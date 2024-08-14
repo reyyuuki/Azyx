@@ -45,6 +45,8 @@ class _MainAppState extends State<MainApp> {
             children:[ 
               Header(),
           SizedBox(
+            width: 300,
+            height: 400,
             child: InfiniteCarousel.builder(
                   itemCount: 10,
                    itemExtent: 120,
@@ -55,11 +57,11 @@ class _MainAppState extends State<MainApp> {
                   controller: controller,
                   axisDirection: Axis.horizontal,
                   loop: true,
-                  itemBuilder: (context, itemIndex, realIndex) {
+                  itemBuilder: (context, itemIndex, realIndex){
                     return
-                    Container(width: 200, height: 400, child: Column(
+                    Container(width: 300, height: 400, margin: EdgeInsets.symmetric(horizontal: 10), child: Column(
                       children: [
-                       SizedBox(width: 200, height: 300, child: ClipRRect(borderRadius: BorderRadius.circular(50) , child:Image.network("https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx16498-73IhOXpJZiMF.jpg", fit: BoxFit.cover,),))
+                       SizedBox(width: 300, height: 300, child: ClipRRect(borderRadius: BorderRadius.circular(10) , child:Image.network("https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx16498-73IhOXpJZiMF.jpg", fit: BoxFit.cover,),))
                       ],
                     ),
                      );
