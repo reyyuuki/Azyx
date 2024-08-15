@@ -7,6 +7,7 @@ environment:
   sdk: '>=3.4.4 <4.0.0'
 
 dependencies:
+  carousel_slider: ^5.0.0
   flutter:
     sdk: flutter
   infinite_carousel: ^1.1.1
