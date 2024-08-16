@@ -7,10 +7,15 @@ environment:
   sdk: '>=3.4.4 <4.0.0'
 
 dependencies:
+  blur: ^4.0.0
   carousel_slider: ^5.0.0
+  cupertino_icons: ^1.0.8
   flutter:
     sdk: flutter
+  http: ^1.2.2
+  iconsax: ^0.0.8
   infinite_carousel: ^1.1.1
+  ionicons: ^0.2.2
 
 dev_dependencies:
   flutter_test:

@@ -11,7 +11,7 @@ ThemeData lightmode = ThemeData(
   colorScheme: ColorScheme.light(
     surface: Color(0xFFEEEEEE),
     primary: Colors.deepPurple.shade400,
-    secondary: Color(0xFFFFFFFF),
+    secondary: Color.fromARGB(255, 92, 81, 81),
     tertiary: Color(0xFFEAEAEA),
   ),
 
@@ -23,7 +23,7 @@ ThemeData darkmode = ThemeData(
   colorScheme: ColorScheme.dark(
     surface: Color(0xFFE000000),
     primary: Colors.deepPurple.shade400,
-    secondary: Color(0xFF00000),
+    secondary: Color.fromARGB(155, 248, 220, 220),
     tertiary: Color.fromARGB(255, 90, 88, 88),
   ),
 
