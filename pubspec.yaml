@@ -16,6 +16,7 @@ dependencies:
   iconsax: ^0.0.8
   infinite_carousel: ^1.1.1
   ionicons: ^0.2.2
+  text_scroll: ^0.2.0
 
 dev_dependencies:
   flutter_test:

@@ -13,7 +13,7 @@ class Carousel extends StatelessWidget {
       return const Center(child: Center(child: CircularProgressIndicator()));
     }
     return SizedBox(
-      height: 450,
+      height: 440,
       child: CarouselSlider(
         options: CarouselOptions(
           height: 560,
@@ -36,20 +36,15 @@ class Carousel extends StatelessWidget {
               return GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/detailspage',
-                      arguments: anime['id']);
+                      arguments:{"id": anime['id']});
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width,
                   margin: const EdgeInsets.symmetric(horizontal: 5.0),
                   decoration: BoxDecoration(
-                      color: const Color.fromARGB(175, 25, 24, 24),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color.fromRGBO(255, 255, 255, 0.2),
-                          blurRadius: 5,
-                        ),
-                      ]),
+                    color: const Color.fromARGB(174, 56, 55, 55),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(8),
                     child: Column(
@@ -73,15 +68,13 @@ class Carousel extends StatelessWidget {
                               : anime['name'],
                           style: const TextStyle(fontSize: 20),
                         ),
-                         const SizedBox(height: 15),
+                        const SizedBox(height: 15),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Container(
                               height: 30,
                               decoration: BoxDecoration(
-                                  border:
-                                      Border.all(width: 1, color: Colors.white),
                                   borderRadius: BorderRadius.circular(20),
                                   color: Colors.black),
                               child: const Padding(
@@ -96,8 +89,6 @@ class Carousel extends StatelessWidget {
                             Container(
                               height: 30,
                               decoration: BoxDecoration(
-                                  border:
-                                      Border.all(width: 1, color: Colors.white),
                                   borderRadius: BorderRadius.circular(20),
                                   color: Colors.black),
                               child: const Padding(
@@ -112,8 +103,6 @@ class Carousel extends StatelessWidget {
                             Container(
                               height: 30,
                               decoration: BoxDecoration(
-                                border:
-                                    Border.all(width: 1, color: Colors.white),
                                 borderRadius: BorderRadius.circular(20),
                                 color: Colors.black,
                               ),
@@ -128,20 +117,25 @@ class Carousel extends StatelessWidget {
                             )
                           ],
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 10),
                         Container(
                           width: 150,
                           height: 40,
                           decoration: BoxDecoration(
-                              color: const Color.fromARGB(255, 253, 89, 144),
+                              color: Colors.black,
                               borderRadius: BorderRadius.circular(20),
-                              border:
-                                  Border.all(width: 1, color: Colors.white)),
-                          child: const Center(
-                              child: Text(
-                            "Read more...",
-                            style: TextStyle(fontSize: 16),
-                          )),
+                              ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                            Text(
+                              "Watch now",
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            SizedBox(width: 5,),
+                            Icon(Ionicons.play_circle,
+                            )
+                          ]),
                         ),
                       ],
                     ),

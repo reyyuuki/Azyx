@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:ui';
 
+import 'package:daizy_tv/components/AnimeDetails.dart';
 import 'package:daizy_tv/components/Poster.dart';
+import 'package:daizy_tv/components/CoverImage.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:http/http.dart' as http;
+import 'package:text_scroll/text_scroll.dart';
 
 class Details extends StatefulWidget {
   final String id;
@@ -28,7 +31,6 @@ class _DetailsState extends State<Details> {
     try {
       final response = await http.get(Uri.parse(
           'https://aniwatch-ryan.vercel.app/anime/info?id=${widget.id}'));
-
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         final newResponse = await http.get(Uri.parse(
@@ -57,8 +59,19 @@ class _DetailsState extends State<Details> {
     }
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 18, 18, 18),
-        title: Text(AnimeData['info']['name']),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: TextScroll(
+          AnimeData['info']['name'].toString(),
+          mode: TextScrollMode.bouncing,
+          velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
+          delayBefore: const Duration(milliseconds: 500),
+          pauseBetween: const Duration(milliseconds: 1000),
+          textAlign: TextAlign.center,
+          selectable: true,
+          style: const TextStyle(fontSize: 18),
+        ),
+        centerTitle: true,
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
@@ -66,209 +79,112 @@ class _DetailsState extends State<Details> {
           icon: const Icon(Ionicons.play_back),
         ),
       ),
-      body: ListView(
+      body: Stack(
         children: [
-          Stack(
-            children: [
-              CoverImage(),
-              Expanded(
-                child: Container(
-                  height: 1000,
-                  margin: const EdgeInsets.only(top: 200),
-                  decoration: const BoxDecoration(
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(40)),
-                    color: Color.fromARGB(255, 18, 18, 18),
-                  ),
-                ),
-              ),
-              Poster(imageUrl: AnimeData['info']['poster']),
-              Positioned(
-                top: 340,
-                left: 0,
-                right: 0,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Column(
-                    children: [
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Text(
-                          AnimeData['info']['name'].length > 80
-                              ? AnimeData['info']['name'].substring(0, 75) +
-                                  "..."
-                              : AnimeData['info']['name'],
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Ionicons.star,
-                            color: Colors.yellow,
-                            size: 20,
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            AnimeData['moreInfo']['malscore'],
-                            style: const TextStyle(fontSize: 18),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      genres(),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      AnimeInfo(),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Text(
-                          AnimeData['info']['description'],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Positioned CoverImage() {
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      child: SizedBox(
-        height: 230,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.network(
-              cover!,
-              fit: BoxFit.cover,
-            ),
-            BackdropFilter(
-              filter: ImageFilter.blur(
-                sigmaX: 5,
-                sigmaY: 5,
-              ),
-              child: Container(
-                color: Colors.black.withOpacity(0.2),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Padding AnimeInfo() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          const SizedBox(
-            width: 100,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ListView(children: [
+            Stack(
               children: [
-                Text("Japanese: "),
-                SizedBox(
-                  height: 5,
+                CoverImage(imageUrl: cover),
+                Expanded(
+                  child: Container(
+                    height: 1000,
+                    margin: const EdgeInsets.only(top: 200),
+                    decoration: const BoxDecoration(
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(40)),
+                      color: Color.fromARGB(255, 18, 18, 18),
+                    ),
+                  ),
                 ),
-                Text("Aired: "),
-                SizedBox(
-                  height: 5,
-                ),
-                Text("Premiered: "),
-                SizedBox(
-                  height: 5,
-                ),
-                Text("Duration: "),
-                SizedBox(
-                  height: 5,
-                ),
-                Text("Status: "),
-                SizedBox(
-                  height: 5,
-                ),
-                Text("Rating: "),
-                SizedBox(
-                  height: 5,
-                ),
-                Text("Quality: "),
+                Poster(imageUrl: AnimeData['info']['poster']),
+                AnimeDetails(AnimeData: AnimeData),
               ],
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(AnimeData['moreInfo']['japanese'].length > 13
-                  ? AnimeData['moreInfo']['japanese'].substring(0, 13)
-                  : AnimeData['moreInfo']['japanese']),
-              const SizedBox(
-                height: 5,
+          ]),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 60,
+              margin: const EdgeInsets.all(20),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(
+                    sigmaX: 5,
+                    sigmaY: 5,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration:
+                        BoxDecoration(color: Colors.white.withOpacity(0.1)),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              constraints: const BoxConstraints(maxWidth: 130),
+                              child: TextScroll(
+                                AnimeData['info']['name'],
+                                mode: TextScrollMode.bouncing,
+                                velocity: const Velocity(
+                                    pixelsPerSecond: Offset(20, 0)),
+                                delayBefore: const Duration(milliseconds: 500),
+                                pauseBetween:
+                                    const Duration(milliseconds: 1000),
+                                textAlign: TextAlign.center,
+                                selectable: true,
+                              ),
+                            ),
+                            const Text(
+                              'Episode 1',
+                              style: TextStyle(
+                                  color: Color.fromARGB(187, 141, 135, 135)),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/stream',
+                                  arguments: {"id": AnimeData['info']['id']});
+                            },
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Ionicons.planet,
+                                  color: Colors.white, // Icon color
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Watch',
+                                  style: TextStyle(
+                                    color: Colors.white, // Text color
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              Text(AnimeData['moreInfo']['aired']),
-              const SizedBox(
-                height: 5,
-              ),
-              Text(AnimeData['moreInfo']['premiered']),
-              const SizedBox(
-                height: 5,
-              ),
-              Text(AnimeData['moreInfo']['duration']),
-              const SizedBox(
-                height: 5,
-              ),
-              Text(AnimeData['moreInfo']['status']),
-              const SizedBox(
-                height: 5,
-              ),
-              Text(AnimeData['info']['stats']['rating']),
-              const SizedBox(
-                height: 5,
-              ),
-              Text(AnimeData['info']['stats']['quality']),
-            ],
-          ),
+            ),
+          )
         ],
       ),
-    );
-  }
-
-  Wrap genres() {
-    return Wrap(
-      spacing: 8.0, // Space between items
-      runSpacing: 2.0, // Space between lines
-      children: AnimeData['moreInfo']['genres'].map<Widget>((genre) {
-        return Chip(
-          label: Text(
-            genre,
-            style: const TextStyle(fontSize: 14),
-          ),
-        );
-      }).toList(),
     );
   }
 }
