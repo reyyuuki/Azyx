@@ -88,7 +88,7 @@ class _DetailsState extends State<Details> {
                 Expanded(
                   child: Container(
                     height: 1000,
-                    margin: const EdgeInsets.only(top: 200),
+                    margin: const EdgeInsets.only(top: 220),
                     decoration: const BoxDecoration(
                       borderRadius:
                           BorderRadius.vertical(top: Radius.circular(40)),

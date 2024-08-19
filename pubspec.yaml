@@ -10,6 +10,7 @@ dependencies:
   blur: ^4.0.0
   carousel_slider: ^5.0.0
   cupertino_icons: ^1.0.8
+  better_player: ^0.0.84
   flutter:
     sdk: flutter
   http: ^1.2.2
@@ -17,6 +18,9 @@ dependencies:
   infinite_carousel: ^1.1.1
   ionicons: ^0.2.2
   text_scroll: ^0.2.0
+  transformable_list_view: ^0.6.0
+  animated_toggle_switch: ^0.8.3
+  lite_rolling_switch: ^1.0.1
 
 dev_dependencies:
   flutter_test:
@@ -24,6 +28,7 @@ dev_dependencies:
   flutter_lints: ^3.0.0
 
 flutter:
+  uses-material-design: true
   assets:
     - assets/images/background.jpg
 

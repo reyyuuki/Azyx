@@ -19,7 +19,7 @@ class CoverImage extends StatelessWidget {
       left: 0,
       right: 0,
       child: SizedBox(
-        height: 230,
+        height: 240,
         child: Stack(
           fit: StackFit.expand,
           children: [
