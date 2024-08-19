@@ -2,6 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:text_scroll/text_scroll.dart';
 
 class Carousel extends StatelessWidget {
   final List<dynamic>? animeData;
@@ -38,7 +39,7 @@ class Carousel extends StatelessWidget {
               return GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/detailspage',
-                      arguments: {"id": anime['id'] , "url": anime['poster']});
+                      arguments: {"id": anime['id'], "image": anime['poster']});
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width,
@@ -73,11 +74,16 @@ class Carousel extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 15),
-                        Text(
-                          anime['name'].length > 20
-                              ? anime['name'].substring(0, 15) + "..."
-                              : anime['name'],
-                          style: const TextStyle(fontSize: 20),
+                        TextScroll(
+                          anime['name'],
+                          mode: TextScrollMode.bouncing,
+                          velocity:
+                              const Velocity(pixelsPerSecond: Offset(30, 0)),
+                          delayBefore: const Duration(milliseconds: 500),
+                          pauseBetween: const Duration(milliseconds: 1000),
+                          textAlign: TextAlign.center,
+                          selectable: true,
+                          style: const TextStyle(fontSize: 18),
                         ),
                         const SizedBox(height: 15),
                         Row(

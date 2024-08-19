@@ -37,7 +37,7 @@ Widget build(BuildContext context) {
                 final id = args?['id'] ?? '';
                 final image = args?['poster'] ?? '';
                 return MaterialPageRoute(
-                  builder: (context) => Details(id: id, url: image),
+                  builder: (context) => Details(id: id, image: image),
                 );
               case '/stream':
                 final id = args?['id'] ?? '';

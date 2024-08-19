@@ -12,8 +12,8 @@ import 'package:text_scroll/text_scroll.dart';
 
 class Details extends StatefulWidget {
   final String id;
-  final String url;
-  const Details({super.key, required this.id,required this.url});
+  final String image;
+  const Details({super.key, required this.id,required this.image});
 
   @override
   State<Details> createState() => _DetailsState();
@@ -97,7 +97,7 @@ class _DetailsState extends State<Details> {
                     ),
                   ),
                 ),
-                Poster(imageUrl: widget.url, id : widget.id),
+                Poster(imageUrl: widget.image, id : widget.id),
                 AnimeDetails(AnimeData: AnimeData),
               ],
             ),

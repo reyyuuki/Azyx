@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class Poster extends StatelessWidget {
 
   final String? imageUrl;
-  final dynamic id;
+  final String? id;
 
   const Poster({super.key, this.imageUrl, this.id});
 
@@ -18,7 +18,7 @@ class Poster extends StatelessWidget {
                 height: 280,
                 width: 200,
                 child: Hero(
-                  tag: id,
+                  tag: id!,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: CachedNetworkImage(

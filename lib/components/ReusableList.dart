@@ -47,7 +47,7 @@ class ReusableList extends StatelessWidget {
               return GestureDetector(
                  onTap: () {
                   Navigator.pushNamed(context, '/detailspage',
-                      arguments:{"id": data[index]['id'], "url": data[index]['poster']});
+                      arguments:{"id": data[index]['id'], "image": data[index]['poster']});
                 },
                   child: Column(
                     children: [
