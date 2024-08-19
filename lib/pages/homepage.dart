@@ -59,12 +59,12 @@ class _HomepageState extends State<Homepage> {
                 height: 40.0,
               ),
               Carousel(
-                animeData: spotlightAnime,
+                animeData: trendingAnime,
               ),
               const SizedBox(
                 height: 30.0,
               ),
-              ReusableList(name: 'Popular', data: trendingAnime),
+              ReusableList(name: 'Popular', data: spotlightAnime),
               const SizedBox(
                 height: 10,
               ),

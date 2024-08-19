@@ -35,8 +35,9 @@ Widget build(BuildContext context) {
             switch (settings.name) {
               case '/detailspage':
                 final id = args?['id'] ?? '';
+                final image = args?['poster'] ?? '';
                 return MaterialPageRoute(
-                  builder: (context) => Details(id: id),
+                  builder: (context) => Details(id: id, url: image),
                 );
               case '/stream':
                 final id = args?['id'] ?? '';

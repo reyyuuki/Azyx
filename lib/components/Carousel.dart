@@ -1,11 +1,13 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class Carousel extends StatelessWidget {
   final List<dynamic>? animeData;
+  final List<String> generes = ["Action", "Adventure", "Fantasy"];
 
-  const Carousel({super.key, this.animeData});
+  Carousel({super.key, this.animeData});
 
   @override
   Widget build(BuildContext context) {
@@ -36,13 +38,13 @@ class Carousel extends StatelessWidget {
               return GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/detailspage',
-                      arguments:{"id": anime['id']});
+                      arguments: {"id": anime['id'] , "url": anime['poster']});
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width,
                   margin: const EdgeInsets.symmetric(horizontal: 5.0),
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(174, 56, 55, 55),
+                    color: Theme.of(context).colorScheme.secondary,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Padding(
@@ -53,11 +55,20 @@ class Carousel extends StatelessWidget {
                         SizedBox(
                           height: 280,
                           width: 230,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: Image.network(
-                              anime['poster'],
-                              fit: BoxFit.cover,
+                          child: Hero(
+                            tag: anime['id'],
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: CachedNetworkImage(
+                                imageUrl: anime['poster'],
+                                fit: BoxFit.cover,
+                                progressIndicatorBuilder:
+                                    (context, url, downloadProgress) =>
+                                        CircularProgressIndicator(
+                                            value: downloadProgress.progress),
+                                errorWidget: (context, url, error) =>
+                                    Icon(Icons.error),
+                              ),
                             ),
                           ),
                         ),
@@ -70,72 +81,54 @@ class Carousel extends StatelessWidget {
                         ),
                         const SizedBox(height: 15),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
+                          children: generes.map((item) {
+                            return Container(
                               height: 30,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: Colors.black),
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 10),
-                                child: Center(
-                                    child: Text(
-                                  "Action",
-                                  style: TextStyle(fontSize: 12),
-                                )),
-                              ),
-                            ),
-                            Container(
-                              height: 30,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: Colors.black),
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 10),
-                                child: Center(
-                                    child: Text(
-                                  "Adventure",
-                                  style: TextStyle(fontSize: 12),
-                                )),
-                              ),
-                            ),
-                            Container(
-                              height: 30,
+                              margin: const EdgeInsets.only(
+                                  right:
+                                      4.0), // Optional: Adds space between genre chips
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(20),
                                 color: Colors.black,
                               ),
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 10),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
                                 child: Center(
-                                    child: Text(
-                                  "Fantasy",
-                                  style: TextStyle(fontSize: 12),
-                                )),
+                                  child: Text(
+                                    item,
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Colors.white),
+                                  ),
+                                ),
                               ),
-                            )
-                          ],
+                            );
+                          }).toList(),
                         ),
                         const SizedBox(height: 10),
                         Container(
                           width: 150,
                           height: 40,
                           decoration: BoxDecoration(
-                              color: Colors.black,
-                              borderRadius: BorderRadius.circular(20),
-                              ),
+                            color: Colors.black,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                            Text(
-                              "Watch now",
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            SizedBox(width: 5,),
-                            Icon(Ionicons.play_circle,
-                            )
-                          ]),
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Watch now",
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.white),
+                                ),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Icon(
+                                  Ionicons.play_circle,
+                                  color: Colors.white,
+                                )
+                              ]),
                         ),
                       ],
                     ),

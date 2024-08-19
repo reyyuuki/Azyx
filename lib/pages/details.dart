@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:daizy_tv/components/AnimeDetails.dart';
+import 'package:daizy_tv/components/Floater.dart';
 import 'package:daizy_tv/components/Poster.dart';
 import 'package:daizy_tv/components/CoverImage.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,8 @@ import 'package:text_scroll/text_scroll.dart';
 
 class Details extends StatefulWidget {
   final String id;
-  const Details({super.key, required this.id});
+  final String url;
+  const Details({super.key, required this.id,required this.url});
 
   @override
   State<Details> createState() => _DetailsState();
@@ -54,14 +56,13 @@ class _DetailsState extends State<Details> {
 
   @override
   Widget build(BuildContext context) {
-    if (AnimeData == null || cover == null) {
-      return const Center(child: Center(child: CircularProgressIndicator()));
-    }
+    
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: TextScroll(
+          AnimeData == null ? "Loading" :
           AnimeData['info']['name'].toString(),
           mode: TextScrollMode.bouncing,
           velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
@@ -87,104 +88,24 @@ class _DetailsState extends State<Details> {
                 CoverImage(imageUrl: cover),
                 Expanded(
                   child: Container(
-                    height: 1000,
+                    height: 870,
                     margin: const EdgeInsets.only(top: 220),
-                    decoration: const BoxDecoration(
+                    decoration:  BoxDecoration(
                       borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(40)),
-                      color: Color.fromARGB(255, 18, 18, 18),
+                          BorderRadius.vertical(top: Radius.circular(50)),
+                      color: Theme.of(context).colorScheme.tertiary,
                     ),
                   ),
                 ),
-                Poster(imageUrl: AnimeData['info']['poster']),
+                Poster(imageUrl: widget.url, id : widget.id),
                 AnimeDetails(AnimeData: AnimeData),
               ],
             ),
           ]),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 60,
-              margin: const EdgeInsets.all(20),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(
-                    sigmaX: 5,
-                    sigmaY: 5,
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration:
-                        BoxDecoration(color: Colors.white.withOpacity(0.1)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              constraints: const BoxConstraints(maxWidth: 130),
-                              child: TextScroll(
-                                AnimeData['info']['name'],
-                                mode: TextScrollMode.bouncing,
-                                velocity: const Velocity(
-                                    pixelsPerSecond: Offset(20, 0)),
-                                delayBefore: const Duration(milliseconds: 500),
-                                pauseBetween:
-                                    const Duration(milliseconds: 1000),
-                                textAlign: TextAlign.center,
-                                selectable: true,
-                              ),
-                            ),
-                            const Text(
-                              'Episode 1',
-                              style: TextStyle(
-                                  color: Color.fromARGB(187, 141, 135, 135)),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/stream',
-                                  arguments: {"id": AnimeData['info']['id']});
-                            },
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Ionicons.planet,
-                                  color: Colors.white, // Icon color
-                                ),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Watch',
-                                  style: TextStyle(
-                                    color: Colors.white, // Text color
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          )
+          Floater(AnimeData: AnimeData,),
         ],
       ),
     );
   }
+
 }

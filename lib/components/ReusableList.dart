@@ -1,9 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 
 // ignore: must_be_immutable
 class ReusableList extends StatelessWidget {
-  List<dynamic>? data;
+  dynamic data;
   final String? name;
 
   ReusableList({super.key, this.data, required this.name});
@@ -11,7 +12,7 @@ class ReusableList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (data == null) {
-      return const Center(child: Center(child: CircularProgressIndicator()));
+      return const SizedBox();
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,10 +45,10 @@ class ReusableList extends StatelessWidget {
             itemCount: data!.length,
             itemBuilder: (context, index) {
               return GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(context, '/detailspage',
-                      arguments: data?[index]['id']);
-                  },
+                 onTap: () {
+                  Navigator.pushNamed(context, '/detailspage',
+                      arguments:{"id": data[index]['id'], "url": data[index]['poster']});
+                },
                   child: Column(
                     children: [
                       Container(
@@ -56,10 +57,16 @@ class ReusableList extends StatelessWidget {
                         margin: const EdgeInsets.symmetric(horizontal: 10),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
-                          child: Image.network(
-                            data?[index]['poster'],
-                            fit: BoxFit.cover,
-                          ),
+                          child: CachedNetworkImage(
+                              imageUrl: data[index]['poster'],
+                              fit: BoxFit.cover,
+                              progressIndicatorBuilder:
+                                  (context, url, downloadProgress) =>
+                                      CircularProgressIndicator(
+                                          value: downloadProgress.progress),
+                              errorWidget: (context, url, error) =>
+                                  Icon(Icons.error),
+                            ),
                         ),
                       ),
                       const SizedBox(

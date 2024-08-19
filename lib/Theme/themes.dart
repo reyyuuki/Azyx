@@ -10,9 +10,11 @@ ThemeData lightmode = ThemeData(
   fontFamily: 'Poppins',
   colorScheme: ColorScheme.light(
     surface: Color(0xFFEEEEEE),
-    primary: Colors.deepPurple.shade400,
-    secondary: Color.fromARGB(255, 92, 81, 81),
+    primary: Colors.black,
+    secondary: Color(0xFFE0E0E0),
     tertiary: Color(0xFFEAEAEA),
+    inverseSurface: const Color.fromARGB(255, 42, 42, 42),
+    inversePrimary: Colors.white
   ),
 
 );
@@ -21,10 +23,12 @@ ThemeData darkmode = ThemeData(
   brightness: Brightness.dark,
   fontFamily: 'Poppins',
   colorScheme: ColorScheme.dark(
-    surface: Color.fromARGB(253, 16, 16, 16),
-    primary: Colors.deepPurple.shade400,
-    secondary: Color.fromARGB(155, 248, 220, 220),
-    tertiary: Color.fromARGB(255, 90, 88, 88),
+    surface: Colors.black26 ,
+    primary: Colors.indigo.shade400,
+    secondary: Color(0xFF222222),
+    tertiary: Color(0xFF141414),
+    inversePrimary: Colors.black,
+    inverseSurface: Colors.white
   ),
 
 );

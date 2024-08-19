@@ -21,6 +21,7 @@ dependencies:
   transformable_list_view: ^0.6.0
   animated_toggle_switch: ^0.8.3
   lite_rolling_switch: ^1.0.1
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:

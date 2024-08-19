@@ -11,7 +11,7 @@ class CoverImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
    if(imageUrl == null){
-    return const Center(child: CircularProgressIndicator(),);
+    return SizedBox();
    }
 
    return Positioned(
@@ -19,7 +19,7 @@ class CoverImage extends StatelessWidget {
       left: 0,
       right: 0,
       child: SizedBox(
-        height: 240,
+        height: 250,
         child: Stack(
           fit: StackFit.expand,
           children: [
