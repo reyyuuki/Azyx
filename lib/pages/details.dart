@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ui';
 
 import 'package:daizy_tv/components/AnimeDetails.dart';
 import 'package:daizy_tv/components/Floater.dart';
@@ -55,8 +54,7 @@ class _DetailsState extends State<Details> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    
+  Widget build(BuildContext context) {   
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -92,7 +90,7 @@ class _DetailsState extends State<Details> {
                     margin: const EdgeInsets.only(top: 220),
                     decoration:  BoxDecoration(
                       borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(50)),
+                          const BorderRadius.vertical(top: Radius.circular(50)),
                       color: Theme.of(context).colorScheme.tertiary,
                     ),
                   ),

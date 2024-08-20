@@ -11,9 +11,7 @@ class AnimeDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (AnimeData == null) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const SizedBox();
     }
 
     return Positioned(

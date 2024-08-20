@@ -68,7 +68,7 @@ class Carousel extends StatelessWidget {
                                         CircularProgressIndicator(
                                             value: downloadProgress.progress),
                                 errorWidget: (context, url, error) =>
-                                    Icon(Icons.error),
+                                    const Icon(Icons.error),
                               ),
                             ),
                           ),
@@ -119,7 +119,7 @@ class Carousel extends StatelessWidget {
                             color: Colors.black,
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: Row(
+                          child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(

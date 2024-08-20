@@ -12,7 +12,9 @@ final dynamic AnimeData;
   @override
   Widget build(BuildContext context) {
     if(AnimeData == null){
-      return const Center(child: CircularProgressIndicator());
+      return Container(
+        margin: const EdgeInsets.only(top: 150),
+        child: const Center(child: CircularProgressIndicator()));
     }
     return Positioned(
           bottom: 0,

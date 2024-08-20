@@ -24,12 +24,6 @@ class Poster extends StatelessWidget {
                     child: CachedNetworkImage(
                                 imageUrl: imageUrl!,
                                 fit: BoxFit.cover,
-                                progressIndicatorBuilder:
-                                    (context, url, downloadProgress) =>
-                                        CircularProgressIndicator(
-                                            value: downloadProgress.progress),
-                                errorWidget: (context, url, error) =>
-                                    Icon(Icons.error),
                               ),
                   ),
                 ),

@@ -17,7 +17,7 @@ class Stream extends StatefulWidget {
   const Stream({super.key, required this.id});
 
   @override
-  State<Stream> createState() =>  _StreamState();
+  State<Stream> createState() => _StreamState();
 }
 
 class _StreamState extends State<Stream> {
@@ -136,7 +136,7 @@ class _StreamState extends State<Stream> {
       autoPlay: false,
     );
 
-    BetterPlayerDataSource betterPlayerDataSource =  BetterPlayerDataSource(
+    BetterPlayerDataSource betterPlayerDataSource = BetterPlayerDataSource(
       BetterPlayerDataSourceType.network,
       videoUrl,
       subtitles: subtitles,
@@ -195,8 +195,8 @@ class _StreamState extends State<Stream> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Episode ${number}',
-                  style: TextStyle(fontSize: 20),
+                  'Episode $number',
+                  style: const TextStyle(fontSize: 20),
                 ),
                 Swicther(),
               ],
@@ -267,7 +267,7 @@ class _StreamState extends State<Stream> {
       padding: const EdgeInsets.all(8.0),
       child: ListView.builder(
         shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         itemCount: EpisodeData!.length,
         itemBuilder: (context, index) {
           final item = EpisodeData![index];
@@ -277,7 +277,7 @@ class _StreamState extends State<Stream> {
           return GestureDetector(
             onTap: () => handleEpisode(url, episodeNumber),
             child: Container(
-              margin: EdgeInsets.only(top: 10),
+              margin: const EdgeInsets.only(top: 10),
               decoration: BoxDecoration(
                   border: Border.all(
                       color: Theme.of(context).colorScheme.inversePrimary),
@@ -290,15 +290,22 @@ class _StreamState extends State<Stream> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      title.length > 30
-                          ? title.substring(0, 27) + '...'
-                          : title,
-                      style: TextStyle(
-                          fontSize: 14,
+                    SizedBox(
+                      width: 250,
+                      child: TextScroll(
+                        title,
+                        mode: TextScrollMode.bouncing,
+                        velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
+                        delayBefore: const Duration(milliseconds: 500),
+                        pauseBetween: const Duration(milliseconds: 1000),
+                        textAlign: TextAlign.center,
+                        selectable: true,
+                        style: TextStyle(
                           color: episodeNumber == number
                               ? Theme.of(context).colorScheme.inversePrimary
-                              : Theme.of(context).colorScheme.inverseSurface),
+                              : Theme.of(context).colorScheme.inverseSurface,
+                        ),
+                      ),
                     ),
                     episodeNumber == number
                         ? Icon(

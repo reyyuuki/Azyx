@@ -35,7 +35,7 @@ Widget build(BuildContext context) {
             switch (settings.name) {
               case '/detailspage':
                 final id = args?['id'] ?? '';
-                final image = args?['poster'] ?? '';
+                final image = args?['image'] ?? '';
                 return MaterialPageRoute(
                   builder: (context) => Details(id: id, image: image),
                 );
@@ -53,7 +53,7 @@ Widget build(BuildContext context) {
                 );
             }
           },
-          home: Homepage(),
+          home: const Homepage(),
   );
 }
 
