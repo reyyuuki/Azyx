@@ -55,8 +55,12 @@ class _HomepageState extends State<Homepage> {
           child: ListView(
             children: [
               const Header(),
+              SizedBox(
+                height: 20,
+              ),
+               const SearchBar(),
               const SizedBox(
-                height: 40.0,
+                height: 30.0,
               ),
               Carousel(
                 animeData: trendingAnime,

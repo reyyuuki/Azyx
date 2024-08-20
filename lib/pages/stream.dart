@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:daizy_tv/components/AnimeDetails.dart';
 import 'package:daizy_tv/components/Poster.dart';
 import 'package:daizy_tv/components/ReusableList.dart';
+import 'package:daizy_tv/components/Videoplayer.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:better_player/better_player.dart';
 import 'package:ionicons/ionicons.dart';
 
 import 'package:lite_rolling_switch/lite_rolling_switch.dart';
@@ -29,7 +29,7 @@ class _StreamState extends State<Stream> {
   dynamic tracks;
   int? number;
 
-  BetterPlayerController? _betterPlayerController;
+ 
 
   @override
   void initState() {
@@ -37,11 +37,7 @@ class _StreamState extends State<Stream> {
     fetchData();
   }
 
-  @override
-  void dispose() {
-    _betterPlayerController?.dispose();
-    super.dispose();
-  }
+  
 
   final String baseUrl = 'https://aniwatch-ryan.vercel.app/anime/info?id=';
   final String episodeDataUrl =
@@ -73,6 +69,7 @@ class _StreamState extends State<Stream> {
       print(e);
     }
   }
+  
 
   Future<void> fetchEpisode() async {
     try {
@@ -86,7 +83,7 @@ class _StreamState extends State<Stream> {
         setState(() {
           Episode = decodeData['sources'];
           tracks = tempdata['tracks'];
-          initializePlayer(); // Initialize player after fetching episode
+           // Initialize player after fetching episode
         });
       }
     } catch (e) {
@@ -110,49 +107,11 @@ class _StreamState extends State<Stream> {
     });
   }
 
-  void initializePlayer() {
-    if (_betterPlayerController != null) {
-      _betterPlayerController!.dispose();
-    }
-
-    String videoUrl = Episode![0]['url'];
-
-    if (tracks == null) {
-      print('Tracks are not available');
-      return;
-    }
-
-    var subtitles = tracks.map<BetterPlayerSubtitlesSource>((item) {
-      return BetterPlayerSubtitlesSource(
-        type: BetterPlayerSubtitlesSourceType.network,
-        name: item['label'] ?? 'Unknown',
-        urls: [item['file']],
-      );
-    }).toList();
-
-    var betterPlayerConfiguration = const BetterPlayerConfiguration(
-      controlsConfiguration: BetterPlayerControlsConfiguration(
-          playerTheme: BetterPlayerTheme.cupertino),
-      autoPlay: false,
-    );
-
-    BetterPlayerDataSource betterPlayerDataSource = BetterPlayerDataSource(
-      BetterPlayerDataSourceType.network,
-      videoUrl,
-      subtitles: subtitles,
-    );
-
-    setState(() {
-      _betterPlayerController = BetterPlayerController(
-        betterPlayerConfiguration,
-        betterPlayerDataSource: betterPlayerDataSource,
-      );
-    });
-  }
+  
 
   @override
   Widget build(BuildContext context) {
-    if (EpisodeData == null || AnimeData == null) {
+    if (EpisodeData == null || AnimeData == null || tracks == null ) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -181,14 +140,7 @@ class _StreamState extends State<Stream> {
       ),
       body: ListView(
         children: [
-          AspectRatio(
-            aspectRatio: 16 / 9,
-            child: _betterPlayerController != null
-                ? BetterPlayer(controller: _betterPlayerController!)
-                : const Center(
-                    child:
-                        CircularProgressIndicator()), // Handle case where player is not yet initialized
-          ),
+          MediaPlayer(Episode: Episode![0]['url'], tracks: tracks,),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
             child: Row(
@@ -210,6 +162,7 @@ class _StreamState extends State<Stream> {
             children: [
               Poster(
                 imageUrl: AnimeData['anime']['info']['poster'],
+                id: AnimeData['anime']['info']['id'],
               ),
               AnimeDetails(
                 AnimeData: AnimeData['anime'],
