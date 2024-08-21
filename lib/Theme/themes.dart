@@ -22,11 +22,11 @@ ThemeData lightmode = ThemeData(
 ThemeData darkmode = ThemeData(
   brightness: Brightness.dark,
   fontFamily: 'Poppins',
-  colorScheme: ColorScheme.dark(
-    surface: Colors.black26 ,
-    primary: Colors.indigo.shade400,
-    secondary: const Color(0xFF222222),
-    tertiary: const Color(0xFF141414),
+  colorScheme: const ColorScheme.dark(
+    surface: Colors.black26,
+    primary: Color.fromARGB(255, 253, 89, 144),
+    secondary: Color(0xFF222222),
+    tertiary: Color(0xFF141414),
     inversePrimary: Colors.black,
     inverseSurface: Colors.white
   ),

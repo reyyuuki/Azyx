@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:daizy_tv/components/AnimeDetails.dart';
-import 'package:daizy_tv/components/Poster.dart';
-import 'package:daizy_tv/components/ReusableList.dart';
-import 'package:daizy_tv/components/Videoplayer.dart';
+import 'package:daizy_tv/components/Anime/AnimeDetails.dart';
+import 'package:daizy_tv/components/Anime/Poster.dart';
+import 'package:daizy_tv/components/Anime/ReusableList.dart';
+import 'package:daizy_tv/components/Anime/Videoplayer.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ionicons/ionicons.dart';

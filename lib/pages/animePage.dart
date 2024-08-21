@@ -2,18 +2,18 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:daizy_tv/components/Carousel.dart';
+import 'package:daizy_tv/components/Anime/Carousel.dart';
 import 'package:daizy_tv/components/Header.dart';
-import 'package:daizy_tv/components/ReusableList.dart';
+import 'package:daizy_tv/components/Anime/ReusableList.dart';
 
-class Homepage extends StatefulWidget {
-  const Homepage({super.key});
+class Animepage extends StatefulWidget {
+  const Animepage({super.key});
 
   @override
-  State<Homepage> createState() => _HomepageState();
+  State<Animepage> createState() => _HomepageState();
 }
 
-class _HomepageState extends State<Homepage> {
+class _HomepageState extends State<Animepage> {
   List<dynamic>? spotlightAnime;
   List<dynamic>? trendingAnime;
   List<dynamic>? latestEpisodesAnime;
@@ -58,7 +58,24 @@ class _HomepageState extends State<Homepage> {
               SizedBox(
                 height: 20,
               ),
-               const SearchBar(),
+               Padding(
+               padding: const EdgeInsets.symmetric(horizontal: 10),
+               child: Container(
+                height: 50,
+                 child: Expanded(
+                   child: TextField(
+                      decoration: InputDecoration(
+                         prefixIcon: Icon(Icons.search),
+                          hintText: 'Search Anime...',
+                          focusedBorder:  OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide(color: Theme.of(context).colorScheme.primary)),
+                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                          fillColor: Theme.of(context).colorScheme.secondary,
+                          filled: true,
+                          ),
+                    ),
+                 ),
+               ),
+             ),
               const SizedBox(
                 height: 30.0,
               ),

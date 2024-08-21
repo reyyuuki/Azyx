@@ -22,6 +22,7 @@ dependencies:
   animated_toggle_switch: ^0.8.3
   lite_rolling_switch: ^1.0.1
   cached_network_image: ^3.4.1
+  curved_navigation_bar: ^1.0.6
 
 dev_dependencies:
   flutter_test:

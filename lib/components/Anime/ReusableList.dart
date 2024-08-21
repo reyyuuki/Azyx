@@ -21,9 +21,9 @@ class ReusableList extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Row(
             children: [
-              const Icon(
+               Icon(
                 Ionicons.grid,
-                color: Color.fromARGB(255, 253, 89, 144),
+                color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(
                 width: 10,
