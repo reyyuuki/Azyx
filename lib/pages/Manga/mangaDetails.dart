@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:daizy_tv/components/Anime/Poster.dart';
 import 'package:daizy_tv/components/Anime/CoverImage.dart';
 import 'package:daizy_tv/components/Manga/MangaAllDetails.dart';
+import 'package:daizy_tv/components/Manga/MangaFloater.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:http/http.dart' as http;
@@ -95,10 +96,11 @@ class _DetailsState extends State<Mangadetails> {
                   ),
                 ),
                 Poster(imageUrl: widget.image, id: widget.id),
-                Mangaalldetails(mangaData: mangaData,)
+                Mangaalldetails(mangaData: mangaData,),
               ],
             ),
           ]),
+          Mangafloater(mangaData: mangaData,)
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:daizy_tv/pages/Manga/mangaDetails.dart';
+import 'package:daizy_tv/pages/Manga/read.dart';
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:daizy_tv/Theme/themes.dart';
@@ -51,6 +52,11 @@ class _MainAppState extends State<MainApp> {
             final image = args?['image'] ?? '';
             return MaterialPageRoute(
               builder: (context) => Mangadetails(id: id, image: image),
+            );
+            case '/read':
+            final id = args?['id'] ?? '';
+            return MaterialPageRoute(
+              builder: (context) => Read(id: id),
             );
           default:
             return MaterialPageRoute(
