@@ -1,6 +1,5 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:text_scroll/text_scroll.dart';
 
@@ -123,7 +122,7 @@ class Mangacarousale extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  "Watch now",
+                                  "Read now",
                                   style: TextStyle(
                                       fontSize: 16, color: Colors.white),
                                 ),
@@ -131,7 +130,7 @@ class Mangacarousale extends StatelessWidget {
                                   width: 5,
                                 ),
                                 Icon(
-                                  Ionicons.play_circle,
+                                  Icons.book,
                                   color: Colors.white,
                                 )
                               ]),

@@ -15,10 +15,8 @@ class Mangaalldetails extends StatelessWidget {
       return const SizedBox();
     }
 
-    return Positioned(
-      top: 340,
-      left: 0,
-      right: 0,
+    return Container(
+      margin: EdgeInsets.only(top:0),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Column(

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:text_scroll/text_scroll.dart';
 
 class MangaInfo extends StatelessWidget {
-final dynamic mangaData;
+  final dynamic mangaData;
 
-   const MangaInfo({super.key,this.mangaData});
+  const MangaInfo({super.key, this.mangaData});
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +44,15 @@ final dynamic mangaData;
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(mangaData['author']),
+                TextScroll(
+                  mangaData['author'],
+                  mode: TextScrollMode.bouncing,
+                  velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
+                  delayBefore: const Duration(milliseconds: 500),
+                  pauseBetween: const Duration(milliseconds: 1000),
+                  textAlign: TextAlign.center,
+                  selectable: true,
+                ),
               const SizedBox(
                 height: 5,
               ),
@@ -51,7 +60,7 @@ final dynamic mangaData;
               const SizedBox(
                 height: 5,
               ),
-              Text(mangaData['status']),
+              Text(mangaData['updated']),
               const SizedBox(
                 height: 5,
               ),

@@ -54,9 +54,10 @@ class _MainAppState extends State<MainApp> {
               builder: (context) => Mangadetails(id: id, image: image),
             );
             case '/read':
-            final id = args?['id'] ?? '';
+            final mangaId = args?['mangaId'] ?? '';
+            final chapterId = args?['chapterId'] ?? '';
             return MaterialPageRoute(
-              builder: (context) => Read(id: id),
+              builder: (context) => Read(mangaId: mangaId, chapterId: chapterId ),
             );
           default:
             return MaterialPageRoute(
