@@ -85,9 +85,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   
   final List<Widget> _pages = [
-    Animepage(),
-    Loginpage(),
-    Mangapage(),
+    const Animepage(),
+    const Loginpage(),
+    const Mangapage(),
   ];
 
   @override
@@ -96,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: _pages[_selectedIndex], 
       bottomNavigationBar: CurvedNavigationBar(
         index: _selectedIndex, 
-        items: [
+        items: const [
           Icon(Icons.home),
           Icon(Icons.login),
           Icon(Icons.movie),

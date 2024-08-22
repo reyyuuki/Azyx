@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:daizy_tv/components/Manga/ProgressBar.dart';
 import 'package:daizy_tv/components/Manga/ReadingHeader.dart';
 import 'package:flutter/material.dart';
@@ -57,7 +58,7 @@ class _ReadState extends State<Read> {
   @override
   Widget build(BuildContext context) {
     if (data == null) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
 
     return Scaffold(
@@ -65,12 +66,13 @@ class _ReadState extends State<Read> {
       children: [
         GestureDetector(
           onTap: _toggleShow,
-          child: ListView.builder(
-            itemCount: chapterList!.length,
-            itemBuilder: (context, index) {
-              final imageUrl = chapterList![index]['image'];
-              return Image.network(imageUrl);
-            },
+          child: ListView(
+            children: [
+              if(chapterList != null)
+              ...chapterList!.map<Widget>((image) => 
+              CachedNetworkImage(imageUrl: image['image'],)
+               )
+            ],
           ),
         ),
         Readingheader(show: show, data: data),

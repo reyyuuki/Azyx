@@ -44,14 +44,17 @@ class MangaInfo extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-                TextScroll(
-                  mangaData['author'],
-                  mode: TextScrollMode.bouncing,
-                  velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
-                  delayBefore: const Duration(milliseconds: 500),
-                  pauseBetween: const Duration(milliseconds: 1000),
-                  textAlign: TextAlign.center,
-                  selectable: true,
+                SizedBox(
+                  width: 220,
+                  child: TextScroll(
+                    mangaData['author'],
+                    mode: TextScrollMode.bouncing,
+                    velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
+                    delayBefore: const Duration(milliseconds: 500),
+                    pauseBetween: const Duration(milliseconds: 1000),
+                    textAlign: TextAlign.center,
+                    selectable: true,
+                  ),
                 ),
               const SizedBox(
                 height: 5,

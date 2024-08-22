@@ -4,6 +4,7 @@ import 'package:daizy_tv/components/Anime/Poster.dart';
 import 'package:daizy_tv/components/Anime/CoverImage.dart';
 import 'package:daizy_tv/components/Manga/MangaAllDetails.dart';
 import 'package:daizy_tv/components/Manga/MangaFloater.dart';
+import 'package:daizy_tv/components/Manga/chapterList.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:http/http.dart' as http;
@@ -76,141 +77,44 @@ class _DetailsState extends State<Mangadetails> {
         body: ListView(
           children: [
             Expanded(
-              child: Container(
-                child: Stack(
-                  children: [
-                    CoverImage(
-                      imageUrl: widget.image,
-                    ),
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.only(top: 220),
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(50)),
-                          color: Theme.of(context).colorScheme.tertiary,
-                        ),
-                        child: Expanded(
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                height: 120,
-                              ),
-                              Mangaalldetails(
-                                mangaData: mangaData,
-                              ),
-                              if (mangaData != null)
-                                ...mangaData['chapterList']
-                                    .map<Widget>((chapter) => ChapterList(context, chapter))
-                                    .toList(),
-                            ],
-                          ),
+              child: Stack(
+                children: [
+                  CoverImage(
+                    imageUrl: widget.image,
+                  ),
+                  Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 220),
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(50)),
+                        color: Theme.of(context).colorScheme.tertiary,
+                      ),
+                      child: Expanded(
+                        child: Column(
+                          children: [
+                            const SizedBox(
+                              height: 120,
+                            ),
+                            Mangaalldetails(
+                              mangaData: mangaData,
+                            ),
+                            if (mangaData != null)
+                              ...mangaData['chapterList']
+                                  .map<Widget>((chapter) => Chapterlist(id: widget.id, chapter: chapter,))
+                                  .toList(),
+                          ],
                         ),
                       ),
                     ),
-                    Poster(imageUrl: widget.image, id: widget.id),
-                  ],
-                ),
+                  ),
+                  Poster(imageUrl: widget.image, id: widget.id),
+                ],
               ),
             ),
           ],
         ));
   }
 
-  GestureDetector ChapterList(BuildContext context, chapter) {
-    return GestureDetector(
-                                        onTap: () {
-                                          Navigator.pushNamed(context, '/read',
-                                          arguments: {"mangaId" : widget.id , "chapterId": chapter['id']}
-                                          );
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 20, vertical: 10),
-                                          child: Container(
-                                            height: 55,
-                                            decoration: BoxDecoration(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .secondary,
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        10)),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  TextScroll(
-                                                    chapter['name'],
-                                                    mode: TextScrollMode
-                                                        .bouncing,
-                                                    velocity: const Velocity(
-                                                        pixelsPerSecond:
-                                                            Offset(30, 0)),
-                                                    delayBefore:
-                                                        const Duration(
-                                                            milliseconds:
-                                                                500),
-                                                    pauseBetween:
-                                                        const Duration(
-                                                            milliseconds:
-                                                                1000),
-                                                    textAlign:
-                                                        TextAlign.center,
-                                                    selectable: true,
-                                                  ),
-                                                  Row(
-                                                    children: [
-                                                      Icon(
-                                                        Ionicons.eye,
-                                                        size: 16,
-                                                      ),
-                                                      SizedBox(
-                                                        width: 5,
-                                                      ),
-                                                      Text(
-                                                        chapter['view'],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  Container(
-                                                      decoration: BoxDecoration(
-                                                          color: Theme.of(
-                                                                  context)
-                                                              .colorScheme
-                                                              .primary,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      10)),
-                                                      child: const Padding(
-                                                        padding: EdgeInsets
-                                                            .symmetric(
-                                                                horizontal:
-                                                                    8),
-                                                        child: Center(
-                                                            child: Row(
-                                                          children: [
-                                                            Icon(
-                                                              Ionicons.book,
-                                                              size: 16,
-                                                            ),
-                                                            SizedBox(
-                                                              width: 2,
-                                                            ),
-                                                            Text('Read'),
-                                                          ],
-                                                        )),
-                                                      )),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      );
-  }
+  
 }
