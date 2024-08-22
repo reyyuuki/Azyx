@@ -1,5 +1,5 @@
-import 'package:daizy_tv/components/Anime/AnimeInfo.dart';
-import 'package:daizy_tv/components/Anime/Genres.dart';
+import 'package:daizy_tv/components/Anime/animeInfo.dart';
+import 'package:daizy_tv/components/Anime/genres.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:text_scroll/text_scroll.dart';

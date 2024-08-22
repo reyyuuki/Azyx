@@ -24,6 +24,7 @@ dependencies:
   cached_network_image: ^3.4.1
   curved_navigation_bar: ^1.0.6
   percent_indicator: ^4.2.3
+  flashy_tab_bar2: ^0.0.10
 
 dev_dependencies:
   flutter_test:

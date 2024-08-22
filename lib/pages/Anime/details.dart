@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:daizy_tv/components/Anime/AnimeDetails.dart';
-import 'package:daizy_tv/components/Anime/Floater.dart';
-import 'package:daizy_tv/components/Anime/Poster.dart';
-import 'package:daizy_tv/components/Anime/CoverImage.dart';
+import 'package:daizy_tv/components/Anime/animeDetails.dart';
+import 'package:daizy_tv/components/Anime/floater.dart';
+import 'package:daizy_tv/components/Anime/poster.dart';
+import 'package:daizy_tv/components/Anime/coverImage.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:http/http.dart' as http;
@@ -75,7 +75,7 @@ class _DetailsState extends State<Details> {
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: const Icon(Ionicons.play_back),
+          icon: const Icon(Icons.arrow_back_ios),
         ),
       ),
       body: Stack(

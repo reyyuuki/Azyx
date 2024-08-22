@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:daizy_tv/backupData/manga.dart';
-import 'package:daizy_tv/components/Manga/MangaCarousale.dart';
-import 'package:daizy_tv/components/Manga/MangaReusableCarousale.dart';
+import 'package:daizy_tv/components/Manga/mangaCarousale.dart';
+import 'package:daizy_tv/components/Manga/mangaReusableCarousale.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:daizy_tv/components/Header.dart';
@@ -66,53 +66,51 @@ class _HomepageState extends State<Mangapage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: ListView(
-            children: [
-              const Header(),
-              SizedBox(
-                height: 20,
-              ),
-               Padding(
-               padding: const EdgeInsets.symmetric(horizontal: 10),
-               child: Container(
-                height: 50,
-                 child: Expanded(
-                   child: TextField(
-                      decoration: InputDecoration(
-                         prefixIcon: Icon(Icons.search),
-                          hintText: 'Search Manga...',
-                          focusedBorder:  OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide(color: Theme.of(context).colorScheme.primary)),
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
-                          fillColor: Theme.of(context).colorScheme.secondary,
-                          filled: true,
-                          ),
-                    ),
-                 ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ListView(
+          children: [
+            const Header(),
+            const SizedBox(
+              height: 20,
+            ),
+             Padding(
+             padding: const EdgeInsets.symmetric(horizontal: 10),
+             child: SizedBox(
+              height: 50,
+               child: Expanded(
+                 child: TextField(
+                    decoration: InputDecoration(
+                       prefixIcon: Icon(Icons.search),
+                        hintText: 'Search Manga...',
+                        focusedBorder:  OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide(color: Theme.of(context).colorScheme.primary)),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                        fillColor: Theme.of(context).colorScheme.secondary,
+                        filled: true,
+                        ),
+                  ),
                ),
              ),
-              const SizedBox(
-                height: 30.0,
-              ),
-              Mangacarousale(
-                mangaData: manga_Data,
-              ),
-              const SizedBox(
-                height: 30.0,
-              ),
-              Mangareusablecarousale(name: 'Popular', data: mangaList1),
-              const SizedBox(
-                height: 10,
-              ),
-              Mangareusablecarousale(name: 'Latest Manga', data: mangaList2),
-              const SizedBox(
-                height: 10,
-              ),
-              Mangareusablecarousale(name: 'Trending Mnaga', data: mangaList3),
-            ],
-          ),
+           ),
+            const SizedBox(
+              height: 30.0,
+            ),
+            Mangacarousale(
+              mangaData: manga_Data,
+            ),
+            const SizedBox(
+              height: 30.0,
+            ),
+            Mangareusablecarousale(name: 'Popular', data: mangaList1),
+            const SizedBox(
+              height: 10,
+            ),
+            Mangareusablecarousale(name: 'Latest Manga', data: mangaList2),
+            const SizedBox(
+              height: 10,
+            ),
+            Mangareusablecarousale(name: 'Trending Mnaga', data: mangaList3),
+          ],
         ),
       ),
     );

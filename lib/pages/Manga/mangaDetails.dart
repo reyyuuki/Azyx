@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:daizy_tv/components/Anime/Poster.dart';
-import 'package:daizy_tv/components/Anime/CoverImage.dart';
-import 'package:daizy_tv/components/Manga/MangaAllDetails.dart';
-import 'package:daizy_tv/components/Manga/MangaFloater.dart';
+import 'package:daizy_tv/components/Anime/poster.dart';
+import 'package:daizy_tv/components/Anime/coverImage.dart';
+import 'package:daizy_tv/components/Manga/mangaAllDetails.dart';
+import 'package:daizy_tv/components/Manga/mangaFloater.dart';
 import 'package:daizy_tv/components/Manga/chapterList.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
@@ -57,7 +57,7 @@ class _DetailsState extends State<Mangadetails> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           title: TextScroll(
-            loading ? "Loading" : mangaData['name'].toString(),
+            loading ? "Loading..." : mangaData['name'].toString(),
             mode: TextScrollMode.bouncing,
             velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
             delayBefore: const Duration(milliseconds: 500),
@@ -71,7 +71,7 @@ class _DetailsState extends State<Mangadetails> {
             onPressed: () {
               Navigator.pop(context);
             },
-            icon: const Icon(Ionicons.play_back),
+            icon: const Icon(Icons.arrow_back_ios),
           ),
         ),
         body: ListView(

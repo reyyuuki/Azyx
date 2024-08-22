@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:daizy_tv/components/Anime/AnimeDetails.dart';
-import 'package:daizy_tv/components/Anime/Poster.dart';
-import 'package:daizy_tv/components/Anime/ReusableList.dart';
-import 'package:daizy_tv/components/Anime/Videoplayer.dart';
+import 'package:daizy_tv/components/Anime/animeDetails.dart';
+import 'package:daizy_tv/components/Anime/poster.dart';
+import 'package:daizy_tv/components/Anime/reusableList.dart';
+import 'package:daizy_tv/components/Anime/videoplayer.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:ionicons/ionicons.dart';
@@ -28,16 +28,13 @@ class _StreamState extends State<Stream> {
   String? category;
   dynamic tracks;
   int? number;
-
- 
+  bool dub = false;
 
   @override
   void initState() {
     super.initState();
     fetchData();
   }
-
-  
 
   final String baseUrl = 'https://aniwatch-ryan.vercel.app/anime/info?id=';
   final String episodeDataUrl =
@@ -69,7 +66,6 @@ class _StreamState extends State<Stream> {
       print(e);
     }
   }
-  
 
   Future<void> fetchEpisode() async {
     try {
@@ -83,7 +79,7 @@ class _StreamState extends State<Stream> {
         setState(() {
           Episode = decodeData['sources'];
           tracks = tempdata['tracks'];
-           // Initialize player after fetching episode
+          // Initialize player after fetching episode
         });
       }
     } catch (e) {
@@ -101,17 +97,17 @@ class _StreamState extends State<Stream> {
   }
 
   void handleCategory(String newCategory) {
-    setState(() {
-      category = newCategory;
-      fetchEpisode();
-    });
+    if (AnimeData['anime']['info']['stats']['episodes']['dub'] >= number) {
+      setState(() {
+        category = newCategory;
+        fetchEpisode();
+      });
+    } else {}
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
-    if (EpisodeData == null || AnimeData == null || tracks == null ) {
+    if (EpisodeData == null || AnimeData == null || tracks == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -135,12 +131,15 @@ class _StreamState extends State<Stream> {
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: const Icon(Ionicons.play_back),
+          icon: const Icon(Icons.arrow_back_ios),
         ),
       ),
       body: ListView(
         children: [
-          MediaPlayer(Episode: Episode![0]['url'], tracks: tracks,),
+          MediaPlayer(
+            Episode: Episode![0]['url'],
+            tracks: tracks,
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
             child: Row(
@@ -248,7 +247,8 @@ class _StreamState extends State<Stream> {
                       child: TextScroll(
                         title,
                         mode: TextScrollMode.bouncing,
-                        velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
+                        velocity:
+                            const Velocity(pixelsPerSecond: Offset(30, 0)),
                         delayBefore: const Duration(milliseconds: 500),
                         pauseBetween: const Duration(milliseconds: 1000),
                         textAlign: TextAlign.center,
