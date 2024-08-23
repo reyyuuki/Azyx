@@ -6,7 +6,6 @@ import 'package:daizy_tv/components/Manga/mangaAllDetails.dart';
 import 'package:daizy_tv/components/Manga/mangaFloater.dart';
 import 'package:daizy_tv/components/Manga/chapterList.dart';
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:http/http.dart' as http;
 import 'package:text_scroll/text_scroll.dart';
 
@@ -53,6 +52,9 @@ class _DetailsState extends State<Mangadetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      bottomNavigationBar: Mangafloater(mangaData: mangaData, id: widget.id,),
+      extendBody: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,

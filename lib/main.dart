@@ -2,14 +2,15 @@ import 'dart:ui';
 
 import 'package:daizy_tv/pages/Manga/mangaDetails.dart';
 import 'package:daizy_tv/pages/Manga/read.dart';
+import 'package:daizy_tv/pages/Anime/searchAnime.dart';
+import 'package:daizy_tv/pages/Manga/searchManga.dart';
 import 'package:flutter/material.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:daizy_tv/Theme/themes.dart';
 import 'package:daizy_tv/pages/Anime/details.dart';
 import 'package:daizy_tv/pages/loginPage.dart';
-import 'package:daizy_tv/pages/mangaPage.dart';
+import 'package:daizy_tv/pages/Manga/mangaPage.dart';
 import 'package:daizy_tv/pages/Anime/stream.dart';
-import 'package:daizy_tv/pages/animePage.dart';
+import 'package:daizy_tv/pages/Anime/animePage.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 
 void main() {
@@ -46,6 +47,12 @@ class _MainAppState extends State<MainApp> {
             return MaterialPageRoute(
               builder: (context) => Stream(id: id),
             );
+            case '/searchAnime':
+            final name = args?['name'] ?? '';
+            return MaterialPageRoute(
+              builder: (context) => SearchAnime(name: name),
+            );
+
 
           // Manga - Routes
           case '/mangaDetail':
@@ -61,6 +68,13 @@ class _MainAppState extends State<MainApp> {
               builder: (context) =>
                   Read(mangaId: mangaId, chapterId: chapterId),
             );
+
+            case '/searchManga':
+            final name = args?['name'] ?? '';
+            return MaterialPageRoute(
+              builder: (context) => SearchManga(name: name),
+            );
+
           default:
             return MaterialPageRoute(
               builder: (context) => const Scaffold(
@@ -97,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: _pages[_selectedIndex],
       bottomNavigationBar: Container(
         height: 60,
-        margin: EdgeInsets.only(bottom: 20),
+        margin: const EdgeInsets.only(bottom: 50),
         child: Center(
           child: SizedBox(
             width: 250,
@@ -106,32 +120,45 @@ class _HomeScreenState extends State<HomeScreen> {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Container(
-                  decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.5), // Glass-like transparency
+                    decoration: BoxDecoration(
+                      color: Colors.white
+                          .withOpacity(0.2), // Glass-like transparency
                       borderRadius: BorderRadius.circular(30),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3), // Border color
-                        width: 1,
-                      ),
                     ),
-                  child: FlashyTabBar(
-                    animationCurve: Curves.linear,
-                    backgroundColor: Colors.transparent,
-                    selectedIndex: _selectedIndex,
-                    showElevation: false,
-                    onItemSelected: (index) => setState(() {
-                      _selectedIndex = index;
-                    }),
-                    items: [
-                      FlashyTabBarItem(
-                          icon: const Icon(Icons.movie), title: const Text('Anime')),
-                      FlashyTabBarItem(
-                          icon: const Icon(Icons.login), title: const Text('Login')),
-                      FlashyTabBarItem(
-                          icon: const Icon(Icons.book), title: const Text('Manga')),
-                    ],
-                  ),
-                ),
+                    child: FlashyTabBar(
+                      selectedIndex: _selectedIndex,
+                      showElevation: true,
+                      onItemSelected: (index) => setState(() {
+                        _selectedIndex = index;
+                      }),
+                      backgroundColor: Colors.transparent,
+                      items: [
+                        FlashyTabBarItem(
+                          icon: _selectedIndex == 0
+                              ? const SizedBox.shrink()
+                              : const Icon(Icons.movie),
+                          title: const Text('Anime'),
+                          activeColor: Colors.white,
+                          inactiveColor: Theme.of(context).colorScheme.primary,
+                        ),
+                        FlashyTabBarItem(
+                          icon: _selectedIndex == 1
+                              ? const SizedBox.shrink()
+                              : const Icon(Icons.login),
+                          title: const Text('Login'),
+                          activeColor: Colors.white,
+                          inactiveColor: Theme.of(context).colorScheme.primary,
+                        ),
+                        FlashyTabBarItem(
+                          icon: _selectedIndex == 2
+                              ? const SizedBox.shrink()
+                              : const Icon(Icons.book),
+                          title: const Text('Manga'),
+                          activeColor: Colors.white,
+                          inactiveColor: Theme.of(context).colorScheme.primary,
+                        ),
+                      ],
+                    )),
               ),
             ),
           ),

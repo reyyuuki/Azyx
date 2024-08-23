@@ -57,24 +57,36 @@ class _HomepageState extends State<Animepage> {
             const SizedBox(
               height: 20,
             ),
-             Padding(
-             padding: const EdgeInsets.symmetric(horizontal: 10),
-             child: SizedBox(
-              height: 50,
-               child: Expanded(
-                 child: TextField(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: SizedBox(
+                height: 50,
+                child: Expanded(
+                  child: TextField(
+                    onSubmitted: (String value) {
+                      Navigator.pushNamed(
+                        context,
+                        '/searchAnime',
+                        arguments: {"name": value},
+                      );
+                    },
                     decoration: InputDecoration(
-                       prefixIcon: const Icon(Icons.search),
-                        hintText: 'Search Anime...',
-                        focusedBorder:  OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide(color: Theme.of(context).colorScheme.primary)),
-                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
-                        fillColor: Theme.of(context).colorScheme.secondary,
-                        filled: true,
-                        ),
+                      prefixIcon: const Icon(Icons.search),
+                      hintText: 'Search Anime...',
+                      focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(
+                              color: Theme.of(context).colorScheme.primary)),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide.none),
+                      fillColor: Theme.of(context).colorScheme.secondary,
+                      filled: true,
+                    ),
                   ),
-               ),
-             ),
-           ),
+                ),
+              ),
+            ),
             const SizedBox(
               height: 30.0,
             ),

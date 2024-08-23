@@ -6,8 +6,10 @@ import 'package:text_scroll/text_scroll.dart';
 
 class Mangafloater extends StatelessWidget {
 final dynamic mangaData;
+final String? id;
 
-  const Mangafloater({super.key, this.mangaData});
+  const Mangafloater({super.key, this.mangaData, this.id});
+
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +18,8 @@ final dynamic mangaData;
         margin: const EdgeInsets.only(top: 150),
         child: const Center(child: CircularProgressIndicator()));
     }
+    final String chapterId = mangaData['chapterId'] ?? 'chapter-1';
+
     return Positioned(
           bottom: 0,
           left: 0,
@@ -67,7 +71,7 @@ final dynamic mangaData;
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.pushNamed(context, '/read',
-                                arguments: {"id": mangaData['id']});
+                                arguments: {"mangaId": id, "chapterId": chapterId});
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color.fromARGB(255, 17, 16, 16),

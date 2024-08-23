@@ -18,13 +18,13 @@ dependencies:
   infinite_carousel: ^1.1.1
   ionicons: ^0.2.2
   text_scroll: ^0.2.0
-  transformable_list_view: ^0.6.0
   animated_toggle_switch: ^0.8.3
   lite_rolling_switch: ^1.0.1
   cached_network_image: ^3.4.1
   curved_navigation_bar: ^1.0.6
   percent_indicator: ^4.2.3
   flashy_tab_bar2: ^0.0.10
+  interactive_slider: ^0.2.2
 
 dev_dependencies:
   flutter_test:

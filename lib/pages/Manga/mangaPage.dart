@@ -80,9 +80,16 @@ class _HomepageState extends State<Mangapage> {
               height: 50,
                child: Expanded(
                  child: TextField(
+                  onSubmitted: (String value) {
+                      Navigator.pushNamed(
+                        context,
+                        '/searchManga',
+                        arguments: {"name": value},
+                      );
+                    },
                     decoration: InputDecoration(
                        prefixIcon: Icon(Icons.search),
-                        hintText: 'Search Manga...',
+                        hintText: 'Search Manga',
                         focusedBorder:  OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide(color: Theme.of(context).colorScheme.primary)),
                         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                         fillColor: Theme.of(context).colorScheme.secondary,

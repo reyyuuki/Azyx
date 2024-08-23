@@ -1,11 +1,9 @@
 import 'dart:convert';
 
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:daizy_tv/components/Manga/readingHeader.dart';
+import 'package:daizy_tv/components/Manga/sliderBar.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:ionicons/ionicons.dart';
-import 'package:percent_indicator/linear_percent_indicator.dart';
+
 
 
 class Read extends StatefulWidget {
@@ -23,12 +21,16 @@ class _ReadState extends State<Read> {
   List<dynamic>? chapterListIds;
   dynamic data;
   bool show = true;
+    bool isLoading = true;
+  bool hasError = false;
 
   @override
   void initState() {
     super.initState();
     fetchData();
   }
+
+  final ScrollController _scrollController = ScrollController();
 
   Future<void> fetchData() async {
     final String url =
@@ -41,27 +43,27 @@ class _ReadState extends State<Read> {
           data = jsonData;
           chapterList = jsonData['images'];
           chapterListIds = jsonData['chapterListIds'];
+          isLoading = false;
+          hasError = false;
         });
-      } else {
-        // Handle non-200 responses
-        print('Failed to load data');
-      }
+      } 
     } catch (error) {
       // Handle errors
-      print(error);
+      isLoading = false;
+      hasError = true;
     }
   }
 
-  void handleChapter(bool next) {
+  void handleChapter(String ? direction) {
 
     int currentIndex = data != null ? chapterListIds!.indexWhere((item) => item["id"] == widget.chapterId) : -1;
 
     if (currentIndex == -1) {
       print("Chapter not found");
-      return;
+      
     }
 
-    if (next){
+    if (direction == 'right'){
       if (currentIndex < chapterListIds!.length - 1) {
         widget.chapterId = chapterListIds![currentIndex + 1]['id'];
          print('Next chapter ID: ${widget.chapterId}');
@@ -92,51 +94,26 @@ class _ReadState extends State<Read> {
       return const Center(child: CircularProgressIndicator());
     }
     
-    return Scaffold(
-        body: Stack(
-      children: [
-        GestureDetector(
-          onTap: _toggleShow,
-          child: ListView(
-            children: [
-              if(chapterList != null)
-              ...chapterList!.map<Widget>((image) => 
-              CachedNetworkImage(imageUrl: image['image'],)
-               )
-            ],
-          ),
-        ),
-        Readingheader(show: show, data: data),
-        Positioned(
-      bottom: 0,
-      width: MediaQuery.of(context).size.width,
-      child: show
-          ? Container(
-              color: const Color.fromARGB(178, 24, 23, 23),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-                child: Row(
-                  children: [
-                  
-                    Transform.rotate(
-                      angle: 3.14, // 180 degrees in radians
-                      child: GestureDetector(onTap:() => handleChapter(true), child: const Icon(Ionicons.play)),
-                    ),
-                    LinearPercentIndicator(
-                      lineHeight: 10,
-                      width: 280,
-                      barRadius: const Radius.circular(10),
-                    ),
-                    GestureDetector(onTap:() => handleChapter(false), child: const Icon(Ionicons.play)),
-                  ],
-                ),
-              ),
-            )
-          : const SizedBox.shrink(),
-    )
-      ],
-    ));
+    return Sliderbar(
+      title: isLoading ? '??' : data['title'],
+      chapter: isLoading ? 'Chapter ?' : data['currentChapter'],
+      totalImages: chapterList?.length ?? 0,
+      scrollController: _scrollController,
+      handleChapter: handleChapter,
+      child: Center(
+        child: isLoading
+            ? const CircularProgressIndicator()
+            : hasError
+                ? const Text('Failed to load data')
+                : ListView.builder(
+                    controller: _scrollController,
+                    itemCount: chapterList!.length,
+                    itemBuilder: (context, index) {
+                      return Image.network(chapterList![index]['image']);
+                    },
+                  ),
+      ),
+    );
   }
 
 }

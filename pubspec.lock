@@ -264,6 +264,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  interactive_slider:
+    dependency: "direct main"
+    description:
+      name: interactive_slider
+      sha256: f90020cd1f1376fc8c0a099f48432d25bb2128cef95f9f72acc71e06c5f7d622
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.2"
   intl:
     dependency: transitive
     description:
@@ -565,14 +573,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.0"
-  transformable_list_view:
-    dependency: "direct main"
-    description:
-      name: transformable_list_view
-      sha256: f228664601e5bb3402b78ca6f523aa51dbfa5cc84c9503e2c9e68a9570ac1c3f
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.0"
   typed_data:
     dependency: transitive
     description:
