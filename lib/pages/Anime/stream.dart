@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:daizy_tv/components/Anime/animeDetails.dart';
 import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/reusableList.dart';
@@ -159,9 +160,19 @@ class _StreamState extends State<Stream> {
           ),
           Column(
             children: [
-              Poster(
-                imageUrl: AnimeData['anime']['info']['poster'],
-                id: AnimeData['anime']['info']['id'],
+              SizedBox(
+                height: 280,
+                width: 200,
+                child: Hero(
+                  tag: AnimeData['anime']['info']['id'],
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: CachedNetworkImage(
+                      imageUrl: AnimeData['anime']['info']['poster'],
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
               ),
               AnimeDetails(
                 AnimeData: AnimeData['anime'],

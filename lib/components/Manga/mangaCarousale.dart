@@ -19,7 +19,6 @@ class Mangacarousale extends StatelessWidget {
       child: CarouselSlider(
         options: CarouselOptions(
           height: 560,
-          aspectRatio: 16 / 9,
           viewportFraction: 0.73,
           initialPage: 0,
           enableInfiniteScroll: true,
@@ -32,7 +31,7 @@ class Mangacarousale extends StatelessWidget {
           enlargeFactor: 0.3,
           scrollDirection: Axis.horizontal,
         ),
-        items: mangaData!.map((manga) {
+        items: mangaData!.map<Widget>((manga) {
           return Builder(
             builder: (BuildContext context) {
               return GestureDetector(

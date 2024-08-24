@@ -84,29 +84,27 @@ class _DetailsState extends State<Mangadetails> {
                   CoverImage(
                     imageUrl: widget.image,
                   ),
-                  Expanded(
-                    child: Container(
-                      margin: const EdgeInsets.only(top: 220),
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(50)),
-                        color: Theme.of(context).colorScheme.tertiary,
-                      ),
-                      child: Expanded(
-                        child: Column(
-                          children: [
-                            const SizedBox(
-                              height: 120,
-                            ),
-                            Mangaalldetails(
-                              mangaData: mangaData,
-                            ),
-                            if (mangaData != null)
-                              ...mangaData['chapterList']
-                                  .map<Widget>((chapter) => Chapterlist(id: widget.id, chapter: chapter,))
-                                  .toList(),
-                          ],
-                        ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 220),
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(50)),
+                      color: Theme.of(context).colorScheme.tertiary,
+                    ),
+                    child: Expanded(
+                      child: Column(
+                        children: [
+                          const SizedBox(
+                            height: 120,
+                          ),
+                          Mangaalldetails(
+                            mangaData: mangaData,
+                          ),
+                          if (mangaData != null)
+                            ...mangaData['chapterList']
+                                .map<Widget>((chapter) => Chapterlist(id: widget.id, chapter: chapter,))
+                                .toList(),
+                        ],
                       ),
                     ),
                   ),

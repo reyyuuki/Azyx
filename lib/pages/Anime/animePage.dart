@@ -56,7 +56,7 @@ class _HomepageState extends State<Animepage> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
+    if (isLoading ) {
       return const Center(child: CircularProgressIndicator());
     }
 

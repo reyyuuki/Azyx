@@ -5,14 +5,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:text_scroll/text_scroll.dart';
 
 class Carousel extends StatelessWidget {
-  final dynamic animeData;
+   dynamic animeData;
   final List<String> generes = ["Action", "Adventure", "Fantasy"];
 
   Carousel({super.key, this.animeData});
 
   @override
   Widget build(BuildContext context) {
-     if (animeData == null || !(animeData is List) || (animeData as List).isEmpty) {
+     if (animeData == null || (animeData as List).isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -21,7 +21,7 @@ class Carousel extends StatelessWidget {
       child: CarouselSlider(
         options: CarouselOptions(
           height: 560,
-          
+  
           viewportFraction: 0.73,
           initialPage: 0,
           enableInfiniteScroll: true,
@@ -34,7 +34,7 @@ class Carousel extends StatelessWidget {
           enlargeFactor: 0.3,
           scrollDirection: Axis.horizontal,
         ),
-        items: animeData!.map((anime) {
+        items: animeData!.map<Widget>((anime) {
           return Builder(
             builder: (BuildContext context) {
               return GestureDetector(

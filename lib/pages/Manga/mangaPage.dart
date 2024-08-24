@@ -65,6 +65,9 @@ class _HomepageState extends State<Mangapage> {
 
   @override
   Widget build(BuildContext context) {
+    if(mangaData == null){
+      return const Center(child: CircularProgressIndicator());
+    }
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -78,25 +81,23 @@ class _HomepageState extends State<Mangapage> {
              padding: const EdgeInsets.symmetric(horizontal: 10),
              child: SizedBox(
               height: 50,
-               child: Expanded(
-                 child: TextField(
-                  onSubmitted: (String value) {
-                      Navigator.pushNamed(
-                        context,
-                        '/searchManga',
-                        arguments: {"name": value},
-                      );
-                    },
-                    decoration: InputDecoration(
-                       prefixIcon: Icon(Icons.search),
-                        hintText: 'Search Manga',
-                        focusedBorder:  OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide(color: Theme.of(context).colorScheme.primary)),
-                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
-                        fillColor: Theme.of(context).colorScheme.secondary,
-                        filled: true,
-                        ),
-                  ),
-               ),
+               child: TextField(
+                onSubmitted: (String value) {
+                    Navigator.pushNamed(
+                      context,
+                      '/searchManga',
+                      arguments: {"name": value},
+                    );
+                  },
+                  decoration: InputDecoration(
+                     prefixIcon: const Icon(Icons.search),
+                      hintText: 'Search Manga',
+                      focusedBorder:  OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide(color: Theme.of(context).colorScheme.primary)),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                      fillColor: Theme.of(context).colorScheme.secondary,
+                      filled: true,
+                      ),
+                ),
              ),
            ),
             const SizedBox(

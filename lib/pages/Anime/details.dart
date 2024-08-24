@@ -84,15 +84,13 @@ class _DetailsState extends State<Details> {
             Stack(
               children: [
                 CoverImage(imageUrl: cover),
-                Expanded(
-                  child: Container(
-                    height: 870,
-                    margin: const EdgeInsets.only(top: 220),
-                    decoration:  BoxDecoration(
-                      borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(50)),
-                      color: Theme.of(context).colorScheme.tertiary,
-                    ),
+                Container(
+                  height: 870,
+                  margin: const EdgeInsets.only(top: 220),
+                  decoration:  BoxDecoration(
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(50)),
+                    color: Theme.of(context).colorScheme.tertiary,
                   ),
                 ),
                 Poster(imageUrl: widget.image, id : widget.id),
