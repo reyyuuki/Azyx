@@ -17,8 +17,8 @@ class Read extends StatefulWidget {
 }
 
 class _ReadState extends State<Read> {
-  List<dynamic>? chapterList;
-  List<dynamic>? chapterListIds;
+  dynamic chapterList;
+  dynamic chapterListIds;
   dynamic data;
   bool show = true;
     bool isLoading = true;

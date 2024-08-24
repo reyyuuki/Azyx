@@ -4,7 +4,7 @@ import 'package:ionicons/ionicons.dart';
 
 // ignore: must_be_immutable
 class Mangareusablecarousale extends StatelessWidget {
-  final List<dynamic>? data;
+  final dynamic data;
   final String? name;
 
   const Mangareusablecarousale({super.key, this.data, required this.name});

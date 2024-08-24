@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:text_scroll/text_scroll.dart';
 
 class Mangacarousale extends StatelessWidget {
-  final List<dynamic>? mangaData;
+  final dynamic mangaData;
   final List<String> generes = ["Action", "Adventure", "Fantasy"];
 
   Mangacarousale({super.key, this.mangaData});

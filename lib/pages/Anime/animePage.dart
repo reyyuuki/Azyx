@@ -14,10 +14,10 @@ class Animepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Animepage> {
-  List<dynamic>? spotlightAnime;
-  List<dynamic>? trendingAnime;
-  List<dynamic>? latestEpisodesAnime;
-  List<dynamic>? topUpComingAnime;
+  dynamic spotlightAnime;
+  dynamic trendingAnime;
+  dynamic latestEpisodesAnime;
+  dynamic topUpComingAnime;
 
   @override
   void initState() {
@@ -48,6 +48,10 @@ class _HomepageState extends State<Animepage> {
 
   @override
   Widget build(BuildContext context) {
+    if(spotlightAnime == null || trendingAnime == null || latestEpisodesAnime == null || topUpComingAnime == null){
+      return const Center(child: CircularProgressIndicator(),);
+    }
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(8.0),

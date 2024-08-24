@@ -5,7 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:text_scroll/text_scroll.dart';
 
 class Carousel extends StatelessWidget {
-  final List<dynamic>? animeData;
+  final dynamic animeData;
   final List<String> generes = ["Action", "Adventure", "Fantasy"];
 
   Carousel({super.key, this.animeData});
@@ -20,7 +20,7 @@ class Carousel extends StatelessWidget {
       child: CarouselSlider(
         options: CarouselOptions(
           height: 560,
-          aspectRatio: 16 / 9,
+          
           viewportFraction: 0.73,
           initialPage: 0,
           enableInfiniteScroll: true,

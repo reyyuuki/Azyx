@@ -16,10 +16,10 @@ class Mangapage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Mangapage> {
-    List<dynamic>? manga_Data;
-    List<dynamic>? mangaList1;
-    List<dynamic>? mangaList2;
-    List<dynamic>? mangaList3;
+    dynamic manga_Data;
+    dynamic mangaList1;
+    dynamic mangaList2;
+    dynamic mangaList3;
 
   @override
   void initState() {

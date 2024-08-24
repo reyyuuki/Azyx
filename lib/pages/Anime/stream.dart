@@ -21,9 +21,9 @@ class Stream extends StatefulWidget {
 }
 
 class _StreamState extends State<Stream> {
-  List<dynamic>? EpisodeData;
+  dynamic EpisodeData;
   dynamic AnimeData;
-  List<dynamic>? Episode;
+  dynamic Episode;
   String? episodeId;
   String? category;
   dynamic tracks;

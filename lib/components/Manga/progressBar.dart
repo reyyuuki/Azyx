@@ -5,7 +5,7 @@
 // // ignore: must_be_immutable
 // class Progressbar extends StatelessWidget {
 //   bool show;
-//   final List<dynamic>? data;
+//   final dynamic data;
 //   String? id;
 //   Progressbar({super.key, required this.show, this.data, this.id});
 

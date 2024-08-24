@@ -13,7 +13,7 @@ class SearchManga extends StatefulWidget {
 }
 
 class _SearchpageState extends State<SearchManga> {
-  List<dynamic>? data;
+  dynamic data;
 
   TextEditingController? _controller;
 

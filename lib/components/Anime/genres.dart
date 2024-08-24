@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Genres extends StatelessWidget {
-  final List<dynamic>? genres;
+  final dynamic genres;
   const Genres({super.key, this.genres});
 
   @override

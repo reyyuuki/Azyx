@@ -15,7 +15,7 @@ class SearchAnime extends StatefulWidget {
 }
 
 class _SearchpageState extends State<SearchAnime> {
-  List<dynamic>? data;
+  dynamic data;
 
 
 TextEditingController? _controller;
