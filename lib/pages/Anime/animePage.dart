@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:daizy_tv/components/Anime/carousel.dart';
@@ -18,6 +17,8 @@ class _HomepageState extends State<Animepage> {
   dynamic trendingAnime;
   dynamic latestEpisodesAnime;
   dynamic topUpComingAnime;
+  bool isLoading = true;
+  String? errorMessage;
 
   @override
   void initState() {
@@ -26,9 +27,13 @@ class _HomepageState extends State<Animepage> {
   }
 
   Future<void> fetchData() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
     try {
-      final response = await http
-          .get(Uri.parse("https://aniwatch-ryan.vercel.app/anime/home"));
+      final response = await http.get(Uri.parse("https://aniwatch-ryan.vercel.app/anime/home"));
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         setState(() {
@@ -36,20 +41,45 @@ class _HomepageState extends State<Animepage> {
           trendingAnime = jsonData['trendingAnimes'];
           latestEpisodesAnime = jsonData['latestEpisodeAnimes'];
           topUpComingAnime = jsonData['topUpcomingAnimes'];
+          isLoading = false;
         });
       } else {
-        throw Exception("Failed to load data");
+        throw Exception("Failed to load data: ${response.statusCode}");
       }
     } catch (error) {
-      // ignore: avoid_print
-      print("Failed to load data");
+      setState(() {
+        errorMessage = "Failed to load data: $error";
+        isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if(spotlightAnime == null || trendingAnime == null || latestEpisodesAnime == null || topUpComingAnime == null){
-      return const Center(child: CircularProgressIndicator(),);
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error, color: Colors.red, size: 50),
+            const SizedBox(height: 16),
+            Text(
+              errorMessage!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 18, color: Colors.red),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: fetchData,
+              child: const Text("Retry"),
+            ),
+          ],
+        ),
+      );
     }
 
     return Scaffold(
@@ -58,60 +88,44 @@ class _HomepageState extends State<Animepage> {
         child: ListView(
           children: [
             const Header(),
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: SizedBox(
                 height: 50,
-                child: Expanded(
-                  child: TextField(
-                    onSubmitted: (String value) {
-                      Navigator.pushNamed(
-                        context,
-                        '/searchAnime',
-                        arguments: {"name": value},
-                      );
-                    },
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.search),
-                      hintText: 'Search Anime...',
-                      focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(
-                              color: Theme.of(context).colorScheme.primary)),
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide.none),
-                      fillColor: Theme.of(context).colorScheme.secondary,
-                      filled: true,
-                    ),
+                child: TextField(
+                  onSubmitted: (String value) {
+                    Navigator.pushNamed(
+                      context,
+                      '/searchAnime',
+                      arguments: {"name": value},
+                    );
+                  },
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.search),
+                    hintText: 'Search Anime...',
+                    focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary)),
+                    enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide.none),
+                    fillColor: Theme.of(context).colorScheme.secondary,
+                    filled: true,
                   ),
                 ),
               ),
             ),
-            const SizedBox(
-              height: 30.0,
-            ),
-            Carousel(
-              animeData: trendingAnime,
-            ),
-            const SizedBox(
-              height: 30.0,
-            ),
+            const SizedBox(height: 30.0),
+            Carousel(animeData: trendingAnime),
+            const SizedBox(height: 30.0),
             ReusableList(name: 'Popular', data: spotlightAnime),
-            const SizedBox(
-              height: 10,
-            ),
+            const SizedBox(height: 10),
             ReusableList(name: 'Latest Episodes', data: latestEpisodesAnime),
-            const SizedBox(
-              height: 10,
-            ),
+            const SizedBox(height: 10),
             ReusableList(name: 'Top Upcoming', data: topUpComingAnime),
-            const SizedBox(
-              height: 10,
-            ),
+            const SizedBox(height: 10),
           ],
         ),
       ),

@@ -12,9 +12,10 @@ class Carousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (animeData == null) {
-      return const Center(child: Center(child: CircularProgressIndicator()));
+     if (animeData == null || !(animeData is List) || (animeData as List).isEmpty) {
+      return const Center(child: CircularProgressIndicator());
     }
+
     return SizedBox(
       height: 440,
       child: CarouselSlider(
