@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:daizy_tv/components/Anime/animeDetails.dart';
+import 'package:daizy_tv/components/Anime/animeInfo.dart';
+import 'package:daizy_tv/components/Anime/genres.dart';
 import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/reusableList.dart';
 import 'package:daizy_tv/components/Anime/videoplayer.dart';
@@ -174,8 +176,72 @@ class _StreamState extends State<Stream> {
                   ),
                 ),
               ),
-              AnimeDetails(
-                AnimeData: AnimeData['anime'],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Column(
+                  children: [
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: TextScroll(
+                        AnimeData == null
+                            ? "Loading"
+                            : AnimeData['anime']['info']['name'].toString(),
+                        mode: TextScrollMode.bouncing,
+                        velocity:
+                            const Velocity(pixelsPerSecond: Offset(30, 0)),
+                        delayBefore: const Duration(milliseconds: 500),
+                        pauseBetween: const Duration(milliseconds: 1000),
+                        textAlign: TextAlign.center,
+                        selectable: true,
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Ionicons.star,
+                          color: Colors.yellow,
+                          size: 20,
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          AnimeData['anime']['moreInfo']['malscore'],
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Genres(genres: AnimeData['anime']['moreInfo']['genres']),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    AnimeInfo(AnimeData: AnimeData['anime']),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Text(
+                        AnimeData['anime']['info']['description'].length > 400
+                            ? AnimeData['anime']['info']['description']
+                                    .substring(0, 400) +
+                                '...'
+                            : AnimeData['anime']['info']['description'],
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(
                 height: 20,

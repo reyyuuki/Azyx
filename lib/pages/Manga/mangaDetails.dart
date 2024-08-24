@@ -53,8 +53,6 @@ class _DetailsState extends State<Mangadetails> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      bottomNavigationBar: Mangafloater(mangaData: mangaData, id: widget.id,),
-      extendBody: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -76,22 +74,25 @@ class _DetailsState extends State<Mangadetails> {
             icon: const Icon(Icons.arrow_back_ios),
           ),
         ),
-        body: ListView(
+        body: Stack(
           children: [
-            Expanded(
-              child: Stack(
-                children: [
-                  CoverImage(
-                    imageUrl: widget.image,
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(top: 220),
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(50)),
-                      color: Theme.of(context).colorScheme.tertiary,
+            ListView(
+              children: [
+                Stack(
+                  children: [
+                    if(mangaData == null)
+                    SizedBox.shrink()
+                    else
+                    CoverImage(
+                      imageUrl: widget.image,
                     ),
-                    child: Expanded(
+                    Container(
+                      margin: const EdgeInsets.only(top: 220),
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(50)),
+                        color: Theme.of(context).colorScheme.tertiary,
+                      ),
                       child: Column(
                         children: [
                           const SizedBox(
@@ -107,11 +108,12 @@ class _DetailsState extends State<Mangadetails> {
                         ],
                       ),
                     ),
-                  ),
-                  Poster(imageUrl: widget.image, id: widget.id),
-                ],
-              ),
+                    Poster(imageUrl: widget.image, id: widget.id),
+                  ],
+                ),
+              ],
             ),
+            Mangafloater(mangaData: mangaData, id: widget.id,),
           ],
         ));
   }

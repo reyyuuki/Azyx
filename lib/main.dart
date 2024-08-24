@@ -118,11 +118,11 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(40),
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                 child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white
-                          .withOpacity(0.2), // Glass-like transparency
+                          .withOpacity(0.4), // Glass-like transparency
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: FlashyTabBar(

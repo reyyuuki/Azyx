@@ -67,34 +67,32 @@ final String? id;
                           ),
                         ],
                       ),
-                      Container(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/read',
-                                arguments: {"mangaId": id, "chapterId": chapterId});
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 17, 16, 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/read',
+                              arguments: {"mangaId": id, "chapterId": chapterId});
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(255, 17, 16, 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Ionicons.book,
+                              color: Colors.white, // Icon color
                             ),
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Ionicons.book,
-                                color: Colors.white, // Icon color
+                            SizedBox(width: 8),
+                            Text(
+                              'Read',
+                              style: TextStyle(
+                                color: Colors.white, // Text color
                               ),
-                              SizedBox(width: 8),
-                              Text(
-                                'Read',
-                                style: TextStyle(
-                                  color: Colors.white, // Text color
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       )
                     ],

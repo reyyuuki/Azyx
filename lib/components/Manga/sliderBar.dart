@@ -130,7 +130,7 @@ class _SlidebarState extends State<Sliderbar> {
                           child: IconButton(
                             icon: const Icon(Icons.skip_previous),
                             onPressed: () {
-                              widget.handleChapter('left');
+                              widget.handleChapter('right');
                             },
                           ),
                         ),
@@ -170,7 +170,7 @@ class _SlidebarState extends State<Sliderbar> {
                           child: IconButton(
                             icon: const Icon(Icons.skip_next),
                             onPressed: () {
-                              widget.handleChapter('right');
+                              widget.handleChapter('left');
                             },
                           ),
                         ),

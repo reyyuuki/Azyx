@@ -9,7 +9,7 @@ class MangaInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (mangaData == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const SizedBox.shrink();
     }
 
     return Padding(
