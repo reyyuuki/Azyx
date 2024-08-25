@@ -91,7 +91,7 @@ class _SlidebarState extends State<Sliderbar> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      icon: const Icon(Icons.arrow_back_ios),
+                      icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).colorScheme.surface,),
                     ),
                     const SizedBox(width: 10),
                     Column(
@@ -100,10 +100,10 @@ class _SlidebarState extends State<Sliderbar> {
                       children: [
                         Text(widget.title!,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 16)),
+                            style: TextStyle(fontSize: 16,  color: Theme.of(context).colorScheme.surface,)),
                         const SizedBox(height: 3),
                         Text(widget.chapter!,
-                            style: const TextStyle(fontSize: 12)),
+                            style: TextStyle(fontSize: 12,  color: Theme.of(context).colorScheme.surface,)),
                       ],
                     ),
                   ],
@@ -128,7 +128,7 @@ class _SlidebarState extends State<Sliderbar> {
                             color: Theme.of(context).colorScheme.tertiary,
                           ),
                           child: IconButton(
-                            icon: const Icon(Icons.skip_previous),
+                            icon: Icon(Icons.skip_previous, color: Theme.of(context).colorScheme.surface,),
                             onPressed: () {
                               widget.handleChapter('right');
                             },
@@ -145,7 +145,7 @@ class _SlidebarState extends State<Sliderbar> {
                                   .withOpacity(0.8),
                             ),
                             child: Slider(
-                              thumbColor: Theme.of(context).colorScheme.primary,
+                              thumbColor: Theme.of(context).colorScheme.inversePrimary,
                               value: _scrollProgress,
                               onChanged: (value) {
                                 setState(() {
@@ -153,7 +153,7 @@ class _SlidebarState extends State<Sliderbar> {
                                 });
                                 _onProgressBarTap(value);
                               },
-                              activeColor: Theme.of(context).colorScheme.primary,
+                              activeColor: Theme.of(context).colorScheme.inversePrimary,
                               inactiveColor: Theme.of(context)
                                   .colorScheme
                                   .surface
@@ -168,7 +168,7 @@ class _SlidebarState extends State<Sliderbar> {
                             color: Theme.of(context).colorScheme.tertiary,
                           ),
                           child: IconButton(
-                            icon: const Icon(Icons.skip_next),
+                            icon: Icon(Icons.skip_next, color: Theme.of(context).colorScheme.surface,),
                             onPressed: () {
                               widget.handleChapter('left');
                             },
@@ -182,7 +182,7 @@ class _SlidebarState extends State<Sliderbar> {
                           vertical: 2, horizontal: 10),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(30),
-                        color: Theme.of(context).colorScheme.tertiary,
+                        color: Theme.of(context).colorScheme.surfaceContainer,
                       ),
                       child: Text(
                         '$_currentPage / ${widget.totalImages}',

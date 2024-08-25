@@ -62,7 +62,7 @@ class _MediaPlayerState extends State<MediaPlayer> with AutomaticKeepAliveClient
     var betterPlayerConfiguration = const BetterPlayerConfiguration(
       controlsConfiguration: BetterPlayerControlsConfiguration(
           playerTheme: BetterPlayerTheme.cupertino),
-      autoPlay: false,
+      autoPlay: true,
     );
 
     BetterPlayerDataSource betterPlayerDataSource = BetterPlayerDataSource(

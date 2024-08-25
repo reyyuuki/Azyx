@@ -5,12 +5,14 @@ import 'package:ionicons/ionicons.dart';
 import 'package:text_scroll/text_scroll.dart';
 
 class AnimeDetails extends StatelessWidget {
-  final dynamic AnimeData;
-  const AnimeDetails({super.key, this.AnimeData});
+  final dynamic animeData;
+  final String? description;
+  const AnimeDetails({super.key, this.animeData, this.description});
+
 
   @override
   Widget build(BuildContext context) {
-    if (AnimeData == null) {
+    if (animeData == null || description == null) {
       return const SizedBox();
     }
 
@@ -28,9 +30,9 @@ class AnimeDetails extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: TextScroll(
-                AnimeData == null
+                animeData == null
                     ? "Loading"
-                    : AnimeData['info']['name'].toString(),
+                    : animeData['info']['name'].toString(),
                 mode: TextScrollMode.bouncing,
                 velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
                 delayBefore: const Duration(milliseconds: 500),
@@ -55,7 +57,7 @@ class AnimeDetails extends StatelessWidget {
                   width: 10,
                 ),
                 Text(
-                  AnimeData['moreInfo']['malscore'],
+                  animeData['moreInfo']['malscore'],
                   style: const TextStyle(fontSize: 18),
                 ),
               ],
@@ -63,20 +65,21 @@ class AnimeDetails extends StatelessWidget {
             const SizedBox(
               height: 10,
             ),
-            Genres(genres: AnimeData['moreInfo']['genres']),
+            Genres(genres: animeData['moreInfo']['genres']),
             const SizedBox(
               height: 30,
             ),
-            AnimeInfo(AnimeData: AnimeData),
+            AnimeInfo(animeData: animeData),
             const SizedBox(
               height: 30,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Text(
-                AnimeData['info']['description'].length > 400
-                    ? AnimeData['info']['description'].substring(0, 400) + '...'
-                    : AnimeData['info']['description'],
+                description != null ? description!.length > 400 ? '${description!.substring(0, 400)}...' : description :
+                animeData['info']['description'].length > 400
+                    ? animeData['info']['description'].substring(0, 400) + '...'
+                    : animeData['info']['description'],
               ),
             ),
           ],

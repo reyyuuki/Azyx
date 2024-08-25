@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 class AnimeInfo extends StatelessWidget {
-final dynamic AnimeData;
+final dynamic animeData;
 
-   const AnimeInfo({super.key,this.AnimeData});
+   const AnimeInfo({super.key,this.animeData});
 
   @override
   Widget build(BuildContext context) {
-    if (AnimeData == null) {
+    if (animeData == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -52,33 +52,33 @@ final dynamic AnimeData;
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(AnimeData!['moreInfo']['japanese'].length > 13
-                  ? AnimeData['moreInfo']['japanese'].substring(0, 13)
-                  : AnimeData['moreInfo']['japanese']),
+              Text(animeData!['moreInfo']['japanese'].length > 13
+                  ? animeData['moreInfo']['japanese'].substring(0, 13)
+                  : animeData['moreInfo']['japanese']),
               const SizedBox(
                 height: 5,
               ),
-              Text(AnimeData['moreInfo']['aired']),
+              Text(animeData['moreInfo']['aired']),
               const SizedBox(
                 height: 5,
               ),
-              Text(AnimeData['moreInfo']['premiered']),
+              Text(animeData['moreInfo']['premiered']),
               const SizedBox(
                 height: 5,
               ),
-              Text(AnimeData['moreInfo']['duration']),
+              Text(animeData['moreInfo']['duration']),
               const SizedBox(
                 height: 5,
               ),
-              Text(AnimeData['moreInfo']['status']),
+              Text(animeData['moreInfo']['status']),
               const SizedBox(
                 height: 5,
               ),
-              Text(AnimeData['info']['stats']['rating']),
+              Text(animeData['info']['stats']['rating']),
               const SizedBox(
                 height: 5,
               ),
-              Text(AnimeData['info']['stats']['quality']),
+              Text(animeData['info']['stats']['quality']),
             ],
           ),
         ],

@@ -20,7 +20,7 @@ class Chapterlist extends StatelessWidget {
         child: Container(
           height: 55,
           decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.secondary,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(10)),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -55,21 +55,22 @@ class Chapterlist extends StatelessWidget {
                 ),
                 Container(
                     decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
+                        color: Theme.of(context).colorScheme.inverseSurface,
                         borderRadius: BorderRadius.circular(10)),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
+                    child:  Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Center(
                           child: Row(
                         children: [
                           Icon(
                             Ionicons.book,
                             size: 16,
+                            color: Theme.of(context).colorScheme.inversePrimary,
                           ),
-                          SizedBox(
+                          const SizedBox(
                             width: 2,
                           ),
-                          Text('Read'),
+                          Text('Read', style: TextStyle(color: Theme.of(context).colorScheme.surface,),),
                         ],
                       )),
                     )),

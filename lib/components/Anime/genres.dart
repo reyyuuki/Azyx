@@ -7,9 +7,7 @@ class Genres extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (genres == null) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const SizedBox.shrink();
     }
 
     return Wrap(
@@ -17,6 +15,7 @@ class Genres extends StatelessWidget {
       runSpacing: 2.0, // Space between lines
       children: genres!.map<Widget>((genre) {
         return Chip(
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
           label: Text(
             genre,
             style: const TextStyle(fontSize: 14),

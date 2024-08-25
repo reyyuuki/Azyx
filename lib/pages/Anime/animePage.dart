@@ -111,7 +111,7 @@ class _HomepageState extends State<Animepage> {
                     enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
                         borderSide: BorderSide.none),
-                    fillColor: Theme.of(context).colorScheme.secondary,
+                        fillColor: Theme.of(context).colorScheme.surfaceContainer,
                     filled: true,
                   ),
                 ),

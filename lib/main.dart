@@ -1,20 +1,28 @@
 import 'dart:ui';
 
+import 'package:daizy_tv/On-Boarding_Screen/login_page.dart';
+import 'package:daizy_tv/On-Boarding_Screen/theme-modes.dart';
+import 'package:daizy_tv/On-Boarding_Screen/welcome_page.dart';
+import 'package:daizy_tv/Provider/theme_provider.dart';
 import 'package:daizy_tv/pages/Manga/mangaDetails.dart';
 import 'package:daizy_tv/pages/Manga/read.dart';
 import 'package:daizy_tv/pages/Anime/searchAnime.dart';
 import 'package:daizy_tv/pages/Manga/searchManga.dart';
 import 'package:flutter/material.dart';
-import 'package:daizy_tv/Theme/themes.dart';
+import 'package:daizy_tv/Provider/theme_provider.dart';
 import 'package:daizy_tv/pages/Anime/details.dart';
 import 'package:daizy_tv/pages/loginPage.dart';
 import 'package:daizy_tv/pages/Manga/mangaPage.dart';
 import 'package:daizy_tv/pages/Anime/stream.dart';
 import 'package:daizy_tv/pages/Anime/animePage.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MainApp());
+  runApp(ChangeNotifierProvider(
+    create: (context) => ThemeProvider(),
+    child: const MainApp(),
+  ));
 }
 
 class MainApp extends StatefulWidget {
@@ -28,13 +36,20 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: lightmode,
-      darkTheme: darkmode,
+      theme: Provider.of<ThemeProvider>(context).themeData,
       color: Theme.of(context).colorScheme.surface,
       debugShowCheckedModeBanner: false,
       onGenerateRoute: (settings) {
         final args = settings.arguments as Map<String, dynamic>?;
         switch (settings.name) {
+
+          //On-Boarding_Screen
+          case '/choose-mode':
+          return MaterialPageRoute(builder: (context) => const Modes());
+
+          case '/login-page' :
+          return MaterialPageRoute(builder: (context) => const LoginPage());
+
           // Anime - Routes
           case '/detailspage':
             final id = args?['id'] ?? '';
@@ -42,11 +57,13 @@ class _MainAppState extends State<MainApp> {
             return MaterialPageRoute(
               builder: (context) => Details(id: id, image: image),
             );
+
           case '/stream':
             final id = args?['id'] ?? '';
             return MaterialPageRoute(
               builder: (context) => Stream(id: id),
             );
+
             case '/searchAnime':
             final name = args?['name'] ?? '';
             return MaterialPageRoute(
@@ -61,6 +78,7 @@ class _MainAppState extends State<MainApp> {
             return MaterialPageRoute(
               builder: (context) => Mangadetails(id: id, image: image),
             );
+
           case '/read':
             final mangaId = args?['mangaId'] ?? '';
             final chapterId = args?['chapterId'] ?? '';
@@ -100,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _pages = [
     const Animepage(),
-    const Loginpage(),
+    const Other(),
     const Mangapage(),
   ];
 

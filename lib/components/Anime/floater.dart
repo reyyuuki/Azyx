@@ -5,13 +5,13 @@ import 'package:ionicons/ionicons.dart';
 import 'package:text_scroll/text_scroll.dart';
 
 class Floater extends StatelessWidget {
-final dynamic AnimeData;
+final dynamic animeData;
 
-  const Floater({super.key, this.AnimeData});
+  const Floater({super.key, this.animeData});
 
   @override
   Widget build(BuildContext context) {
-    if(AnimeData == null){
+    if(animeData == null){
       return Container(
         margin: const EdgeInsets.only(top: 150),
         child: const Center(child: CircularProgressIndicator()));
@@ -45,7 +45,7 @@ final dynamic AnimeData;
                           Container(
                             constraints: const BoxConstraints(maxWidth: 130),
                             child: TextScroll(
-                              AnimeData['info']['name'],
+                              animeData['info']['name'],
                               mode: TextScrollMode.bouncing,
                               velocity: const Velocity(
                                   pixelsPerSecond: Offset(20, 0)),
@@ -67,26 +67,26 @@ final dynamic AnimeData;
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.pushNamed(context, '/stream',
-                                arguments: {"id": AnimeData['info']['id']});
+                                arguments: {"id": animeData['info']['id']});
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 17, 16, 16),
+                            backgroundColor: Theme.of(context).colorScheme.inverseSurface,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          child: const Row(
+                          child:  Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
                                 Ionicons.planet,
-                                color: Colors.white, // Icon color
+                                 color: Theme.of(context).colorScheme.inversePrimary, // Icon color
                               ),
-                              SizedBox(width: 8),
+                              const SizedBox(width: 8),
                               Text(
                                 'Watch',
                                 style: TextStyle(
-                                  color: Colors.white, // Text color
+                                   color: Theme.of(context).colorScheme.surface, // Text color
                                 ),
                               ),
                             ],

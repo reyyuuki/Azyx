@@ -226,7 +226,7 @@ class _StreamState extends State<Stream> {
                     const SizedBox(
                       height: 30,
                     ),
-                    AnimeInfo(AnimeData: AnimeData['anime']),
+                    AnimeInfo(animeData: AnimeData['anime']),
                     const SizedBox(
                       height: 30,
                     ),
@@ -277,8 +277,9 @@ class _StreamState extends State<Stream> {
       width: 150,
       textOn: 'Sub',
       textOff: 'Dub',
-      colorOn: Colors.indigo.shade400,
-      colorOff: Colors.blueGrey,
+      textOnColor: Colors.white,
+      colorOn: Theme.of(context).colorScheme.onSecondaryFixedVariant,
+      colorOff: Theme.of(context).colorScheme.onTertiaryFixedVariant,
       iconOn: Icons.closed_caption,
       iconOff: Icons.mic,
       animationDuration: const Duration(milliseconds: 300),
@@ -309,11 +310,11 @@ class _StreamState extends State<Stream> {
               margin: const EdgeInsets.only(top: 10),
               decoration: BoxDecoration(
                   border: Border.all(
-                      color: Theme.of(context).colorScheme.inversePrimary),
+                      color: Theme.of(context).colorScheme.outline),
                   borderRadius: BorderRadius.circular(10),
                   color: episodeNumber == number
                       ? Theme.of(context).colorScheme.inverseSurface
-                      : Theme.of(context).colorScheme.primary.withOpacity(0.2)),
+                      : Theme.of(context).colorScheme.surfaceContainerHigh),
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Row(

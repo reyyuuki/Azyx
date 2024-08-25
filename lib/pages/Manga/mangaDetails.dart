@@ -54,7 +54,7 @@ class _DetailsState extends State<Mangadetails> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
         appBar: AppBar(
-          backgroundColor: Colors.transparent,
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
           elevation: 0,
           title: TextScroll(
             loading ? "Loading..." : mangaData['name'].toString(),
@@ -81,7 +81,7 @@ class _DetailsState extends State<Mangadetails> {
                 Stack(
                   children: [
                     if(mangaData == null)
-                    SizedBox.shrink()
+                    const SizedBox.shrink()
                     else
                     CoverImage(
                       imageUrl: widget.image,
@@ -91,7 +91,7 @@ class _DetailsState extends State<Mangadetails> {
                       decoration: BoxDecoration(
                         borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(50)),
-                        color: Theme.of(context).colorScheme.tertiary,
+                        color: Theme.of(context).colorScheme.surfaceContainer,
                       ),
                       child: Column(
                         children: [

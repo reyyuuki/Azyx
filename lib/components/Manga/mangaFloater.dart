@@ -16,7 +16,7 @@ final String? id;
     if(mangaData == null){
       return Container(
         margin: const EdgeInsets.only(top: 150),
-        child: const Center(child: CircularProgressIndicator()));
+        child: const SizedBox.shrink());
     }
     final String chapterId = mangaData['chapterId'] ?? 'chapter-1';
 
@@ -73,23 +73,23 @@ final String? id;
                               arguments: {"mangaId": id, "chapterId": chapterId});
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 17, 16, 16),
+                          backgroundColor:  Theme.of(context).colorScheme.inverseSurface,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: const Row(
+                        child:  Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
                               Ionicons.book,
-                              color: Colors.white, // Icon color
+                               color: Theme.of(context).colorScheme.inversePrimary, // Icon color
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
                               'Read',
                               style: TextStyle(
-                                color: Colors.white, // Text color
+                                 color: Theme.of(context).colorScheme.surface, // Text color
                               ),
                             ),
                           ],

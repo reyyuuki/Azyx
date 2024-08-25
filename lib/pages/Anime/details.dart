@@ -5,7 +5,6 @@ import 'package:daizy_tv/components/Anime/floater.dart';
 import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/coverImage.dart';
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:http/http.dart' as http;
 import 'package:text_scroll/text_scroll.dart';
 
@@ -19,8 +18,9 @@ class Details extends StatefulWidget {
 }
 
 class _DetailsState extends State<Details> {
-  dynamic AnimeData;
+  dynamic animeData;
   String? cover;
+  String? description;
 
   @override
   void initState() {
@@ -40,8 +40,9 @@ class _DetailsState extends State<Details> {
         if (newResponse.statusCode == 200) {
           final newData = jsonDecode(newResponse.body);
           setState(() {
-            AnimeData = jsonData['anime'];
+            animeData = jsonData['anime'];
             cover = newData['cover'];
+            description = newData['description'];
           });
         }
       } else {
@@ -57,11 +58,11 @@ class _DetailsState extends State<Details> {
   Widget build(BuildContext context) {   
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         elevation: 0,
         title: TextScroll(
-          AnimeData == null ? "Loading" :
-          AnimeData['info']['name'].toString(),
+          animeData == null ? "Loading" :
+          animeData['info']['name'].toString(),
           mode: TextScrollMode.bouncing,
           velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
           delayBefore: const Duration(milliseconds: 500),
@@ -90,15 +91,15 @@ class _DetailsState extends State<Details> {
                   decoration:  BoxDecoration(
                     borderRadius:
                         const BorderRadius.vertical(top: Radius.circular(50)),
-                    color: Theme.of(context).colorScheme.tertiary,
+                    color: Theme.of(context).colorScheme.surfaceContainer,
                   ),
                 ),
                 Poster(imageUrl: widget.image, id : widget.id),
-                AnimeDetails(AnimeData: AnimeData),
+                AnimeDetails(animeData: animeData, description: description,),
               ],
             ),
           ]),
-          Floater(AnimeData: AnimeData,),
+          Floater(animeData: animeData,),
         ],
       ),
     );

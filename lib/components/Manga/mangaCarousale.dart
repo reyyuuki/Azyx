@@ -43,7 +43,7 @@ class Mangacarousale extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   margin: const EdgeInsets.symmetric(horizontal: 5.0),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondary,
+                    color: Theme.of(context).colorScheme.surfaceContainer,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Padding(
@@ -95,7 +95,7 @@ class Mangacarousale extends StatelessWidget {
                                       4.0), // Optional: Adds space between genre chips
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(20),
-                                color: Colors.black,
+                                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                               ),
                               child: Padding(
                                 padding:
@@ -116,7 +116,7 @@ class Mangacarousale extends StatelessWidget {
                           width: 150,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: Colors.black,
+                             color: Theme.of(context).colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Row(
