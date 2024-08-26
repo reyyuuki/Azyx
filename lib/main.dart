@@ -4,23 +4,32 @@ import 'package:daizy_tv/On-Boarding_Screen/login_page.dart';
 import 'package:daizy_tv/On-Boarding_Screen/theme-modes.dart';
 import 'package:daizy_tv/On-Boarding_Screen/welcome_page.dart';
 import 'package:daizy_tv/Provider/theme_provider.dart';
+import 'package:daizy_tv/dataBase/user.dart';
 import 'package:daizy_tv/pages/Manga/mangaDetails.dart';
 import 'package:daizy_tv/pages/Manga/read.dart';
 import 'package:daizy_tv/pages/Anime/searchAnime.dart';
 import 'package:daizy_tv/pages/Manga/searchManga.dart';
 import 'package:flutter/material.dart';
-import 'package:daizy_tv/Provider/theme_provider.dart';
 import 'package:daizy_tv/pages/Anime/details.dart';
 import 'package:daizy_tv/pages/loginPage.dart';
 import 'package:daizy_tv/pages/Manga/mangaPage.dart';
 import 'package:daizy_tv/pages/Anime/stream.dart';
 import 'package:daizy_tv/pages/Anime/animePage.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async{
+
+  // init the Hive
+  await Hive.initFlutter();
+  var box = await Hive.openBox('mybox');
+
+  final themeProvider = ThemeProvider();
+  await themeProvider.loadDynamicColors();
+  
   runApp(ChangeNotifierProvider(
-    create: (context) => ThemeProvider(),
+    create: (context) => themeProvider,
     child: const MainApp(),
   ));
 }
@@ -33,6 +42,20 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
+
+  UserDataBase? userDataBase;
+
+  @override
+  void initState() {
+    super.initState();
+    userDataBase = UserDataBase();
+    _checkLogin();
+  }
+
+  Future<void> _checkLogin() async {
+    userDataBase?.loadData(); // Load data from Hive
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -93,6 +116,13 @@ class _MainAppState extends State<MainApp> {
               builder: (context) => SearchManga(name: name),
             );
 
+
+            // Main-Screen
+
+            case '/homeScreen':
+            return MaterialPageRoute(builder: (context) => const HomeScreen());
+
+
           default:
             return MaterialPageRoute(
               builder: (context) => const Scaffold(
@@ -101,7 +131,7 @@ class _MainAppState extends State<MainApp> {
             );
         }
       },
-      home: const HomeScreen(),
+      home: userDataBase!.login ?  const WelcomePage() : const HomeScreen(),
     );
   }
 }

@@ -26,16 +26,25 @@ dependencies:
   flashy_tab_bar2: ^0.0.10
   interactive_slider: ^0.2.2
   provider:
+  hive_flutter: ^1.1.0
+  hive: ^2.2.3
+  image_picker: ^1.1.2
+  dynamic_color: ^1.7.0
+  
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.11
+  
 
 flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/images/imagePlaceholder.png
 
   fonts:
     - family: Poppins

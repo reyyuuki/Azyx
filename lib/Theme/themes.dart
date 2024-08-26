@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+
+
 ThemeData lightmode = ThemeData(
   brightness: Brightness.light,
   fontFamily: 'Poppins',
-  useMaterial3: true,  // Enable Material 3
+  useMaterial3: true,
   colorScheme: ColorScheme.fromSeed(
-    seedColor: const Color(0XFF94FB35),  // Replace with your seed color
+    seedColor: Colors.blue,
     brightness: Brightness.light,
   ),
 );
@@ -13,9 +15,9 @@ ThemeData lightmode = ThemeData(
 ThemeData darkmode = ThemeData(
   brightness: Brightness.dark,
   fontFamily: 'Poppins',
-  useMaterial3: true,  // Enable Material 3
+  useMaterial3: true,
   colorScheme: ColorScheme.fromSeed(
-    seedColor: const Color(0XFF94FB35),  // Replace with your seed color
+    seedColor: Colors.blue,
     brightness: Brightness.dark,
   ),
 );

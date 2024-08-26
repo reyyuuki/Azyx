@@ -1,25 +1,67 @@
+import 'dart:io';
+
+import 'package:daizy_tv/dataBase/user.dart';
 import 'package:flutter/material.dart';
 
-class Header extends StatelessWidget {
-    const Header({
-      super.key,
-    });
-  
-    @override
-    Widget build(BuildContext context) {
-      return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-       Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-         children: [
-           const Text("DaizyTv" ,style: TextStyle(fontSize: 30,fontFamily: 'Poppins')),
-           Text("Enjoy Unlimited Anime!", style: TextStyle(fontSize: 15, color: Colors.grey[500]),)
-         ],
-       ),
-        SizedBox(width: 50, height: 50, child: ClipRRect(borderRadius: BorderRadius.circular(50) , child:Image.network("https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx16498-73IhOXpJZiMF.jpg", fit: BoxFit.cover,),))
-      ],
-                  );
-                  
-    }
+class Header extends StatefulWidget {
+  const Header({super.key});
+
+  @override
+  _HeaderState createState() => _HeaderState();
+}
+
+class _HeaderState extends State<Header> {
+  UserDataBase? _userDataBase;
+  String _userName = "User";
+   // Default username
+
+  @override
+  void initState() {
+    super.initState();
+    _userDataBase = UserDataBase();
+    _loadUserData();
   }
+
+  Future<void> _loadUserData() async {
+    _userDataBase?.loadData(); // Load data from Hive
+    setState(() {
+      _userName = _userDataBase!.userName.isNotEmpty ? _userDataBase!.userName : "User";
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+               Text(
+                _userName,
+                style: const TextStyle(fontSize: 20, fontFamily: 'Poppins'),
+              ),
+              Text(
+                "Enjoy unlimited Anime!", // Display the username
+                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+              ),
+            ],
+          ),
+          SizedBox(
+            width: 50,
+            height: 50,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(50),
+              child: Image.file(
+                File(_userDataBase!.imagePath),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
