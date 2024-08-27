@@ -29,7 +29,7 @@ class Modes extends StatelessWidget {
                   onPressed: () {
                     final themeProvider =
                         Provider.of<ThemeProvider>(context, listen: false);
-                    themeProvider.setTheme(lightmode);
+                    themeProvider.setTheme(darkmode);
                     Navigator.pushNamed(context, '/login-page');
                   },
                   child: Text("Dark Mode")),
