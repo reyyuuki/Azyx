@@ -65,7 +65,7 @@ class _SearchpageState extends State<SearchManga> {
         toolbarHeight: 80, 
         backgroundColor: Theme.of(context).colorScheme.surface,
         title: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+          padding: const EdgeInsets.symmetric(vertical: 10),
           child: TextField(
             controller: _controller,
             onSubmitted: (value) {
@@ -83,7 +83,7 @@ class _SearchpageState extends State<SearchManga> {
                 borderRadius: BorderRadius.circular(20),
                 borderSide: BorderSide.none,
               ),
-              fillColor: Theme.of(context).colorScheme.secondary,
+              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               filled: true,
             ),
           ),

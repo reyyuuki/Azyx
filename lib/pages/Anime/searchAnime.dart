@@ -68,7 +68,7 @@ void dispose() {
         toolbarHeight: 80, 
         backgroundColor: Theme.of(context).colorScheme.surface,
         title: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+          padding: const EdgeInsets.symmetric(vertical: 10),
           child: TextField(
             controller: _controller,
             onSubmitted: (value) {
@@ -86,7 +86,7 @@ void dispose() {
                 borderRadius: BorderRadius.circular(20),
                 borderSide: BorderSide.none,
               ),
-              fillColor: Theme.of(context).colorScheme.surfaceContainer,
+              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               filled: true,
             ),
           ),

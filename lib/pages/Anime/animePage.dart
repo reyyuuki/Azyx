@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:daizy_tv/backupData/anime.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:daizy_tv/components/Anime/carousel.dart';
@@ -17,23 +18,28 @@ class _HomepageState extends State<Animepage> {
   dynamic trendingAnime;
   dynamic latestEpisodesAnime;
   dynamic topUpComingAnime;
-  bool isLoading = true;
-  String? errorMessage;
+
 
   @override
   void initState() {
     super.initState();
+    backUpData();
     fetchData();
   }
 
+  void backUpData() {
+    spotlightAnime = animeData['spotlightAnimes'];
+    trendingAnime = animeData['trendingAnimes'];
+    latestEpisodesAnime = animeData['latestEpisodeAnimes'];
+    topUpComingAnime = animeData['topUpcomingAnimes'];
+  }
+
   Future<void> fetchData() async {
-    setState(() {
-      isLoading = true;
-      errorMessage = null;
-    });
+
 
     try {
-      final response = await http.get(Uri.parse("https://aniwatch-ryan.vercel.app/anime/home"));
+      final response = await http
+          .get(Uri.parse("https://aniwatch-ryan.vercel.app/anime/home"));
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         setState(() {
@@ -41,53 +47,25 @@ class _HomepageState extends State<Animepage> {
           trendingAnime = jsonData['trendingAnimes'];
           latestEpisodesAnime = jsonData['latestEpisodeAnimes'];
           topUpComingAnime = jsonData['topUpcomingAnimes'];
-          isLoading = false;
         });
       } else {
         throw Exception("Failed to load data: ${response.statusCode}");
       }
     } catch (error) {
-      setState(() {
-        errorMessage = "Failed to load data: $error";
-        isLoading = false;
-      });
+      // ignore: avoid_print
+      print(error);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading ) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error, color: Colors.red, size: 50),
-            const SizedBox(height: 16),
-            Text(
-              errorMessage!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18, color: Colors.red),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: fetchData,
-              child: const Text("Retry"),
-            ),
-          ],
-        ),
-      );
-    }
 
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListView(
           children: [
-            const Header(),
+            const Header(name: "Anime",),
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -111,7 +89,7 @@ class _HomepageState extends State<Animepage> {
                     enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
                         borderSide: BorderSide.none),
-                        fillColor: Theme.of(context).colorScheme.surfaceContainer,
+                    fillColor: Theme.of(context).colorScheme.surfaceContainer,
                     filled: true,
                   ),
                 ),

@@ -73,7 +73,7 @@ class _HomepageState extends State<Mangapage> {
         padding: const EdgeInsets.all(8.0),
         child: ListView(
           children: [
-            const Header(),
+            const Header(name: "Manga",),
             const SizedBox(
               height: 20,
             ),

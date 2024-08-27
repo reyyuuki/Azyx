@@ -4,7 +4,8 @@ import 'package:daizy_tv/dataBase/user.dart';
 import 'package:flutter/material.dart';
 
 class Header extends StatefulWidget {
-  const Header({super.key});
+  final String? name;
+  const Header({super.key, this.name});
 
   @override
   _HeaderState createState() => _HeaderState();
@@ -12,7 +13,7 @@ class Header extends StatefulWidget {
 
 class _HeaderState extends State<Header> {
   UserDataBase? _userDataBase;
-  String _userName = "User";
+  String _userName = "";
    // Default username
 
   @override
@@ -44,7 +45,7 @@ class _HeaderState extends State<Header> {
                 style: const TextStyle(fontSize: 20, fontFamily: 'Poppins'),
               ),
               Text(
-                "Enjoy unlimited Anime!", // Display the username
+                "Enjoy unlimited ${widget.name}!", // Display the username
                 style: TextStyle(fontSize: 12, color: Colors.grey[500]),
               ),
             ],
