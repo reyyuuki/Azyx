@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:daizy_tv/Bottom_Menu/_profile.dart';
+import 'package:daizy_tv/Bottom_Menu/_setting.dart';
 import 'package:daizy_tv/On-Boarding_Screen/login_page.dart';
 import 'package:daizy_tv/On-Boarding_Screen/theme-modes.dart';
 import 'package:daizy_tv/On-Boarding_Screen/welcome_page.dart';
@@ -118,10 +120,16 @@ class _MainAppState extends State<MainApp> {
 
 
             // Main-Screen
-
             case '/homeScreen':
             return MaterialPageRoute(builder: (context) => const HomeScreen());
 
+
+            //Bottom-Menu-Screens
+            case './profile':
+            return MaterialPageRoute(builder: (context) => const Profile());
+
+            case './settings':
+            return MaterialPageRoute(builder: (context) => const Setting());
 
           default:
             return MaterialPageRoute(

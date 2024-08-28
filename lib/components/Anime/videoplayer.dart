@@ -1,6 +1,5 @@
 import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class MediaPlayer extends StatefulWidget {
 
@@ -21,6 +20,7 @@ class _MediaPlayerState extends State<MediaPlayer> with AutomaticKeepAliveClient
  @override
   void dispose() {
     _betterPlayerController?.dispose();
+    
     super.dispose();
   }
 
@@ -76,13 +76,14 @@ class _MediaPlayerState extends State<MediaPlayer> with AutomaticKeepAliveClient
         betterPlayerConfiguration,
         betterPlayerDataSource: betterPlayerDataSource,
       );
+    
     });
   }
 
   @override
   Widget build(BuildContext context) {
     if(widget.Episode == null || widget.tracks == null){
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
     return AspectRatio(
             aspectRatio: 16 / 9,

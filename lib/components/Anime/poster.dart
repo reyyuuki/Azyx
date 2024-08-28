@@ -13,18 +13,20 @@ class Poster extends StatelessWidget {
 
    return Positioned(
               top: 70,
-              left: 80,
-              child: SizedBox(
-                height: 280,
-                width: 200,
-                child: Hero(
-                  tag: id!,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: CachedNetworkImage(
-                                imageUrl: imageUrl!,
-                                fit: BoxFit.cover,
-                              ),
+              width: MediaQuery.of(context).size.width,
+              child: Center(
+                child: SizedBox(
+                  height: 280,
+                  width: 200,
+                  child: Hero(
+                    tag: id!,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: CachedNetworkImage(
+                                  imageUrl: imageUrl!,
+                                  fit: BoxFit.cover,
+                                ),
+                    ),
                   ),
                 ),
               ),
