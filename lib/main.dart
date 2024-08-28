@@ -33,6 +33,7 @@ void main() async{
   final themeProvider = ThemeProvider();
   await themeProvider.loadDynamicColors();
   
+  
   runApp(ChangeNotifierProvider(
     create: (context) => themeProvider,
     child: const MainApp(),

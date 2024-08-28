@@ -8,6 +8,7 @@ class Modes extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
       body: Container(
         child: Center(
@@ -16,9 +17,7 @@ class Modes extends StatelessWidget {
             children: [
               ElevatedButton(
                   onPressed: () {
-                    final themeProvider =
-                        Provider.of<ThemeProvider>(context, listen: false);
-                    themeProvider.setTheme(lightmode);
+                    themeProvider.setLightMode();
                     Navigator.pushNamed(context, '/login-page');
                   },
                   child: Text("Light Mode")),
@@ -27,9 +26,7 @@ class Modes extends StatelessWidget {
               ),
               ElevatedButton(
                   onPressed: () {
-                    final themeProvider =
-                        Provider.of<ThemeProvider>(context, listen: false);
-                    themeProvider.setTheme(darkmode);
+                    themeProvider.setDarkMode();
                     Navigator.pushNamed(context, '/login-page');
                   },
                   child: Text("Dark Mode")),
