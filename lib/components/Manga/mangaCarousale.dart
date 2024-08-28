@@ -104,7 +104,7 @@ class Mangacarousale extends StatelessWidget {
                                   child: Text(
                                     item,
                                     style: const TextStyle(
-                                        fontSize: 12, color: Colors.white),
+                                        fontSize: 12),
                                   ),
                                 ),
                               ),
@@ -125,14 +125,13 @@ class Mangacarousale extends StatelessWidget {
                                 Text(
                                   "Read now",
                                   style: TextStyle(
-                                      fontSize: 16, color: Colors.white),
+                                      fontSize: 16),
                                 ),
                                 SizedBox(
                                   width: 5,
                                 ),
                                 Icon(
                                   Icons.book,
-                                  color: Colors.white,
                                 )
                               ]),
                         ),
