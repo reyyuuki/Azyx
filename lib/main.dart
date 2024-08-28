@@ -11,6 +11,9 @@ import 'package:daizy_tv/pages/Manga/mangaDetails.dart';
 import 'package:daizy_tv/pages/Manga/read.dart';
 import 'package:daizy_tv/pages/Anime/searchAnime.dart';
 import 'package:daizy_tv/pages/Manga/searchManga.dart';
+import 'package:daizy_tv/settings/_about.dart';
+import 'package:daizy_tv/settings/_languages.dart';
+import 'package:daizy_tv/settings/_theme_changer.dart';
 import 'package:flutter/material.dart';
 import 'package:daizy_tv/pages/Anime/details.dart';
 import 'package:daizy_tv/pages/loginPage.dart';
@@ -127,9 +130,17 @@ class _MainAppState extends State<MainApp> {
             //Bottom-Menu-Screens
             case './profile':
             return MaterialPageRoute(builder: (context) => const Profile());
-
             case './settings':
-            return MaterialPageRoute(builder: (context) => const Setting());
+            return MaterialPageRoute(builder: (context) =>  Setting());
+
+            //Setting-Screens
+            case './theme-changer':
+            return MaterialPageRoute(builder: (context) => const ThemeChange());
+            case './languages':
+            return MaterialPageRoute(builder: (context) => const Languages());
+            case './about':
+            return MaterialPageRoute(builder: (context) => const About());
+            
 
           default:
             return MaterialPageRoute(
