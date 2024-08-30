@@ -65,10 +65,13 @@ class _HeaderState extends State<Header> {
                     borderRadius: BorderRadius.circular(50),
                     color: Theme.of(context).colorScheme.inverseSurface),
                 child: isImage
-                    ? Image.file(
-                        File(_userDataBase!.imagePath),
-                        fit: BoxFit.cover,
-                      )
+                    ? ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.file(
+                          File(_userDataBase!.imagePath),
+                          fit: BoxFit.cover,
+                        ),
+                    )
                     : Icon(
                         Iconsax.user,
                         color: Theme.of(context).colorScheme.surface,
@@ -109,10 +112,13 @@ class _HeaderState extends State<Header> {
                                     .colorScheme
                                     .inverseSurface),
                             child: isImage
-                                ? Image.file(
-                                    File(_userDataBase!.imagePath),
-                                    fit: BoxFit.cover,
-                                  )
+                                ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Image.file(
+                                      File(_userDataBase!.imagePath),
+                                      fit: BoxFit.cover,
+                                    ),
+                                )
                                 : Icon(
                                     Iconsax.user,
                                     color:

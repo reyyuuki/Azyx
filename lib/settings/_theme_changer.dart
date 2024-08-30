@@ -14,10 +14,16 @@ class ThemeChange extends StatefulWidget {
 }
 
 class __ThemeChangeState extends State<ThemeChange> {
+
+  @override
+  void initState(){
+    super.initState();
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    themeProvider.selectedmode == 'system' ? themeProvider.useSystemTheme() : () {};
+  }
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    themeProvider.selectedmode == 'system' ? themeProvider.useSystemTheme() : () {};
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text("App Themes",
@@ -54,7 +60,7 @@ class __ThemeChangeState extends State<ThemeChange> {
                       style: TextStyle(fontSize: 20),
                     ),
                   ),
-                  Mode(themeProvider),
+                  Mode(),
                   Container(
                     height: 130,
                     child: Padding(
@@ -103,7 +109,7 @@ class __ThemeChangeState extends State<ThemeChange> {
   GestureDetector colorBall(MaterialColor color){
     return GestureDetector(
       onTap: () { 
-        Provider.of<ThemeProvider>(context, listen: false).updateSeedColor("tonalSpot", color);
+        Provider.of<ThemeProvider>(context, listen: false).updateSeedColor(color);
       },
       child: Container(
         decoration: BoxDecoration(border: Border.all(width: 2, color: color), borderRadius: BorderRadius.circular(20)),
@@ -122,7 +128,7 @@ class __ThemeChangeState extends State<ThemeChange> {
     );
   }
 
-  Padding Mode(ThemeProvider themeProvider) {
+  Padding Mode() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
@@ -136,10 +142,10 @@ class __ThemeChangeState extends State<ThemeChange> {
           children: [
             GestureDetector(
                 onTap: () {
-                  themeProvider.setLightMode("tonalSpot");
+                  Provider.of<ThemeProvider>(context, listen: false).setLightMode();
                 },
                 child: ThemeTemplate(
-                  isBorder: themeProvider.selectedmode == 'light',
+                  isBorder: Provider.of<ThemeProvider>(context, listen: false).selectedmode == 'light',
                   topLeft: Colors.white,
                   topRight: Colors.white,
                   bottomLeft: Colors.white,
@@ -148,10 +154,10 @@ class __ThemeChangeState extends State<ThemeChange> {
                 )),
             GestureDetector(
                 onTap: () {
-                  themeProvider.setDarkMode("tonalSpot");
+                  Provider.of<ThemeProvider>(context, listen: false).setDarkMode();
                 },
                 child: ThemeTemplate(
-                  isBorder: themeProvider.selectedmode == 'dark',
+                  isBorder: Provider.of<ThemeProvider>(context, listen: false).selectedmode == 'dark',
                   topLeft: Color.fromARGB(193, 0, 0, 0),
                   topRight: Color.fromARGB(193, 0, 0, 0),
                   bottomLeft: Colors.black,
@@ -160,10 +166,10 @@ class __ThemeChangeState extends State<ThemeChange> {
                 )),
             GestureDetector(
                 onTap: () {
-                  themeProvider.useSystemTheme();
+                  Provider.of<ThemeProvider>(context, listen: false).useSystemTheme();
                 },
                 child: ThemeTemplate(
-                  isBorder: themeProvider.selectedmode == 'system',
+                  isBorder: Provider.of<ThemeProvider>(context, listen: false).selectedmode == 'system',
                   topLeft: Colors.white,
                   topRight: Color.fromARGB(193, 0, 0, 0),
                   bottomLeft: Colors.white,
@@ -176,3 +182,5 @@ class __ThemeChangeState extends State<ThemeChange> {
     );
   }
 }
+
+
