@@ -1,5 +1,6 @@
 import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class MediaPlayer extends StatefulWidget {
 
@@ -20,7 +21,7 @@ class _MediaPlayerState extends State<MediaPlayer> with AutomaticKeepAliveClient
  @override
   void dispose() {
     _betterPlayerController?.dispose();
-    
+    WakelockPlus.disable();
     super.dispose();
   }
 
@@ -76,8 +77,9 @@ class _MediaPlayerState extends State<MediaPlayer> with AutomaticKeepAliveClient
         betterPlayerConfiguration,
         betterPlayerDataSource: betterPlayerDataSource,
       );
-    
     });
+
+    WakelockPlus.enable();
   }
 
   @override
