@@ -1,4 +1,5 @@
 import 'package:daizy_tv/Provider/themes.dart';
+import 'package:daizy_tv/components/_colorball.dart';
 import 'package:daizy_tv/components/_theme_template.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -13,17 +14,14 @@ class ThemeChange extends StatefulWidget {
   State<ThemeChange> createState() => __ThemeChangeState();
 }
 
-class __ThemeChangeState extends State<ThemeChange> {
 
-  @override
-  void initState(){
-    super.initState();
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    themeProvider.selectedmode == 'system' ? themeProvider.useSystemTheme() : () {};
-  }
+class __ThemeChangeState extends State<ThemeChange> {
   @override
   Widget build(BuildContext context) {
-    
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    themeProvider.selectedmode == 'system'
+        ? themeProvider.useSystemTheme()
+        : () {};
     return Scaffold(
       appBar: AppBar(
         title: const Text("App Themes",
@@ -60,8 +58,8 @@ class __ThemeChangeState extends State<ThemeChange> {
                       style: TextStyle(fontSize: 20),
                     ),
                   ),
-                  Mode(),
-                  Container(
+                  Mode(themeProvider),
+                  SizedBox(
                     height: 130,
                     child: Padding(
                       padding: const EdgeInsets.all(10),
@@ -83,13 +81,40 @@ class __ThemeChangeState extends State<ThemeChange> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                colorBall(Colors.red),
-                                colorBall(Colors.blue),
-                                colorBall(Colors.green),
-                                colorBall(Colors.yellow),
-                                colorBall(Colors.indigo),
-                                colorBall(Colors.purple),
-                                colorBall(Colors.pink),
+                                GestureDetector(
+                                  onTap: () {
+                                    themeProvider.loadDynamicColors();
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        border: Border.all(width: 2, color:themeProvider.isMaterial! ? Theme.of(context).colorScheme.inverseSurface : Colors.transparent ),
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(3),
+                                      child: Container(
+                                        width: 25,
+                                        height: 25,
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .inverseSurface
+                                                .withOpacity(0.4)),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                ColorBall(
+                                  color: Colors.red,
+                                ),
+                                ColorBall(color: Colors.blue),
+                                ColorBall(color: Colors.green),
+                                ColorBall(color: Colors.yellow),
+                                ColorBall(color: Colors.indigo),
+                                ColorBall(color: Colors.purple),
+                                ColorBall(color: Colors.pink),
                               ],
                             ),
                           )
@@ -106,29 +131,7 @@ class __ThemeChangeState extends State<ThemeChange> {
     );
   }
 
-  GestureDetector colorBall(MaterialColor color){
-    return GestureDetector(
-      onTap: () { 
-        Provider.of<ThemeProvider>(context, listen: false).updateSeedColor(color);
-      },
-      child: Container(
-        decoration: BoxDecoration(border: Border.all(width: 2, color: color), borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(3),
-          child: Container(
-            width: 25,
-            height: 25,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: color,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Padding Mode() {
+  Padding Mode(ThemeProvider themeProvider) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
@@ -142,10 +145,10 @@ class __ThemeChangeState extends State<ThemeChange> {
           children: [
             GestureDetector(
                 onTap: () {
-                  Provider.of<ThemeProvider>(context, listen: false).setLightMode();
+                  themeProvider.setLightMode();
                 },
                 child: ThemeTemplate(
-                  isBorder: Provider.of<ThemeProvider>(context, listen: false).selectedmode == 'light',
+                  isBorder: themeProvider.selectedmode == 'light',
                   topLeft: Colors.white,
                   topRight: Colors.white,
                   bottomLeft: Colors.white,
@@ -154,10 +157,10 @@ class __ThemeChangeState extends State<ThemeChange> {
                 )),
             GestureDetector(
                 onTap: () {
-                  Provider.of<ThemeProvider>(context, listen: false).setDarkMode();
+                  themeProvider.setDarkMode();
                 },
                 child: ThemeTemplate(
-                  isBorder: Provider.of<ThemeProvider>(context, listen: false).selectedmode == 'dark',
+                  isBorder: themeProvider.selectedmode == 'dark',
                   topLeft: Color.fromARGB(193, 0, 0, 0),
                   topRight: Color.fromARGB(193, 0, 0, 0),
                   bottomLeft: Colors.black,
@@ -166,10 +169,10 @@ class __ThemeChangeState extends State<ThemeChange> {
                 )),
             GestureDetector(
                 onTap: () {
-                  Provider.of<ThemeProvider>(context, listen: false).useSystemTheme();
+                  themeProvider.useSystemTheme();
                 },
                 child: ThemeTemplate(
-                  isBorder: Provider.of<ThemeProvider>(context, listen: false).selectedmode == 'system',
+                  isBorder: themeProvider.selectedmode == 'system',
                   topLeft: Colors.white,
                   topRight: Color.fromARGB(193, 0, 0, 0),
                   bottomLeft: Colors.white,
@@ -182,5 +185,3 @@ class __ThemeChangeState extends State<ThemeChange> {
     );
   }
 }
-
-
