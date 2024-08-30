@@ -17,7 +17,7 @@ class Modes extends StatelessWidget {
             children: [
               ElevatedButton(
                   onPressed: () {
-                    themeProvider.setLightMode();
+                    themeProvider.setLightMode("neutral");
                     Navigator.pushNamed(context, '/login-page');
                   },
                   child: Text("Light Mode")),
@@ -26,7 +26,7 @@ class Modes extends StatelessWidget {
               ),
               ElevatedButton(
                   onPressed: () {
-                    themeProvider.setDarkMode();
+                    themeProvider.setDarkMode("neutral");
                     Navigator.pushNamed(context, '/login-page');
                   },
                   child: Text("Dark Mode")),

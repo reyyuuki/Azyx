@@ -39,7 +39,7 @@ class __ThemeChangeState extends State<ThemeChange> {
               height: 10,
             ),
             Container(
-              height: 300,
+              height: 400,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -47,57 +47,129 @@ class __ThemeChangeState extends State<ThemeChange> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                  const Padding(
+                    padding: EdgeInsets.all(10),
                     child: Text(
                       "Mode",
                       style: TextStyle(fontSize: 20),
                     ),
                   ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      GestureDetector(
-                          onTap: () {
-                            themeProvider.setLightMode();
-                          },
-                          child: ThemeTemplate(
-                            isBorder: themeProvider.isLight,
-                            topLeft: Colors.white,
-                            topRight: Colors.white,
-                            bottomLeft: Colors.white,
-                            bottomRight: Colors.white,
-                          )),
-                      GestureDetector(
-                          onTap: () {
-                            themeProvider.setDarkMode();
-                          },
-                          child: ThemeTemplate(
-                            isBorder: themeProvider.isDark,
-                            topLeft: Color.fromARGB(193, 0, 0, 0),
-                            topRight: Color.fromARGB(193, 0, 0, 0),
-                            bottomLeft: Colors.black,
-                            bottomRight: Colors.black,
-                          )),
-                      GestureDetector(
-                          onTap: () {
-                            themeProvider.useSystemTheme();
-                          },
-                          child: ThemeTemplate(
-                            isBorder: themeProvider.isSystem,
-                            topLeft: Colors.white,
-                            topRight: Color.fromARGB(193, 0, 0, 0),
-                            bottomLeft: Colors.white,
-                            bottomRight: Colors.black,
-                          )),
-                    ],
+                  Mode(themeProvider),
+                  Container(
+                    height: 130,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          const Text(
+                            "Highlight-Color",
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                colorBall(Colors.red),
+                                colorBall(Colors.blue),
+                                colorBall(Colors.green),
+                                colorBall(Colors.yellow),
+                                colorBall(Colors.indigo),
+                                colorBall(Colors.purple),
+                                colorBall(Colors.pink),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
             )
+          ],
+        ),
+      ),
+    );
+  }
+
+  GestureDetector colorBall(MaterialColor color){
+    return GestureDetector(
+      onTap: () { 
+        Provider.of<ThemeProvider>(context, listen: false).updateSeedColor(color);
+      },
+      child: Container(
+        decoration: BoxDecoration(border: Border.all(width: 2, color: color), borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(3),
+          child: Container(
+            width: 25,
+            height: 25,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: color,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Padding Mode(ThemeProvider themeProvider) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        height: 210,
+        decoration: const BoxDecoration(
+            border: BorderDirectional(
+                bottom: BorderSide(
+                    width: 1, color: Color.fromARGB(188, 158, 158, 158)))),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            GestureDetector(
+                onTap: () {
+                  themeProvider.setLightMode("rainbow");
+                },
+                child: ThemeTemplate(
+                  isBorder: themeProvider.isLight,
+                  topLeft: Colors.white,
+                  topRight: Colors.white,
+                  bottomLeft: Colors.white,
+                  bottomRight: Colors.white,
+                  name: "Light",
+                )),
+            GestureDetector(
+                onTap: () {
+                  themeProvider.setDarkMode("expressive");
+                },
+                child: ThemeTemplate(
+                  isBorder: themeProvider.isDark,
+                  topLeft: Color.fromARGB(193, 0, 0, 0),
+                  topRight: Color.fromARGB(193, 0, 0, 0),
+                  bottomLeft: Colors.black,
+                  bottomRight: Colors.black,
+                  name: "Dark",
+                )),
+            GestureDetector(
+                onTap: () {
+                  themeProvider.useSystemTheme();
+                },
+                child: ThemeTemplate(
+                  isBorder: themeProvider.isSystem,
+                  topLeft: Colors.white,
+                  topRight: Color.fromARGB(193, 0, 0, 0),
+                  bottomLeft: Colors.white,
+                  bottomRight: Colors.black,
+                  name: "System",
+                )),
           ],
         ),
       ),

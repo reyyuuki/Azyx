@@ -6,28 +6,29 @@ class ThemeProvider with ChangeNotifier {
   bool isDark = false;
   bool isLight = false;
   bool isSystem = false;
+  String? variant = "neutral";
 
   
   ThemeData get themeData => _themeData;
 
   Future<void> loadDynamicColors() async {
-    _themeData = await buildLightMode();
-    isDark = false;
-    isLight = true;
+    _themeData = await buildDarkMode(variant);
+    isDark = true;
+    isLight = false;
     isSystem = false; 
     notifyListeners();
   }
 
-  Future<void> setLightMode() async {
-    _themeData = await buildLightMode();
+  Future<void> setLightMode(variant) async {
+    _themeData = await buildLightMode(variant);
     notifyListeners();
     isDark = false;
     isLight = true;
     isSystem = false;
   }
 
-  Future<void> setDarkMode() async {
-    _themeData = await buildDarkMode();
+  Future<void> setDarkMode(variant) async {
+    _themeData = await buildDarkMode(variant);
     isDark = true;
     isLight = false;
     isSystem = false;
@@ -39,8 +40,18 @@ class ThemeProvider with ChangeNotifier {
     isDark = false;
    isLight = false;
    isSystem = true;
-     _themeData = brightness == Brightness.dark ? await buildDarkMode() : await buildLightMode();
+     _themeData = brightness == Brightness.dark ? await buildDarkMode(variant) : await buildLightMode(variant);
     notifyListeners();
   }
-  
+  void updateSeedColor(MaterialColor newColor) {
+    changeColor(newColor);
+    if (isLight) {
+    setLightMode(variant);
+  } else if (isDark) {
+    setDarkMode(variant);
+  } else {
+    useSystemTheme();
+  }
+    notifyListeners();
+  }
 }
