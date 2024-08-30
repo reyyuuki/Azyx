@@ -1,4 +1,4 @@
-import 'package:daizy_tv/Theme/themes.dart';
+import 'package:daizy_tv/Provider/themes.dart';
 import 'package:daizy_tv/components/_theme_template.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -17,7 +17,7 @@ class __ThemeChangeState extends State<ThemeChange> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    themeProvider.isSystem == true ? themeProvider.useSystemTheme() : () {};
+    themeProvider.selectedmode == 'system' ? themeProvider.useSystemTheme() : () {};
     return Scaffold(
       appBar: AppBar(
         title: const Text("App Themes",
@@ -103,7 +103,7 @@ class __ThemeChangeState extends State<ThemeChange> {
   GestureDetector colorBall(MaterialColor color){
     return GestureDetector(
       onTap: () { 
-        Provider.of<ThemeProvider>(context, listen: false).updateSeedColor(color);
+        Provider.of<ThemeProvider>(context, listen: false).updateSeedColor("tonalSpot", color);
       },
       child: Container(
         decoration: BoxDecoration(border: Border.all(width: 2, color: color), borderRadius: BorderRadius.circular(20)),
@@ -136,10 +136,10 @@ class __ThemeChangeState extends State<ThemeChange> {
           children: [
             GestureDetector(
                 onTap: () {
-                  themeProvider.setLightMode("rainbow");
+                  themeProvider.setLightMode("tonalSpot");
                 },
                 child: ThemeTemplate(
-                  isBorder: themeProvider.isLight,
+                  isBorder: themeProvider.selectedmode == 'light',
                   topLeft: Colors.white,
                   topRight: Colors.white,
                   bottomLeft: Colors.white,
@@ -148,10 +148,10 @@ class __ThemeChangeState extends State<ThemeChange> {
                 )),
             GestureDetector(
                 onTap: () {
-                  themeProvider.setDarkMode("expressive");
+                  themeProvider.setDarkMode("tonalSpot");
                 },
                 child: ThemeTemplate(
-                  isBorder: themeProvider.isDark,
+                  isBorder: themeProvider.selectedmode == 'dark',
                   topLeft: Color.fromARGB(193, 0, 0, 0),
                   topRight: Color.fromARGB(193, 0, 0, 0),
                   bottomLeft: Colors.black,
@@ -163,7 +163,7 @@ class __ThemeChangeState extends State<ThemeChange> {
                   themeProvider.useSystemTheme();
                 },
                 child: ThemeTemplate(
-                  isBorder: themeProvider.isSystem,
+                  isBorder: themeProvider.selectedmode == 'system',
                   topLeft: Colors.white,
                   topRight: Color.fromARGB(193, 0, 0, 0),
                   bottomLeft: Colors.white,

@@ -1,5 +1,5 @@
 import 'package:daizy_tv/Provider/theme_provider.dart';
-import 'package:daizy_tv/Theme/themes.dart';
+import 'package:daizy_tv/Provider/themes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

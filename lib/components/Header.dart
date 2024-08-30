@@ -15,6 +15,7 @@ class Header extends StatefulWidget {
 class _HeaderState extends State<Header> {
   UserDataBase? _userDataBase;
   String _userName = "";
+  bool isImage = false;
   // Default username
 
   @override
@@ -25,13 +26,13 @@ class _HeaderState extends State<Header> {
   }
 
   Future<void> _loadUserData() async {
-    _userDataBase?.loadData(); 
+    _userDataBase?.loadData();
     setState(() {
       _userName =
           _userDataBase!.userName.isNotEmpty ? _userDataBase!.userName : "User";
+      isImage = _userDataBase!.imagePath.isNotEmpty ? true : false;
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -57,17 +58,22 @@ class _HeaderState extends State<Header> {
             onTap: () {
               _displayBottomSheet(context);
             },
-            child: SizedBox(
-              width: 50,
-              height: 50,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(50),
-                child: Image.file(
-                  File(_userDataBase!.imagePath),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
+            child: Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(50),
+                    color: Theme.of(context).colorScheme.inverseSurface),
+                child: isImage
+                    ? Image.file(
+                        File(_userDataBase!.imagePath),
+                        fit: BoxFit.cover,
+                      )
+                    : Icon(
+                        Iconsax.user,
+                        color: Theme.of(context).colorScheme.surface,
+                        size: 30,
+                      )),
           ),
         ],
       ),
@@ -94,17 +100,25 @@ class _HeaderState extends State<Header> {
                           _userName,
                           style: const TextStyle(fontSize: 20),
                         ),
-                        SizedBox(
-                          width: 50,
-                          height: 50,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(50),
-                            child: Image.file(
-                              File(_userDataBase!.imagePath),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
+                        Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .inverseSurface),
+                            child: isImage
+                                ? Image.file(
+                                    File(_userDataBase!.imagePath),
+                                    fit: BoxFit.cover,
+                                  )
+                                : Icon(
+                                    Iconsax.user,
+                                    color:
+                                        Theme.of(context).colorScheme.surface,
+                                    size: 30,
+                                  )),
                       ],
                     ),
                     GestureDetector(
@@ -168,7 +182,7 @@ class _HeaderState extends State<Header> {
                         Navigator.of(context).pop();
                         Future.delayed(Duration(milliseconds: 200), () {
                           _userDataBase?.deleteData();
-                           Navigator.pushNamed(context, '/login-page');
+                          Navigator.pushNamed(context, '/login-page');
                         });
                       },
                       child: Container(
