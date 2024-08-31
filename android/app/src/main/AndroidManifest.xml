@@ -6,9 +6,10 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
-        android:label="daizy_tv"
+        android:label="Daizy TV"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_rounded_launcher">
         <activity
             android:name=".MainActivity"
             android:exported="true"
