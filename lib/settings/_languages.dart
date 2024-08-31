@@ -5,8 +5,9 @@ class Languages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text("This page content seeing soon", style: TextStyle(fontSize: 20),)),
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      body: const Center(child: Text("This page content seeing soon", style: TextStyle(fontSize: 20),)),
     );
   }
 }

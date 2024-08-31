@@ -26,6 +26,7 @@ class _SettingState extends State<Setting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
         appBar: AppBar(
           title: const Text("Settings", style: TextStyle(fontWeight: FontWeight.bold)),
           leading: IconButton(

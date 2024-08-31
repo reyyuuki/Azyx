@@ -57,6 +57,7 @@ class _DetailsState extends State<Details> {
   @override
   Widget build(BuildContext context) {   
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         elevation: 0,

@@ -69,6 +69,7 @@ class _HomepageState extends State<Mangapage> {
       return const Center(child: CircularProgressIndicator());
     }
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListView(
