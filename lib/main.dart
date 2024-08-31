@@ -31,7 +31,6 @@ void main() async{
   var box = await Hive.openBox('mybox');
 
   final themeProvider = ThemeProvider();
-  await themeProvider.loadDynamicColors();
   
   
   runApp(ChangeNotifierProvider(
