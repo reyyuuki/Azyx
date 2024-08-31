@@ -31,6 +31,7 @@ dependencies:
   image_picker: ^1.1.2
   dynamic_color: ^1.7.0
   wakelock_plus: ^1.2.8
+  dropdown_button2: ^2.3.9
   
 
 dev_dependencies:

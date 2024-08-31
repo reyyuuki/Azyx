@@ -8,7 +8,7 @@ class ThemeProvider with ChangeNotifier {
   String? variant = "tonalSpot";
   Color? _seedColor;
   bool? _isMaterial = true;
-  var palette;
+  var palette = DynamicSchemeVariant.tonalSpot;
 
   ThemeData get themeData => _themeData;
   String? get selectedmode => _selectedmode;
@@ -33,7 +33,7 @@ class ThemeProvider with ChangeNotifier {
           colorScheme: ColorScheme.fromSeed(
             seedColor: _seedColor!,
             brightness: Brightness.light,
-          
+            dynamicSchemeVariant: palette,
           ),
         );
         break;
@@ -44,7 +44,7 @@ class ThemeProvider with ChangeNotifier {
           colorScheme: ColorScheme.fromSeed(
             seedColor: _seedColor!,
             brightness: Brightness.dark,
-            
+            dynamicSchemeVariant: palette
           ),
         );
         break;
@@ -89,39 +89,39 @@ class ThemeProvider with ChangeNotifier {
     notifyListeners();
   }
 
-//   void setPaletteColor(variant){
-//      switch (variant) {
-//       case "content":
-//         palette = DynamicSchemeVariant.content;
-//         break;
-//       case "expressive":
-//         palette = DynamicSchemeVariant.expressive;
-//         break;
-//       case "fidelity":
-//         palette = DynamicSchemeVariant.fidelity;
-//         break;
-//       case "fruitSalad":
-//         palette = DynamicSchemeVariant.fruitSalad;
-//         break;
-//       case "monochrome":
-//         palette = DynamicSchemeVariant.monochrome;
-//         break;
-//       case "neutral":
-//         palette = DynamicSchemeVariant.neutral;
-//         break;
-//       case "rainbow":
-//         palette = DynamicSchemeVariant.rainbow;
-//         break;
-//       case "tonalSpot":
-//         palette = DynamicSchemeVariant.tonalSpot;
-//         break;
-//       case "vibrant":
-//         palette = DynamicSchemeVariant.vibrant;
-//         break;
-//       default:
-//         palette = DynamicSchemeVariant.content;
-//     }
-//    updateTheme();
-// notifyListeners();
-//   }
+  void setPaletteColor(variant){
+     switch (variant) {
+      case "Content":
+        palette = DynamicSchemeVariant.content;
+        break;
+      case "Expressive":
+        palette = DynamicSchemeVariant.expressive;
+        break;
+      case "Fidelity":
+        palette = DynamicSchemeVariant.fidelity;
+        break;
+      case "FruitSalad":
+        palette = DynamicSchemeVariant.fruitSalad;
+        break;
+      case "Monochrome":
+        palette = DynamicSchemeVariant.monochrome;
+        break;
+      case "Neutral":
+        palette = DynamicSchemeVariant.neutral;
+        break;
+      case "Rainbow":
+        palette = DynamicSchemeVariant.rainbow;
+        break;
+      case "TonalSpot":
+        palette = DynamicSchemeVariant.tonalSpot;
+        break;
+      case "Vibrant":
+        palette = DynamicSchemeVariant.vibrant;
+        break;
+      default:
+        palette = DynamicSchemeVariant.content;
+    }
+   updateTheme();
+notifyListeners();
+  }
 }

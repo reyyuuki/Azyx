@@ -5,31 +5,38 @@ import 'package:provider/provider.dart';
 class ColorBall extends StatelessWidget {
 
   var color;
+  String? name;
   
-   ColorBall({super.key,this.color});
+   ColorBall({super.key,this.color,required this.name});
 
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     bool isBorder = themeProvider.seedColor == color ? true : false;
-    return GestureDetector(
-      onTap: () { 
-        themeProvider.updateSeedColor(color!);
-      },
-      child: Container(
-        decoration: BoxDecoration(border: Border.all(width: 2, color: isBorder ? color!: Colors.transparent), borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(3),
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: () { 
+            themeProvider.updateSeedColor(color!);
+          },
           child: Container(
-            width: 25,
-            height: 25,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: color,
+            decoration: BoxDecoration(border: Border.all(width: 2, color: isBorder ? color!: Colors.transparent), borderRadius: BorderRadius.circular(20)),
+            child: Padding(
+              padding: const EdgeInsets.all(3),
+              child: Container(
+                width: 25,
+                height: 25,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: color,
+                ),
+              ),
             ),
           ),
         ),
-      ),
+        const SizedBox(height: 5,),
+        Text(isBorder ? name! : "")
+      ],
     );
   }
 }
