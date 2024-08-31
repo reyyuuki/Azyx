@@ -1,8 +1,6 @@
-import 'package:daizy_tv/Provider/themes.dart';
 import 'package:daizy_tv/components/_colorball.dart';
-import 'package:daizy_tv/components/_theme_template.dart';
+import 'package:daizy_tv/settings/mode.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 
@@ -16,7 +14,8 @@ class ThemeChange extends StatefulWidget {
 }
 
 class __ThemeChangeState extends State<ThemeChange> {
-  String? _paletteValue = "TonalSpot";
+  String? _paletteValue;
+  bool? isMaterial;
 
   final List<String> _items = [
     "Content",
@@ -30,13 +29,14 @@ class __ThemeChangeState extends State<ThemeChange> {
     "Vibrant"
   ];
 
+ 
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    themeProvider.selectedmode == 'system'
-        ? themeProvider.useSystemTheme()
-        : () {};
+    isMaterial = themeProvider.isMaterial;
+    _paletteValue = themeProvider.variant;
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: const Text("App Themes",
             style: TextStyle(fontWeight: FontWeight.bold)),
@@ -72,7 +72,7 @@ class __ThemeChangeState extends State<ThemeChange> {
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  Mode(themeProvider),
+                  Mode(themeProvider: themeProvider),
                   SizedBox(
                     height: 140,
                     child: Padding(
@@ -106,7 +106,7 @@ class __ThemeChangeState extends State<ThemeChange> {
                                         decoration: BoxDecoration(
                                             border: Border.all(
                                                 width: 2,
-                                                color: themeProvider.isMaterial!
+                                                color: isMaterial!
                                                     ? Theme.of(context)
                                                         .colorScheme
                                                         .inverseSurface
@@ -140,7 +140,7 @@ class __ThemeChangeState extends State<ThemeChange> {
                                     ),
                                     Text(
                                       themeProvider.isMaterial! ? "Custom" : "",
-                                      style: TextStyle(fontSize: 12),
+                                      style: const TextStyle(fontSize: 12),
                                     )
                                   ],
                                 ),
@@ -181,11 +181,11 @@ class __ThemeChangeState extends State<ThemeChange> {
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(20)),
               child: Padding(
-                padding: EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(10.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
+                    const Text(
                       "Theme Variant",
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -218,7 +218,7 @@ class __ThemeChangeState extends State<ThemeChange> {
                               });
                               if (newValue != null) {
                                 themeProvider.setPaletteColor(
-                                    newValue); // Call your function with the new value
+                                    newValue); 
                               }
                             },
                             value: _paletteValue,
@@ -236,60 +236,6 @@ class __ThemeChangeState extends State<ThemeChange> {
                 ),
               ),
             )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Padding Mode(ThemeProvider themeProvider) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        height: 210,
-        decoration: const BoxDecoration(
-            border: BorderDirectional(
-                bottom: BorderSide(
-                    width: 1, color: Color.fromARGB(188, 158, 158, 158)))),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            GestureDetector(
-                onTap: () {
-                  themeProvider.setLightMode();
-                },
-                child: ThemeTemplate(
-                  isBorder: themeProvider.selectedmode == 'light',
-                  topLeft: Colors.white,
-                  topRight: Colors.white,
-                  bottomLeft: Colors.white,
-                  bottomRight: Colors.white,
-                  name: "Light",
-                )),
-            GestureDetector(
-                onTap: () {
-                  themeProvider.setDarkMode();
-                },
-                child: ThemeTemplate(
-                  isBorder: themeProvider.selectedmode == 'dark',
-                  topLeft: Color.fromARGB(193, 0, 0, 0),
-                  topRight: Color.fromARGB(193, 0, 0, 0),
-                  bottomLeft: Colors.black,
-                  bottomRight: Colors.black,
-                  name: "Dark",
-                )),
-            GestureDetector(
-                onTap: () {
-                  themeProvider.useSystemTheme();
-                },
-                child: ThemeTemplate(
-                  isBorder: themeProvider.selectedmode == 'system',
-                  topLeft: Colors.white,
-                  topRight: Color.fromARGB(193, 0, 0, 0),
-                  bottomLeft: Colors.white,
-                  bottomRight: Colors.black,
-                  name: "System",
-                )),
           ],
         ),
       ),
