@@ -18,7 +18,6 @@ import 'package:text_scroll/text_scroll.dart';
 
 class Stream extends StatefulWidget {
   final String id;
-
   const Stream({super.key, required this.id});
 
   @override

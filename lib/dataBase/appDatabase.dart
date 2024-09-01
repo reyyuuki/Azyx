@@ -73,7 +73,7 @@ class Data extends ChangeNotifier {
       'mangaId': mangaId,
       'mangaTitle': mangaTitle,
       'currentChapter': currentChapter,
-      'posterImage': mangaImage,
+      'mangaImage': mangaImage,
     };
 
     readsmanga!.removeWhere((manga) => manga['mangaId'] == mangaId);

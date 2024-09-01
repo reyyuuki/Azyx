@@ -103,7 +103,7 @@ class _DetailsState extends State<Mangadetails> {
                           ),
                           if (mangaData != null)
                             ...mangaData['chapterList']
-                                .map<Widget>((chapter) => Chapterlist(id: widget.id, chapter: chapter,))
+                                .map<Widget>((chapter) => Chapterlist(id: widget.id, chapter: chapter,image: widget.image,))
                                 .toList(),
                         ],
                       ),
