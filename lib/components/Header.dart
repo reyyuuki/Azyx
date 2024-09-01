@@ -46,7 +46,7 @@ class _HeaderState extends State<Header> {
             children: [
               Text(
                 _userName,
-                style: const TextStyle(fontSize: 20),
+                style:  TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
               ),
               Text(
                 "Enjoy unlimited ${widget.name}!", // Display the username
@@ -66,7 +66,7 @@ class _HeaderState extends State<Header> {
                     color: Theme.of(context).colorScheme.inverseSurface),
                 child: isImage
                     ? ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(25),
                       child: Image.file(
                           File(_userDataBase!.imagePath),
                           fit: BoxFit.cover,
@@ -113,7 +113,7 @@ class _HeaderState extends State<Header> {
                                     .inverseSurface),
                             child: isImage
                                 ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(25),
                                   child: Image.file(
                                       File(_userDataBase!.imagePath),
                                       fit: BoxFit.cover,

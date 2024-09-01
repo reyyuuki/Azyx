@@ -1,17 +1,19 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:daizy_tv/components/Anime/animeDetails.dart';
 import 'package:daizy_tv/components/Anime/animeInfo.dart';
 import 'package:daizy_tv/components/Anime/genres.dart';
-import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/reusableList.dart';
 import 'package:daizy_tv/components/Anime/videoplayer.dart';
+import 'package:daizy_tv/dataBase/appDatabase.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:ionicons/ionicons.dart';
 
 import 'package:lite_rolling_switch/lite_rolling_switch.dart';
+import 'package:provider/provider.dart';
 import 'package:text_scroll/text_scroll.dart';
 
 class Stream extends StatefulWidget {
@@ -24,14 +26,14 @@ class Stream extends StatefulWidget {
 }
 
 class _StreamState extends State<Stream> {
-  dynamic EpisodeData;
+  dynamic episodeData;
   dynamic AnimeData;
   dynamic Episode;
-  String? episodeId;
+  int? episodeId;
   String? category;
   dynamic tracks;
-  int? number;
   bool dub = false;
+  var box = Hive.box("mybox");
 
   @override
   void initState() {
@@ -47,6 +49,7 @@ class _StreamState extends State<Stream> {
 
   Future<void> fetchData() async {
     try {
+      final provider = Provider.of<Data>(context, listen: false);
       final response = await http.get(Uri.parse(baseUrl + widget.id));
       final episodeResponse =
           await http.get(Uri.parse(episodeDataUrl + widget.id));
@@ -56,61 +59,77 @@ class _StreamState extends State<Stream> {
 
         setState(() {
           AnimeData = tempAnimeData;
-          EpisodeData = decodeData['episodes'];
-          episodeId = decodeData['episodes'][0]['episodeId'];
+          episodeData = decodeData['episodes'];
+          // episodeId = decodeData['episodes'][0]['episodeId'];
+
+          episodeId = int.tryParse(provider.getCurrentEpisodeForAnime(
+              AnimeData['anime']['info']['id'] ?? 1)!);
           category = 'sub';
-          number = decodeData['episodes'][0]['number'];
+          provider.addWatchedAnimes(
+              animeId: tempAnimeData['anime']['info']['id'],
+              animeTitle: tempAnimeData['anime']['info']['name'],
+              currentEpisode: episodeId!.toString(),
+              posterImage: tempAnimeData['anime']['info']['poster']);
         });
 
-        fetchEpisode();
+       await fetchEpisode();
+      }
+      else{
+        log("not Loading");
       }
     } catch (e) {
-      // ignore: avoid_print
-      print(e);
+      log("error occured $e");
     }
   }
 
   Future<void> fetchEpisode() async {
+    if (episodeData == null || episodeId == null) return;
     try {
+      final provider = Provider.of<Data>(context, listen: false);
       final response = await http.get(Uri.parse(
-          '$episodeUrl$episodeId?server=vidstreaming&category=$category'));
+          '$episodeUrl${episodeData[(episodeId! - 1)]['episodeId']}&category=$category'));
       final captionsResponse = await http.get(
-          Uri.parse('$episodeUrl$episodeId?server=vidstreaming&category=sub'));
+          Uri.parse('$episodeUrl${episodeData[(episodeId! - 1)]['episodeId']}&category=sub'));
       if (response.statusCode == 200) {
         final decodeData = jsonDecode(response.body);
         final tempdata = jsonDecode(captionsResponse.body);
         setState(() {
-          Episode = decodeData['sources'];
+          Episode = decodeData['sources'][0]["url"];
           tracks = tempdata['tracks'];
-          // Initialize player after fetching episode
         });
+        provider.addWatchedAnimes(
+            animeId: AnimeData['anime']['info']['id'],
+            animeTitle: AnimeData['anime']['info']['name'],
+            currentEpisode: episodeId!.toString(),
+            posterImage: AnimeData['anime']['info']['poster']);
+      }
+      else{
+        log('error not getting data');
       }
     } catch (e) {
-      // ignore: avoid_print
-      print(e);
+      log("error in $e");
     }
   }
 
-  void handleEpisode(String url, int newNumber) {
+  void handleEpisode(int? episode) {
     setState(() {
-      episodeId = url;
-      number = newNumber;
-      fetchEpisode();
+      episodeId = episode;
     });
+    fetchEpisode();
   }
 
   void handleCategory(String newCategory) {
-    if (AnimeData['anime']['info']['stats']['episodes']['dub'] >= number) {
+    if (AnimeData['anime']['info']['stats']['episodes']['dub'] >= episodeId) {
       setState(() {
         category = newCategory;
-        fetchEpisode();
       });
+      fetchEpisode();
     } else {}
   }
 
   @override
   Widget build(BuildContext context) {
-    if (EpisodeData == null || AnimeData == null || tracks == null) {
+    if (episodeData == null || AnimeData == null || tracks == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -140,7 +159,7 @@ class _StreamState extends State<Stream> {
       body: ListView(
         children: [
           MediaPlayer(
-            Episode: Episode![0]['url'],
+            Episode: Episode,
             tracks: tracks,
           ),
           Padding(
@@ -149,7 +168,7 @@ class _StreamState extends State<Stream> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Episode $number',
+                  'Episode $episodeId',
                   style: const TextStyle(fontSize: 20),
                 ),
                 Swicther(),
@@ -298,21 +317,20 @@ class _StreamState extends State<Stream> {
       child: ListView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: EpisodeData!.length,
+        itemCount: episodeData!.length,
         itemBuilder: (context, index) {
-          final item = EpisodeData![index];
+          final item = episodeData![index];
           final title = item['title'];
-          final url = item['episodeId'];
           final episodeNumber = item['number'];
           return GestureDetector(
-            onTap: () => handleEpisode(url, episodeNumber),
+            onTap: () => handleEpisode(episodeNumber),
             child: Container(
               margin: const EdgeInsets.only(top: 10),
               decoration: BoxDecoration(
                   border: Border.all(
                       color: Theme.of(context).colorScheme.outline),
                   borderRadius: BorderRadius.circular(10),
-                  color: episodeNumber == number
+                  color: episodeNumber == episodeId
                       ? Theme.of(context).colorScheme.inverseSurface
                       : Theme.of(context).colorScheme.surfaceContainerHigh),
               child: Padding(
@@ -332,13 +350,13 @@ class _StreamState extends State<Stream> {
                         textAlign: TextAlign.center,
                         selectable: true,
                         style: TextStyle(
-                          color: episodeNumber == number
+                          color: episodeNumber == episodeId
                               ? Theme.of(context).colorScheme.inversePrimary
                               : Theme.of(context).colorScheme.inverseSurface,
                         ),
                       ),
                     ),
-                    episodeNumber == number
+                    episodeNumber == episodeId
                         ? Icon(
                             Ionicons.play,
                             color: Theme.of(context).colorScheme.inversePrimary,
@@ -347,7 +365,7 @@ class _StreamState extends State<Stream> {
                             'Ep- ${item['number']}',
                             style: TextStyle(
                                 fontSize: 14,
-                                color: episodeNumber == number
+                                color: episodeNumber == episodeId
                                     ? Theme.of(context)
                                         .colorScheme
                                         .inversePrimary

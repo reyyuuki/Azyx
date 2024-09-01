@@ -1,9 +1,9 @@
 import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class MediaPlayer extends StatefulWidget {
-
   final dynamic tracks;
   final String? Episode;
 
@@ -13,12 +13,11 @@ class MediaPlayer extends StatefulWidget {
   State<MediaPlayer> createState() => _MediaPlayerState();
 }
 
-class _MediaPlayerState extends State<MediaPlayer> with AutomaticKeepAliveClientMixin {
+class _MediaPlayerState extends State<MediaPlayer>
+    with AutomaticKeepAliveClientMixin {
+  BetterPlayerController? _betterPlayerController;
 
- BetterPlayerController? _betterPlayerController;
- 
-
- @override
+  @override
   void dispose() {
     _betterPlayerController?.dispose();
     WakelockPlus.disable();
@@ -31,10 +30,10 @@ class _MediaPlayerState extends State<MediaPlayer> with AutomaticKeepAliveClient
     initializePlayer();
   }
 
-  @override 
-  void didUpdateWidget(covariant MediaPlayer oldWidget){
+  @override
+  void didUpdateWidget(covariant MediaPlayer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if(widget.Episode != oldWidget.Episode) {
+    if (widget.Episode != oldWidget.Episode) {
       _betterPlayerController?.dispose();
       initializePlayer();
     }
@@ -60,10 +59,17 @@ class _MediaPlayerState extends State<MediaPlayer> with AutomaticKeepAliveClient
       );
     }).toList();
 
-    var betterPlayerConfiguration = const BetterPlayerConfiguration(
+    var betterPlayerConfiguration = BetterPlayerConfiguration(
       controlsConfiguration: BetterPlayerControlsConfiguration(
-          playerTheme: BetterPlayerTheme.cupertino),
+          playerTheme: BetterPlayerTheme.cupertino,
+          playIcon: Iconsax.play,
+        skipBackIcon: Iconsax.backward_10_seconds,
+        skipForwardIcon: Iconsax.forward_10_seconds,
+        pauseIcon: Iconsax.pause,
+          ),
       autoPlay: true,
+      fit: BoxFit.contain,
+      
     );
 
     BetterPlayerDataSource betterPlayerDataSource = BetterPlayerDataSource(
@@ -84,20 +90,19 @@ class _MediaPlayerState extends State<MediaPlayer> with AutomaticKeepAliveClient
 
   @override
   Widget build(BuildContext context) {
-    if(widget.Episode == null || widget.tracks == null){
+    if (widget.Episode == null || widget.tracks == null) {
       return const Center(child: CircularProgressIndicator());
     }
     return AspectRatio(
-            aspectRatio: 16 / 9,
-            child: _betterPlayerController != null
-                ? BetterPlayer(controller: _betterPlayerController!)
-                : const Center(
-                    child:
-                        CircularProgressIndicator()), // Handle case where player is not yet initialized
-          );
+      aspectRatio: 16 / 9,
+      child: _betterPlayerController != null
+          ? BetterPlayer(controller: _betterPlayerController!)
+          : const Center(
+              child:
+                  CircularProgressIndicator()), // Handle case where player is not yet initialized
+    );
   }
 
   @override
   bool get wantKeepAlive => true;
-  
 }
