@@ -1,103 +1,150 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:daizy_tv/components/Manga/sliderBar.dart';
+import 'package:daizy_tv/dataBase/appDatabase.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 
 
 class Read extends StatefulWidget {
-  final String? mangaId;
-  String? chapterId;
+  final String mangaId;
+  String chapterId;
+  String image;
 
-   Read({super.key, this.mangaId, this.chapterId});
+   Read({super.key,required this.mangaId,required this.chapterId,required this.image});
 
   @override
   State<Read> createState() => _ReadState();
 }
 
 class _ReadState extends State<Read> {
-  dynamic chapterList;
-  dynamic chapterListIds;
-  dynamic data;
+  List<dynamic>? chapterList;
+  List<dynamic>? chapterImages;
+  String? currentChapter;
+  String? mangaTitle;
+  int? index;
+  
   bool show = true;
-    bool isLoading = true;
+  bool isLoading = true;
   bool hasError = false;
 
   @override
   void initState() {
     super.initState();
-    fetchData();
+    fetchChapterData();
   }
 
   final ScrollController _scrollController = ScrollController();
 
-  Future<void> fetchData() async {
-    final String url =
-        'https://anymey-proxy.vercel.app/cors?url=https://manga-ryan.vercel.app/api/manga/${widget.mangaId}/${widget.chapterId}';
+  Future<void> fetchChapterData() async {
+    const String url =
+        'https://anymey-proxy.vercel.app/cors?url=https://manga-ryan.vercel.app/api/manga/';
     try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final jsonData = jsonDecode(response.body);
+      final resp = await http.get(Uri.parse(url + widget.chapterId));
+      final provider = Provider.of<Data>(context, listen: false);
+      if (resp.statusCode == 200) {
+        final tempData = jsonDecode(resp.body);
         setState(() {
-          data = jsonData;
-          chapterList = jsonData['images'];
-          chapterListIds = jsonData['chapterListIds'];
+          chapterList = tempData['chapterListIds'];
+          chapterImages = tempData['images'];
+          currentChapter = tempData['currentChapter'];
+          mangaTitle = tempData['title'];
+          index = tempData['chapterListIds']
+              ?.indexWhere((chapter) => chapter['name'] == currentChapter);
           isLoading = false;
-          hasError = false;
         });
-      } 
-    } catch (error) {
-      // Handle errors
-      isLoading = false;
-      hasError = true;
+        provider.addReadsManga(
+            mangaId: widget.mangaId,
+            mangaTitle: tempData['title'],
+            currentChapter: currentChapter.toString(),
+            mangaImage: widget.image);
+      } else {
+        setState(() {
+          hasError = true;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      log(e.toString());
+      setState(() {
+        hasError = true;
+        isLoading = false;
+      });
+    }
+  }
+
+    Future<void> fetchChapterImages() async {
+    setState(() {
+      isLoading = true;
+    });
+    const String url =
+        'https://anymey-proxy.vercel.app/cors?url=https://manga-ryan.vercel.app/api/manga/';
+    try {
+      final provider = Provider.of<Data>(context);
+      final resp = await http.get(
+          Uri.parse('$url${widget.mangaId}/${chapterList?[index!]['id']}'));
+      if (resp.statusCode == 200) {
+        final tempData = jsonDecode(resp.body);
+        setState(() {
+          chapterImages = tempData['images'];
+          currentChapter = tempData['currentChapter'];
+          isLoading = false;
+        });
+        provider.addReadsManga(
+            mangaId: widget.mangaId,
+            mangaTitle: mangaTitle!,
+            currentChapter: currentChapter.toString(),
+            mangaImage: widget.image)
+            ;
+      } else {
+        setState(() {
+          hasError = true;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      log(e.toString());
+      setState(() {
+        hasError = true;
+        isLoading = false;
+      });
     }
   }
 
   void handleChapter(String ? direction) {
 
-    int currentIndex = data != null ? chapterListIds!.indexWhere((item) => item["id"] == widget.chapterId) : -1;
-
-    if (currentIndex == -1) {
-      print("Chapter not found");
-      
-    }
-
-    if (direction == 'right'){
-      if (currentIndex < chapterListIds!.length - 1) {
-        widget.chapterId = chapterListIds![currentIndex + 1]['id'];
-         print('Next chapter ID: ${widget.chapterId}');
-        fetchData();
-      } else {
-        print("No more chapters");
-      }
+     if (direction == 'right') {
+      index = ((chapterList?.indexWhere(
+                  (chapter) => chapter['name'] == currentChapter))! -
+              1)
+          .clamp(0, chapterList!.length - 1);
     } else {
-      if (currentIndex > 0) {
-        widget.chapterId = chapterListIds![currentIndex - 1]['id'];
-        fetchData();
-      } else {
-        print("No previous chapters");
-      }
+      index = ((chapterList?.indexWhere(
+                  (chapter) => chapter['name'] == currentChapter))! +
+              1)
+          .clamp(0, chapterList!.length - 1);
     }
+    fetchChapterImages();
   }
 
 
   void _toggleShow() {
     setState(() {
-      show = !show; // Toggle the boolean variable
+      show = !show;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (data == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
     
+
     return Sliderbar(
-      title: isLoading ? '??' : data['title'],
-      chapter: isLoading ? 'Chapter ?' : data['currentChapter'],
-      totalImages: chapterList?.length ?? 0,
+      title: isLoading ? '??' : mangaTitle ?? "Unknown",
+      chapter: isLoading ? 'Chapter ?' : currentChapter ?? "Unknown",
+      totalImages: chapterImages?.length ?? 0,
       scrollController: _scrollController,
       handleChapter: handleChapter,
       child: Center(
@@ -107,9 +154,9 @@ class _ReadState extends State<Read> {
                 ? const Text('Failed to load data')
                 : ListView.builder(
                     controller: _scrollController,
-                    itemCount: chapterList!.length,
+                    itemCount: chapterImages!.length,
                     itemBuilder: (context, index) {
-                      return Image.network(chapterList![index]['image']);
+                      return Image.network(chapterImages![index]['image']);
                     },
                   ),
       ),

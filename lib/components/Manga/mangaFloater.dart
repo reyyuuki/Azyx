@@ -1,24 +1,30 @@
 import 'dart:ui';
 
+import 'package:daizy_tv/dataBase/appDatabase.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:provider/provider.dart';
 import 'package:text_scroll/text_scroll.dart';
 
 class Mangafloater extends StatelessWidget {
-final dynamic mangaData;
+final List<dynamic> chapterList;
 final String? id;
+final String? image;
+final String? title;
 
-  const Mangafloater({super.key, this.mangaData, this.id});
-
+  const Mangafloater({super.key,required this.chapterList,required this.id, this.image, this.title});
 
   @override
-  Widget build(BuildContext context) {
-    if(mangaData == null){
-      return Container(
-        margin: const EdgeInsets.only(top: 150),
-        child: const SizedBox.shrink());
-    }
-    final String chapterId = mangaData['chapterId'] ?? 'chapter-1';
+  Widget build(BuildContext context) {    
+     final provider = Provider.of<Data>(context);
+    final currentChapter =
+        provider.getCurrentChapterForManga(id!) ?? 'chapter-1';
+    final currentChapterList = chapterList
+        .where((chapter) => chapter['name'] == currentChapter)
+        .toList();
+    final currentChapterId = currentChapterList.isNotEmpty
+        ? currentChapterList.first['id']
+        : 'chapter-1';
 
     return Positioned(
           bottom: 0,
@@ -49,7 +55,7 @@ final String? id;
                           Container(
                             constraints: const BoxConstraints(maxWidth: 130),
                             child: TextScroll(
-                              mangaData['name'],
+                              title!,
                               mode: TextScrollMode.bouncing,
                               velocity: const Velocity(
                                   pixelsPerSecond: Offset(20, 0)),
@@ -60,9 +66,11 @@ final String? id;
                               selectable: true,
                             ),
                           ),
-                          const Text(
-                            'Chapter 1',
-                            style: TextStyle(
+                          Text(
+                            currentChapter.isEmpty
+                                  ? 'Chapter 1'
+                                  : currentChapter,
+                            style: const TextStyle(
                                 color: Color.fromARGB(187, 141, 135, 135)),
                           ),
                         ],
@@ -70,7 +78,7 @@ final String? id;
                       ElevatedButton(
                         onPressed: () {
                           Navigator.pushNamed(context, '/read',
-                              arguments: {"mangaId": id, "chapterId": chapterId});
+                              arguments: {"mangaId": id, "chapterId":'/$id/$currentChapterId', "image": image});
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:  Theme.of(context).colorScheme.inverseSurface,

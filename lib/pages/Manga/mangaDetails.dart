@@ -113,7 +113,8 @@ class _DetailsState extends State<Mangadetails> {
                 ),
               ],
             ),
-            Mangafloater(mangaData: mangaData, id: widget.id,),
+
+           mangaData != null ? Mangafloater(chapterList: mangaData['chapterList'], id: widget.id, image: widget.image, title: mangaData['name'],) : const SizedBox.shrink()
           ],
         ));
   }
