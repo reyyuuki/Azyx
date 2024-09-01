@@ -14,7 +14,7 @@ class ThemeChange extends StatefulWidget {
 }
 
 class __ThemeChangeState extends State<ThemeChange> {
-  String? _paletteValue;
+  String? _paletteValue = "Content";
   bool? isMaterial;
 
   final List<String> _items = [
@@ -218,7 +218,7 @@ class __ThemeChangeState extends State<ThemeChange> {
                               });
                               if (newValue != null) {
                                 themeProvider.setPaletteColor(
-                                    newValue); 
+                                    _paletteValue!); 
                               }
                             },
                             value: _paletteValue,

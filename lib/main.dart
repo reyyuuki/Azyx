@@ -6,6 +6,7 @@ import 'package:daizy_tv/On-Boarding_Screen/login_page.dart';
 import 'package:daizy_tv/On-Boarding_Screen/theme-modes.dart';
 import 'package:daizy_tv/On-Boarding_Screen/welcome_page.dart';
 import 'package:daizy_tv/Provider/theme_provider.dart';
+import 'package:daizy_tv/dataBase/appDatabase.dart';
 import 'package:daizy_tv/dataBase/user.dart';
 import 'package:daizy_tv/pages/Manga/mangaDetails.dart';
 import 'package:daizy_tv/pages/Manga/read.dart';
@@ -16,25 +17,30 @@ import 'package:daizy_tv/settings/_languages.dart';
 import 'package:daizy_tv/settings/_theme_changer.dart';
 import 'package:flutter/material.dart';
 import 'package:daizy_tv/pages/Anime/details.dart';
-import 'package:daizy_tv/pages/loginPage.dart';
+import 'package:daizy_tv/pages/_homepage.dart';
 import 'package:daizy_tv/pages/Manga/mangaPage.dart';
 import 'package:daizy_tv/pages/Anime/stream.dart';
 import 'package:daizy_tv/pages/Anime/animePage.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 
 void main() async{
 
   // init the Hive
   await Hive.initFlutter();
-  var box = await Hive.openBox('mybox');
+  await Hive.openBox('mybox');
+  await Hive.openBox("app-data");
 
-  final themeProvider = ThemeProvider();
   
   
-  runApp(ChangeNotifierProvider(
-    create: (context) => themeProvider,
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => Data()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+      ],
     child: const MainApp(),
   ));
 }
@@ -110,9 +116,10 @@ class _MainAppState extends State<MainApp> {
           case '/read':
             final mangaId = args?['mangaId'] ?? '';
             final chapterId = args?['chapterId'] ?? '';
+            final image = args?['image'] ?? '';
             return MaterialPageRoute(
               builder: (context) =>
-                  Read(mangaId: mangaId, chapterId: chapterId),
+                  Read(mangaId: mangaId, chapterId: chapterId, image: image),
             );
 
             case '/searchManga':
@@ -167,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _pages = [
     const Animepage(),
-    const Other(),
+    const HomePage(),
     const Mangapage(),
   ];
 
@@ -211,8 +218,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         FlashyTabBarItem(
                           icon: _selectedIndex == 1
                               ? const SizedBox.shrink()
-                              : const Icon(Icons.login),
-                          title: const Text('Login'),
+                              : const Icon(Iconsax.home_15),
+                          title: const Text('Home'),
                           activeColor: Colors.white,
                           inactiveColor: Theme.of(context).colorScheme.primary,
                         ),

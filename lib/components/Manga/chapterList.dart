@@ -13,7 +13,10 @@ class Chapterlist extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, '/read',
-            arguments: {"mangaId": id, "chapterId": chapter['id']});
+            arguments: {"mangaId": id, "chapterId": chapter['path'].toString().substring(
+                                      8,
+                                      chapter['path'].toString().length,
+                                    ),});
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),

@@ -119,8 +119,8 @@ class ThemeProvider with ChangeNotifier {
     updateTheme();
   }
 
-  void setPaletteColor(String variant) {
-    switch (variant) {
+  void setPaletteColor(String newVariant) {
+    switch (newVariant) {
       case "Content":
         palette = DynamicSchemeVariant.content;
         break;
@@ -152,7 +152,9 @@ class ThemeProvider with ChangeNotifier {
         palette = DynamicSchemeVariant.tonalSpot; // Fallback to a default
     }
     updateTheme();
-    Hive.box("mybox").put("palette", variant);
+    _variant = newVariant;
+    Hive.box("mybox").put("palette", _variant);
+
   }
 
   Map<int, Color> getMaterialColorSwatch(int colorValue) {
