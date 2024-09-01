@@ -5,18 +5,22 @@ import 'package:text_scroll/text_scroll.dart';
 class Chapterlist extends StatelessWidget {
   final String? id;
   final dynamic chapter;
+  final String? image;
 
-  const Chapterlist({super.key, this.id, this.chapter});
+  const Chapterlist({super.key, this.id, this.chapter, this.image});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, '/read',
-            arguments: {"mangaId": id, "chapterId": chapter['path'].toString().substring(
-                                      8,
-                                      chapter['path'].toString().length,
-                                    ),});
+        Navigator.pushNamed(context, '/read', arguments: {
+          "mangaId": id,
+          "chapterId": chapter['path'].toString().substring(
+                8,
+                chapter['path'].toString().length,
+              ),
+          "image": image
+        });
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -60,7 +64,7 @@ class Chapterlist extends StatelessWidget {
                     decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.inverseSurface,
                         borderRadius: BorderRadius.circular(10)),
-                    child:  Padding(
+                    child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Center(
                           child: Row(
@@ -73,7 +77,12 @@ class Chapterlist extends StatelessWidget {
                           const SizedBox(
                             width: 2,
                           ),
-                          Text('Read', style: TextStyle(color: Theme.of(context).colorScheme.surface,),),
+                          Text(
+                            'Read',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.surface,
+                            ),
+                          ),
                         ],
                       )),
                     )),
