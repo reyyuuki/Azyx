@@ -23,10 +23,10 @@ class Data extends ChangeNotifier {
     }
   }
 
-  void setWatchedAnimes(List<Map<String, dynamic>> anime) {
-    animeWatches = anime;
+  void setWatchedAnimes(List<Map<String, dynamic>> animes) {
+    animeWatches = animes;
     var box = Hive.box("app-data");
-    box.put("currently-Watching", anime);
+    box.put("currently-Watching", animes);
     notifyListeners();
   }
 
@@ -48,16 +48,17 @@ class Data extends ChangeNotifier {
     animeWatches!.removeWhere((anime) => anime['animeId'] == animeId);
     animeWatches!.add(newAnime);
 
+
     var box = Hive.box("app-data");
     box.put("currently-Watching", animeWatches);
     log("Updated anime watches: $animeWatches");
     notifyListeners();
   }
 
-  void setReadsMangas(List<Map<String, dynamic>> manga) {
-    readsmanga = manga;
+  void setReadsMangas(List<Map<String, dynamic>> mangas) {
+    readsmanga = mangas;
     var box = Hive.box("app-data");
-    box.put("currently-Reading", manga);
+    box.put("currently-Reading", mangas);
     notifyListeners();
   }
 
@@ -86,21 +87,17 @@ class Data extends ChangeNotifier {
   }
 
   Map<String, dynamic>? getAnimeById(String animeId) {
-    final anime = animeWatches?.firstWhere(
+     return animeWatches?.firstWhere(
       (anime) => anime['animeId'] == animeId,
       orElse: () => {},
     );
-    log("Fetched anime by ID ($animeId): $anime");
-    return anime;
   }
 
   Map<String, dynamic>? getMangaById(String mangaId) {
-    final manga = readsmanga?.firstWhere(
+    return readsmanga?.firstWhere(
       (manga) => manga['mangaId'] == mangaId,
       orElse: () => {},
     );
-    log("Fetched manga by ID ($mangaId): $manga");
-    return manga;
   }
 
   String? getCurrentEpisodeForAnime(String animeId) {
