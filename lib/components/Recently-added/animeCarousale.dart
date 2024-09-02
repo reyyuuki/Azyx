@@ -14,9 +14,9 @@ class Animecarousale extends StatelessWidget {
       children: [
         const Text(
           "Continue Watching",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 10),
         SizedBox(
           height: 250,
           child: InfiniteCarousel.builder(

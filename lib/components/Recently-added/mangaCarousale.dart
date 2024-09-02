@@ -14,13 +14,13 @@ class Mangacarousale extends StatelessWidget {
       children: [
         const Text(
           "Continue Reading",
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 10),
         SizedBox(
           height: 250,
           child: carosaleData == null || carosaleData!.isEmpty
-              ? Center(
+              ? const Center(
                   child: Text(
                     "No manga available",
                     style: TextStyle(color: Colors.grey, fontSize: 16),
@@ -31,17 +31,17 @@ class Mangacarousale extends StatelessWidget {
                   itemExtent: MediaQuery.of(context).size.width / 2.3,
                   loop: false,
                   center: false,
+                  anchor: 0,
+            velocityFactor: 0.7,
+            axisDirection: Axis.horizontal,
                   itemBuilder: (context, itemIndex, realIndex) {
                     final manga = carosaleData![itemIndex];
                     final id = manga['mangaId'];
                     final poster = manga['mangaImage'];
                     final title = manga['mangaTitle'];
                     final currentEpisode = manga['currentChapter'];
-
-                    // Debugging prints
-                    print("Image URL: $poster");
-                    print("Title: $title");
-
+                    const String proxyUrl =
+                  'https://goodproxy.goodproxy.workers.dev/fetch?url=';
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
@@ -52,7 +52,7 @@ class Mangacarousale extends StatelessWidget {
                               Navigator.pushNamed(
                                 context,
                                 "/mangaDetail",
-                                arguments: {"id": id, "image": poster},
+                                arguments: {"id": id, "image": proxyUrl + poster},
                               );
                             },
                             child: SizedBox(
