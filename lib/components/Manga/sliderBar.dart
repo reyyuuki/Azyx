@@ -112,7 +112,7 @@ class _SlidebarState extends State<Sliderbar> {
             ),
             AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
-              bottom: _areBarsVisible ? 0 : -100,
+              bottom: _areBarsVisible ? 25 : -100,
               left: 0,
               right: 0,
               child: Container(
@@ -176,21 +176,18 @@ class _SlidebarState extends State<Sliderbar> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 2, horizontal: 10),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30),
-                        color: Theme.of(context).colorScheme.surfaceContainer,
-                      ),
-                      child: Text(
-                        '$_currentPage / ${widget.totalImages}',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
                   ],
                 ),
+              ),
+            ),
+            Positioned(
+              bottom: -2,
+              width: MediaQuery.of(context).size.width,
+              child: Center(
+                child: Text(
+                            '$_currentPage / ${widget.totalImages}',
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
               ),
             ),
           ],
