@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:daizy_tv/components/Manga/sliderBar.dart';
 import 'package:daizy_tv/dataBase/appDatabase.dart';
 import 'package:flutter/material.dart';
@@ -156,7 +157,21 @@ class _ReadState extends State<Read> {
                     controller: _scrollController,
                     itemCount: chapterImages!.length,
                     itemBuilder: (context, index) {
-                      return Image.network(chapterImages![index]['image']);
+                       return CachedNetworkImage(
+                        imageUrl: chapterImages![index]['image'],
+                        fit: BoxFit.cover,
+                        placeholder: (context, progress) => SizedBox(
+                          height: MediaQuery.of(context).size.height,
+                          width: MediaQuery.of(context).size.width,
+                          child: const Center(
+                              child: SizedBox(
+                                  height: 50,
+                                  width: 50,
+                                  child: CircularProgressIndicator())),
+                        ),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.error),
+                      );
                     },
                   ),
       ),
