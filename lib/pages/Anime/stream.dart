@@ -59,8 +59,6 @@ class _StreamState extends State<Stream> {
         setState(() {
           AnimeData = tempAnimeData;
           episodeData = decodeData['episodes'];
-          // episodeId = decodeData['episodes'][0]['episodeId'];
-
           episodeId = int.tryParse(provider.getCurrentEpisodeForAnime(
               AnimeData['anime']['info']['id'] ?? 1)!);
           category = 'sub';
