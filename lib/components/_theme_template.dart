@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
 
 class ThemeTemplate extends StatelessWidget {
-  final Color topLeft;
-  final Color topRight;
-  final Color bottomLeft;
-  final Color bottomRight;
+  final Color color;
   bool? isBorder = false;
   final String name;
   ThemeTemplate(
       {super.key,
-      required this.topLeft,
-      required this.bottomLeft,
-      required this.bottomRight,
-      required this.topRight,
+      required this.color,
       required this.isBorder,
       required this.name});
 
@@ -36,58 +30,10 @@ class ThemeTemplate extends StatelessWidget {
               height: 130,
               width: 76,
               decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(18)),
-              child: Stack(
-                children: [
-                  Row(
-                    children: [
-                      Column(
+                  color: color, borderRadius: BorderRadius.circular(18)),
+              child: Column(
                         children: [
-                          Container(
-                            height: 50,
-                            width: 38,
-                            decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.only(
-                                    topLeft: Radius.circular(18)),
-                                color: topLeft),
-                          ),
-                          Container(
-                            height: 80,
-                            width: 38,
-                            decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.only(
-                                    bottomLeft: Radius.circular(18)),
-                                color: bottomLeft),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          Container(
-                            height: 50,
-                            width: 38,
-                            decoration: BoxDecoration(
-                                color: topRight,
-                                borderRadius: const BorderRadius.only(
-                                    topRight: Radius.circular(18))),
-                          ),
-                          Container(
-                            height: 80,
-                            width: 38,
-                            decoration: BoxDecoration(
-                                color: bottomRight,
-                                borderRadius: const BorderRadius.only(
-                                    bottomRight: Radius.circular(18))),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Positioned(
-                      top: 10,
-                      width: 76,
-                      child: Column(
-                        children: [
+                          const SizedBox(height: 10,),
                           Column(
                             children: [
                               Container(
@@ -131,9 +77,7 @@ class ThemeTemplate extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(5)),
                           ),
                         ],
-                      ))
-                ],
-              ),
+                      )
             ),
           ),
         ),
