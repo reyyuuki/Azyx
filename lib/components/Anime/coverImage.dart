@@ -11,7 +11,7 @@ class CoverImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
    if(imageUrl == null){
-    return const SizedBox();
+    return const SizedBox.shrink();
    }
 
    return Positioned(
