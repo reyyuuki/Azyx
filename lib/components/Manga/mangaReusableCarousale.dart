@@ -6,8 +6,9 @@ import 'package:ionicons/ionicons.dart';
 class Mangareusablecarousale extends StatelessWidget {
   final dynamic data;
   final String? name;
+  final String? taggName;
 
-  const Mangareusablecarousale({super.key, this.data, required this.name});
+  const Mangareusablecarousale({super.key, this.data, required this.name, required this.taggName});
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +51,7 @@ class Mangareusablecarousale extends StatelessWidget {
               final imageUrl = item['image'] ?? '';
               final title = item['title'] ?? '';
               final id = item['id'] ?? '';
+              final tagg = id + taggName;
 
               return GestureDetector(
                 onTap: () {
@@ -57,7 +59,7 @@ class Mangareusablecarousale extends StatelessWidget {
                     Navigator.pushNamed(
                       context,
                       '/mangaDetail',
-                      arguments: {"id": id, "image": imageUrl},
+                      arguments: {"id": id, "image": imageUrl, "tagg": tagg},
                     );
                   } else {
                     // Optionally show an error or perform an alternative action
@@ -73,7 +75,7 @@ class Mangareusablecarousale extends StatelessWidget {
                       width: 150,
                       margin: const EdgeInsets.symmetric(horizontal: 10),
                       child: Hero(
-                        tag: id,
+                        tag: tagg,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
                           child: CachedNetworkImage(
