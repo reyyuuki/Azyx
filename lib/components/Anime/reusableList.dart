@@ -6,8 +6,9 @@ import 'package:ionicons/ionicons.dart';
 class ReusableList extends StatelessWidget {
   dynamic data;
   final String? name;
+  final String? taggName; 
 
-  ReusableList({super.key, this.data, required this.name});
+  ReusableList({super.key, this.data, required this.name,required this.taggName});
 
   @override
   Widget build(BuildContext context) {
@@ -44,10 +45,11 @@ class ReusableList extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             itemCount: data!.length,
             itemBuilder: (context, index) {
+              final tagg = data[index]['id'] + taggName;
               return GestureDetector(
                  onTap: () {
                   Navigator.pushNamed(context, '/detailspage',
-                      arguments:{"id": data[index]['id'], "image": data[index]['poster']});
+                      arguments:{"id": data[index]['id'], "image": data[index]['poster'], "tagg": tagg});
                 },
                   child: Column(
                     children: [
@@ -56,7 +58,7 @@ class ReusableList extends StatelessWidget {
                         width: 150,
                         margin: const EdgeInsets.symmetric(horizontal: 10),
                         child: Hero(
-                          tag: data[index]['id'],
+                          tag: tagg,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(20),
                             child: CachedNetworkImage(
