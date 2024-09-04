@@ -14,10 +14,18 @@ final dynamic animeData;
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<Data>(context);
-    if(animeData == null){
-      return Container(
-        margin: const EdgeInsets.only(top: 150),
-        child: const Center(child: CircularProgressIndicator()));
+    if (animeData == null) {
+      return const Center(child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(height: 140,),
+          CircularProgressIndicator(),
+        ],
+      )); 
+    }
+
+    if(animeData['info']['id'] == null){
+      return const SizedBox.shrink();
     }
     return Positioned(
           bottom: 0,
@@ -60,7 +68,7 @@ final dynamic animeData;
                             ),
                           ),
                            Text(
-                            'Episode ${provider.getCurrentEpisodeForAnime(animeData['info']['id']) ?? '1'}',
+                            'Episode ${provider.getCurrentEpisodeForAnime(animeData['info']['id'] ?? "") ?? '1'}',
                             style: const TextStyle(
                                 color: Color.fromARGB(187, 141, 135, 135)),
                           ),
