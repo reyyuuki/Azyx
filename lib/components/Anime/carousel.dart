@@ -39,7 +39,7 @@ class Carousel extends StatelessWidget {
               return GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/detailspage',
-                      arguments: {"id": anime['id'], "image": anime['poster']});
+                      arguments: {"id": anime['id'], "image": anime['poster'], "tagg": anime['id'] + "MainCarousale"});
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width,
@@ -57,7 +57,7 @@ class Carousel extends StatelessWidget {
                           height: 280,
                           width: 230,
                           child: Hero(
-                            tag: anime['id'],
+                            tag: anime['id'] + "MainCarousale",
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(20),
                               child: CachedNetworkImage(
