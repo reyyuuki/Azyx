@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:daizy_tv/components/Anime/animeDetails.dart';
 import 'package:daizy_tv/components/Anime/floater.dart';
@@ -11,7 +12,8 @@ import 'package:text_scroll/text_scroll.dart';
 class Details extends StatefulWidget {
   final String id;
   final String image;
-  const Details({super.key, required this.id,required this.image});
+  final String tagg;
+  const Details({super.key, required this.id,required this.image, required this.tagg});
 
   @override
   State<Details> createState() => _DetailsState();
@@ -43,6 +45,7 @@ class _DetailsState extends State<Details> {
             animeData = jsonData['anime'];
             cover = newData['cover'];
             description = newData['description'];
+            log(widget.tagg);
           });
         }
       } else {
@@ -95,12 +98,12 @@ class _DetailsState extends State<Details> {
                     color: Theme.of(context).colorScheme.surfaceContainer,
                   ),
                 ),
-                Poster(imageUrl: widget.image, id : widget.id),
+                Poster(imageUrl: widget.image, id : widget.tagg),
                 AnimeDetails(animeData: animeData, description: description,),
               ],
             ),
           ]),
-          Floater(animeData: animeData,),
+          Floater(animeData: animeData,)
         ],
       ),
     );
