@@ -88,8 +88,9 @@ class _MainAppState extends State<MainApp> {
           case '/detailspage':
             final id = args?['id'] ?? '';
             final image = args?['image'] ?? '';
+            final tagg = args?['tagg'] ?? '';
             return MaterialPageRoute(
-              builder: (context) => Details(id: id, image: image),
+              builder: (context) => Details(id: id, image: image, tagg: tagg),
             );
 
           case '/stream':
@@ -109,8 +110,9 @@ class _MainAppState extends State<MainApp> {
           case '/mangaDetail':
             final id = args?['id'] ?? '';
             final image = args?['image'] ?? '';
+            final tagg = args?['tagg'] ?? '';
             return MaterialPageRoute(
-              builder: (context) => Mangadetails(id: id, image: image),
+              builder: (context) => Mangadetails(id: id, image: image, tagg: tagg),
             );
 
           case '/read':
