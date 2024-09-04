@@ -57,7 +57,7 @@ class AnimeDetails extends StatelessWidget {
                   width: 10,
                 ),
                 Text(
-                  animeData['moreInfo']['malscore'],
+                  animeData['moreInfo']['malscore'] ?? "??",
                   style: const TextStyle(fontSize: 18),
                 ),
               ],
