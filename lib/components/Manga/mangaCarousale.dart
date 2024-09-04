@@ -32,12 +32,13 @@ class Mangacarousale extends StatelessWidget {
           scrollDirection: Axis.horizontal,
         ),
         items: mangaData!.map<Widget>((manga) {
+          final tagg = manga['id'] + "MainCarosale";
           return Builder(
             builder: (BuildContext context) {
               return GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/mangaDetail',
-                      arguments: {"id": manga['id'], "image": manga['image']});
+                      arguments: {"id": manga['id'], "image": manga['image'], "tagg": tagg});
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width,
@@ -55,7 +56,7 @@ class Mangacarousale extends StatelessWidget {
                           height: 280,
                           width: 230,
                           child: Hero(
-                            tag: manga['id'],
+                            tag: tagg,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(20),
                               child: CachedNetworkImage(
