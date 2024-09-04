@@ -54,31 +54,31 @@ final dynamic animeData;
             children: [
               Text(animeData!['moreInfo']['japanese'].length > 13
                   ? animeData['moreInfo']['japanese'].substring(0, 13)
-                  : animeData['moreInfo']['japanese']),
+                  : animeData['moreInfo']['japanese'] ?? "??"),
               const SizedBox(
                 height: 5,
               ),
-              Text(animeData['moreInfo']['aired']),
+              Text(animeData['moreInfo']['aired'] ?? "??"),
               const SizedBox(
                 height: 5,
               ),
-              Text(animeData['moreInfo']['premiered']),
+              Text(animeData['moreInfo']['premiered'] ?? "??"),
               const SizedBox(
                 height: 5,
               ),
-              Text(animeData['moreInfo']['duration']),
+              Text(animeData['moreInfo']['duration'] ?? "??"),
               const SizedBox(
                 height: 5,
               ),
-              Text(animeData['moreInfo']['status']),
+              Text(animeData['moreInfo']['status'] ?? "??"),
               const SizedBox(
                 height: 5,
               ),
-              Text(animeData['info']['stats']['rating']),
+              Text(animeData['info']['stats']['rating'] ?? "??"),
               const SizedBox(
                 height: 5,
               ),
-              Text(animeData['info']['stats']['quality']),
+              Text(animeData['info']['stats']['quality'] ?? "??"),
             ],
           ),
         ],
