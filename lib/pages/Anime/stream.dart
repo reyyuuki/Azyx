@@ -265,6 +265,7 @@ class _StreamState extends State<Stream> {
               ReusableList(
                 name: "Popular Anime",
                 data: AnimeData['mostPopularAnimes'],
+                taggName: "Popular",
               ),
               const SizedBox(
                 height: 10,
@@ -272,6 +273,7 @@ class _StreamState extends State<Stream> {
               ReusableList(
                 name: "Related Anime",
                 data: AnimeData['relatedAnimes'],
+                taggName: "Related",
               ),
               const SizedBox(
                 height: 10,
@@ -279,6 +281,7 @@ class _StreamState extends State<Stream> {
               ReusableList(
                 name: "Recommended Anime",
                 data: AnimeData['recommendedAnimes'],
+                taggName: "Recommended",
               ),
             ],
           ),
