@@ -110,15 +110,15 @@ class _HomepageState extends State<Mangapage> {
             const SizedBox(
               height: 30.0,
             ),
-            Mangareusablecarousale(name: 'Popular', data: mangaList1),
+            Mangareusablecarousale(name: 'Popular', data: mangaList1, taggName: "Carosale1",),
             const SizedBox(
               height: 10,
             ),
-            Mangareusablecarousale(name: 'Latest Manga', data: mangaList2),
+            Mangareusablecarousale(name: 'Latest Manga', data: mangaList2, taggName: "Carosale2"),
             const SizedBox(
               height: 10,
             ),
-            Mangareusablecarousale(name: 'Trending Mnaga', data: mangaList3),
+            Mangareusablecarousale(name: 'Trending Mnaga', data: mangaList3, taggName: "Carosale3"),
           ],
         ),
       ),
