@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:ui';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:daizy_tv/components/Anime/_gridlist.dart';
+import 'package:daizy_tv/pages/Anime/_search_list.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:iconsax/iconsax.dart';
+import 'package:ionicons/ionicons.dart';
 
 class SearchAnime extends StatefulWidget {
   String name;
@@ -15,6 +17,7 @@ class SearchAnime extends StatefulWidget {
 
 class _SearchpageState extends State<SearchAnime> {
   dynamic data;
+  bool isGrid = false;
 
   TextEditingController? _controller;
 
@@ -52,6 +55,12 @@ class _SearchpageState extends State<SearchAnime> {
   void handleSearch(String text) {
     widget.name = text;
     fetchdata();
+  }
+
+  void changList(bool list) {
+    setState(() {
+      isGrid = list;
+    });
   }
 
   @override
@@ -106,7 +115,7 @@ class _SearchpageState extends State<SearchAnime> {
           ),
           const SizedBox(height: 20),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 15),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -117,111 +126,55 @@ class _SearchpageState extends State<SearchAnime> {
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.primary),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 5),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
                   child: Row(
                     children: [
-                      Icon(Iconsax.menu_15),
-                      SizedBox(width: 10),
-                      Icon(Iconsax.grid_25),
+                      GestureDetector(
+                          onTap: () {
+                            changList(true);
+                          },
+                          child: Icon(
+                            Iconsax.menu_15,
+                            color: isGrid
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.grey,
+                          )),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      GestureDetector(
+                          onTap: () {
+                            changList(false);
+                          },
+                          child: Icon(
+                            Ionicons.grid,
+                            color: !isGrid
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.grey,
+                          )),
                     ],
                   ),
                 )
               ],
             ),
           ),
-          const SizedBox(height: 10),
+          
           Expanded(
-            child: ListView.builder(
-              itemCount: data.length,
-              itemBuilder: (context, index) {
-                final item = data[index];
-                final title = item['name'];
-                final episodes = item['episodes']['sub'].toString();
-                final image = item['poster'];
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                  child: Stack(
-                    children: [
-                      Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            gradient: LinearGradient(
-                                colors: [
-                                  Colors.transparent,
-                                  Theme.of(context).colorScheme.primary
-                                ],
-                                begin: Alignment.center,
-                                end: Alignment.bottomCenter)),
-                        width: MediaQuery.of(context).size.width,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: ImageFiltered(
-                            imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                            child: CachedNetworkImage(
-                              imageUrl: image,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          height: 200,
-                          decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.transparent,
-                                  Theme.of(context).colorScheme.primary,
-                                ],
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                              ),
-                              borderRadius: BorderRadius.circular(20)),
-                        ),
-                      ),
-                      Positioned(
-                          top: 0,
-                          width: MediaQuery.of(context).size.width,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 15),
-                            child: Row(
-                              children: [
-                                SizedBox(
-                                  height: 170,
-                                  width: 120,
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(20),
-                                    child: CachedNetworkImage(
-                                      imageUrl: image,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 20,),
-                                SizedBox(
-                                  width:150,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(title.length > 40 ? title.substring(0,37) + "..." : title , style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),),
-                                    const SizedBox(height: 5,),
-                                    Text('Episodes  ' + item['episodes']['sub'].toString(),style: TextStyle( color: Theme.of(context).colorScheme.onSecondaryFixed),)
-                                  ],
-                                )),
-                              ],
-                            ),
-                          ))
-                    ],
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 1000),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return ScaleTransition(
+                  scale: CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.elasticOut, // Bouncing effect
                   ),
+                  child: child,
                 );
               },
+              child: isGrid
+                ? GridList(data: data)
+                : SearchList(data: data)
             ),
           ),
         ],
