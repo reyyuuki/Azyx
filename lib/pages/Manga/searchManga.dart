@@ -1,8 +1,10 @@
 import 'dart:convert';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:daizy_tv/components/Manga/_manga_grid.dart';
+import 'package:daizy_tv/components/Manga/_manga_list.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:text_scroll/text_scroll.dart';
+import 'package:iconsax/iconsax.dart';
+import 'package:ionicons/ionicons.dart';
 
 class SearchManga extends StatefulWidget {
   String name;
@@ -14,6 +16,7 @@ class SearchManga extends StatefulWidget {
 
 class _SearchpageState extends State<SearchManga> {
   dynamic data;
+  bool isGrid = false;
 
   TextEditingController? _controller;
 
@@ -53,6 +56,12 @@ class _SearchpageState extends State<SearchManga> {
     fetchdata();
   }
 
+  void changList(bool list) {
+    setState(() {
+      isGrid = list;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (data == null) {
@@ -61,101 +70,110 @@ class _SearchpageState extends State<SearchManga> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        toolbarHeight: 80, 
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        title: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: TextField(
-            controller: _controller,
-            onSubmitted: (value) {
-              handleSearch(value);
-            },
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.search),
-              hintText: 'Search Manga...',
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-                borderSide:
-                    BorderSide(color: Theme.of(context).colorScheme.primary),
+      body: Column(
+        children: [
+          const SizedBox(height: 45),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: const Icon(
+                  Icons.arrow_back_ios,
+                  size: 30,
+                ),
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-                borderSide: BorderSide.none,
+              SizedBox(
+                height: 55,
+                width: 280,
+                child: TextField(
+                  controller: _controller,
+                  onSubmitted: (value) {
+                    handleSearch(value);
+                  },
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.search),
+                    hintText: 'Search Manga',
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.primary),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide.none,
+                    ),
+                    fillColor:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                    filled: true,
+                  ),
+                ),
               ),
-              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-              filled: true,
+            ],
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Search Results",
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                          onTap: () {
+                            changList(true);
+                          },
+                          child: Icon(
+                            Iconsax.menu_15,
+                            color: isGrid
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.grey,
+                          )),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      GestureDetector(
+                          onTap: () {
+                            changList(false);
+                          },
+                          child: Icon(
+                            Ionicons.grid,
+                            color: !isGrid
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.grey,
+                          )),
+                    ],
+                  ),
+                )
+              ],
             ),
           ),
-        ),
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(Icons.arrow_back_ios),
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(10.0),
-        children: [
-          const SizedBox(height: 40),
-          GridView.builder(
-            physics:
-                const NeverScrollableScrollPhysics(), // Disable grid scrolling
-            shrinkWrap: true, // Take only needed space
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, // Number of columns
-              crossAxisSpacing: 20.0, // Space between columns
-              childAspectRatio:
-                  0.5, // Ratio between width and height of the grid items
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 1000),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return ScaleTransition(
+                  scale: CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.elasticOut, // Bouncing effect
+                  ),
+                  child: child,
+                );
+              },
+              child: isGrid
+                  ? MangaGrid(data: data, key: ValueKey<bool>(isGrid))
+                  : MangaSearchList(data: data, key: ValueKey<bool>(!isGrid)),
             ),
-            itemCount: data!.length,
-            itemBuilder: (context, index) {
-              final item = data![index];
-              return GestureDetector(
-                onTap: () => Navigator.pushNamed(context, '/mangaDetail',
-                    arguments: {"id": item['id'], "image": item['image']}),
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 250,
-                      width: 230,
-                      child: Hero(
-                        tag: item['id'],
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: CachedNetworkImage(
-                            imageUrl: item['image'],
-                            fit: BoxFit.cover,
-                            progressIndicatorBuilder:
-                                (context, url, downloadProgress) => Center(
-                              child: CircularProgressIndicator(
-                                  value: downloadProgress.progress),
-                            ),
-                            errorWidget: (context, url, error) =>
-                                const Icon(Icons.error),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Expanded(
-                      child: TextScroll(
-                        item['title'],
-                        mode: TextScrollMode.bouncing,
-                        velocity:
-                            const Velocity(pixelsPerSecond: Offset(40, 0)),
-                        delayBefore: const Duration(milliseconds: 500),
-                        pauseBetween: const Duration(milliseconds: 1000),
-                        textAlign: TextAlign.center,
-                        selectable: true,
-                        style: const TextStyle(fontSize: 18),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
           ),
         ],
       ),
