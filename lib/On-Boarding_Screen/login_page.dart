@@ -20,7 +20,7 @@ class _LoginPageState extends State<LoginPage> {
   Future _pickImage() async {
   try {
     final pickedImage = await  ImagePicker().pickImage(source: ImageSource.gallery);
-
+    
     if (pickedImage != null) {
       setState(() {
         imagePath = pickedImage.path;
