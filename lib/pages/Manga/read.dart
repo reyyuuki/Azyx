@@ -84,7 +84,7 @@ class _ReadState extends State<Read> {
     const String url =
         'https://anymey-proxy.vercel.app/cors?url=https://manga-ryan.vercel.app/api/manga/';
     try {
-      final provider = Provider.of<Data>(context);
+      final provider = Provider.of<Data>(context, listen: false);
       final resp = await http.get(
           Uri.parse('$url${widget.mangaId}/${chapterList?[index!]['id']}'));
       if (resp.statusCode == 200) {
@@ -122,6 +122,7 @@ class _ReadState extends State<Read> {
                   (chapter) => chapter['name'] == currentChapter))! -
               1)
           .clamp(0, chapterList!.length - 1);
+          log(index.toString());
     } else {
       index = ((chapterList?.indexWhere(
                   (chapter) => chapter['name'] == currentChapter))! +
@@ -131,12 +132,6 @@ class _ReadState extends State<Read> {
     fetchChapterImages();
   }
 
-
-  void _toggleShow() {
-    setState(() {
-      show = !show;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {

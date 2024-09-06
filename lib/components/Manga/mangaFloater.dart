@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:ui';
 
 import 'package:daizy_tv/dataBase/appDatabase.dart';
@@ -25,6 +26,7 @@ final String? title;
     final currentChapterId = currentChapterList.isNotEmpty
         ? currentChapterList.first['id']
         : 'chapter-1';
+        log(currentChapter);
 
     return Positioned(
           bottom: 0,

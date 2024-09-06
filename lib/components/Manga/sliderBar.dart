@@ -25,7 +25,7 @@ class Sliderbar extends StatefulWidget {
 }
 
 class _SlidebarState extends State<Sliderbar> {
-  bool _areBarsVisible = true;
+  bool _areBarsVisible = false;
   double _scrollProgress = 0.0;
   int _currentPage = 1;
 
@@ -181,12 +181,12 @@ class _SlidebarState extends State<Sliderbar> {
               ),
             ),
             Positioned(
-              bottom: -2,
+              bottom: 0,
               width: MediaQuery.of(context).size.width,
               child: Center(
                 child: Text(
                             '$_currentPage / ${widget.totalImages}',
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
                           ),
               ),
             ),
