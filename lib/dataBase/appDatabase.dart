@@ -109,6 +109,6 @@ class Data extends ChangeNotifier {
   String? getCurrentChapterForManga(String mangaId) {
     final manga = getMangaById(mangaId);
     log('Manga fetched for current chapter: $manga');
-    return manga?['currentChapter'] ?? '1';
+    return manga?['currentChapter'] ?? 'chapter 1';
   }
 }
