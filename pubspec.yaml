@@ -32,6 +32,7 @@ dependencies:
   dynamic_color: ^1.7.0
   wakelock_plus: ^1.2.8
   dropdown_button2: ^2.3.9
+  flutter_launcher_icons: ^0.13.1
   
 
 dev_dependencies:
@@ -40,6 +41,9 @@ dev_dependencies:
   flutter_lints: ^3.0.0
   hive_generator: ^2.0.1
   build_runner: ^2.4.11
+flutter_icons:
+  android: true
+  image_path: "assets/icon/icon.png"
   
 
 flutter:
