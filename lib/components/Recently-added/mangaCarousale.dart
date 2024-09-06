@@ -9,6 +9,9 @@ class Mangacarousale extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if(carosaleData == null){
+      return const SizedBox.shrink();
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
