@@ -121,10 +121,12 @@ class __ThemeChangeState extends State<ThemeChange> {
                                             decoration: BoxDecoration(
                                               gradient: LinearGradient(
                                                   colors: [
-                                                    Colors.purple,
                                                     Theme.of(context)
                                                         .colorScheme
                                                         .primary,
+                                                          Theme.of(context)
+                                                        .colorScheme
+                                                        .secondary,
                                                   ],
                                                   begin: Alignment.topLeft,
                                                   end: Alignment.bottomRight),
@@ -186,13 +188,13 @@ class __ThemeChangeState extends State<ThemeChange> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text(
-                      "Theme Variant",
+                      "Palette",
                       style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Container(
                         height: 50,
-                        width: 150,
+                        width: 135,
                         decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.inverseSurface,
                             borderRadius: BorderRadius.circular(15)),
@@ -206,6 +208,7 @@ class __ThemeChangeState extends State<ThemeChange> {
                                 child: Text(
                                   item,
                                   style: TextStyle(
+                                    fontSize: 14,
                                       color: Theme.of(context)
                                           .colorScheme
                                           .surface),
