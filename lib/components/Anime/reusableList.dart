@@ -31,7 +31,7 @@ class ReusableList extends StatelessWidget {
               ),
               Text(
                 name!,
-                style: const TextStyle(fontSize: 25),
+                style:  const TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
               ),
             ],
           ),
