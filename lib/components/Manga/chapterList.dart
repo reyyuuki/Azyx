@@ -28,6 +28,7 @@ class Chapterlist extends StatelessWidget {
           height: 55,
           decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              border: Border( left: BorderSide(width: 5, color: Theme.of(context).colorScheme.inverseSurface)),
               borderRadius: BorderRadius.circular(10)),
           child: Padding(
             padding: const EdgeInsets.all(8.0),

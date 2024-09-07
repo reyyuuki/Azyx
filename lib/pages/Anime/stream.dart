@@ -294,7 +294,8 @@ class _StreamState extends State<Stream> {
                 child: Container(
                   margin: const EdgeInsets.only(top: 10),
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border(left: BorderSide(width: 5, color: Theme.of(context).colorScheme.primary)),
                       color: episodeNumber == episodeId
                           ? Theme.of(context).colorScheme.inversePrimary
                           : Theme.of(context)
