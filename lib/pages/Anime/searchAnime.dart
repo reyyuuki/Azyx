@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:daizy_tv/components/Anime/_gridlist.dart';
-import 'package:daizy_tv/pages/Anime/_search_list.dart';
+import 'package:daizy_tv/components/Anime/_search_list.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:iconsax/iconsax.dart';

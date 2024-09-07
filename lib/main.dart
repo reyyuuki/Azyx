@@ -3,8 +3,6 @@ import 'dart:ui';
 import 'package:daizy_tv/Bottom_Menu/_profile.dart';
 import 'package:daizy_tv/Bottom_Menu/_setting.dart';
 import 'package:daizy_tv/On-Boarding_Screen/login_page.dart';
-import 'package:daizy_tv/On-Boarding_Screen/theme-modes.dart';
-import 'package:daizy_tv/On-Boarding_Screen/welcome_page.dart';
 import 'package:daizy_tv/Provider/theme_provider.dart';
 import 'package:daizy_tv/dataBase/appDatabase.dart';
 import 'package:daizy_tv/dataBase/user.dart';
@@ -59,12 +57,6 @@ class _MainAppState extends State<MainApp> {
   @override
   void initState() {
     super.initState();
-    userDataBase = UserDataBase();
-    _checkLogin();
-  }
-
-  Future<void> _checkLogin() async {
-    userDataBase?.loadData(); // Load data from Hive
   }
 
   @override
@@ -78,9 +70,6 @@ class _MainAppState extends State<MainApp> {
         switch (settings.name) {
 
           //On-Boarding_Screen
-          case '/choose-mode':
-          return MaterialPageRoute(builder: (context) => const Modes());
-
           case '/login-page' :
           return MaterialPageRoute(builder: (context) => const LoginPage());
 
@@ -159,7 +148,7 @@ class _MainAppState extends State<MainApp> {
             );
         }
       },
-      home: userDataBase!.login ?  const WelcomePage() : const HomeScreen(),
+      home: const HomeScreen(),
     );
   }
 }
