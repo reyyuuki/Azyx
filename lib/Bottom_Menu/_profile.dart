@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:daizy_tv/components/Recently-added/animeCarousale.dart';
+import 'package:daizy_tv/components/Recently-added/mangaCarousale.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iconsax/iconsax.dart';
@@ -16,16 +18,22 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   var box = Hive.box('mybox');
+  var appData = Hive.box("app-data");
   String imagePath = "";
   String userName = "";
-  final TextEditingController _nameController = TextEditingController(); // Controller for TextField
+   List<dynamic>? animeWatches;
+   List<dynamic>? mangaReads;
+  
+  final TextEditingController _nameController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     imagePath = box.get("imagePath") ?? "";
     userName = box.get("userName") ?? "";
-    _nameController.text = userName; // Initialize the TextField with current username
+    animeWatches = appData.get("currently-Watching") ?? "0";
+    mangaReads = appData.get("currently-Reading") ?? "0";
+    _nameController.text = userName; 
   }
 
   Future<void> _pickImage() async {
@@ -177,6 +185,100 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
             ),
+            const SizedBox(height:10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: Center(
+                child: Container(
+                  width: 200,
+                  height: 60,
+                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.onSecondaryFixed, borderRadius: BorderRadius.circular(20)),
+                  child:  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          children: [
+                            Text("Anime", style: TextStyle(fontWeight: FontWeight.bold),),
+                            Text(animeWatches!.length.toString(), style: TextStyle(fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Text("Manga", style: TextStyle(fontWeight: FontWeight.bold)),
+                            Text(mangaReads!.length.toString(), style: TextStyle(fontWeight: FontWeight.bold)),
+                          ],
+                        )
+                    ],),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height:10),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              child: Text("Stats", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),),
+            ),
+            const SizedBox(height:10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              child: Container(
+                height: 230,
+                decoration: BoxDecoration(color: Theme.of(context).colorScheme.onSecondaryFixed,
+                borderRadius: BorderRadius.circular(20)
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: Row(
+                    mainAxisAlignment:MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Episodes Watched",style: TextStyle(fontSize: 16),),
+                          SizedBox(height: 10,),
+                          Text("Days Watched",style: TextStyle(fontSize: 16),),
+                          SizedBox(height: 10,),
+                          Text("Anime Mean Score",style: TextStyle(fontSize: 16),),
+                          SizedBox(height: 10,),
+                          Text("Chapters Read",style: TextStyle(fontSize: 16),),
+                          SizedBox(height: 10,),
+                          Text("Volume Read",style: TextStyle(fontSize: 16),),
+                          SizedBox(height: 10,),
+                          Text("Mnaga Mean Score",style: TextStyle(fontSize: 16),),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("0",style: TextStyle(fontSize: 16),),
+                          SizedBox(height: 10,),
+                          Text("0",style: TextStyle(fontSize: 16),),
+                          SizedBox(height: 10,),
+                          Text("0",style: TextStyle(fontSize: 16),),
+                          SizedBox(height: 10,),
+                          Text("0",style: TextStyle(fontSize: 16),),
+                          SizedBox(height: 10,),
+                          Text("0",style: TextStyle(fontSize: 16),),
+                          SizedBox(height: 10,),
+                          Text("0",style: TextStyle(fontSize: 16),),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+             const SizedBox(height: 20,),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Animecarousale(carosaleData: animeWatches),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Mangacarousale(carosaleData: mangaReads),
+            )
         ],
       ),
     );
