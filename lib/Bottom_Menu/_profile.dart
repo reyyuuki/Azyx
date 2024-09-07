@@ -31,8 +31,8 @@ class _ProfileState extends State<Profile> {
     super.initState();
     imagePath = box.get("imagePath") ?? "";
     userName = box.get("userName") ?? "";
-    animeWatches = appData.get("currently-Watching") ?? "0";
-    mangaReads = appData.get("currently-Reading") ?? "0";
+    animeWatches = appData.get("currently-Watching");
+    mangaReads = appData.get("currently-Reading");
     _nameController.text = userName; 
   }
 
@@ -59,7 +59,7 @@ class _ProfileState extends State<Profile> {
       dialogBackgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       dialogBorderRadius: BorderRadius.circular(20),
       customHeader:  Icon(
-    Iconsax.user_edit, // Change to any icon you want
+    Iconsax.user_edit,
     size: 50,
     color: Theme.of(context).colorScheme.primary,
   ),
@@ -88,7 +88,7 @@ class _ProfileState extends State<Profile> {
       btnOkOnPress: () {
         setState(() {
           userName = _nameController.text;
-          box.put("userName", userName); // Update the username in Hive
+          box.put("userName", userName);
         });
       },
       btnCancelOnPress: () {},
@@ -115,7 +115,7 @@ class _ProfileState extends State<Profile> {
                           fit: BoxFit.cover,
                         )
                       : Container(
-                          color: Colors.grey, // Fallback color for when no image is available
+                          color: Colors.transparent,
                         ),
                 ),
               ),
@@ -153,8 +153,8 @@ class _ProfileState extends State<Profile> {
                                   fit: BoxFit.cover,
                                 )
                               : Container(
-                                  color: Colors.grey, // Placeholder for the profile image
-                                ),
+                                color: Theme.of(context).colorScheme.onSecondaryFixed,
+                                child: Icon(Iconsax.user, size: 80,))
                         ),
                       ),
                     ),
@@ -194,20 +194,20 @@ class _ProfileState extends State<Profile> {
                   height: 60,
                   decoration: BoxDecoration(color: Theme.of(context).colorScheme.onSecondaryFixed, borderRadius: BorderRadius.circular(20)),
                   child:  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Column(
                           children: [
-                            Text("Anime", style: TextStyle(fontWeight: FontWeight.bold),),
-                            Text(animeWatches!.length.toString(), style: TextStyle(fontWeight: FontWeight.bold)),
+                            const Text("Anime", style: TextStyle(fontWeight: FontWeight.bold),),
+                            Text(animeWatches != null ? animeWatches!.length.toString() : "0", style: const TextStyle(fontWeight: FontWeight.bold)),
                           ],
                         ),
                         Column(
                           children: [
-                            Text("Manga", style: TextStyle(fontWeight: FontWeight.bold)),
-                            Text(mangaReads!.length.toString(), style: TextStyle(fontWeight: FontWeight.bold)),
+                            const Text("Manga", style: TextStyle(fontWeight: FontWeight.bold)),
+                            Text(mangaReads != null ?  mangaReads!.length.toString() : "0", style: const TextStyle(fontWeight: FontWeight.bold)),
                           ],
                         )
                     ],),
