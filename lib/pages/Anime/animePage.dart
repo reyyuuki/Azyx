@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:daizy_tv/backupData/anime.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -35,8 +36,6 @@ class _HomepageState extends State<Animepage> {
   }
 
   Future<void> fetchData() async {
-
-
     try {
       final response = await http
           .get(Uri.parse("https://goodproxy.goodproxy.workers.dev/fetch?url=https://aniwatch-ryan.vercel.app/anime/home"));
@@ -52,8 +51,7 @@ class _HomepageState extends State<Animepage> {
         throw Exception("Failed to load data: ${response.statusCode}");
       }
     } catch (error) {
-      // ignore: avoid_print
-      print(error);
+      log('$error');
     }
   }
 
