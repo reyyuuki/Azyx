@@ -17,14 +17,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.7.0"
-  animated_toggle_switch:
+  animated_button:
     dependency: "direct main"
     description:
-      name: animated_toggle_switch
-      sha256: "786e82be3b004100299c1c6d023f8f1928decc8353a6fdff191bf78c866262fa"
+      name: animated_button
+      sha256: "74c7a632e7e9befd1b56595a280bf66b4604d797c1c79c84ca38cf0607f638de"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.3"
+    version: "0.2.0"
   archive:
     dependency: transitive
     description:
@@ -49,6 +49,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.11.0"
+  awesome_dialog:
+    dependency: "direct main"
+    description:
+      name: awesome_dialog
+      sha256: "41c41ae4b30b5c7f26bb3d9f9c87010ed1cab0bb4d4ac0cc513e5799c37e9d82"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.1"
   better_player:
     dependency: "direct main"
     description:
@@ -257,14 +265,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
-  curved_navigation_bar:
-    dependency: "direct main"
-    description:
-      name: curved_navigation_bar
-      sha256: bb4ab128fcb6f4a9f0f1f72d227db531818b20218984789777f049fcbf919279
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.6"
   dart_style:
     dependency: transitive
     description:
@@ -816,14 +816,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
-  percent_indicator:
-    dependency: "direct main"
-    description:
-      name: percent_indicator
-      sha256: c37099ad833a883c9d71782321cb65c3a848c21b6939b6185f0ff6640d05814c
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.2.3"
   petitparser:
     dependency: transitive
     description:
@@ -880,6 +872,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
+  rive:
+    dependency: transitive
+    description:
+      name: rive
+      sha256: daa5394a7d064b4997b39e9afa02f6882c479c38b19fa0dd60f052b99c105400
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.13.13"
+  rive_common:
+    dependency: transitive
+    description:
+      name: rive_common
+      sha256: c7bf0781b1621629361579c300ac2f8aa1a238227a242202a596e82becc244d7
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.11"
   rxdart:
     dependency: transitive
     description:

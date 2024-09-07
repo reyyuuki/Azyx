@@ -41,11 +41,11 @@ class _StreamState extends State<Stream> {
     fetchData();
   }
 
-  final String baseUrl = 'https://aniwatch-ryan.vercel.app/anime/info?id=';
+  final String baseUrl = 'https://goodproxy.goodproxy.workers.dev/fetch?url=https://aniwatch-ryan.vercel.app/anime/info?id=';
   final String episodeDataUrl =
-      'https://aniwatch-ryan.vercel.app/anime/episodes/';
+      'https://goodproxy.goodproxy.workers.dev/fetch?url=https://aniwatch-ryan.vercel.app/anime/episodes/';
   final String episodeUrl =
-      'https://aniwatch-ryan.vercel.app/anime/episode-srcs?id=';
+      'https://goodproxy.goodproxy.workers.dev/fetch?url=https://aniwatch-ryan.vercel.app/anime/episode-srcs?id=';
 
   Future<void> fetchData() async {
     try {

@@ -33,11 +33,11 @@ class _DetailsState extends State<Details> {
   Future<void> fetchData() async {
     try {
       final response = await http.get(Uri.parse(
-          'https://aniwatch-ryan.vercel.app/anime/info?id=${widget.id}'));
+          'https://goodproxy.goodproxy.workers.dev/fetch?url=https://aniwatch-ryan.vercel.app/anime/info?id=${widget.id}'));
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         final newResponse = await http.get(Uri.parse(
-            'https://consumet-api-two-nu.vercel.app/meta/anilist/info/${jsonData['anime']['info']['anilistId']}'));
+            'https://goodproxy.goodproxy.workers.dev/fetch?url=https://consumet-api-two-nu.vercel.app/meta/anilist/info/${jsonData['anime']['info']['anilistId']}'));
 
         if (newResponse.statusCode == 200) {
           final newData = jsonDecode(newResponse.body);

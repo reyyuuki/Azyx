@@ -39,7 +39,7 @@ class _HomepageState extends State<Animepage> {
 
     try {
       final response = await http
-          .get(Uri.parse("https://aniwatch-ryan.vercel.app/anime/home"));
+          .get(Uri.parse("https://goodproxy.goodproxy.workers.dev/fetch?url=https://aniwatch-ryan.vercel.app/anime/home"));
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         setState(() {
