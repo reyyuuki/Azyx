@@ -32,7 +32,7 @@ class Header extends StatelessWidget {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
                   Text(
-                    "Enjoy unlimited ${name ?? 'content'}!", // Display the username
+                    "Enjoy unlimited ${name ?? 'content'}!",
                     style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                   ),
                 ],
@@ -179,16 +179,21 @@ class Header extends StatelessWidget {
                   color: Colors.transparent,
                   width: MediaQuery.of(context).size.width,
                   height: 40,
-                  child: const Row(
+                  child:  Row(
                     children: [
-                      Icon(
+                      box.get("userName") != null ?
+                      const Icon(
+                        Iconsax.login,
+                        size: 20,
+                      ) : 
+                      const Icon(
                         Iconsax.logout,
                         size: 20,
                       ),
-                      SizedBox(width: 20),
+                      const SizedBox(width: 20),
                       Text(
-                        "LogOut",
-                        style: TextStyle(fontSize: 18),
+                        box.get("userName") != null ? "LogOut" : "LogIn",
+                        style: const TextStyle(fontSize: 18),
                       ),
                     ],
                   ),
