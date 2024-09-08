@@ -39,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
     final box = Hive.box('mybox');
     box.put('userName', _usernameController.text);
     box.put('passWord', _passwordController.text);
-    box.put('imagePath', imagePath ?? 'assets/images/imagePlaceholder.png');
+    box.put('imagePath', imagePath);
     box.put('login', false );
   }
 
@@ -63,12 +63,11 @@ class _LoginPageState extends State<LoginPage> {
                           width: 100,
                           fit: BoxFit.cover,
                         )
-                      : Image.asset(
-                          'assets/images/imagePlaceholder.png',
-                          height: 100,
+                      : Container(
+                        height: 100,
                           width: 100,
-                          fit: BoxFit.cover,
-                        ),
+                          decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(20)),
+                        child: Icon(Iconsax.image5, size: 50,))
                 ),
               ),
               const SizedBox(height: 20),
@@ -80,28 +79,8 @@ class _LoginPageState extends State<LoginPage> {
               TextField(
                 controller: _usernameController,
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(Iconsax.user),
+                  prefixIcon: const Icon(Icons.person),
                   hintText: 'Username',
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide(
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide.none,
-                  ),
-                  fillColor: Theme.of(context).colorScheme.surfaceContainer,
-                  filled: true,
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Iconsax.eye_slash),
-                  hintText: 'Password',
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
                     borderSide: BorderSide(
@@ -133,6 +112,7 @@ class _LoginPageState extends State<LoginPage> {
                     "LogIn",
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.inverseSurface,
+                      fontSize: 18
                     ),
                   ),
                 ),

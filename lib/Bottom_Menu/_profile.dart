@@ -160,7 +160,7 @@ class _ProfileState extends State<Profile> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      userName.isNotEmpty ? userName : "No Name", // Fallback name
+                      userName.isNotEmpty ? userName : "Guest", // Fallback name
                       style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                     ),
                   ],

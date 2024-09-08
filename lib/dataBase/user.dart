@@ -25,12 +25,6 @@ class UserDataBase {
     passWord = _mybox.get('passWord', defaultValue: '');
     imagePath = _mybox.get('imagePath', defaultValue: '');
     login = _mybox.get('login', defaultValue: true);
-
-    // Assign a default name if the userName is empty
-    if (userName.isEmpty) {
-      userName = 'User${Random().nextInt(1000)}'; 
-      storeData(); 
-    }
   }
 
   // Method to delete data
