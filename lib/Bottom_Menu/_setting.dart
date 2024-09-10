@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:daizy_tv/components/setting_tile.dart';
 import 'package:daizy_tv/dataBase/user.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iconsax/iconsax.dart';
 
 class Setting extends StatefulWidget {
@@ -13,18 +14,19 @@ class Setting extends StatefulWidget {
 }
 
 class _SettingState extends State<Setting> {
-  UserDataBase? _userDataBase;
+ var box = Hive.box("mybox");
+ 
 
   @override
   void initState() {
     super.initState();
-    _userDataBase = UserDataBase();
-     _userDataBase?.loadData();
   }
 
 
   @override
   Widget build(BuildContext context) {
+    String userName = box.get("userName") ?? "Guest";
+    String image = box.get("imagePath") ?? "";
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
         appBar: AppBar(
@@ -49,7 +51,7 @@ class _SettingState extends State<Setting> {
                     child: ClipRRect(
                         borderRadius: BorderRadius.circular(100),
                         child: Image.file(
-                          File(_userDataBase!.imagePath),
+                          File(image),
                           fit: BoxFit.cover,
                           errorBuilder: (BuildContext context, Object exception,
                               StackTrace? stackTrace) {
@@ -61,7 +63,7 @@ class _SettingState extends State<Setting> {
                         )),
                   ),
                   const SizedBox(height: 10,),
-                  Text(_userDataBase!.userName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),)
+                  Text(userName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),)
                 ],
               ),
               const SizedBox(

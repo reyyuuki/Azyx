@@ -12,7 +12,7 @@ class Carousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-     if (animeData == null || (animeData as List).isEmpty) {
+     if (animeData == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -94,7 +94,7 @@ class Carousel extends StatelessWidget {
                               height: 30,
                               margin: const EdgeInsets.only(
                                   right:
-                                      4.0), // Optional: Adds space between genre chips
+                                      4.0),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(20),
                                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
