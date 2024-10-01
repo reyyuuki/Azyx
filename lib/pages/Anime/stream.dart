@@ -123,6 +123,7 @@ class _StreamState extends State<Stream> {
       setState(() {
         category = newCategory;
       });
+      log(newCategory);
       fetchEpisode();
     }
   }
@@ -265,9 +266,9 @@ class _StreamState extends State<Stream> {
       onChanged: (bool state) {
         handleCategory(state ? 'sub' : 'dub');
       },
-      onDoubleTap: () => handleCategory(category == 'sub' ? 'dub' : 'sub'),
+      onDoubleTap: () => {},
       onSwipe: () => handleCategory(category == 'sub' ? 'dub' : 'sub'),
-      onTap: () => handleCategory(category == 'sub' ? 'dub' : 'sub'),
+      onTap: () => {},
     );
   }
 
