@@ -34,41 +34,28 @@ class _HomepageState extends State<Animepage> {
   }
 
   void backUpData() {
-    if (isConsumet) {
-      setState(() {
-        spotlightAnime = extractData( consumet_spotlightAnimes["results"]);
-        trendingAnime = extractData(consumet_trendingAnimes["results"]);
-        latestEpisodesAnime = extractData(consumet_latestEpisodeAnimes["results"]);
-        topUpComingAnime = extractData(consumet_topUpcomingAnimes["results"]);
-      });
-    } else {
       setState(() {
         spotlightAnime = animeData['spotlightAnimes'];
         trendingAnime = animeData['trendingAnimes'];
         latestEpisodesAnime = animeData['latestEpisodeAnimes'];
         topUpComingAnime = animeData['topUpcomingAnimes'];
       });
-    }
   }
 
 
   Future<void> fetchData() async{
-    if (isConsumet) {
-     baseData = await consumetHomePageData();
-    } else {
     baseData = await fetchHomePageData();
-    }
   }
 
 
-  void updateData(){
-    setState(() {
-      spotlightAnime = extractData(baseData["spotlightAnimes"]);
-      trendingAnime = extractData(baseData["trendingAnimes"]);
-      latestEpisodesAnime = extractData(baseData["latestEpisodesAnimes"]);
-      topUpComingAnime = extractData(baseData["topUpComingAnimes"]);
-    });
-  }
+  // void updateData(){
+  //   setState(() {
+  //     spotlightAnime = extractData(baseData["spotlightAnimes"]);
+  //     trendingAnime = extractData(baseData["trendingAnimes"]);
+  //     latestEpisodesAnime = extractData(baseData["latestEpisodesAnimes"]);
+  //     topUpComingAnime = extractData(baseData["topUpComingAnimes"]);
+  //   });
+  // }
 
 
   @override
