@@ -46,7 +46,7 @@ class Header extends StatelessWidget {
                   height: 50,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(50),
-                    color: Theme.of(context).colorScheme.inverseSurface,
+                    color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
                   ),
                   child: isImage
                       ? ClipRRect(
@@ -58,7 +58,7 @@ class Header extends StatelessWidget {
                         )
                       : Icon(
                           Iconsax.user,
-                          color: Theme.of(context).colorScheme.surface,
+                          color: Colors.white,
                           size: 30,
                         ),
                 ),
@@ -96,7 +96,7 @@ class Header extends StatelessWidget {
                     height: 50,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(50),
-                      color: Theme.of(context).colorScheme.inverseSurface,
+                      color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
                     ),
                     child: box.get("imagePath") != null && File(box.get("imagePath")!).existsSync()
                         ? ClipRRect(
@@ -108,7 +108,7 @@ class Header extends StatelessWidget {
                           )
                         : Icon(
                             Iconsax.user,
-                            color: Theme.of(context).colorScheme.surface,
+                            color: Colors.white,
                             size: 30,
                           ),
                   ),
