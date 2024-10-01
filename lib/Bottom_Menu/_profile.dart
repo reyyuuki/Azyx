@@ -5,6 +5,7 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:daizy_tv/components/Recently-added/animeCarousale.dart';
 import 'package:daizy_tv/components/Recently-added/mangaCarousale.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:image_picker/image_picker.dart';
@@ -21,9 +22,9 @@ class _ProfileState extends State<Profile> {
   var appData = Hive.box("app-data");
   String imagePath = "";
   String userName = "";
-   List<dynamic>? animeWatches;
-   List<dynamic>? mangaReads;
-  
+  List<dynamic>? animeWatches;
+  List<dynamic>? mangaReads;
+
   final TextEditingController _nameController = TextEditingController();
 
   @override
@@ -33,12 +34,13 @@ class _ProfileState extends State<Profile> {
     userName = box.get("userName") ?? "";
     animeWatches = appData.get("currently-Watching");
     mangaReads = appData.get("currently-Reading");
-    _nameController.text = userName; 
+    _nameController.text = userName;
   }
 
   Future<void> _pickImage() async {
     try {
-      final pickedImage = await ImagePicker().pickImage(source: ImageSource.gallery);
+      final pickedImage =
+          await ImagePicker().pickImage(source: ImageSource.gallery);
 
       if (pickedImage != null) {
         setState(() {
@@ -58,19 +60,22 @@ class _ProfileState extends State<Profile> {
       animType: AnimType.bottomSlide,
       dialogBackgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       dialogBorderRadius: BorderRadius.circular(20),
-      customHeader:  Icon(
-    Iconsax.user_edit,
-    size: 50,
-    color: Theme.of(context).colorScheme.primary,
-  ),
+      customHeader: Icon(
+        Iconsax.user_edit,
+        size: 50,
+        color: Theme.of(context).colorScheme.primary,
+      ),
       title: 'Edit Username',
       btnOkIcon: Iconsax.user_edit,
       btnCancelIcon: Iconsax.close_circle,
       body: Column(
         children: [
-          const Text('Enter your Username', style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
+          const Text(
+            'Enter your Username',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
           const SizedBox(height: 20),
-           Padding(
+          Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: TextField(
               controller: _nameController,
@@ -94,6 +99,15 @@ class _ProfileState extends State<Profile> {
       btnCancelOnPress: () {},
     ).show();
   }
+
+  List<String> data = [
+    'Episodes Watched',
+    'Days Watched',
+    'Anime Mean Score',
+    'Chapters Read',
+    'Volume Read',
+    'Manga Mean Score'
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +143,7 @@ class _ProfileState extends State<Profile> {
                     gradient: LinearGradient(
                       colors: [
                         Colors.transparent,
-                        Theme.of(context).colorScheme.surface,
+                        Theme.of(context).colorScheme.onPrimaryFixedVariant,
                       ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
@@ -146,22 +160,27 @@ class _ProfileState extends State<Profile> {
                         width: 200,
                         height: 200,
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(100),
-                          child: imagePath.isNotEmpty
-                              ? Image.file(
-                                  File(imagePath),
-                                  fit: BoxFit.cover,
-                                )
-                              : Container(
-                                color: Theme.of(context).colorScheme.onSecondaryFixed,
-                                child: Icon(Iconsax.user, size: 80,))
-                        ),
+                            borderRadius: BorderRadius.circular(100),
+                            child: imagePath.isNotEmpty
+                                ? Image.file(
+                                    File(imagePath),
+                                    fit: BoxFit.cover,
+                                  )
+                                : Container(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryFixedVariant,
+                                    child: const Icon(
+                                      Iconsax.user,
+                                      size: 80,
+                                    ))),
                       ),
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      userName.isNotEmpty ? userName : "Guest", // Fallback name
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                      userName.isNotEmpty ? userName : "Guest",
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.w700),
                     ),
                   ],
                 ),
@@ -169,116 +188,175 @@ class _ProfileState extends State<Profile> {
             ],
           ),
           const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            child: Center(
-              child: AnimatedButton(
-                key: const ValueKey("editButton"), // Added key
-                height: 50,
-                width: 300,
-                color: Theme.of(context).colorScheme.onSecondaryFixed,
-                pressEvent: () {
-                  _showEditDialog(); 
-                },
-                text:
-                  "Edit name",
-                ),
-              ),
-            ),
-            const SizedBox(height:10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: Center(
-                child: Container(
-                  width: 200,
-                  height: 60,
-                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.onSecondaryFixed, borderRadius: BorderRadius.circular(20)),
-                  child:  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          children: [
-                            const Text("Anime", style: TextStyle(fontWeight: FontWeight.bold),),
-                            Text(animeWatches != null ? animeWatches!.length.toString() : "0", style: const TextStyle(fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            const Text("Manga", style: TextStyle(fontWeight: FontWeight.bold)),
-                            Text(mangaReads != null ?  mangaReads!.length.toString() : "0", style: const TextStyle(fontWeight: FontWeight.bold)),
-                          ],
-                        )
-                    ],),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                child: Center(
+                  child: AnimatedButton(
+                    key: const ValueKey("editButton"),
+                    height: 40,
+                    width: 160,
+                    isFixedHeight: false,
+                    color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
+                    pressEvent: () {
+                      _showEditDialog();
+                    },
+                    text: "Edit name",
+                    buttonTextStyle:
+                        const TextStyle(fontSize: 16, color: Colors.white),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height:10),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              child: Text("Stats", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),),
-            ),
-            const SizedBox(height:10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: Container(
-                height: 230,
-                decoration: BoxDecoration(color: Theme.of(context).colorScheme.onSecondaryFixed,
-                borderRadius: BorderRadius.circular(20)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: Center(
+                  child: AnimatedButton(
+                    key: const ValueKey("editButton"),
+                    height: 40,
+                    width: 160,
+                    isFixedHeight: false,
+                    color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
+                    pressEvent: () {
+                      // Show Snackbar
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Center(
+                              child: Text(
+                            "Currently not available!",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w500),
+                          )),
+                          duration: const Duration(seconds: 2),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)),
+                          width: 230,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                        ),
+                      );
+                    },
+                    text: "Share Profile",
+                    buttonTextStyle:
+                        const TextStyle(fontSize: 16, color: Colors.white),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-                child: const Padding(
-                  padding: EdgeInsets.all(20.0),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Center(
+              child: Container(
+                width: 200,
+                height: 60,
+                decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
+                    borderRadius: BorderRadius.circular(20)),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   child: Row(
-                    mainAxisAlignment:MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Episodes Watched",style: TextStyle(fontSize: 16),),
-                          SizedBox(height: 10,),
-                          Text("Days Watched",style: TextStyle(fontSize: 16),),
-                          SizedBox(height: 10,),
-                          Text("Anime Mean Score",style: TextStyle(fontSize: 16),),
-                          SizedBox(height: 10,),
-                          Text("Chapters Read",style: TextStyle(fontSize: 16),),
-                          SizedBox(height: 10,),
-                          Text("Volume Read",style: TextStyle(fontSize: 16),),
-                          SizedBox(height: 10,),
-                          Text("Mnaga Mean Score",style: TextStyle(fontSize: 16),),
+                          const Text(
+                            "Anime",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white),
+                          ),
+                          Text(
+                              animeWatches != null
+                                  ? animeWatches!.length.toString()
+                                  : "0",
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
                         ],
                       ),
                       Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("0",style: TextStyle(fontSize: 16),),
-                          SizedBox(height: 10,),
-                          Text("0",style: TextStyle(fontSize: 16),),
-                          SizedBox(height: 10,),
-                          Text("0",style: TextStyle(fontSize: 16),),
-                          SizedBox(height: 10,),
-                          Text("0",style: TextStyle(fontSize: 16),),
-                          SizedBox(height: 10,),
-                          Text("0",style: TextStyle(fontSize: 16),),
-                          SizedBox(height: 10,),
-                          Text("0",style: TextStyle(fontSize: 16),),
+                          const Text("Manga",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white)),
+                          Text(
+                              mangaReads != null
+                                  ? mangaReads!.length.toString()
+                                  : "0",
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold)),
                         ],
-                      ),
+                      )
                     ],
                   ),
                 ),
               ),
             ),
-             const SizedBox(height: 20,),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Animecarousale(carosaleData: animeWatches),
+          ),
+          const SizedBox(height: 10),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 15),
+            child: Text(
+              "Stats",
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.w700),
             ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Mangacarousale(carosaleData: mangaReads),
-            )
+          ),
+          const SizedBox(height: 10),
+          Center(
+            child: Container(
+              decoration: BoxDecoration(color: Theme.of(context).colorScheme.onPrimaryFixedVariant, borderRadius: BorderRadius.circular(20)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: data.map<Widget>((item) {
+                  return Column(
+                    children: [
+                      Container(
+                        width: 370,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(item,
+                                  style: const TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w500)),
+                              const Text(
+                                "0",
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Animecarousale(carosaleData: animeWatches),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Mangacarousale(carosaleData: mangaReads),
+          )
         ],
       ),
     );
