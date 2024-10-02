@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
+import 'package:html/parser.dart' as parser;
 
 var box = Hive.box("app-data");
 bool isConsumet = box.get("isConsumet", defaultValue: false);
@@ -169,61 +170,108 @@ Future<dynamic>? fetchStreamingLinksConsumet(String id) async {
   }
 }
 
-dynamic extractData(dynamic results) {
-  // bool isConsumet = Hive.box("app-data").get("isConsumet");
-  bool isConsumet = true;
-  if (results != null) {
-    dynamic items = [];
-    for (var result in results) {
-      String id = "";
-      String name = "Unknown";
-      String poster = "";
-      String description = "";
-      dynamic otherInfo = [];
-      String coverImage = "";
-      String type = "";
-      List<dynamic> genres = [];
-      dynamic totalEpisodes = "";
 
-      if (isConsumet) {
-        id = result["id"] ?? "";
-        name = result["title"]["english"] ??
-            result["title"]["romaji"] ??
-            result["title"]["native"] ??
-            "Unknown";
-        poster = result["image"] ?? "";
-        otherInfo = [
-          result["type"],
-          result["releaseDate"],
-          "HD",
-          result["rating"]
-        ];
-        genres = result["genres"];
-        description = result["description"] ?? "??";
-        coverImage = result["cover"] ?? "";
-        totalEpisodes = result["totalEpisodes"] ?? "??";
-      } else {
-        id = result["id"];
-        name = result["name"] ?? result["jname"] ?? "Unknown";
-        poster = result["poster"];
-        otherInfo = result["otherInfo"] ?? ["??", "??", "??", "??"];
-        description = result["description"] ?? "??";
-        totalEpisodes = result["episodes"];
-      }
-      items.add({
-        'id': id,
-        'name': name,
-        'poster': poster,
-        'otherInfo': otherInfo,
-        'description': description,
-        'cover': coverImage,
-        'type': type,
-      });
+
+// dynamic extractData(dynamic results) {
+//   // bool isConsumet = Hive.box("app-data").get("isConsumet");
+//   bool isConsumet = true;
+//   if (results != null) {
+//     dynamic items = [];
+//     for (var result in results) {
+//       String id = "";
+//       String name = "Unknown";
+//       String poster = "";
+//       String description = "";
+//       dynamic otherInfo = [];
+//       String coverImage = "";
+//       String type = "";
+//       List<dynamic> genres = [];
+//       dynamic totalEpisodes = "";
+
+//       if (isConsumet) {
+//         id = result["id"] ?? "";
+//         name = result["title"]["english"] ??
+//             result["title"]["romaji"] ??
+//             result["title"]["native"] ??
+//             "Unknown";
+//         poster = result["image"] ?? "";
+//         otherInfo = [
+//           result["type"],
+//           result["releaseDate"],
+//           "HD",
+//           result["rating"]
+//         ];
+//         genres = result["genres"];
+//         description = result["description"] ?? "??";
+//         coverImage = result["cover"] ?? "";
+//         totalEpisodes = result["totalEpisodes"] ?? "??";
+//       } else {
+//         id = result["id"];
+//         name = result["name"] ?? result["jname"] ?? "Unknown";
+//         poster = result["poster"];
+//         otherInfo = result["otherInfo"] ?? ["??", "??", "??", "??"];
+//         description = result["description"] ?? "??";
+//         totalEpisodes = result["episodes"];
+//       }
+//       items.add({
+//         'id': id,
+//         'name': name,
+//         'poster': poster,
+//         'otherInfo': otherInfo,
+//         'description': description,
+//         'cover': coverImage,
+//         'type': type,
+//       });
       
+//     }
+//     return items;
+//   }
+//   else{
+//     return;
+//   }
+// }
+
+
+Future extractLinks(imageClass, titleClass, idClass) async {
+  const url = 'https://hianime.to/home'; 
+
+  final response = await http.Client().get(Uri.parse(url));
+
+  if (response.statusCode == 200) {
+    var document = parser.parse(response.body);
+
+    try {
+      dynamic items = [];
+
+      var imageElements = document.getElementsByClassName(imageClass);
+      var titleElements = document.getElementsByClassName(titleClass);
+      var idElements = document.getElementsByClassName(idClass);
+
+       int itemCount = imageElements.length < titleElements.length
+          ? imageElements.length
+          : titleElements.length;
+      
+      for (var i = 0; i < itemCount; i++) {
+        String? imagelink = imageElements[i].attributes['data-src']; 
+        String title = titleElements[i].text.trim();
+        String? id = idElements[i].attributes['href'];
+
+        if (imagelink != null && id != null) {
+          items.add({
+            'name': title,
+            'poster': imagelink,
+            'id': id,
+          });
+        }
+      }
+
+      // log('Scraped Items: $items');
+      return items;
+    } catch (e) {
+      log('Error: $e');
     }
-    return items;
-  }
-  else{
-    return;
+  } else {
+    log('Failed to load website: Status code ${response.statusCode}');
+    return [{'error': 'ERROR: ${response.statusCode}.'}];
   }
 }
