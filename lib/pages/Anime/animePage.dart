@@ -1,11 +1,9 @@
-import 'dart:convert';
 import 'dart:developer';
+
 import 'package:daizy_tv/_anime_api.dart';
 import 'package:daizy_tv/backupData/anime.dart';
-import 'package:daizy_tv/backupData/anime_consumet_data.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:daizy_tv/components/Anime/carousel.dart';
 import 'package:daizy_tv/components/Header.dart';
 import 'package:daizy_tv/components/Anime/reusableList.dart';
@@ -44,19 +42,14 @@ class _HomepageState extends State<Animepage> {
 
 
   Future<void> fetchData() async{
-    baseData = await fetchHomePageData();
+
+    final spotlight = await extractLinks("film-poster-img", "desi-head-title", "btn-secondary");
+
+  setState(() {
+    spotlightAnime = spotlight;
+  });
+    log("spot $trendingAnime");
   }
-
-
-  // void updateData(){
-  //   setState(() {
-  //     spotlightAnime = extractData(baseData["spotlightAnimes"]);
-  //     trendingAnime = extractData(baseData["trendingAnimes"]);
-  //     latestEpisodesAnime = extractData(baseData["latestEpisodesAnimes"]);
-  //     topUpComingAnime = extractData(baseData["topUpComingAnimes"]);
-  //   });
-  // }
-
 
   @override
   Widget build(BuildContext context) {
