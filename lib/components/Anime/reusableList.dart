@@ -13,7 +13,7 @@ class ReusableList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (data == null) {
-      return const SizedBox();
+      return const Center(child:CircularProgressIndicator());
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,7 +39,7 @@ class ReusableList extends StatelessWidget {
         const SizedBox(
           height: 10.0,
         ),
-        SizedBox(
+       SizedBox(
           height: 270,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
