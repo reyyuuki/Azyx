@@ -59,7 +59,14 @@ class _StreamState extends State<Stream> {
 
         setState(() {
           AnimeData = tempAnimeData;
-          episodeData = decodeData['episodes'];
+          if(category == "dub") {
+            int length = AnimeData['anime']['info']['stats']['episodes']['dub']; 
+           episodeData = decodeData['episodes'].sublist(0, length); 
+          }
+          else{
+            episodeData = decodeData['episodes'];
+          }
+          
           filteredEpisodes = episodeData;
           episodeId = int.tryParse(provider.getCurrentEpisodeForAnime(
               AnimeData['anime']['info']['id']?.toString() ?? '1')!);
@@ -123,7 +130,6 @@ class _StreamState extends State<Stream> {
       setState(() {
         category = newCategory;
       });
-      log(newCategory);
       fetchEpisode();
     }
   }
@@ -266,9 +272,9 @@ class _StreamState extends State<Stream> {
       onChanged: (bool state) {
         handleCategory(state ? 'sub' : 'dub');
       },
-      onDoubleTap: () => {},
+      onDoubleTap: () => handleCategory(category == 'sub' ? 'dub' : 'sub'),
       onSwipe: () => handleCategory(category == 'sub' ? 'dub' : 'sub'),
-      onTap: () => {},
+      onTap: () => handleCategory(category == 'sub' ? 'dub' : 'sub'),
     );
   }
 
