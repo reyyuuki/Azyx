@@ -52,33 +52,33 @@ final dynamic animeData;
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(animeData!['moreInfo']['japanese'].length > 13
-                  ? animeData['moreInfo']['japanese'].substring(0, 13)
-                  : animeData['moreInfo']['japanese'] ?? "??"),
+              Text(animeData!['jname'].length > 13
+                  ? animeData['jname'].substring(0, 13)
+                  : animeData['jname'] ?? "??"),
               const SizedBox(
                 height: 5,
               ),
-              Text(animeData['moreInfo']['aired'] ?? "??"),
+              Text(animeData['aired'] ?? "??"),
               const SizedBox(
                 height: 5,
               ),
-              Text(animeData['moreInfo']['premiered'] ?? "??"),
+              Text(animeData['premiered'] ?? "??"),
               const SizedBox(
                 height: 5,
               ),
-              Text(animeData['moreInfo']['duration'] ?? "??"),
+              Text(animeData['duration'] ?? "??"),
               const SizedBox(
                 height: 5,
               ),
-              Text(animeData['moreInfo']['status'] ?? "??"),
+              Text(animeData['status'] ?? "??"),
               const SizedBox(
                 height: 5,
               ),
-              Text(animeData['info']['stats']['rating'] ?? "??"),
+              Text(animeData['rating'] ?? "??"),
               const SizedBox(
                 height: 5,
               ),
-              Text(animeData['info']['stats']['quality'] ?? "??"),
+              Text(animeData['quality'] ?? "??"),
             ],
           ),
         ],
