@@ -43,12 +43,12 @@ class _HomepageState extends State<Animepage> {
 
   Future<void> fetchData() async{
 
-    final spotlight = await extractLinks("film-poster-img", "desi-head-title", "btn-secondary");
-
+    final spotlight = await extractLinks("deslide-cover-img", "deslide-item-content", "btn-secondary");
+    final trending = await extractLinks("film-poster", "number", "film-poster");
   setState(() {
     spotlightAnime = spotlight;
+    trendingAnime = trending;
   });
-    log("spot $trendingAnime");
   }
 
   @override
