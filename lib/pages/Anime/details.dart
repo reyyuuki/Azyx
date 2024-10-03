@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:daizy_tv/_anime_api.dart';
 import 'package:daizy_tv/components/Anime/animeDetails.dart';
 import 'package:daizy_tv/components/Anime/floater.dart';
 import 'package:daizy_tv/components/Anime/poster.dart';
@@ -28,8 +29,27 @@ class _DetailsState extends State<Details> {
   void initState() {
     super.initState();
     fetchData();
+    scrapedData();
   }
 
+Future<void> scrapedData() async {
+  try {
+    final data = await scrapDetail(widget.id);
+
+    if (data != null && data is Map<String, dynamic>) {
+      setState(() {
+        animeData = data; 
+      });
+      log("Scraped data: $data");
+    } else {
+      log("Error: Unexpected data type from scrapDetail");
+    }
+  } catch (error) {
+    log("Error in scrapedData: $error");
+  }
+}
+
+ 
   Future<void> fetchData() async {
     try {
       final response = await http.get(Uri.parse(
@@ -42,7 +62,7 @@ class _DetailsState extends State<Details> {
         if (newResponse.statusCode == 200) {
           final newData = jsonDecode(newResponse.body);
           setState(() {
-            animeData = jsonData['anime'];
+            // animeData = jsonData['anime'];
             cover = newData['cover'];
             description = newData['description'];
             log(widget.tagg);
@@ -65,8 +85,8 @@ class _DetailsState extends State<Details> {
         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         elevation: 0,
         title: TextScroll(
-          animeData == null ? "Loading" :
-          animeData['info']['name'].toString(),
+          animeData == null ? "Loading..." :
+          animeData['name'].toString(),
           mode: TextScrollMode.bouncing,
           velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
           delayBefore: const Duration(milliseconds: 500),
@@ -103,7 +123,7 @@ class _DetailsState extends State<Details> {
               ],
             ),
           ]),
-          Floater(animeData: animeData,)
+          Floater(animeData: animeData,id: widget.id,)
         ],
       ),
     );
