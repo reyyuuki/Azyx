@@ -32,7 +32,7 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   awesome_dialog: ^3.2.1
   animated_button: ^0.2.0
-  
+  html: ^0.15.0
 
 dev_dependencies:
   flutter_test:
