@@ -12,7 +12,7 @@ class AnimeDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (animeData == null || description == null) {
+    if (animeData == null) {
       return const SizedBox();
     }
 
@@ -32,7 +32,7 @@ class AnimeDetails extends StatelessWidget {
               child: TextScroll(
                 animeData == null
                     ? "Loading"
-                    : animeData['info']['name'].toString(),
+                    : animeData['name'].toString(),
                 mode: TextScrollMode.bouncing,
                 velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
                 delayBefore: const Duration(milliseconds: 500),
@@ -57,7 +57,7 @@ class AnimeDetails extends StatelessWidget {
                   width: 10,
                 ),
                 Text(
-                  animeData['moreInfo']['malscore'] ?? "??",
+                  animeData['malscore'] ?? "??",
                   style: const TextStyle(fontSize: 18),
                 ),
               ],
@@ -65,7 +65,7 @@ class AnimeDetails extends StatelessWidget {
             const SizedBox(
               height: 10,
             ),
-            Genres(genres: animeData['moreInfo']['genres']),
+            Genres(genres: animeData['genres']),
             const SizedBox(
               height: 30,
             ),
@@ -77,9 +77,9 @@ class AnimeDetails extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Text(
                 description != null ? description!.length > 400 ? '${description!.substring(0, 400)}...' : description :
-                animeData['info']['description'].length > 400
-                    ? animeData['info']['description'].substring(0, 400) + '...'
-                    : animeData['info']['description'],
+                animeData['description'].length > 400
+                    ? animeData['description'].substring(0, 400) + '...'
+                    : animeData['description'],
               ),
             ),
           ],
