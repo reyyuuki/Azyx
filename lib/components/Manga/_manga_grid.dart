@@ -23,7 +23,7 @@ class MangaGrid extends StatelessWidget {
           crossAxisCount: 2, 
           crossAxisSpacing: 20.0, 
           childAspectRatio:
-              0.7, 
+              0.56, 
         ),
         itemCount: data!.length,
         itemBuilder: (context, index) {
@@ -36,12 +36,12 @@ class MangaGrid extends StatelessWidget {
             child: Column(
               children: [
                 SizedBox(
-                  height: 170,
-                  width: 120,
+                  height: 250,
+                  width: 150,
                   child: Hero(
                     tag: tagg,
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(10),
                       child: CachedNetworkImage(
                         imageUrl: item['image'],
                         fit: BoxFit.cover,
@@ -59,7 +59,7 @@ class MangaGrid extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 SizedBox(
-                  width: 120,
+                  width: 150,
                   child: TextScroll(
                     item['title'],
                     mode: TextScrollMode.bouncing,
@@ -68,7 +68,7 @@ class MangaGrid extends StatelessWidget {
                     pauseBetween: const Duration(milliseconds: 1000),
                     textAlign: TextAlign.center,
                     selectable: true,
-                    style: const TextStyle(fontSize: 18),
+                    style: const TextStyle(fontSize: 16, fontFamily: "Poppins-Bold"),
                   ),
                 ),
               ],

@@ -87,7 +87,7 @@ class MangaSearchList extends StatelessWidget {
                               child: Hero(
                                 tag: tagg,
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(10),
                                   child: CachedNetworkImage(
                                     imageUrl: image,
                                     fit: BoxFit.cover,
@@ -105,7 +105,7 @@ class MangaSearchList extends StatelessWidget {
                                       ? title.substring(0, 47) + "..."
                                       : title,
                                   style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
+                                      fontFamily: "Poppins-Bold",
                                       fontSize: 16),
                                 )),
                           ],
