@@ -130,7 +130,7 @@ class _SlidebarState extends State<Sliderbar> {
                           child: IconButton(
                             icon: Icon(Icons.skip_previous, color: Theme.of(context).colorScheme.surface,),
                             onPressed: () {
-                              widget.handleChapter('right');
+                              widget.handleChapter('left');
                             },
                           ),
                         ),
@@ -170,7 +170,7 @@ class _SlidebarState extends State<Sliderbar> {
                           child: IconButton(
                             icon: Icon(Icons.skip_next, color: Theme.of(context).colorScheme.surface,),
                             onPressed: () {
-                              widget.handleChapter('left');
+                              widget.handleChapter('right');
                             },
                           ),
                         ),
