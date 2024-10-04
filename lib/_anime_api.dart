@@ -334,14 +334,13 @@ Future<Map<String, dynamic>?> scrapDetail(String id) async {
       };
 
       log("Scraped: $item");
-      return item; // return the map directly
+      return item;
     } catch (e) {
       print('Error scraping details: $e');
-      return null; // return null in case of an error
+      return null; 
     }
   } else {
     print('Request failed with status: ${response.statusCode}');
-    return null; // return null on failed response
+    return null; 
   }
 }
-
