@@ -187,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white
-                          .withOpacity(0.4), // Glass-like transparency
+                          .withOpacity(0.3), // Glass-like transparency
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: FlashyTabBar(
@@ -202,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           icon: _selectedIndex == 0
                               ? const SizedBox.shrink()
                               : const Icon(Icons.movie),
-                          title: const Text('Anime'),
+                          title: const Text('Anime', style: TextStyle(fontFamily: "Poppins-Bold"),),
                           activeColor: Colors.white,
                           inactiveColor: Theme.of(context).colorScheme.primary,
                         ),
@@ -210,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           icon: _selectedIndex == 1
                               ? const SizedBox.shrink()
                               : const Icon(Iconsax.home_15),
-                          title: const Text('Home'),
+                          title: const Text('Home', style: TextStyle(fontFamily: "Poppins-Bold"),),
                           activeColor: Colors.white,
                           inactiveColor: Theme.of(context).colorScheme.primary,
                         ),
@@ -218,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           icon: _selectedIndex == 2
                               ? const SizedBox.shrink()
                               : const Icon(Icons.book),
-                          title: const Text('Manga'),
+                          title: const Text('Manga', style: TextStyle(fontFamily: "Poppins-Bold"),),
                           activeColor: Colors.white,
                           inactiveColor: Theme.of(context).colorScheme.primary,
                         ),

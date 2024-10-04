@@ -21,7 +21,7 @@ class Mangacarousale extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         SizedBox(
-          height: 250,
+          height: 290,
           child: carosaleData == null || carosaleData!.isEmpty
               ? const Center(
                   child: Text(
@@ -59,12 +59,12 @@ class Mangacarousale extends StatelessWidget {
                               );
                             },
                             child: SizedBox(
-                              height: 180,
-                              width: 130,
+                              height: 220,
+                              width: 150,
                               child: Hero(
                                 tag: id ?? "defaultTag",
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(10),
                                   child: CachedNetworkImage(
                                     imageUrl: poster ?? '',
                                     fit: BoxFit.cover,

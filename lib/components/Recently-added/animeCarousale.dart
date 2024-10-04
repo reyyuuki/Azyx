@@ -22,7 +22,7 @@ class Animecarousale extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         SizedBox(
-          height: 250,
+          height: 290,
           child: InfiniteCarousel.builder(
             itemCount: carosaleData!.length,
             itemExtent: MediaQuery.of(context).size.width / 2.3,
@@ -46,12 +46,12 @@ class Animecarousale extends StatelessWidget {
                         );
                       },
                       child: SizedBox(
-                        height: 180,
-                        width: 130,
+                        height: 220,
+                        width: 150,
                         child: Hero(
                           tag: id,
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(10),
                             child: CachedNetworkImage(
                               imageUrl: poster ?? '',
                               fit: BoxFit.cover,

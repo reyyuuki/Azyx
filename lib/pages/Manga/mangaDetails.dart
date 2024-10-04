@@ -93,7 +93,7 @@ class _DetailsState extends State<Mangadetails> {
           pauseBetween: const Duration(milliseconds: 1000),
           textAlign: TextAlign.center,
           selectable: true,
-          style: const TextStyle(fontSize: 18),
+          style: const TextStyle(fontSize: 18, fontFamily: "Poppins-Bold"),
         ),
         centerTitle: true,
         leading: IconButton(

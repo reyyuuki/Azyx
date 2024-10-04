@@ -94,7 +94,7 @@ class _SearchpageState extends State<SearchAnime> {
                     handleSearch(value);
                   },
                   decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.search),
+                    prefixIcon: const Icon(Iconsax.search_normal),
                     hintText: 'Search Anime',
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -123,7 +123,7 @@ class _SearchpageState extends State<SearchAnime> {
                   "Search Results",
                   style: TextStyle(
                       fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                      fontFamily: "Poppins-Bold",
                       color: Theme.of(context).colorScheme.primary),
                 ),
                 Padding(
@@ -161,21 +161,9 @@ class _SearchpageState extends State<SearchAnime> {
           ),
           
           Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 1000),
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return ScaleTransition(
-                  scale: CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.elasticOut, // Bouncing effect
-                  ),
-                  child: child,
-                );
-              },
-              child: isGrid
-                ? GridList(data: data)
-                : SearchList(data: data)
-            ),
+            child: isGrid
+              ? GridList(data: data)
+              : SearchList(data: data),
           ),
         ],
       ),

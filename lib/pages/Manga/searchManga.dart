@@ -93,7 +93,7 @@ class _SearchpageState extends State<SearchManga> {
                     handleSearch(value);
                   },
                   decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.search),
+                    prefixIcon: const Icon(Iconsax.search_normal),
                     hintText: 'Search Manga',
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -122,7 +122,7 @@ class _SearchpageState extends State<SearchManga> {
                   "Search Results",
                   style: TextStyle(
                       fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                      fontFamily: "Poppins-Bold",
                       color: Theme.of(context).colorScheme.primary),
                 ),
                 Padding(
@@ -159,21 +159,9 @@ class _SearchpageState extends State<SearchManga> {
             ),
           ),
           Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 1000),
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return ScaleTransition(
-                  scale: CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.elasticOut, // Bouncing effect
-                  ),
-                  child: child,
-                );
-              },
-              child: isGrid
-                  ? MangaGrid(data: data, key: ValueKey<bool>(isGrid))
-                  : MangaSearchList(data: data, key: ValueKey<bool>(!isGrid)),
-            ),
+            child: isGrid
+                ? MangaGrid(data: data, key: ValueKey<bool>(isGrid))
+                : MangaSearchList(data: data, key: ValueKey<bool>(!isGrid)),
           ),
         ],
       ),
