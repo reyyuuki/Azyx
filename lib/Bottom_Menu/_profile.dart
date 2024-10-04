@@ -259,7 +259,7 @@ class _ProfileState extends State<Profile> {
                 height: 60,
                 decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
-                    borderRadius: BorderRadius.circular(20)),
+                    borderRadius: BorderRadius.circular(10)),
                 child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -312,37 +312,37 @@ class _ProfileState extends State<Profile> {
           ),
           const SizedBox(height: 10),
           Center(
-            child: Container(
-              decoration: BoxDecoration(color: Theme.of(context).colorScheme.onPrimaryFixedVariant, borderRadius: BorderRadius.circular(20)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: data.map<Widget>((item) {
-                  return Column(
-                    children: [
-                      Container(
-                        width: 370,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10)),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(item,
-                                  style: const TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w500)),
-                              const Text(
-                                "0",
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                              )
-                            ],
+            child: Padding(
+              padding: const EdgeInsets.all(15),
+              child: Container(
+                decoration: BoxDecoration(color: Theme.of(context).colorScheme.onPrimaryFixedVariant, borderRadius: BorderRadius.circular(10)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: data.map<Widget>((item) {
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                          child: Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(item,
+                                    style: const TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w500)),
+                                const Text(
+                                  "0",
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                )
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                }).toList(),
+                      ],
+                    );
+                  }).toList(),
+                ),
               ),
             ),
           ),

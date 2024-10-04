@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:daizy_tv/_anime_api.dart';
 import 'package:daizy_tv/components/setting_tile.dart';
 import 'package:daizy_tv/dataBase/user.dart';
+import 'package:daizy_tv/scraper/episodeScrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iconsax/iconsax.dart';
@@ -14,23 +16,22 @@ class Setting extends StatefulWidget {
 }
 
 class _SettingState extends State<Setting> {
- var box = Hive.box("mybox");
- 
+  var box = Hive.box("mybox");
 
   @override
   void initState() {
     super.initState();
   }
 
-
   @override
   Widget build(BuildContext context) {
     String userName = box.get("userName") ?? "Guest";
     String image = box.get("imagePath") ?? "";
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         appBar: AppBar(
-          title: const Text("Settings", style: TextStyle(fontWeight: FontWeight.bold)),
+          title: const Text("Settings",
+              style: TextStyle(fontWeight: FontWeight.bold)),
           leading: IconButton(
               onPressed: () {
                 Navigator.pop(context);
@@ -58,30 +59,52 @@ class _SettingState extends State<Setting> {
                             return const Icon(
                               Iconsax.user,
                               size: 100,
-                            ); 
+                            );
                           },
                         )),
                   ),
-                  const SizedBox(height: 10,),
-                  Text(userName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),)
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    userName,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 20),
+                  )
                 ],
               ),
               const SizedBox(
                 height: 40,
               ),
-              const SettingTile(icon: Icon(Icons.palette), name: "Themes", routeName: './theme-changer',),
+              const SettingTile(
+                icon: Icon(Icons.palette),
+                name: "Themes",
+                routeName: './theme-changer',
+              ),
               const SizedBox(
                 height: 10,
               ),
-              const SettingTile(icon: Icon(Icons.language), name: "Languages", routeName: './languages',),
+              const SettingTile(
+                icon: Icon(Icons.language),
+                name: "Languages",
+                routeName: './languages',
+              ),
               const SizedBox(
                 height: 10,
               ),
-              const SettingTile(icon: Icon(Iconsax.user_tag), name: "Profile", routeName: "./profile",),
+              const SettingTile(
+                icon: Icon(Iconsax.user_tag),
+                name: "Profile",
+                routeName: "./profile",
+              ),
               const SizedBox(
                 height: 10,
               ),
-              const SettingTile(icon: Icon(Iconsax.info_circle), name: "About", routeName: "./about",),
+              const SettingTile(
+                icon: Icon(Iconsax.info_circle),
+                name: "About",
+                routeName: "./about",
+              ),
             ],
           ),
         ));
