@@ -41,7 +41,7 @@ class Mangareusablecarousale extends StatelessWidget {
           height: 10.0,
         ),
         SizedBox(
-          height: 270,
+          height: 300,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: data!.length,
@@ -71,13 +71,13 @@ class Mangareusablecarousale extends StatelessWidget {
                 child: Column(
                   children: [
                     Container(
-                      height: 230,
+                      height: 250,
                       width: 150,
                       margin: const EdgeInsets.symmetric(horizontal: 10),
                       child: Hero(
                         tag: tagg,
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(10),
                           child: CachedNetworkImage(
                             imageUrl: imageUrl,
                             fit: BoxFit.cover,
@@ -99,7 +99,7 @@ class Mangareusablecarousale extends StatelessWidget {
                     Text(
                       title.length > 20
                           ? '${title.substring(0, 17)}...'
-                          : title,
+                          : title, style: const TextStyle(fontFamily: "Poppins-Bold"),
                     ),
                   ],
                 ),

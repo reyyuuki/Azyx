@@ -66,6 +66,7 @@ final String? title;
                                   const Duration(milliseconds: 1000),
                               textAlign: TextAlign.center,
                               selectable: true,
+                              style: TextStyle( fontFamily: "Poppins-Bold")
                             ),
                           ),
                           Text(
@@ -73,7 +74,7 @@ final String? title;
                                   ? 'Chapter 1'
                                   : currentChapter,
                             style: const TextStyle(
-                                color: Color.fromARGB(187, 141, 135, 135)),
+                                color: Color.fromARGB(187, 141, 135, 135), fontFamily: "Poppins-Bold"),
                           ),
                         ],
                       ),
@@ -99,7 +100,8 @@ final String? title;
                             Text(
                               'Read',
                               style: TextStyle(
-                                 color: Theme.of(context).colorScheme.surface, // Text color
+                                 color: Theme.of(context).colorScheme.surface,
+                                 fontFamily: "Poppins-Bold" // Text color
                               ),
                             ),
                           ],

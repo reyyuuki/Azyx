@@ -42,7 +42,7 @@ class Mangacarousale extends StatelessWidget {
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width,
-                  margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                  margin: const EdgeInsets.symmetric(horizontal: 13),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surfaceContainer,
                     borderRadius: BorderRadius.circular(20),
@@ -58,7 +58,7 @@ class Mangacarousale extends StatelessWidget {
                           child: Hero(
                             tag: tagg,
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(10),
                               child: CachedNetworkImage(
                                 imageUrl: manga['image'],
                                 fit: BoxFit.cover,
@@ -84,28 +84,29 @@ class Mangacarousale extends StatelessWidget {
                           pauseBetween: const Duration(milliseconds: 1000),
                           textAlign: TextAlign.center,
                           selectable: true,
-                          style: const TextStyle(fontSize: 18),
+                          style: const TextStyle(fontSize: 16, fontFamily: "Poppins-Bold"),
                         ),
                         const SizedBox(height: 15),
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: generes.map((item) {
                             return Container(
                               height: 30,
                               margin: const EdgeInsets.only(
                                   right:
-                                      4.0), // Optional: Adds space between genre chips
+                                      5), // Optional: Adds space between genre chips
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                borderRadius: BorderRadius.circular(5),
+                                 color: Theme.of(context).colorScheme.onSecondaryFixedVariant,
                               ),
                               child: Padding(
                                 padding:
-                                    const EdgeInsets.symmetric(horizontal: 10),
+                                    const EdgeInsets.symmetric(horizontal: 8),
                                 child: Center(
                                   child: Text(
                                     item,
                                     style: const TextStyle(
-                                        fontSize: 12),
+                                        fontSize: 10, fontFamily: "Poppins-Bold"),
                                   ),
                                 ),
                               ),
@@ -117,8 +118,8 @@ class Mangacarousale extends StatelessWidget {
                           width: 150,
                           height: 40,
                           decoration: BoxDecoration(
-                             color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(20),
+                             color: Theme.of(context).colorScheme.onSecondaryFixedVariant,
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -126,7 +127,7 @@ class Mangacarousale extends StatelessWidget {
                                 Text(
                                   "Read now",
                                   style: TextStyle(
-                                      fontSize: 16),
+                                      fontSize: 16, fontFamily: "Poppins-Bold"),
                                 ),
                                 SizedBox(
                                   width: 5,
