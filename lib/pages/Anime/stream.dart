@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:daizy_tv/components/Anime/reusableList.dart';
 import 'package:daizy_tv/components/Anime/videoplayer.dart';
 import 'package:daizy_tv/dataBase/appDatabase.dart';
+import 'package:daizy_tv/scraper/episodeScrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
@@ -52,19 +53,19 @@ class _StreamState extends State<Stream> {
       final provider = Provider.of<Data>(context, listen: false);
       final response = await http.get(Uri.parse(baseUrl + widget.id));
       final episodeResponse =
-          await http.get(Uri.parse(episodeDataUrl + widget.id));
-      if (response.statusCode == 200 && episodeResponse.statusCode == 200) {
-        final decodeData = jsonDecode(episodeResponse.body);
+          await scrapeAnimeEpisodes(widget.id);
+      if (response.statusCode == 200) {
         final tempAnimeData = jsonDecode(response.body);
 
         setState(() {
           AnimeData = tempAnimeData;
           if(category == "dub") {
             int length = AnimeData['anime']['info']['stats']['episodes']['dub']; 
-           episodeData = decodeData['episodes'].sublist(0, length); 
+           episodeData = episodeResponse['episodes'].sublist(0, length); 
+           log(length.toString());
           }
           else{
-            episodeData = decodeData['episodes'];
+            episodeData = episodeResponse['episodes'];
           }
           
           filteredEpisodes = episodeData;
@@ -93,9 +94,10 @@ class _StreamState extends State<Stream> {
       final provider = Provider.of<Data>(context, listen: false);
       final episodeIdValue = episodeData[(episodeId! - 1)]['episodeId'];
       final response = await http.get(Uri.parse(
-          '$episodeUrl$episodeIdValue&category=$category'));
+          '$episodeUrl$episodeIdValue?server=vidstreaming&category=$category'));
       final captionsResponse = await http.get(Uri.parse(
           '$episodeUrl$episodeIdValue&category=sub'));
+          log('$episodeUrl$episodeIdValue?server=vidstreaming&category=$category');
       if (response.statusCode == 200) {
         final decodeData = jsonDecode(response.body);
         final tempdata = jsonDecode(captionsResponse.body);
@@ -129,6 +131,7 @@ class _StreamState extends State<Stream> {
     if (episodeData != null && AnimeData['anime']['info']['stats']['episodes']['dub'] >= episodeId) {
       setState(() {
         category = newCategory;
+        log(newCategory);
       });
       fetchEpisode();
     }
@@ -190,7 +193,7 @@ class _StreamState extends State<Stream> {
                 Text(
                   'Episode ${episodeId ?? 0}',
                   style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.w600),
+                      fontSize: 20, fontFamily: "Poppins-Bold"),
                 ),
                 Swicther(),
               ],
@@ -272,9 +275,9 @@ class _StreamState extends State<Stream> {
       onChanged: (bool state) {
         handleCategory(state ? 'sub' : 'dub');
       },
-      onDoubleTap: () => handleCategory(category == 'sub' ? 'dub' : 'sub'),
-      onSwipe: () => handleCategory(category == 'sub' ? 'dub' : 'sub'),
-      onTap: () => handleCategory(category == 'sub' ? 'dub' : 'sub'),
+      onDoubleTap: () => {},
+      onSwipe: () => {},
+      onTap: () => {},
     );
   }
 
@@ -328,7 +331,7 @@ class _StreamState extends State<Stream> {
                                 color: Theme.of(context)
                                     .colorScheme
                                     .inverseSurface,
-                                fontWeight: FontWeight.w500),
+                                fontFamily: "Poppins-Bold"),
                           ),
                         ),
                         episodeNumber == episodeId
