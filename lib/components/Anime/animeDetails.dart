@@ -39,7 +39,7 @@ class AnimeDetails extends StatelessWidget {
                 pauseBetween: const Duration(milliseconds: 1000),
                 textAlign: TextAlign.center,
                 selectable: true,
-                style: const TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 18, fontFamily: "Poppins-Bold"),
               ),
             ),
             const SizedBox(
@@ -58,7 +58,7 @@ class AnimeDetails extends StatelessWidget {
                 ),
                 Text(
                   animeData['malscore'] ?? "??",
-                  style: const TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18, fontFamily: "Poppins-Bold"),
                 ),
               ],
             ),
@@ -80,6 +80,7 @@ class AnimeDetails extends StatelessWidget {
                 animeData['description'].length > 400
                     ? animeData['description'].substring(0, 400) + '...'
                     : animeData['description'],
+                    style: TextStyle( fontFamily: "Poppins-Bold")
               ),
             ),
           ],

@@ -67,6 +67,7 @@ class Floater extends StatelessWidget {
                           pauseBetween: const Duration(milliseconds: 1000),
                           textAlign: TextAlign.center,
                           selectable: true,
+                          style: const TextStyle( fontFamily: "Poppins-Bold")
                         ),
                       ),
                       Text(
@@ -100,6 +101,7 @@ class Floater extends StatelessWidget {
                           'Watch',
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.surface,
+                            fontFamily: "Poppins-Bold"
                           ),
                         ),
                       ],

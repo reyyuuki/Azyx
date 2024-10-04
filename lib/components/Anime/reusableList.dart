@@ -31,7 +31,7 @@ class ReusableList extends StatelessWidget {
               ),
               Text(
                 name!,
-                style:  const TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
+                style:  const TextStyle(fontSize: 25, fontFamily: "Poppins-Bold"),
               ),
             ],
           ),
@@ -40,7 +40,7 @@ class ReusableList extends StatelessWidget {
           height: 10.0,
         ),
        SizedBox(
-          height: 270,
+          height: 300,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: data!.length,
@@ -54,13 +54,13 @@ class ReusableList extends StatelessWidget {
                   child: Column(
                     children: [
                       Container(
-                        height: 230,
+                        height: 250,
                         width: 150,
                         margin: const EdgeInsets.symmetric(horizontal: 10),
                         child: Hero(
                           tag: tagg,
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(10),
                             child: CachedNetworkImage(
                                 imageUrl: data[index]['poster'],
                                 fit: BoxFit.cover,
@@ -82,7 +82,7 @@ class ReusableList extends StatelessWidget {
                       Text(
                         data?[index]['name'].length > 20
                             ? '${data![index]['name'].toString().substring(0, 17)}...'
-                            : data![index]['name'],
+                            : data![index]['name'], style: const TextStyle(fontFamily: "Poppins-Bold"),
                       )
                     ],
                   ));

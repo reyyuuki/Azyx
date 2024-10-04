@@ -18,7 +18,7 @@ class Genres extends StatelessWidget {
           backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
           label: Text(
             genre,
-            style: const TextStyle(fontSize: 14),
+            style: const TextStyle(fontSize: 14, fontFamily: "Poppins-Bold"),
           ),
         );
       }).toList(),
