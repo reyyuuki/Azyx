@@ -88,7 +88,7 @@ class SearchList extends StatelessWidget {
                               child: Hero(
                                 tag: tagg,
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(10),
                                   child: CachedNetworkImage(
                                     imageUrl: image,
                                     fit: BoxFit.cover,
@@ -109,7 +109,7 @@ class SearchList extends StatelessWidget {
                                           ? title.substring(0, 37) + "..."
                                           : title,
                                       style: const TextStyle(
-                                          fontWeight: FontWeight.w600,
+                                          fontFamily: "Poppins-Bold",
                                           fontSize: 16),
                                     ),
                                     const SizedBox(
@@ -117,6 +117,7 @@ class SearchList extends StatelessWidget {
                                     ),
                                     Text(
                                       'Episodes  $episodes',
+                                      style: const TextStyle(fontFamily: "Poppins"),
                                     )
                                   ],
                                 )),
