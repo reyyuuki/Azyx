@@ -80,7 +80,7 @@ class AnimeDetails extends StatelessWidget {
                 animeData['description'].length > 400
                     ? animeData['description'].substring(0, 400) + '...'
                     : animeData['description'],
-                    style: TextStyle( fontFamily: "Poppins-Bold")
+                    style: const TextStyle( fontFamily: "Poppins-Bold")
               ),
             ),
           ],
