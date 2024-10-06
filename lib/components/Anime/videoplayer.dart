@@ -56,10 +56,11 @@ class _MediaPlayerState extends State<MediaPlayer>
         type: BetterPlayerSubtitlesSourceType.network,
         name: item['label'] ?? 'Unknown',
         urls: [item['file']],
+        selectedByDefault: true
       );
     }).toList();
 
-    var betterPlayerConfiguration = BetterPlayerConfiguration(
+    var betterPlayerConfiguration = const BetterPlayerConfiguration(
       controlsConfiguration: BetterPlayerControlsConfiguration(
           playerTheme: BetterPlayerTheme.cupertino,
           playIcon: Iconsax.play,
