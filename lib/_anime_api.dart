@@ -171,67 +171,6 @@ Future<dynamic>? fetchStreamingLinksConsumet(String id) async {
 }
 
 
-
-// dynamic extractData(dynamic results) {
-//   // bool isConsumet = Hive.box("app-data").get("isConsumet");
-//   bool isConsumet = true;
-//   if (results != null) {
-//     dynamic items = [];
-//     for (var result in results) {
-//       String id = "";
-//       String name = "Unknown";
-//       String poster = "";
-//       String description = "";
-//       dynamic otherInfo = [];
-//       String coverImage = "";
-//       String type = "";
-//       List<dynamic> genres = [];
-//       dynamic totalEpisodes = "";
-
-//       if (isConsumet) {
-//         id = result["id"] ?? "";
-//         name = result["title"]["english"] ??
-//             result["title"]["romaji"] ??
-//             result["title"]["native"] ??
-//             "Unknown";
-//         poster = result["image"] ?? "";
-//         otherInfo = [
-//           result["type"],
-//           result["releaseDate"],
-//           "HD",
-//           result["rating"]
-//         ];
-//         genres = result["genres"];
-//         description = result["description"] ?? "??";
-//         coverImage = result["cover"] ?? "";
-//         totalEpisodes = result["totalEpisodes"] ?? "??";
-//       } else {
-//         id = result["id"];
-//         name = result["name"] ?? result["jname"] ?? "Unknown";
-//         poster = result["poster"];
-//         otherInfo = result["otherInfo"] ?? ["??", "??", "??", "??"];
-//         description = result["description"] ?? "??";
-//         totalEpisodes = result["episodes"];
-//       }
-//       items.add({
-//         'id': id,
-//         'name': name,
-//         'poster': poster,
-//         'otherInfo': otherInfo,
-//         'description': description,
-//         'cover': coverImage,
-//         'type': type,
-//       });
-      
-//     }
-//     return items;
-//   }
-//   else{
-//     return;
-//   }
-// }
-
-
 Future extractLinks(imageClass, titleClass, idClass) async {
   const url = 'https://hianime.to/home'; 
 
