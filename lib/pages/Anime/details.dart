@@ -6,6 +6,7 @@ import 'package:daizy_tv/components/Anime/animeDetails.dart';
 import 'package:daizy_tv/components/Anime/floater.dart';
 import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/coverImage.dart';
+import 'package:daizy_tv/scraper/anime_detail_scraper.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:text_scroll/text_scroll.dart';
@@ -34,9 +35,9 @@ class _DetailsState extends State<Details> {
 
 Future<void> scrapedData() async {
   try {
-    final data = await scrapDetail(widget.id);
+    final data = await scrapeAnimeAboutInfo(widget.id);
 
-    if (data != null && data is Map<String, dynamic>) {
+    if (data.isNotEmpty) {
       setState(() {
         animeData = data; 
       });
