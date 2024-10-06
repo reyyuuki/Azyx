@@ -21,10 +21,6 @@ final dynamic animeData;
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Japanese: ",style: TextStyle( fontFamily: "Poppins-Bold")),
-                SizedBox(
-                  height: 5,
-                ),
                 Text("Aired: ",style: TextStyle( fontFamily: "Poppins-Bold")),
                 SizedBox(
                   height: 5,
@@ -52,12 +48,6 @@ final dynamic animeData;
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(animeData!['jname'].length > 13
-                  ? animeData['jname'].substring(0, 13)
-                  : animeData['jname'] ?? "??",style: TextStyle( fontFamily: "Poppins-Bold")),
-              const SizedBox(
-                height: 5,
-              ),
               Text(animeData['aired'] ?? "??",style: TextStyle( fontFamily: "Poppins-Bold")),
               const SizedBox(
                 height: 5,
