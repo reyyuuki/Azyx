@@ -106,7 +106,7 @@ class Header extends StatelessWidget {
                               fit: BoxFit.cover,
                             ),
                           )
-                        : Icon(
+                        : const Icon(
                             Iconsax.user,
                             color: Colors.white,
                             size: 30,
@@ -118,7 +118,7 @@ class Header extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).pop();
                   Future.delayed(const Duration(milliseconds: 200), () {
-                    Navigator.pushNamed(context, './profile');
+                   box.get("userName") != null ? Navigator.pushNamed(context, './profile') : Navigator.pushNamed(context, "/login-page");
                   });
                 },
                 child: Container(
