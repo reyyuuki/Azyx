@@ -31,7 +31,7 @@ class _SettingState extends State<Setting> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         appBar: AppBar(
           title: const Text("Settings",
-              style: TextStyle(fontWeight: FontWeight.bold)),
+              style: TextStyle(fontFamily: "Poppins-Bold")),
           leading: IconButton(
               onPressed: () {
                 Navigator.pop(context);
@@ -69,7 +69,7 @@ class _SettingState extends State<Setting> {
                   Text(
                     userName,
                     style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 20),
+                        fontFamily: "Poppins-Bold", fontSize: 20),
                   )
                 ],
               ),
@@ -92,10 +92,10 @@ class _SettingState extends State<Setting> {
               const SizedBox(
                 height: 10,
               ),
-              const SettingTile(
+               SettingTile(
                 icon: Icon(Iconsax.user_tag),
                 name: "Profile",
-                routeName: "./profile",
+                routeName: box.get("userName") != null ? "./profile" : "/login-page",
               ),
               const SizedBox(
                 height: 10,
