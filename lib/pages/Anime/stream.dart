@@ -43,10 +43,8 @@ class _StreamState extends State<Stream> {
   }
 
   final String baseUrl = 'https://goodproxy.goodproxy.workers.dev/fetch?url=https://aniwatch-ryan.vercel.app/anime/info?id=';
-  final String episodeDataUrl =
-      'https://goodproxy.goodproxy.workers.dev/fetch?url=https://aniwatch-ryan.vercel.app/anime/episodes/';
   final String episodeUrl =
-      'https://goodproxy.goodproxy.workers.dev/fetch?url=https://aniwatch-ryan.vercel.app/anime/episode-srcs?id=';
+      'https://aniwatch-ryan.vercel.app/anime/episode-srcs?id=';
 
   Future<void> fetchData() async {
     try {
@@ -54,21 +52,15 @@ class _StreamState extends State<Stream> {
       final response = await http.get(Uri.parse(baseUrl + widget.id));
       final episodeResponse =
           await scrapeAnimeEpisodes(widget.id);
+          setState(() {
+            episodeData = episodeResponse['episodes'];
+          filteredEpisodes = episodeData;
+          });
       if (response.statusCode == 200) {
         final tempAnimeData = jsonDecode(response.body);
 
         setState(() {
           AnimeData = tempAnimeData;
-          if(category == "dub") {
-            int length = AnimeData['anime']['info']['stats']['episodes']['dub']; 
-           episodeData = episodeResponse['episodes'].sublist(0, length); 
-           log(length.toString());
-          }
-          else{
-            episodeData = episodeResponse['episodes'];
-          }
-          
-          filteredEpisodes = episodeData;
           episodeId = int.tryParse(provider.getCurrentEpisodeForAnime(
               AnimeData['anime']['info']['id']?.toString() ?? '1')!);
           category = 'sub';
@@ -122,6 +114,7 @@ class _StreamState extends State<Stream> {
     if (episode != null) {
       setState(() {
         episodeId = episode;
+        Episode = "";
       });
       fetchEpisode();
     }
@@ -131,6 +124,7 @@ class _StreamState extends State<Stream> {
     if (episodeData != null && AnimeData['anime']['info']['stats']['episodes']['dub'] >= episodeId) {
       setState(() {
         category = newCategory;
+        Episode = "";
         log(newCategory);
       });
       fetchEpisode();
