@@ -84,7 +84,7 @@ class ThemeTemplate extends StatelessWidget {
         const SizedBox(
           height: 10,
         ),
-        Text(name),
+        Text(name, style: const TextStyle(fontFamily: "Poppins-Bold"),),
       ],
     );
   }
