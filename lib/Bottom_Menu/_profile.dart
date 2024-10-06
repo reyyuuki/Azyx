@@ -5,7 +5,6 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:daizy_tv/components/Recently-added/animeCarousale.dart';
 import 'package:daizy_tv/components/Recently-added/mangaCarousale.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:image_picker/image_picker.dart';
@@ -72,7 +71,7 @@ class _ProfileState extends State<Profile> {
         children: [
           const Text(
             'Enter your Username',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: 16, fontFamily: "Poppins-Bold"),
           ),
           const SizedBox(height: 20),
           Padding(
@@ -180,7 +179,7 @@ class _ProfileState extends State<Profile> {
                     Text(
                       userName.isNotEmpty ? userName : "Guest",
                       style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.w700),
+                          fontSize: 20, fontFamily: "Poppins-Bold",color: Colors.white),
                     ),
                   ],
                 ),
@@ -206,7 +205,7 @@ class _ProfileState extends State<Profile> {
                     },
                     text: "Edit name",
                     buttonTextStyle:
-                        const TextStyle(fontSize: 16, color: Colors.white),
+                        const TextStyle(fontSize: 16, color: Colors.white, fontFamily: "Poppins-Bold"),
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
@@ -229,13 +228,13 @@ class _ProfileState extends State<Profile> {
                               child: Text(
                             "Currently not available!",
                             style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w500),
+                                fontSize: 16, fontFamily: "Poppins-Bold"),
                           )),
                           duration: const Duration(seconds: 2),
                           behavior: SnackBarBehavior.floating,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20)),
-                          width: 230,
+                          width: 240,
                           backgroundColor:
                               Theme.of(context).colorScheme.primary,
                         ),
@@ -243,7 +242,7 @@ class _ProfileState extends State<Profile> {
                     },
                     text: "Share Profile",
                     buttonTextStyle:
-                        const TextStyle(fontSize: 16, color: Colors.white),
+                        const TextStyle(fontSize: 16, color: Colors.white,fontFamily: "Poppins-Bold"),
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
@@ -271,7 +270,7 @@ class _ProfileState extends State<Profile> {
                           const Text(
                             "Anime",
                             style: TextStyle(
-                                fontWeight: FontWeight.bold,
+                                fontFamily: "Poppins-Bold",
                                 color: Colors.white),
                           ),
                           Text(
@@ -279,21 +278,21 @@ class _ProfileState extends State<Profile> {
                                   ? animeWatches!.length.toString()
                                   : "0",
                               style:
-                                  const TextStyle(fontWeight: FontWeight.bold)),
+                                  const TextStyle(fontFamily: "Poppins-Bold", color: Colors.white)),
                         ],
                       ),
                       Column(
                         children: [
                           const Text("Manga",
                               style: TextStyle(
-                                  fontWeight: FontWeight.bold,
+                                  fontFamily: "Poppins-Bold",
                                   color: Colors.white)),
                           Text(
                               mangaReads != null
                                   ? mangaReads!.length.toString()
                                   : "0",
                               style:
-                                  const TextStyle(fontWeight: FontWeight.bold)),
+                                  const TextStyle(fontFamily: "Poppins-Bold", color: Colors.white)),
                         ],
                       )
                     ],
@@ -307,7 +306,7 @@ class _ProfileState extends State<Profile> {
             padding: EdgeInsets.symmetric(horizontal: 15),
             child: Text(
               "Stats",
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 25, fontFamily: "Poppins-Bold"),
             ),
           ),
           const SizedBox(height: 10),
@@ -323,20 +322,18 @@ class _ProfileState extends State<Profile> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                          child: Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(item,
-                                    style: const TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w500)),
-                                const Text(
-                                  "0",
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                )
-                              ],
-                            ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(item,
+                                  style: const TextStyle(
+                                      fontSize: 17,
+                                      fontFamily: "Poppins-Bold", color: Colors.white)),
+                              const Text(
+                                "0",
+                                style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 16, color: Colors.white),
+                              )
+                            ],
                           ),
                         ),
                       ],
