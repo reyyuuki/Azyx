@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:daizy_tv/_anime_api.dart';
 import 'package:daizy_tv/backupData/anime.dart';
@@ -7,6 +6,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:daizy_tv/components/Anime/carousel.dart';
 import 'package:daizy_tv/components/Header.dart';
 import 'package:daizy_tv/components/Anime/reusableList.dart';
+import 'package:iconsax/iconsax.dart';
 
 class Animepage extends StatefulWidget {
   const Animepage({super.key});
@@ -76,7 +76,7 @@ class _HomepageState extends State<Animepage> {
                     );
                   },
                   decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.search),
+                    prefixIcon: const Icon(Iconsax.search_normal),
                     hintText: 'Search Anime...',
                     focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
@@ -93,12 +93,12 @@ class _HomepageState extends State<Animepage> {
             ),
             const SizedBox(height: 30.0),
             Carousel(
-              animeData: spotlightAnime,
+              animeData: trendingAnime,
             ),
             const SizedBox(height: 30.0),
             ReusableList(
               name: 'Popular',
-              data: trendingAnime,
+              data: spotlightAnime,
               taggName: "Carousale1",
             ),
             const SizedBox(height: 10),

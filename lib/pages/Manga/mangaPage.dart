@@ -6,6 +6,7 @@ import 'package:daizy_tv/components/Manga/mangaReusableCarousale.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:daizy_tv/components/Header.dart';
+import 'package:iconsax/iconsax.dart';
 
 
 class Mangapage extends StatefulWidget {
@@ -91,7 +92,7 @@ class _HomepageState extends State<Mangapage> {
                     );
                   },
                   decoration: InputDecoration(
-                     prefixIcon: const Icon(Icons.search),
+                     prefixIcon: const Icon(Iconsax.search_normal),
                       hintText: 'Search Manga',
                       focusedBorder:  OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide(color: Theme.of(context).colorScheme.primary)),
                       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
