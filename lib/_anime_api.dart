@@ -261,7 +261,7 @@ Future extractLinks(imageClass, titleClass, idClass) async {
             'name': title,
             'poster': imagelink,
             'id': id,
-            'rank': i + 1,
+            'rank': i,
           });
         }
       }
@@ -276,71 +276,3 @@ Future extractLinks(imageClass, titleClass, idClass) async {
   }
 }
 
-
-Future<Map<String, dynamic>?> scrapDetail(String id) async {
-  String url = "https://hianime.to/$id";
-
-  final response = await http.Client().get(Uri.parse(url));
-
-  if (response.statusCode == 200) {
-    var document = parser.parse(response.body);
-
-    try {
-      var imageElement = document.getElementsByClassName('film-poster')[0].children[0].attributes['src'];
-      var details = document.getElementsByClassName("anisc-info")[0];
-      var info = document.getElementsByClassName("tick")[0];
-
-      String jname = details.children[1].children[1].text.trim();
-      String name = document.getElementsByClassName("film-name")[0].text.trim();
-      String aired = details.children[3].children[1].text.trim();
-      String premeired = details.children[4].children[1].text.trim();
-      String duration = details.children[5].children[1].text.trim();
-      String status = details.children[6].children[1].text.trim();
-      String malScore = details.children[7].children[1].text.trim();
-      String studio = details.children[9].children[1].text.trim();
-      String producers = details.children[10].children[1].text.trim();
-      String description = document.getElementsByClassName("film-description")[0].children[0].text.trim();
-      String rating = info.children[0].text.trim();
-      String quality = info.children[1].text.trim();
-      String sub = info.children[2].text.trim();
-      String dub = info.children[3].text.trim();
-
-      List<String> genres = [];
-      var genreElements = document.getElementsByClassName('item-list')[0].getElementsByTagName('a');
-      for (var genre in genreElements) {
-        String? title = genre.text.trim();
-        if (title.isNotEmpty) {
-          genres.add(title);
-        }
-      }
-
-      var item = {
-        'poster': imageElement,
-        'jname': jname,
-        'name': name,
-        'aired': aired,
-        'premiered': premeired,
-        'duration': duration,
-        'status': status,
-        'malscore': malScore,
-        'genres': genres,
-        'description': description,
-        'producer': producers,
-        'studio': studio,
-        'rating': rating,
-        'quality': quality,
-        'sub': sub.toString(),
-        'dub': dub.toString(),
-      };
-
-      log("Scraped: $item");
-      return item;
-    } catch (e) {
-      print('Error scraping details: $e');
-      return null; 
-    }
-  } else {
-    print('Request failed with status: ${response.statusCode}');
-    return null; 
-  }
-}
