@@ -2,12 +2,14 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/Recently-added/animeCarousale.dart';
 import 'package:daizy_tv/components/Recently-added/mangaCarousale.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -99,17 +101,24 @@ class _ProfileState extends State<Profile> {
     ).show();
   }
 
-  List<String> data = [
-    'Episodes Watched',
-    'Days Watched',
-    'Anime Mean Score',
-    'Chapters Read',
-    'Volume Read',
-    'Manga Mean Score'
-  ];
+ 
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<AniListProvider>(context,listen: false);
+    List<Map<String, dynamic>> data = [
+     {'title': 'Anime Count', 'value': provider.userData['statistics']['anime']['count']},
+    {'title': 'Episodes Watched', 'value': provider.userData['statistics']['anime']['episodesWatched']},
+    {'title': 'Minutes Watched', 'value': provider.userData['statistics']['anime']['minutesWatched']},
+    // {'title': 'Days Watched', 'value': provider.userData['statistics']['anime']['daysWatched']},
+    // {'title': 'Anime Mean Score', 'value': provider.userData['statistics']['anime']['episodeWatched']},
+    {'title': 'Manga Count', 'value': provider.userData['statistics']['manga']['count']},
+    {'title': 'Chapters Read', 'value': provider.userData['statistics']['manga']['chaptersRead']},
+    // {'title': 'Volumes Read', 'value': 0},
+    // {'title': 'Manga Mean Score', 'value': 0.0},
+  ];
+    String name = provider.userData['name'] ?? "Guest";
+    String image = provider.userData['avatar']['large'] ?? "";
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: ListView(
@@ -122,9 +131,9 @@ class _ProfileState extends State<Profile> {
                 width: MediaQuery.of(context).size.width,
                 child: ImageFiltered(
                   imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                  child: imagePath.isNotEmpty
-                      ? Image.file(
-                          File(imagePath),
+                  child: image.isNotEmpty
+                      ? Image.network(
+                          image,
                           fit: BoxFit.cover,
                         )
                       : Container(
@@ -134,15 +143,15 @@ class _ProfileState extends State<Profile> {
               ),
               Positioned(
                 bottom: -20,
-                left: 0,
-                right: 0,
+                width: MediaQuery.of(context).size.width,
                 child: Container(
-                  height: 200,
+                  height: 300,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
                         Colors.transparent,
-                        Theme.of(context).colorScheme.onPrimaryFixedVariant,
+                        Theme.of(context).colorScheme.surface,
+                        Theme.of(context).colorScheme.surface,
                       ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
@@ -160,9 +169,9 @@ class _ProfileState extends State<Profile> {
                         height: 200,
                         child: ClipRRect(
                             borderRadius: BorderRadius.circular(100),
-                            child: imagePath.isNotEmpty
-                                ? Image.file(
-                                    File(imagePath),
+                            child: image.isNotEmpty
+                                ? Image.network(
+                                    image,
                                     fit: BoxFit.cover,
                                   )
                                 : Container(
@@ -177,78 +186,15 @@ class _ProfileState extends State<Profile> {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      userName.isNotEmpty ? userName : "Guest",
+                      name,
                       style: const TextStyle(
-                          fontSize: 20, fontFamily: "Poppins-Bold",color: Colors.white),
+                          fontSize: 20, fontFamily: "Poppins-Bold"),
                     ),
                   ],
                 ),
               )
             ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                child: Center(
-                  child: AnimatedButton(
-                    key: const ValueKey("editButton"),
-                    height: 40,
-                    width: 160,
-                    isFixedHeight: false,
-                    color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
-                    pressEvent: () {
-                      _showEditDialog();
-                    },
-                    text: "Edit name",
-                    buttonTextStyle:
-                        const TextStyle(fontSize: 16, color: Colors.white, fontFamily: "Poppins-Bold"),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: Center(
-                  child: AnimatedButton(
-                    key: const ValueKey("editButton"),
-                    height: 40,
-                    width: 160,
-                    isFixedHeight: false,
-                    color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
-                    pressEvent: () {
-                      // Show Snackbar
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Center(
-                              child: Text(
-                            "Currently not available!",
-                            style: TextStyle(
-                                fontSize: 16, fontFamily: "Poppins-Bold"),
-                          )),
-                          duration: const Duration(seconds: 2),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20)),
-                          width: 240,
-                          backgroundColor:
-                              Theme.of(context).colorScheme.primary,
-                        ),
-                      );
-                    },
-                    text: "Share Profile",
-                    buttonTextStyle:
-                        const TextStyle(fontSize: 16, color: Colors.white,fontFamily: "Poppins-Bold"),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          ), 
           const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -257,7 +203,7 @@ class _ProfileState extends State<Profile> {
                 width: 200,
                 height: 60,
                 decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(10)),
                 child: Padding(
                   padding:
@@ -270,15 +216,12 @@ class _ProfileState extends State<Profile> {
                           const Text(
                             "Anime",
                             style: TextStyle(
-                                fontFamily: "Poppins-Bold",
-                                color: Colors.white),
+                                fontFamily: "Poppins-Bold",),
                           ),
                           Text(
-                              animeWatches != null
-                                  ? animeWatches!.length.toString()
-                                  : "0",
+                              provider.userData['statistics']['anime']['count'].toString(),
                               style:
-                                  const TextStyle(fontFamily: "Poppins-Bold", color: Colors.white)),
+                                  const TextStyle(fontFamily: "Poppins-Bold")),
                         ],
                       ),
                       Column(
@@ -286,13 +229,11 @@ class _ProfileState extends State<Profile> {
                           const Text("Manga",
                               style: TextStyle(
                                   fontFamily: "Poppins-Bold",
-                                  color: Colors.white)),
+                                  )),
                           Text(
-                              mangaReads != null
-                                  ? mangaReads!.length.toString()
-                                  : "0",
+                              provider.userData['statistics']['manga']['count'].toString(),
                               style:
-                                  const TextStyle(fontFamily: "Poppins-Bold", color: Colors.white)),
+                                  const TextStyle(fontFamily: "Poppins-Bold",)),
                         ],
                       )
                     ],
@@ -314,7 +255,7 @@ class _ProfileState extends State<Profile> {
             child: Padding(
               padding: const EdgeInsets.all(15),
               child: Container(
-                decoration: BoxDecoration(color: Theme.of(context).colorScheme.onPrimaryFixedVariant, borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(10)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: data.map<Widget>((item) {
@@ -325,13 +266,13 @@ class _ProfileState extends State<Profile> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(item,
+                              Text(item['title'],
                                   style: const TextStyle(
                                       fontSize: 17,
-                                      fontFamily: "Poppins-Bold", color: Colors.white)),
-                              const Text(
-                                "0",
-                                style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 16, color: Colors.white),
+                                      fontFamily: "Poppins-Bold")),
+                               Text(
+                                item['value'].toString().isNotEmpty ? item['value'].toString() : "0" ,
+                                style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 16),
                               )
                             ],
                           ),
