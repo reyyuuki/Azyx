@@ -2,10 +2,12 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:daizy_tv/_anime_api.dart';
+import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/setting_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Setting extends StatefulWidget {
@@ -18,28 +20,6 @@ class Setting extends StatefulWidget {
 class _SettingState extends State<Setting> {
   var box = Hive.box("mybox");
 
- Future<void> _launchInWebView() async {
-  // Correctly parse the URL using Uri.parse
-  Uri url = Uri.parse('https://anilist.co/api/v2/oauth/authorize?client_id=21626&redirect_uri=azyx://callback&response_type=code');
-  // Launch the URL in a WebView mode
-  if (!await launchUrl(url, mode: LaunchMode.inAppWebView)) {
-    throw Exception('Could not launch $url');
-  }
-}
-
-
- Future<void> loginWithAniList() async {
-    final authUrl = Uri.parse(
-        'https://anilist.co/api/v2/oauth/authorize?client_id=21626&redirect_uri=azyx://callback&response_type=code');
-
-    if (await canLaunchUrl(authUrl)) {
-      await launchUrl(authUrl);
-      log("done");
-    } else {
-      throw 'Could not launch $authUrl';
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -47,8 +27,10 @@ class _SettingState extends State<Setting> {
 
   @override
   Widget build(BuildContext context) {
-    String userName = box.get("userName") ?? "Guest";
-    String image = box.get("imagePath") ?? "";
+    final provider = Provider.of<AniListProvider>(context,listen: false);
+    
+    String userName = provider.userData['name'] ?? "Guest";
+    String image = provider.userData['avatar']?['large'] ?? "";
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
         appBar: AppBar(
@@ -73,8 +55,8 @@ class _SettingState extends State<Setting> {
                     height: 200,
                     child: ClipRRect(
                         borderRadius: BorderRadius.circular(100),
-                        child: Image.file(
-                          File(image),
+                        child: Image.network(
+                          image,
                           fit: BoxFit.cover,
                           errorBuilder: (BuildContext context, Object exception,
                               StackTrace? stackTrace) {
@@ -117,7 +99,7 @@ class _SettingState extends State<Setting> {
                SettingTile(
                 icon: Icon(Iconsax.user_tag),
                 name: "Profile",
-                routeName: box.get("userName") != null ? "./profile" : "/login-page",
+                routeName: provider.userData['name'] != null ? "./profile" : "/login-page",
               ),
               const SizedBox(
                 height: 10,
@@ -140,7 +122,7 @@ class _SettingState extends State<Setting> {
           child: const Icon(Icons.arrow_back_ios),
         ),
         onTap: () {
-          loginWithAniList();
+          Provider.of<AniListProvider>(context, listen: false).login(context);
         },
       ),
     )
