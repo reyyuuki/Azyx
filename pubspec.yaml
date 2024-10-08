@@ -36,6 +36,9 @@ dependencies:
   rename_app: ^1.6.1
   change_app_package_name: ^1.4.0
   url_launcher: ^6.3.0
+  flutter_dotenv: ^5.1.0
+  flutter_secure_storage: ^4.2.1
+  flutter_web_auth: ^0.5.0
 
 dev_dependencies:
   flutter_test:
@@ -50,6 +53,9 @@ flutter_icons:
 
 flutter:
   uses-material-design: true
+
+  assets:
+  - .env
 
   fonts:
     - family: Poppins
