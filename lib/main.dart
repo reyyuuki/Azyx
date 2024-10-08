@@ -4,6 +4,7 @@ import 'package:daizy_tv/Bottom_Menu/_profile.dart';
 import 'package:daizy_tv/Bottom_Menu/_setting.dart';
 import 'package:daizy_tv/On-Boarding_Screen/login_page.dart';
 import 'package:daizy_tv/Provider/theme_provider.dart';
+import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/dataBase/appDatabase.dart';
 import 'package:daizy_tv/dataBase/user.dart';
 import 'package:daizy_tv/pages/Manga/mangaDetails.dart';
@@ -20,25 +21,24 @@ import 'package:daizy_tv/pages/Manga/mangaPage.dart';
 import 'package:daizy_tv/pages/Anime/stream.dart';
 import 'package:daizy_tv/pages/Anime/animePage.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 
-void main() async{
-
+void main() async {
   // init the Hive
   await Hive.initFlutter();
   await Hive.openBox('mybox');
   await Hive.openBox("app-data");
+  await dotenv.load(fileName: ".env");
 
-  
-  
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => Data()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-      ],
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => Data()),
+      ChangeNotifierProvider(create: (_) => ThemeProvider()),
+      ChangeNotifierProvider(create: (_) => AniListProvider()..tryAutoLogin()),
+    ],
     child: const MainApp(),
   ));
 }
@@ -51,13 +51,7 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-
   UserDataBase? userDataBase;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +62,9 @@ class _MainAppState extends State<MainApp> {
       onGenerateRoute: (settings) {
         final args = settings.arguments as Map<String, dynamic>?;
         switch (settings.name) {
-
           //On-Boarding_Screen
-          case '/login-page' :
-          return MaterialPageRoute(builder: (context) => const LoginPage());
+          case '/login-page':
+            return MaterialPageRoute(builder: (context) => const LoginPage());
 
           // Anime - Routes
           case '/detailspage':
@@ -88,12 +81,11 @@ class _MainAppState extends State<MainApp> {
               builder: (context) => Stream(id: id),
             );
 
-            case '/searchAnime':
+          case '/searchAnime':
             final name = args?['name'] ?? '';
             return MaterialPageRoute(
               builder: (context) => SearchAnime(name: name),
             );
-
 
           // Manga - Routes
           case '/mangaDetail':
@@ -101,7 +93,8 @@ class _MainAppState extends State<MainApp> {
             final image = args?['image'] ?? '';
             final tagg = args?['tagg'] ?? '';
             return MaterialPageRoute(
-              builder: (context) => Mangadetails(id: id, image: image, tagg: tagg),
+              builder: (context) =>
+                  Mangadetails(id: id, image: image, tagg: tagg),
             );
 
           case '/read':
@@ -113,32 +106,29 @@ class _MainAppState extends State<MainApp> {
                   Read(mangaId: mangaId, chapterId: chapterId, image: image),
             );
 
-            case '/searchManga':
+          case '/searchManga':
             final name = args?['name'] ?? '';
             return MaterialPageRoute(
               builder: (context) => SearchManga(name: name),
             );
 
-
-            // Main-Screen
-            case '/homeScreen':
+          // Main-Screen
+          case '/homeScreen':
             return MaterialPageRoute(builder: (context) => const HomeScreen());
 
-
-            //Bottom-Menu-Screens
-            case './profile':
+          //Bottom-Menu-Screens
+          case './profile':
             return MaterialPageRoute(builder: (context) => const Profile());
-            case './settings':
-            return MaterialPageRoute(builder: (context) =>  Setting());
+          case './settings':
+            return MaterialPageRoute(builder: (context) => Setting());
 
-            //Setting-Screens
-            case './theme-changer':
+          //Setting-Screens
+          case './theme-changer':
             return MaterialPageRoute(builder: (context) => const ThemeChange());
-            case './languages':
+          case './languages':
             return MaterialPageRoute(builder: (context) => const Languages());
-            case './about':
+          case './about':
             return MaterialPageRoute(builder: (context) => const About());
-            
 
           default:
             return MaterialPageRoute(
@@ -202,7 +192,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           icon: _selectedIndex == 0
                               ? const SizedBox.shrink()
                               : const Icon(Icons.movie),
-                          title: const Text('Anime', style: TextStyle(fontFamily: "Poppins-Bold"),),
+                          title: const Text(
+                            'Anime',
+                            style: TextStyle(fontFamily: "Poppins-Bold"),
+                          ),
                           activeColor: Colors.white,
                           inactiveColor: Theme.of(context).colorScheme.primary,
                         ),
@@ -210,7 +203,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           icon: _selectedIndex == 1
                               ? const SizedBox.shrink()
                               : const Icon(Iconsax.home_15),
-                          title: const Text('Home', style: TextStyle(fontFamily: "Poppins-Bold"),),
+                          title: const Text(
+                            'Home',
+                            style: TextStyle(fontFamily: "Poppins-Bold"),
+                          ),
                           activeColor: Colors.white,
                           inactiveColor: Theme.of(context).colorScheme.primary,
                         ),
@@ -218,7 +214,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           icon: _selectedIndex == 2
                               ? const SizedBox.shrink()
                               : const Icon(Icons.book),
-                          title: const Text('Manga', style: TextStyle(fontFamily: "Poppins-Bold"),),
+                          title: const Text(
+                            'Manga',
+                            style: TextStyle(fontFamily: "Poppins-Bold"),
+                          ),
                           activeColor: Colors.white,
                           inactiveColor: Theme.of(context).colorScheme.primary,
                         ),
