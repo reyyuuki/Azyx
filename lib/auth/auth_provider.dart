@@ -19,6 +19,7 @@ class AniListProvider with ChangeNotifier {
     if (token != null) {
       await fetchUserProfile();
     }
+    return log('Auth token not available!');
   }
 
   Future<void> login(BuildContext context) async {
@@ -32,7 +33,7 @@ class AniListProvider with ChangeNotifier {
     try {
       final result = await FlutterWebAuth.authenticate(
         url: url,
-        callbackUrlScheme: 'anymex',
+        callbackUrlScheme: 'azyx',
       );
 
       final code = Uri.parse(result).queryParameters['code'];
@@ -122,7 +123,6 @@ class AniListProvider with ChangeNotifier {
     } else {
       throw Exception('Failed to load user profile');
     }
-
     _isLoading = false;
     notifyListeners();
   }
