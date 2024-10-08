@@ -1,12 +1,12 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:daizy_tv/_anime_api.dart';
 import 'package:daizy_tv/components/setting_tile.dart';
-import 'package:daizy_tv/dataBase/user.dart';
-import 'package:daizy_tv/scraper/episodeScrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Setting extends StatefulWidget {
   Setting({super.key});
@@ -17,6 +17,28 @@ class Setting extends StatefulWidget {
 
 class _SettingState extends State<Setting> {
   var box = Hive.box("mybox");
+
+ Future<void> _launchInWebView() async {
+  // Correctly parse the URL using Uri.parse
+  Uri url = Uri.parse('https://anilist.co/api/v2/oauth/authorize?client_id=21626&redirect_uri=azyx://callback&response_type=code');
+  // Launch the URL in a WebView mode
+  if (!await launchUrl(url, mode: LaunchMode.inAppWebView)) {
+    throw Exception('Could not launch $url');
+  }
+}
+
+
+ Future<void> loginWithAniList() async {
+    final authUrl = Uri.parse(
+        'https://anilist.co/api/v2/oauth/authorize?client_id=21626&redirect_uri=azyx://callback&response_type=code');
+
+    if (await canLaunchUrl(authUrl)) {
+      await launchUrl(authUrl);
+      log("done");
+    } else {
+      throw 'Could not launch $authUrl';
+    }
+  }
 
   @override
   void initState() {
@@ -105,6 +127,23 @@ class _SettingState extends State<Setting> {
                 name: "About",
                 routeName: "./about",
               ),
+              Container(
+      decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHigh, borderRadius: BorderRadius.circular(10)),
+      child: ListTile(
+        title: Text(
+          "Anilist - List",
+          style: const TextStyle(fontFamily: "Poppins-Bold", ),
+        ),
+        leading: Icon(Icons.face_retouching_natural),
+        trailing: Transform.rotate(
+          angle: 3.14,
+          child: const Icon(Icons.arrow_back_ios),
+        ),
+        onTap: () {
+          loginWithAniList();
+        },
+      ),
+    )
             ],
           ),
         ));
