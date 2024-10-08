@@ -1,24 +1,34 @@
 import 'dart:io';
 
+import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:provider/provider.dart';
 
-class Header extends StatelessWidget {
+class Header extends StatefulWidget {
   final String? name;
   const Header({super.key, this.name});
 
   @override
+  State<Header> createState() => _HeaderState();
+}
+
+class _HeaderState extends State<Header> {
+  @override
   Widget build(BuildContext context) {
     var box = Hive.box("mybox");
+    final provider = Provider.of<AniListProvider>(context); // Listen for changes
+
+    // Use null-aware operators to prevent null errors
+    final userData = provider.userData;
+    final bool isLoggedIn = userData != null;
+    final String image = isLoggedIn ? userData?['avatar']?['large'] ?? "" : "";
+    final String userName = isLoggedIn ? userData['name'] ?? "Guest" : "Guest";
 
     return ValueListenableBuilder(
       valueListenable: box.listenable(),
       builder: (context, Box box, child) {
-        String image = box.get("imagePath") ?? "";
-        String _userName = box.get("userName") ?? "Guest";
-        bool isImage = image.isNotEmpty;
-
         return Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
@@ -28,11 +38,11 @@ class Header extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _userName,
+                    userName,
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
                   Text(
-                    "Enjoy unlimited ${name ?? 'content'}!",
+                    "Enjoy unlimited ${widget.name ?? 'content'}!",
                     style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                   ),
                 ],
@@ -48,15 +58,22 @@ class Header extends StatelessWidget {
                     borderRadius: BorderRadius.circular(50),
                     color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
                   ),
-                  child: isImage
+                  child: isLoggedIn
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(25),
-                          child: Image.file(
-                            File(image),
+                          child: Image.network(
+                            image,
                             fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(
+                                Iconsax.user,
+                                color: Colors.white,
+                                size: 30,
+                              );
+                            },
                           ),
                         )
-                      : Icon(
+                      : const Icon(
                           Iconsax.user,
                           color: Colors.white,
                           size: 30,
@@ -71,6 +88,12 @@ class Header extends StatelessWidget {
   }
 
   Future<void> _displayBottomSheet(BuildContext context, Box box) {
+    final provider = Provider.of<AniListProvider>(context, listen: false);
+    final userData = provider.userData;
+    final bool isLoggedIn = userData != null;
+    final String userName = isLoggedIn ? userData['name'] ?? "Guest" : "Guest";
+    final String image = isLoggedIn ? userData?['avatar']?['large'] ?? "" : "";
+
     return showModalBottomSheet(
       context: context,
       barrierColor: Colors.black87.withOpacity(0.5),
@@ -88,7 +111,7 @@ class Header extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    box.get("userName") ?? "Guest",
+                    userName,
                     style: const TextStyle(fontSize: 20),
                   ),
                   Container(
@@ -98,12 +121,19 @@ class Header extends StatelessWidget {
                       borderRadius: BorderRadius.circular(50),
                       color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
                     ),
-                    child: box.get("imagePath") != null && File(box.get("imagePath")!).existsSync()
+                    child: isLoggedIn
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(25),
-                            child: Image.file(
-                              File(box.get("imagePath")!),
+                            child: Image.network(
+                              image,
                               fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(
+                                  Iconsax.user,
+                                  color: Colors.white,
+                                  size: 30,
+                                );
+                              },
                             ),
                           )
                         : const Icon(
@@ -114,7 +144,7 @@ class Header extends StatelessWidget {
                   ),
                 ],
               ),
-              GestureDetector(
+                GestureDetector(
                 onTap: () {
                   Navigator.of(context).pop();
                   Future.delayed(const Duration(milliseconds: 200), () {
@@ -170,9 +200,7 @@ class Header extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).pop();
                   Future.delayed(const Duration(milliseconds: 200), () {
-                    box.delete("userName");
-                    box.delete("imagePath");
-                    Navigator.pushNamed(context, '/login-page');
+                    provider.logout(context);
                   });
                 },
                 child: Container(
