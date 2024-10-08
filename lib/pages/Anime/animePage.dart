@@ -28,7 +28,6 @@ class _HomepageState extends State<Animepage> {
   void initState() {
     super.initState();
     backUpData();
-    fetchData();
   }
 
   void backUpData() {
@@ -40,16 +39,6 @@ class _HomepageState extends State<Animepage> {
       });
   }
 
-
-  Future<void> fetchData() async{
-
-    final spotlight = await extractLinks("deslide-cover-img", "deslide-item-content", "btn-secondary");
-    final trending = await extractLinks("film-poster", "number", "film-poster");
-  setState(() {
-    spotlightAnime = spotlight;
-    trendingAnime = trending;
-  });
-  }
 
   @override
   Widget build(BuildContext context) {

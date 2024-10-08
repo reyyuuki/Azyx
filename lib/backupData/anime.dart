@@ -115,83 +115,70 @@ dynamic animeData = {
       "id": "one-piece-100",
       "name": "One Piece",
       "jname": "One Piece",
-      "poster":
-          "https://cdn.noitatnemucod.net/thumbnail/300x400/100/bcd84731a3eda4f4a306250769675065.jpg"
+      "poster": "https://cdn.noitatnemucod.net/thumbnail/300x400/100/bcd84731a3eda4f4a306250769675065.jpg"
     },
     {
       "rank": 2,
-      "id": "my-hero-academia-season-7-19146",
-      "name": "My Hero Academia Season 7",
-      "jname": "Boku no Hero Academia 7th Season",
-      "poster":
-          "https://cdn.noitatnemucod.net/thumbnail/300x400/100/af4938d7388aad3438e443e74b02531e.jpg"
+      "id": "dandadan-19319",
+      "name": "Dandadan",
+      "jname": "Dandadan",
+      "poster": "https://cdn.noitatnemucod.net/thumbnail/300x400/100/a8b56a7589ff9edb6c86977c31e27a06.jpg"
     },
     {
       "rank": 3,
-      "id": "alya-sometimes-hides-her-feelings-in-russian-19254",
-      "name": "Alya Sometimes Hides Her Feelings in Russian",
-      "jname": "Tokidoki Bosotto Russia-go de Dereru Tonari no Alya-san",
-      "poster":
-          "https://cdn.noitatnemucod.net/thumbnail/300x400/100/b210daff9a85c7b6e42d82d578ee90b2.jpg"
+      "id": "blue-lock-season-2-19318",
+      "name": "Blue Lock Season 2",
+      "jname": "Blue Lock vs. U-20 Japan",
+      "poster": "https://cdn.noitatnemucod.net/thumbnail/300x400/100/8ed3a4df2e8f22be9916959c96e5e3e2.jpg"
     },
     {
       "rank": 4,
-      "id": "a-nobodys-way-up-to-an-exploration-hero-lv-19223",
-      "name": "A Nobody's Way Up to an Exploration Hero LV",
-      "jname": "Mob kara Hajimaru Tansaku Eiyuutan",
-      "poster":
-          "https://cdn.noitatnemucod.net/thumbnail/300x400/100/d6b6d4a43555afa74323871b9dcf107e.jpg"
+      "id": "blue-box-19326",
+      "name": "Blue Box",
+      "jname": "Ao no Hako",
+      "poster": "https://cdn.noitatnemucod.net/thumbnail/300x400/100/5f112b1c1f3f41ed87de0c48b6cf4e0d.jpg"
     },
     {
       "rank": 5,
-      "id": "oshi-no-ko-season-2-19256",
-      "name": "Oshi No Ko Season 2",
-      "jname": "\"Oshi no Ko\" 2nd Season",
-      "poster":
-          "https://cdn.noitatnemucod.net/thumbnail/300x400/100/2d1cb3f0d6a5eea02851ea80f515b984.jpg"
+      "id": "bleach-thousand-year-blood-war-the-conflict-19322",
+      "name": "Bleach: Thousand-Year Blood War - The Conflict",
+      "jname": "Bleach: Sennen Kessen-hen - Soukoku-tan",
+      "poster": "https://cdn.noitatnemucod.net/thumbnail/300x400/100/b87a9e986e6e403ffddb520d24f5040a.jpg"
     },
     {
       "rank": 6,
-      "id": "fairy-tail-100-years-quest-19253",
-      "name": "Fairy Tail: 100 Years Quest",
-      "jname": "Fairy Tail: 100-nen Quest",
-      "poster":
-          "https://cdn.noitatnemucod.net/thumbnail/300x400/100/28a6148a40022320436d20ea91e2800d.jpg"
+      "id": "rurouni-kenshin-kyoto-disturbance-19340",
+      "name": "Rurouni Kenshin -Kyoto Disturbance-",
+      "jname": "Rurouni Kenshin: Meiji Kenkaku Romantan - Kyoto Douran",
+      "poster": "https://cdn.noitatnemucod.net/thumbnail/300x400/100/4c339e5c8107dbda621c214e351f7164.jpg"
     },
     {
       "rank": 7,
-      "id": "wistoria-wand-and-sword-19239",
-      "name": "Wistoria: Wand and Sword",
-      "jname": "Tsue to Tsurugi no Wistoria",
-      "poster":
-          "https://cdn.noitatnemucod.net/thumbnail/300x400/100/14a6029b0f2759923a4d2fa957765fe4.jpg"
+      "id": "rezero-starting-life-in-another-world-season-3-19301",
+      "name": "Re:ZERO -Starting Life in Another World- Season 3",
+      "jname": "Re:Zero kara Hajimeru Isekai Seikatsu 3rd Season",
+      "poster": "https://cdn.noitatnemucod.net/thumbnail/300x400/100/fd9a4794949c53baa8ef6ae16f78c7ab.jpg"
     },
     {
       "rank": 8,
-      "id": "days-with-my-stepsister-19251",
-      "name": "Days with My Stepsister",
-      "jname": "Gimai Seikatsu",
-      "poster":
-          "https://cdn.noitatnemucod.net/thumbnail/300x400/100/41c04482b97e13ef9ad4d90698e4614f.jpg"
+      "id": "my-star-season-2-19256",
+      "name": "My Star: Season 2",
+      "jname": "Oshi no Ko 2nd Season",
+      "poster": "https://cdn.noitatnemucod.net/thumbnail/300x400/100/2d1cb3f0d6a5eea02851ea80f515b984.jpg"
     },
     {
       "rank": 9,
-      "id":
-          "failure-frame-i-became-the-strongest-and-annihilated-everything-with-low-level-spells-19237",
-      "name":
-          "Failure Frame: I Became the Strongest and Annihilated Everything With Low-Level Spells",
-      "jname":
-          "Hazurewaku no \"Joutai Ijou Skill\" de Saikyou ni Natta Ore ga Subete wo Juurin suru made",
-      "poster":
-          "https://cdn.noitatnemucod.net/thumbnail/300x400/100/6511271f7f9ca415411b234df57125ed.jpg"
-    },
-    {
-      "rank": 10,
       "id": "wind-breaker-19136",
       "name": "Wind Breaker",
       "jname": "Wind Breaker",
-      "poster":
-          "https://cdn.noitatnemucod.net/thumbnail/300x400/100/d9bb23228e5a641b5a3e9386382dae3a.jpg"
+      "poster": "https://cdn.noitatnemucod.net/thumbnail/300x400/100/d9bb23228e5a641b5a3e9386382dae3a.jpg"
+    },
+    {
+      "rank": 10,
+      "id": "good-bye-dragon-life-19347",
+      "name": "Good Bye, Dragon Life.",
+      "jname": "Sayounara Ryuusei, Konnichiwa Jinsei",
+      "poster": "https://cdn.noitatnemucod.net/thumbnail/300x400/100/6431fdac6396ff285bf3c69b807a8a9a.jpg"
     }
   ],
   "latestEpisodeAnimes": [
