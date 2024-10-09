@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:daizy_tv/components/Manga/_manga_grid.dart';
 import 'package:daizy_tv/components/Manga/_manga_list.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:iconsax/iconsax.dart';
 import 'package:ionicons/ionicons.dart';
@@ -35,7 +36,7 @@ class _SearchpageState extends State<SearchManga> {
 
   Future<void> fetchdata() async {
     String url =
-        'https://anymey-proxy.vercel.app/cors?url=https://manga-ryan.vercel.app/api/search/${widget.name}';
+        'https://anymey-proxy.vercel.app/cors?url=${dotenv.get("KAKALOT_URL")}api/search/${widget.name}';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {

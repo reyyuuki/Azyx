@@ -8,6 +8,7 @@ import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/coverImage.dart';
 import 'package:daizy_tv/scraper/anime_detail_scraper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:text_scroll/text_scroll.dart';
 
@@ -41,7 +42,7 @@ Future<void> scrapedData() async {
       setState(() {
         animeData = data; 
       });
-      log("Scraped data: $data");
+      
     } else {
       log("Error: Unexpected data type from scrapDetail");
     }
@@ -52,29 +53,32 @@ Future<void> scrapedData() async {
 
  
   Future<void> fetchData() async {
+    String aniwatchUrl = dotenv.get("HIANIME_URL");
+    String consumetUrl = dotenv.get("CONSUMET_URL");
+    String proxy = "https://goodproxy.goodproxy.workers.dev/fetch?url=";
     try {
       final response = await http.get(Uri.parse(
-          'https://goodproxy.goodproxy.workers.dev/fetch?url=https://aniwatch-ryan.vercel.app/anime/info?id=${widget.id}'));
+          '$proxy${aniwatchUrl}anime/info?id=${widget.id}'));
+          log('$proxy${aniwatchUrl}anime/info?id=${widget.id}');
+          
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         final newResponse = await http.get(Uri.parse(
-            'https://goodproxy.goodproxy.workers.dev/fetch?url=https://consumet-api-two-nu.vercel.app/meta/anilist/info/${jsonData['anime']['info']['anilistId']}'));
+            '$proxy${consumetUrl}meta/anilist/info/${jsonData['anime']['info']['anilistId']}'));
 
+          log('$proxy${consumetUrl}meta/anilist/info/${jsonData['anime']['info']['anilistId']}');
         if (newResponse.statusCode == 200) {
           final newData = jsonDecode(newResponse.body);
           setState(() {
             // animeData = jsonData['anime'];
+            log("data anilist : ${jsonData['anime']['info']['anilistId']}");
             cover = newData['cover'];
             description = newData['description'];
-            log(widget.tagg);
           });
         }
-      } else {
-        throw Exception("Failed to load data");
       }
     } catch (error) {
-      // ignore: avoid_print
-      print("Failed to load data");
+      log("Failed to load data : $error");
     }
   }
 
@@ -131,3 +135,4 @@ Future<void> scrapedData() async {
   }
 
 }
+

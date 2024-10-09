@@ -7,6 +7,7 @@ import 'package:daizy_tv/components/Manga/mangaAllDetails.dart';
 import 'package:daizy_tv/components/Manga/mangaFloater.dart';
 import 'package:daizy_tv/components/Manga/chapterList.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:iconsax/iconsax.dart';
 import 'package:text_scroll/text_scroll.dart';
@@ -48,7 +49,8 @@ class _DetailsState extends State<Mangadetails> {
   Future<void> fetchData() async {
     try {
       final response = await http.get(Uri.parse(
-          'https://anymey-proxy.vercel.app/cors?url=https://manga-ryan.vercel.app/api/manga/${widget.id}'));
+          'https://anymey-proxy.vercel.app/cors?url=https://${dotenv.get("KAKALOT_URL")}api/manga/${widget.id}'));
+          log('https://anymey-proxy.vercel.app/cors?url=https://${dotenv.get("KAKALOT_URL")}api/manga/${widget.id}');
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         setState(() {

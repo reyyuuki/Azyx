@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:daizy_tv/components/Anime/_gridlist.dart';
 import 'package:daizy_tv/components/Anime/_search_list.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:iconsax/iconsax.dart';
 import 'package:ionicons/ionicons.dart';
@@ -36,7 +37,7 @@ class _SearchpageState extends State<SearchAnime> {
 
   Future<void> fetchdata() async {
     String url =
-        'https://aniwatch-ryan.vercel.app/anime/search?q=${widget.name}';
+        '${dotenv.get("HIANIME_URL")}anime/search?q=${widget.name}';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {

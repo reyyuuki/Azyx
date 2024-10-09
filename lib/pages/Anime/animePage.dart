@@ -1,5 +1,4 @@
 
-import 'package:daizy_tv/_anime_api.dart';
 import 'package:daizy_tv/backupData/anime.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';

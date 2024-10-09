@@ -6,6 +6,7 @@ import 'package:daizy_tv/components/Anime/videoplayer.dart';
 import 'package:daizy_tv/dataBase/appDatabase.dart';
 import 'package:daizy_tv/scraper/episodeScrapper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:iconsax/iconsax.dart';
@@ -41,12 +42,12 @@ class _StreamState extends State<Stream> {
     super.initState();
     fetchData();
   }
-
-  final String baseUrl = 'https://goodproxy.goodproxy.workers.dev/fetch?url=https://aniwatch-ryan.vercel.app/anime/info?id=';
+  final String baseUrl = 'https://goodproxy.goodproxy.workers.dev/fetch?url=${dotenv.get("HIANIME_URL")}anime/info?id=';
   final String episodeUrl =
-      'https://aniwatch-ryan.vercel.app/anime/episode-srcs?id=';
+      '${dotenv.get("HIANIME_URL")}anime/episode-srcs?id=';
 
   Future<void> fetchData() async {
+    log(baseUrl + widget.id);
     try {
       final provider = Provider.of<Data>(context, listen: false);
       final response = await http.get(Uri.parse(baseUrl + widget.id));
