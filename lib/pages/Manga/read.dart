@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:daizy_tv/components/Manga/sliderBar.dart';
 import 'package:daizy_tv/dataBase/appDatabase.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
@@ -41,8 +42,8 @@ class _ReadState extends State<Read> {
   final ScrollController _scrollController = ScrollController();
 
   Future<void> fetchChapterData() async {
-    const String url =
-        'https://anymey-proxy.vercel.app/cors?url=https://manga-ryan.vercel.app/api/manga/';
+     String url =
+        'https://anymey-proxy.vercel.app/cors?url=${dotenv.get("KAKALOT_URL")}api/manga/';
     try {
       final resp = await http.get(Uri.parse(url + widget.chapterId));
       final provider = Provider.of<Data>(context, listen: false);
@@ -81,8 +82,8 @@ class _ReadState extends State<Read> {
     setState(() {
       isLoading = true;
     });
-    const String url =
-        'https://anymey-proxy.vercel.app/cors?url=https://manga-ryan.vercel.app/api/manga/';
+     String url =
+        'https://anymey-proxy.vercel.app/cors?url=${dotenv.get("KAKALOT_URL")}api/manga/';
     try {
       final provider = Provider.of<Data>(context, listen: false);
       final resp = await http.get(

@@ -4,6 +4,7 @@ import 'package:daizy_tv/backupData/manga.dart';
 import 'package:daizy_tv/components/Manga/mangaCarousale.dart';
 import 'package:daizy_tv/components/Manga/mangaReusableCarousale.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:daizy_tv/components/Header.dart';
 import 'package:iconsax/iconsax.dart';
@@ -39,8 +40,8 @@ class _HomepageState extends State<Mangapage> {
 
 
   Future<void> fetchData() async {
-    const String url =
-        'https://anymey-proxy.vercel.app/cors?url=https://manga-ryan.vercel.app/api/mangalist';
+     String url =
+        'https://anymey-proxy.vercel.app/cors?url=https://${dotenv.get("KAKALOT_URL")}api/mangalist';
 
     try {
       final response = await http.get(Uri.parse(url));
