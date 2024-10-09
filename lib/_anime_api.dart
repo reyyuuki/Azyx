@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
 
 var box = Hive.box("app-data");
 bool isConsumet = box.get("isConsumet", defaultValue: false);
-const String proxy = "https://goodproxy.goodproxy.workers.dev/fetch?url=";
-const aniwatchUrl = "https://aniwatch-ryan.vercel.app/anime";
-const consumetUrl = "https://consumet-api-two-nu.vercel.app/meta/anilist/";
+String proxy = dotenv.get("PROXY_URL");
+String aniwatchUrl = dotenv.get("HIANIME_URL");
+String consumetUrl = dotenv.get("CONSUMET_URL");
 
 Future<dynamic> fetchHomePageData() async {
   try {
@@ -24,77 +25,6 @@ Future<dynamic> fetchHomePageData() async {
   }
 }
 
-Future<dynamic> consumetHomePageData() async {
-  dynamic data = {};
-
-  try {
-    final spotlightAnimesResponse = await http.get(Uri.parse(
-        '${proxy}https://consumet-api-two-nu.vercel.app/meta/anilist/trending'));
-    final trendingAnimesResponse = await http.get(Uri.parse(
-        '${proxy}https://consumet-api-two-nu.vercel.app/meta/anilist/trending?page=2'));
-    final latestEpisodesResponse = await http.get(Uri.parse(
-        '${proxy}https://consumet-api-two-nu.vercel.app/meta/anilist/advanced-search?sort=["EPISODES"]'));
-    final topUpcomingAnimesResponse = await http.get(Uri.parse(
-        '${proxy}https://consumet-api-two-nu.vercel.app/meta/anilist/advanced-search?status=NOT_YET_RELEASED'));
-    final topAiringAnimesResponse = await http.get(Uri.parse(
-        '${proxy}https://consumet-api-two-nu.vercel.app/meta/anilist/trending?page=3'));
-    final mostPopularAnimesResponse = await http.get(Uri.parse(
-        '${proxy}https://consumet-api-two-nu.vercel.app/meta/anilist/popular'));
-    final mostFavouriteAnimesResponse = await http.get(Uri.parse(
-        '${proxy}https://consumet-api-two-nu.vercel.app/meta/anilist/popular?page=2'));
-    final latestCompletedAnimesResponse = await http.get(Uri.parse(
-        '${proxy}https://consumet-api-two-nu.vercel.app/meta/anilist/advanced-search?year=2024&status=FINISHED'));
-
-    if (spotlightAnimesResponse.statusCode == 200) {
-      data['spotlightAnimes'] =
-          jsonDecode(spotlightAnimesResponse.body)['results'];
-    }
-    if (trendingAnimesResponse.statusCode == 200) {
-      data['trendingAnimes'] =
-          jsonDecode(trendingAnimesResponse.body)['results'];
-    }
-    if (latestEpisodesResponse.statusCode == 200) {
-      data['latestEpisodesAnimes'] =
-          jsonDecode(latestEpisodesResponse.body)['results'];
-    }
-    if (topUpcomingAnimesResponse.statusCode == 200) {
-      data['topUpcomingAnimes'] =
-          jsonDecode(topUpcomingAnimesResponse.body)['results'];
-    }
-    if (topAiringAnimesResponse.statusCode == 200) {
-      data['topAiringAnimes'] =
-          jsonDecode(topAiringAnimesResponse.body)['results'];
-    }
-    if (mostPopularAnimesResponse.statusCode == 200) {
-      data['mostPopularAnimes'] =
-          jsonDecode(mostPopularAnimesResponse.body)['results'];
-    }
-    if (mostFavouriteAnimesResponse.statusCode == 200) {
-      data['mostFavouriteAnimes'] =
-          jsonDecode(mostFavouriteAnimesResponse.body)['results'];
-    }
-    if (latestCompletedAnimesResponse.statusCode == 200) {
-      data['latestCompletedAnimes'] =
-          jsonDecode(latestCompletedAnimesResponse.body)['results'];
-    }
-    if (spotlightAnimesResponse.statusCode == 200 &&
-        topAiringAnimesResponse.statusCode == 200 &&
-        trendingAnimesResponse.statusCode == 200) {
-      final today = jsonDecode(spotlightAnimesResponse.body);
-      final week = jsonDecode(trendingAnimesResponse.body);
-      final month = jsonDecode(topAiringAnimesResponse.body);
-      data['top10Animes'] = {
-        // 'today': extractData(today['results']),
-        // 'week': extractData(week['results']),
-        // 'month': extractData(month['results']),
-      };
-    }
-  } catch (e) {
-    log('Error fetching data from Consumet API: $e');
-  }
-
-  return data;
-}
 
 Future<dynamic>? fetchAnimeDetailsConsumet(String id) async {
   try {
