@@ -61,8 +61,6 @@ Future<Map<String, dynamic>> scrapeAnimeEpisodes(String animeId) async {
       'totalEpisodes': totalEpisodes,
       'episodes': episodes,
     };
-
-    log(scrapedData.toString());
     return scrapedData;
   } catch (e) {
     if (e is http.ClientException) {
