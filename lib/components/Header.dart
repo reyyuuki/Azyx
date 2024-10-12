@@ -39,7 +39,7 @@ class _HeaderState extends State<Header> {
                 children: [
                   Text(
                     userName,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
                   Text(
                     "Enjoy unlimited ${widget.name ?? 'content'}!",
@@ -56,7 +56,7 @@ class _HeaderState extends State<Header> {
                   height: 50,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(50),
-                    color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   ),
                   child: isLoggedIn
                       ? ClipRRect(
@@ -66,7 +66,7 @@ class _HeaderState extends State<Header> {
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return const Icon(
-                                Iconsax.user,
+                                Icons.settings,
                                 color: Colors.white,
                                 size: 30,
                               );
@@ -105,7 +105,7 @@ class _HeaderState extends State<Header> {
         child: SizedBox(
           height: 200,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: userData['name'] != null ? MainAxisAlignment.spaceBetween : MainAxisAlignment.spaceEvenly,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -148,10 +148,10 @@ class _HeaderState extends State<Header> {
                 onTap: () {
                   Navigator.of(context).pop();
                   Future.delayed(const Duration(milliseconds: 200), () {
-                   box.get("userName") != null ? Navigator.pushNamed(context, './profile') : Navigator.pushNamed(context, "/login-page");
+                   userData?['name'] != null ? Navigator.pushNamed(context, './profile') : Navigator.pushNamed(context, "/login-page");
                   });
                 },
-                child: Container(
+                child: userData?['name'] != null ? Container(
                   color: Colors.transparent,
                   width: MediaQuery.of(context).size.width,
                   height: 40,
@@ -168,7 +168,7 @@ class _HeaderState extends State<Header> {
                       ),
                     ],
                   ),
-                ),
+                ) : const SizedBox.shrink(),
               ),
               GestureDetector(
                 onTap: () {
@@ -200,7 +200,7 @@ class _HeaderState extends State<Header> {
                 onTap: () {
                   Navigator.of(context).pop();
                   Future.delayed(const Duration(milliseconds: 200), () {
-                    provider.logout(context);
+                   provider.userData?['name'] != null ? provider.logout(context) : provider.login(context);
                   });
                 },
                 child: Container(
@@ -220,7 +220,7 @@ class _HeaderState extends State<Header> {
                       ),
                       const SizedBox(width: 20),
                       Text(
-                        box.get("userName") != null ? "LogOut" : "LogIn",
+                        userData['name'] != null ? "LogOut" : "LogIn",
                         style: const TextStyle(fontSize: 18),
                       ),
                     ],
