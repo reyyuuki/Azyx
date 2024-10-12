@@ -1,4 +1,5 @@
-import 'package:daizy_tv/auth/auth_provider.dart';
+import 'dart:developer';
+
 import 'package:daizy_tv/backupData/anime.dart';
 import 'package:daizy_tv/backupData/manga.dart';
 import 'package:daizy_tv/components/Anime/reusableList.dart';
@@ -8,7 +9,6 @@ import 'package:daizy_tv/components/Recently-added/animeCarousale.dart';
 import 'package:daizy_tv/components/Recently-added/mangaCarousale.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -27,12 +27,16 @@ class _HomePageState extends State<HomePage> {
     data();
   }
 
+
+
   void data() {
     setState(() {
       recomendAnime = animeData["mostPopularAnimes"];
       recomendManga = mangaData["mangaList"];
     });
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +53,17 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(
               height: 20,
             ),
-
+      // Row(
+      //   children: [
+      //     ElevatedButton(onPressed: () {
+      //       Navigator.pushNamed(context, './animelist');
+      //     }, child: const Text("AnimeList")),
+      //     const SizedBox(width: 20,),
+      //     ElevatedButton(onPressed: () {
+      //       Navigator.pushNamed(context, './mangalist');
+      //     }, child: const Text("MangaList"))
+      //   ],
+      // ),
             ValueListenableBuilder(
               valueListenable: box.listenable(),
               builder: (context, Box<dynamic> box, _) {
@@ -60,7 +74,7 @@ class _HomePageState extends State<HomePage> {
             ),
 
             const SizedBox(
-              height: 20,
+              height: 5,
             ),
 
             ValueListenableBuilder(
@@ -76,6 +90,7 @@ class _HomePageState extends State<HomePage> {
                 name: "Recommend Animes",
                 taggName: "recommended",
                 data: recomendAnime),
+                const SizedBox(height: 20,),
             Mangareusablecarousale(
                 name: "Recommend Mangas",
                 taggName: "recommended",
@@ -86,3 +101,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
