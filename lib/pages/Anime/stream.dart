@@ -227,7 +227,7 @@ class _StreamState extends State<Stream> {
             children: [
               AnimeData['mostPopularAnimes']?.isNotEmpty == true
                   ? ReusableList(
-                      name: "Popular Anime",
+                      name: "Popular Animes",
                       data: AnimeData['mostPopularAnimes'],
                       taggName: "Popular",
                     )
@@ -236,7 +236,7 @@ class _StreamState extends State<Stream> {
                 height: 10,
               ),
               ReusableList(
-                name: "Related Anime",
+                name: "Related Animes",
                 data: AnimeData['relatedAnimes'],
                 taggName: "Related",
               ),
@@ -244,7 +244,7 @@ class _StreamState extends State<Stream> {
                 height: 10,
               ),
               ReusableList(
-                name: "Recommended Anime",
+                name: "Recommended Animes",
                 data: AnimeData['recommendedAnimes'],
                 taggName: "Recommended",
               ),
@@ -307,21 +307,14 @@ class _StreamState extends State<Stream> {
                               .colorScheme
                               .surfaceContainerHighest),
                   child: Padding(
-                    padding: const EdgeInsets.all(15),
+                    padding:  EdgeInsets.all(15),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         SizedBox(
                           width: 220,
-                          child: TextScroll(
-                            title,
-                            mode: TextScrollMode.bouncing,
-                            velocity:
-                                const Velocity(pixelsPerSecond: Offset(30, 0)),
-                            delayBefore: const Duration(milliseconds: 500),
-                            pauseBetween: const Duration(milliseconds: 1000),
-                            textAlign: TextAlign.center,
-                            selectable: true,
+                          child: Text(
+                            title.length > 25 ? '${title.substring(0, 25)}...' : title,
                             style: TextStyle(
                                 color: Theme.of(context)
                                     .colorScheme
