@@ -43,7 +43,7 @@ class _ReadState extends State<Read> {
 
   Future<void> fetchChapterData() async {
      String url =
-        'https://anymey-proxy.vercel.app/cors?url=${dotenv.get("KAKALOT_URL")}api/manga/';
+        '${dotenv.get("KAKALOT_URL")}api/manga/';
     try {
       final resp = await http.get(Uri.parse(url + widget.chapterId));
       final provider = Provider.of<Data>(context, listen: false);
@@ -83,7 +83,7 @@ class _ReadState extends State<Read> {
       isLoading = true;
     });
      String url =
-        'https://anymey-proxy.vercel.app/cors?url=${dotenv.get("KAKALOT_URL")}api/manga/';
+        '${dotenv.get("KAKALOT_URL")}api/manga/';
     try {
       final provider = Provider.of<Data>(context, listen: false);
       final resp = await http.get(
