@@ -7,6 +7,8 @@ import 'package:daizy_tv/Provider/theme_provider.dart';
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/dataBase/appDatabase.dart';
 import 'package:daizy_tv/dataBase/user.dart';
+import 'package:daizy_tv/pages/Lists/animelist.dart';
+import 'package:daizy_tv/pages/Lists/mangalist.dart';
 import 'package:daizy_tv/pages/Manga/mangaDetails.dart';
 import 'package:daizy_tv/pages/Manga/read.dart';
 import 'package:daizy_tv/pages/Anime/searchAnime.dart';
@@ -130,6 +132,13 @@ class _MainAppState extends State<MainApp> {
           case './about':
             return MaterialPageRoute(builder: (context) => const About());
 
+
+          //Lists 
+          case './animelist': 
+            return MaterialPageRoute(builder: (context) => const Animelist());
+          case './mangalist':
+            return MaterialPageRoute(builder: (context) => const Mangalist());
+            
           default:
             return MaterialPageRoute(
               builder: (context) => const Scaffold(
@@ -166,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: _pages[_selectedIndex],
       bottomNavigationBar: Container(
         height: 60,
-        margin: const EdgeInsets.only(bottom: 50),
+        margin: const EdgeInsets.only(bottom: 30),
         child: Center(
           child: SizedBox(
             width: 250,
@@ -177,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white
-                          .withOpacity(0.3), // Glass-like transparency
+                          .withOpacity(0.1), // Glass-like transparency
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: FlashyTabBar(
