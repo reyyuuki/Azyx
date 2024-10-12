@@ -49,7 +49,7 @@ class _DetailsState extends State<Mangadetails> {
   Future<void> fetchData() async {
     try {
       final response = await http.get(Uri.parse(
-          'https://anymey-proxy.vercel.app/cors?url=https://${dotenv.get("KAKALOT_URL")}api/manga/${widget.id}'));
+          '${dotenv.get("KAKALOT_URL")}api/manga/${widget.id}'));
           log('https://anymey-proxy.vercel.app/cors?url=https://${dotenv.get("KAKALOT_URL")}api/manga/${widget.id}');
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
