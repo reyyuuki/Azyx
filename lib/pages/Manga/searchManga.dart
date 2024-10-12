@@ -36,7 +36,7 @@ class _SearchpageState extends State<SearchManga> {
 
   Future<void> fetchdata() async {
     String url =
-        'https://anymey-proxy.vercel.app/cors?url=${dotenv.get("KAKALOT_URL")}api/search/${widget.name}';
+        '${dotenv.get("KAKALOT_URL")}api/search/${widget.name}';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
