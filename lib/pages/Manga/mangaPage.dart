@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:daizy_tv/backupData/manga.dart';
 import 'package:daizy_tv/components/Manga/mangaCarousale.dart';
@@ -41,7 +42,7 @@ class _HomepageState extends State<Mangapage> {
 
   Future<void> fetchData() async {
      String url =
-        'https://anymey-proxy.vercel.app/cors?url=https://${dotenv.get("KAKALOT_URL")}api/mangalist';
+        'https://anymey-proxy.vercel.app/cors?url=${dotenv.get("KAKALOT_URL")}api/mangalist';
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -61,7 +62,7 @@ class _HomepageState extends State<Mangapage> {
         throw Exception('Manga data is not available');
       }
     } catch (error) {
-      print(error);
+      log(error.toString());
     }
   }
 
