@@ -12,11 +12,11 @@ class Mangacarousale extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (mangaData == null) {
-      return const Center(child: Center(child: CircularProgressIndicator()));
+      return const Center(child: CircularProgressIndicator());
     }
     return SizedBox(
       height: 440,
-      child: CarouselSlider(
+      child: CarouselSlider.builder(
         options: CarouselOptions(
           height: 560,
           viewportFraction: 0.73,
@@ -31,26 +31,29 @@ class Mangacarousale extends StatelessWidget {
           enlargeFactor: 0.3,
           scrollDirection: Axis.horizontal,
         ),
-        items: mangaData!.map<Widget>((manga) {
+        itemCount: mangaData!.length,
+        itemBuilder: (BuildContext context, int index, int realIndex) {
+          final manga = mangaData[index];
           final tagg = manga['id'] + "MainCarosale";
-          return Builder(
-            builder: (BuildContext context) {
-              return GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/mangaDetail',
-                      arguments: {"id": manga['id'], "image": manga['image'], "tagg": tagg});
-                },
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  margin: const EdgeInsets.symmetric(horizontal: 13),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainer,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+          
+          return GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, '/mangaDetail',
+                  arguments: {"id": manga['id'], "image": manga['image'], "tagg": tagg});
+            },
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              margin: const EdgeInsets.symmetric(horizontal: 13),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Stack(
                       children: [
                         SizedBox(
                           height: 280,
@@ -74,77 +77,110 @@ class Mangacarousale extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 15),
-                        TextScroll(
-                          manga['title'],
-                          mode: TextScrollMode.bouncing,
-                          velocity:
-                              const Velocity(pixelsPerSecond: Offset(30, 0)),
-                          delayBefore: const Duration(milliseconds: 500),
-                          pauseBetween: const Duration(milliseconds: 1000),
-                          textAlign: TextAlign.center,
-                          selectable: true,
-                          style: const TextStyle(fontSize: 16, fontFamily: "Poppins-Bold"),
-                        ),
-                        const SizedBox(height: 15),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: generes.map((item) {
-                            return Container(
-                              height: 30,
-                              margin: const EdgeInsets.only(
-                                  right:
-                                      5), // Optional: Adds space between genre chips
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
-                                 color: Theme.of(context).colorScheme.onSecondaryFixedVariant,
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          child: Container(
+                            height: 40,
+                            width: 40,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSecondaryFixedVariant
+                                  .withOpacity(0.8),
+                              borderRadius: const BorderRadius.only(
+                                bottomRight: Radius.circular(10),
+                                topLeft: Radius.circular(10),
                               ),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                child: Center(
-                                  child: Text(
-                                    item,
-                                    style: const TextStyle(
-                                        fontSize: 10, fontFamily: "Poppins-Bold"),
-                                  ),
-                                ),
+                            ),
+                            child:  Center(
+                              child: Text(
+                                '#${index + 1}',
+                                style: const TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
                               ),
-                            );
-                          }).toList(),
-                        ),
-                        const SizedBox(height: 10),
-                        Container(
-                          width: 150,
-                          height: 40,
-                          decoration: BoxDecoration(
-                             color: Theme.of(context).colorScheme.onSecondaryFixedVariant,
-                            borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
-                          child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "Read now",
-                                  style: TextStyle(
-                                      fontSize: 16, fontFamily: "Poppins-Bold"),
-                                ),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Icon(
-                                  Icons.book,
-                                )
-                              ]),
                         ),
                       ],
                     ),
-                  ),
+                    const SizedBox(height: 15),
+                    TextScroll(
+                      manga['title'],
+                      mode: TextScrollMode.bouncing,
+                      velocity:
+                          const Velocity(pixelsPerSecond: Offset(30, 0)),
+                      delayBefore: const Duration(milliseconds: 500),
+                      pauseBetween: const Duration(milliseconds: 1000),
+                      textAlign: TextAlign.center,
+                      selectable: true,
+                      style: const TextStyle(
+                          fontSize: 16, fontFamily: "Poppins-Bold"),
+                    ),
+                    const SizedBox(height: 15),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: generes.map((item) {
+                        return Container(
+                          height: 30,
+                          margin: const EdgeInsets.only(right: 5),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSecondaryFixedVariant,
+                          ),
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8),
+                            child: Center(
+                              child: Text(
+                                item,
+                                style: const TextStyle(
+                                    fontSize: 10,
+                                    fontFamily: "Poppins-Bold",
+                                    color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      width: 150,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSecondaryFixedVariant,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Read now",
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontFamily: "Poppins-Bold",
+                                color: Colors.white),
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Icon(Icons.book, color: Colors.white)
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            },
+              ),
+            ),
           );
-        }).toList(),
+        },
       ),
     );
   }
