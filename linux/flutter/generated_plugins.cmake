@@ -5,7 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
   file_selector_linux
-  flutter_secure_storage
+  flutter_secure_storage_linux
   rive_common
   url_launcher_linux
 )
