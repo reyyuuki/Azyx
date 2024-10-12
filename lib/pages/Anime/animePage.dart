@@ -15,7 +15,7 @@ class Animepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Animepage> {
-  dynamic spotlightAnime;
+  dynamic mostPopularAnimes;
   dynamic trendingAnime;
   dynamic latestEpisodesAnime;
   dynamic topUpComingAnime;
@@ -31,10 +31,10 @@ class _HomepageState extends State<Animepage> {
 
   void backUpData() {
       setState(() {
-        spotlightAnime = animeData['spotlightAnimes'];
+        mostPopularAnimes = animeData['mostPopularAnimes'];
         trendingAnime = animeData['trendingAnimes'];
         latestEpisodesAnime = animeData['latestEpisodeAnimes'];
-        topUpComingAnime = animeData['topUpcomingAnimes'];
+        topUpComingAnime = animeData['topAiringAnimes'];
       });
   }
 
@@ -85,8 +85,8 @@ class _HomepageState extends State<Animepage> {
             ),
             const SizedBox(height: 30.0),
             ReusableList(
-              name: 'Popular',
-              data: spotlightAnime,
+              name: 'Popular Animes',
+              data: mostPopularAnimes,
               taggName: "Carousale1",
             ),
             const SizedBox(height: 10),
