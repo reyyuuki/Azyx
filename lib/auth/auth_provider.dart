@@ -215,7 +215,7 @@ class AniListProvider with ChangeNotifier {
     } catch (e) {
       log('Failed to load anime list: $e');
     }
-
+    
     _isLoading = false;
     notifyListeners();
   }
@@ -308,7 +308,7 @@ class AniListProvider with ChangeNotifier {
     } catch (e) {
       log('Failed to load manga list: $e');
     }
-
+    log(userData['mangaList'].toString());
     _isLoading = false;
     notifyListeners();
   }
