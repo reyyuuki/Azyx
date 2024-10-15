@@ -86,7 +86,7 @@ class Carousel extends StatelessWidget {
                                 child: Container(
                                   height: 40,
                                   width: 40,
-                                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.onSecondaryFixedVariant.withOpacity(0.8), borderRadius: BorderRadius.only(bottomRight: Radius.circular(10), topLeft: Radius.circular(10))),
+                                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.onSecondaryFixedVariant.withOpacity(0.8), borderRadius: const BorderRadius.only(bottomRight: Radius.circular(10), topLeft: Radius.circular(10))),
                                   child: Center(child: Text('#${anime['rank']}', style: const TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),)),
                                 )),
                           ],
