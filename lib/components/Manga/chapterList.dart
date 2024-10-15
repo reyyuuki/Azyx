@@ -15,10 +15,7 @@ class Chapterlist extends StatelessWidget {
       onTap: () {
         Navigator.pushNamed(context, '/read', arguments: {
           "mangaId": id,
-          "chapterId": chapter['path'].toString().substring(
-                8,
-                chapter['path'].toString().length,
-              ),
+          "chapterId": chapter['id'],
           "image": image
         });
       },
@@ -38,7 +35,7 @@ class Chapterlist extends StatelessWidget {
                 SizedBox(
                   width: 90,
                   child: TextScroll(
-                    chapter['name'],
+                    chapter['title'],
                     mode: TextScrollMode.bouncing,
                     velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
                     delayBefore: const Duration(milliseconds: 500),
@@ -58,7 +55,7 @@ class Chapterlist extends StatelessWidget {
                       width: 5,
                     ),
                     Text(
-                      chapter['view'],style: const TextStyle( fontFamily: "Poppins-Bold"),
+                      chapter['views'],style: const TextStyle( fontFamily: "Poppins-Bold"),
                     ),
                   ],
                 ),
