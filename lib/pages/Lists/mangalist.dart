@@ -84,7 +84,7 @@ return Consumer<AniListProvider>(
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                   child: Container(
-                    height: 50,
+                    height: 55,
                     decoration: BoxDecoration(
                       color: _selectedIndex == i
                           ? Theme.of(context).colorScheme.inverseSurface
