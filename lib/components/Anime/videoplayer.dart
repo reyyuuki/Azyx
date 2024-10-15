@@ -53,24 +53,22 @@ class _MediaPlayerState extends State<MediaPlayer>
 
     var subtitles = widget.tracks.map<BetterPlayerSubtitlesSource>((item) {
       return BetterPlayerSubtitlesSource(
-        type: BetterPlayerSubtitlesSourceType.network,
-        name: item['label'] ?? 'Unknown',
-        urls: [item['file']],
-        selectedByDefault: true
-      );
+          type: BetterPlayerSubtitlesSourceType.network,
+          name: item['label'] ?? 'Unknown',
+          urls: [item['file']],
+          selectedByDefault: item['label'] == 'English');
     }).toList();
 
     var betterPlayerConfiguration = const BetterPlayerConfiguration(
       controlsConfiguration: BetterPlayerControlsConfiguration(
-          playerTheme: BetterPlayerTheme.cupertino,
-          playIcon: Iconsax.play,
+        playerTheme: BetterPlayerTheme.cupertino,
+        playIcon: Iconsax.play,
         skipBackIcon: Iconsax.backward_10_seconds,
         skipForwardIcon: Iconsax.forward_10_seconds,
         pauseIcon: Iconsax.pause,
-          ),
+      ),
       autoPlay: true,
       fit: BoxFit.contain,
-      
     );
 
     BetterPlayerDataSource betterPlayerDataSource = BetterPlayerDataSource(
@@ -100,7 +98,7 @@ class _MediaPlayerState extends State<MediaPlayer>
           ? BetterPlayer(controller: _betterPlayerController!)
           : const Center(
               child:
-                  CircularProgressIndicator()), // Handle case where player is not yet initialized
+                  CircularProgressIndicator()),
     );
   }
 
