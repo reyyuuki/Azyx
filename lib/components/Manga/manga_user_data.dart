@@ -23,7 +23,8 @@ class MangaLists extends StatelessWidget {
           ? GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
-                childAspectRatio: 0.33,
+                childAspectRatio: 0.50,
+                crossAxisSpacing: 5
               ),
               itemCount: filteredData.length,
               itemBuilder: (context, index) {
@@ -54,7 +55,7 @@ class MangaLists extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 5),
-                    Text(filteredData[index]['media']['title']['romaji']),
+                    Text(filteredData[index]['media']['title']['romaji'].length > 12 ? '${filteredData[index]['media']['title']['romaji'].substring(0,10)}...': filteredData[index]['media']['title']['romaji']) ,
                     const SizedBox(height: 5),
                     Text('${filteredData[index]['progress'].toString()} | ${filteredData[index]['media']['chapters'] == null ? 0 : filteredData[index]['media']['chapters'].toString()}' )
                   ],
