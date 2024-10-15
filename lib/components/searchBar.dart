@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 class Searchbar extends StatelessWidget {
   const Searchbar({super.key});
@@ -14,7 +13,7 @@ class Searchbar extends StatelessWidget {
                  child: Expanded(
                    child: TextField(
                       decoration: InputDecoration(
-                         prefixIcon: Icon(Icons.search),
+                         prefixIcon: const Icon(Icons.search),
                           hintText: 'Search Anime...',
                           focusedBorder:  OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
                           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),

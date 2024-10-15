@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:daizy_tv/_anime_api.dart';
 import 'package:daizy_tv/components/Anime/animeDetails.dart';
 import 'package:daizy_tv/components/Anime/floater.dart';
 import 'package:daizy_tv/components/Anime/poster.dart';

@@ -76,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
                                     .colorScheme
                                     .surfaceContainerHighest,
                                 borderRadius: BorderRadius.circular(20)),
-                            child: Icon(Iconsax.image5, size: 50),
+                            child: const Icon(Iconsax.image5, size: 50),
                           ),
                   ),
                 ),

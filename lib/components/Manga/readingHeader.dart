@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:text_scroll/text_scroll.dart';
 
 class Readingheader extends StatelessWidget {
