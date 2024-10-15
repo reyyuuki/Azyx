@@ -1,4 +1,5 @@
 import 'package:daizy_tv/auth/auth_provider.dart';
+import 'package:daizy_tv/components/Manga/all_manga_lists.dart';
 import 'package:daizy_tv/components/Manga/manga_user_data.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -25,6 +26,7 @@ return Consumer<AniListProvider>(
         return const Center(child: CircularProgressIndicator());
       }
     final List<Map<String, dynamic>> categories = [
+      {"name": "All", "view": AllMangaLists(data: provider['mangaList'])},
       {"name": "Completed", "view": MangaLists(data: provider['mangaList'], status: "COMPLETED")},
       {"name": "Planning", "view": MangaLists(data: provider['mangaList'], status: "PLANNING")},
       {"name": "Releasing", "view": MangaLists(data: provider['mangaList'], status: "RELEASING")},
@@ -59,6 +61,9 @@ return Consumer<AniListProvider>(
                   child: Container(
                     decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryFixedDim, borderRadius: BorderRadius.circular(10)),
                     child: ListTile(
+                      onTap: () {
+                        Navigator.pushNamed(context, './profile');
+                      },
                       leading: SizedBox(
                         height: 35,
                         width: 35,
@@ -70,7 +75,7 @@ return Consumer<AniListProvider>(
                           ),
                         ),
                       ),
-                      title: Text( provider['name'].length > 12 ? "${provider['name'].substring(0, 10)}..."  : provider['name'], style:  TextStyle(fontFamily: "Poppins-Bold", color: Colors.black),),
+                      title: Text( provider['name'].length > 12 ? "${provider['name'].substring(0, 10)}..."  : provider['name'], style:  const TextStyle(fontFamily: "Poppins-Bold", color: Colors.black),),
                     ),
                   ),
                 ),
