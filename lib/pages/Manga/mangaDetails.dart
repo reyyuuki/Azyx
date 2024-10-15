@@ -169,7 +169,7 @@ class _DetailsState extends State<Mangadetails> {
                                 chapter: chapter,
                                 image: widget.image,
                               );
-                            }).toList(),
+                            }),
                         ],
                       ),
                     ),
