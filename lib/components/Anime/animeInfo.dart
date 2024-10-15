@@ -48,27 +48,27 @@ final dynamic animeData;
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(animeData['aired'] ?? "??",style: TextStyle( fontFamily: "Poppins-Bold")),
+              Text(animeData['aired'] ?? "??",style: const TextStyle( fontFamily: "Poppins-Bold")),
               const SizedBox(
                 height: 5,
               ),
-              Text(animeData['premiered'] ?? "??",style: TextStyle( fontFamily: "Poppins-Bold")),
+              Text(animeData['premiered'] ?? "??",style: const TextStyle( fontFamily: "Poppins-Bold")),
               const SizedBox(
                 height: 5,
               ),
-              Text(animeData['duration'] ?? "??",style: TextStyle( fontFamily: "Poppins-Bold")),
+              Text(animeData['duration'] ?? "??",style: const TextStyle( fontFamily: "Poppins-Bold")),
               const SizedBox(
                 height: 5,
               ),
-              Text(animeData['status'] ?? "??",style: TextStyle( fontFamily: "Poppins-Bold")),
+              Text(animeData['status'] ?? "??",style: const TextStyle( fontFamily: "Poppins-Bold")),
               const SizedBox(
                 height: 5,
               ),
-              Text(animeData['rating'] ?? "??",style: TextStyle( fontFamily: "Poppins-Bold")),
+              Text(animeData['rating'] ?? "??",style: const TextStyle( fontFamily: "Poppins-Bold")),
               const SizedBox(
                 height: 5,
               ),
-              Text(animeData['quality'] ?? "??",style: TextStyle( fontFamily: "Poppins-Bold")),
+              Text(animeData['quality'] ?? "??",style: const TextStyle( fontFamily: "Poppins-Bold")),
             ],
           ),
         ],
