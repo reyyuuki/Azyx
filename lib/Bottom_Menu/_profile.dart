@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:awesome_dialog/awesome_dialog.dart';
@@ -272,7 +271,7 @@ class _ProfileState extends State<Profile> {
                                       fontFamily: "Poppins-Bold")),
                                Text(
                                 item['value'].toString().isNotEmpty ? item['value'].toString() : "0" ,
-                                style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 16),
+                                style: const TextStyle(fontFamily: "Poppins-Bold", fontSize: 16),
                               )
                             ],
                           ),
