@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:daizy_tv/components/Manga/sliderBar.dart';
 import 'package:daizy_tv/dataBase/appDatabase.dart';
+import 'package:daizy_tv/scraper/mangakakalot/manga_scrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -36,31 +37,32 @@ class _ReadState extends State<Read> {
   @override
   void initState() {
     super.initState();
+    log(widget.chapterId);
     fetchChapterData();
+
   }
 
   final ScrollController _scrollController = ScrollController();
 
   Future<void> fetchChapterData() async {
-     String url =
-        '${dotenv.get("KAKALOT_URL")}api/manga/';
     try {
-      final resp = await http.get(Uri.parse(url + widget.chapterId));
+      final resp = await fetchChapterDetails(mangaId: widget.mangaId, chapterId: widget.chapterId);
       final provider = Provider.of<Data>(context, listen: false);
-      if (resp.statusCode == 200) {
-        final tempData = jsonDecode(resp.body);
+      log(resp);
+      if (resp != null) {
+        
         setState(() {
-          chapterList = tempData['chapterListIds'];
-          chapterImages = tempData['images'];
-          currentChapter = tempData['currentChapter'];
-          mangaTitle = tempData['title'];
-          index = tempData['chapterListIds']
+          chapterList = resp['chapterListIds'];
+          chapterImages = resp['images'];
+          currentChapter = resp['currentChapter'];
+          mangaTitle = resp['title'];
+          index = resp['chapterListIds']
               ?.indexWhere((chapter) => chapter['name'] == currentChapter);
           isLoading = false;
         });
         provider.addReadsManga(
             mangaId: widget.mangaId,
-            mangaTitle: tempData['title'],
+            mangaTitle: resp['title'],
             currentChapter: currentChapter.toString(),
             mangaImage: widget.image);
       } else {
@@ -68,6 +70,7 @@ class _ReadState extends State<Read> {
           hasError = true;
           isLoading = false;
         });
+        log('error');
       }
     } catch (e) {
       log(e.toString());
