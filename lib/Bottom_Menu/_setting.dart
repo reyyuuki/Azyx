@@ -110,7 +110,7 @@ class _SettingState extends State<Setting> {
               ),
               ElevatedButton(onPressed: () async {
                 await scrapeSliderItems();
-              }, child: Text('Fetch Data'))
+              }, child: const Text('Fetch Data'))
             ],
           ),
         ));
