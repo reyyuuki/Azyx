@@ -47,7 +47,7 @@ class MangaInfo extends StatelessWidget {
                 SizedBox(
                   width: 220,
                   child: TextScroll(
-                    mangaData['author'],
+                    mangaData['authors'][0],
                     mode: TextScrollMode.bouncing,
                     velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
                     delayBefore: const Duration(milliseconds: 500),
