@@ -1,15 +1,13 @@
-import 'dart:developer';
 
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/setting_tile.dart';
-import 'package:daizy_tv/scraper/Manga-Reader/_mangaReader.dart';
-import 'package:daizy_tv/scraper/Manga-Reader/_mangareader_details.dart';
+import 'package:daizy_tv/scraper/miruro/scrapper_home.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 
 class Setting extends StatefulWidget {
-  Setting({super.key});
+  const Setting({super.key});
 
   @override
   State<Setting> createState() => _SettingState();
@@ -110,7 +108,9 @@ class _SettingState extends State<Setting> {
               const SizedBox(
                 height: 10,
               ),
-     
+              ElevatedButton(onPressed: () async {
+                await scrapeSliderItems();
+              }, child: Text('Fetch Data'))
             ],
           ),
         ));
