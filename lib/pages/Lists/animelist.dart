@@ -1,4 +1,5 @@
 import 'package:daizy_tv/auth/auth_provider.dart';
+import 'package:daizy_tv/components/Anime/all_anime_lists.dart';
 import 'package:daizy_tv/components/Anime/anime_lists.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -26,6 +27,7 @@ class _AnimelistState extends State<Animelist> {
         return const Center(child: CircularProgressIndicator());
       }
     final List<Map<String, dynamic>> categories = [
+      {"name": "All", "view": AllAnimeLists(data: provider['animeList'])},
       {"name": "Completed", "view": AnimeLists(data: provider['animeList'], status: "COMPLETED")},
       {"name": "Planning", "view": AnimeLists(data: provider['animeList'], status: "PLANNING")},
       {"name": "Continue", "view": AnimeLists(data: provider['animeList'], status: "CONTINUE")},
@@ -59,6 +61,9 @@ class _AnimelistState extends State<Animelist> {
                   child: Container(
                     decoration: BoxDecoration(color: Theme.of(context).colorScheme.primaryFixedDim, borderRadius: BorderRadius.circular(10)),
                     child: ListTile(
+                      onTap: () {
+                        Navigator.pushNamed(context, './profile');
+                      },
                       leading: SizedBox(
                         height: 35,
                         width: 35,
