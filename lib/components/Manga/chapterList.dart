@@ -45,7 +45,7 @@ class Chapterlist extends StatelessWidget {
                     pauseBetween: const Duration(milliseconds: 1000),
                     textAlign: TextAlign.center,
                     selectable: true,
-                    style: TextStyle(fontFamily: "Poppins-Bold"),
+                    style: const TextStyle(fontFamily: "Poppins-Bold"),
                   ),
                 ),
                 Row(
@@ -58,7 +58,7 @@ class Chapterlist extends StatelessWidget {
                       width: 5,
                     ),
                     Text(
-                      chapter['view'],style: TextStyle( fontFamily: "Poppins-Bold"),
+                      chapter['view'],style: const TextStyle( fontFamily: "Poppins-Bold"),
                     ),
                   ],
                 ),
