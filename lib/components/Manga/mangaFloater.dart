@@ -66,7 +66,7 @@ final String? title;
                                   const Duration(milliseconds: 1000),
                               textAlign: TextAlign.center,
                               selectable: true,
-                              style: TextStyle( fontFamily: "Poppins-Bold")
+                              style: const TextStyle( fontFamily: "Poppins-Bold")
                             ),
                           ),
                           Text(

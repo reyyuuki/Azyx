@@ -122,7 +122,7 @@ class _MainAppState extends State<MainApp> {
           case './profile':
             return MaterialPageRoute(builder: (context) => const Profile());
           case './settings':
-            return MaterialPageRoute(builder: (context) => Setting());
+            return MaterialPageRoute(builder: (context) => const Setting());
 
           //Setting-Screens
           case './theme-changer':

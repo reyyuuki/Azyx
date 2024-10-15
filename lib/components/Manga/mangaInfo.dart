@@ -54,21 +54,21 @@ class MangaInfo extends StatelessWidget {
                     pauseBetween: const Duration(milliseconds: 1000),
                     textAlign: TextAlign.center,
                     selectable: true,
-                    style: TextStyle( fontFamily: "Poppins-Bold"),
+                    style: const TextStyle( fontFamily: "Poppins-Bold"),
                   ),
                 ),
               const SizedBox(
                 height: 5,
               ),
-              Text(mangaData['status'],style: TextStyle( fontFamily: "Poppins-Bold")),
+              Text(mangaData['status'],style: const TextStyle( fontFamily: "Poppins-Bold")),
               const SizedBox(
                 height: 5,
               ),
-              Text(mangaData['updated'],style: TextStyle( fontFamily: "Poppins-Bold")),
+              Text(mangaData['updated'],style: const TextStyle( fontFamily: "Poppins-Bold")),
               const SizedBox(
                 height: 5,
               ),
-              Text(mangaData['view'],style: TextStyle( fontFamily: "Poppins-Bold")),
+              Text(mangaData['view'],style: const TextStyle( fontFamily: "Poppins-Bold")),
               const SizedBox(
                 height: 5,
               ),

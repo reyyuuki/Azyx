@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ui';
 import 'package:daizy_tv/components/Anime/_gridlist.dart';
 import 'package:daizy_tv/components/Anime/_search_list.dart';
 import 'package:flutter/material.dart';
