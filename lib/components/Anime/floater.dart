@@ -28,7 +28,7 @@ class Floater extends StatelessWidget {
       );
     }
 
-    if (id == null || id.isEmpty) {
+    if (id.isEmpty) {
       return const SizedBox.shrink();
     }
 
