@@ -147,7 +147,7 @@ class _StreamState extends State<Stream> {
 
   @override
   Widget build(BuildContext context) {
-    if (episodeData == null || AnimeData == null || tracks == null) {
+    if (episodeData == null || AnimeData == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -176,10 +176,13 @@ class _StreamState extends State<Stream> {
       ),
       body: ListView(
         children: [
+          tracks != null ?
           MediaPlayer(
             Episode: Episode,
             tracks: tracks,
-          ),
+          ) : const SizedBox(
+              height: 200,
+            child: Center(child: CircularProgressIndicator()),),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
             child: Row(
@@ -307,7 +310,7 @@ class _StreamState extends State<Stream> {
                               .colorScheme
                               .surfaceContainerHighest),
                   child: Padding(
-                    padding:  EdgeInsets.all(15),
+                    padding:  const EdgeInsets.all(15),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
