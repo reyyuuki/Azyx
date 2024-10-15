@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:ionicons/ionicons.dart';
 
 // ignore: must_be_immutable
 class ReusableList extends StatelessWidget {
@@ -53,7 +52,7 @@ class ReusableList extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               itemCount: data!.length,
               itemBuilder: (context, index) {
-                final tagg = data[index]['id'] + taggName;
+                final tagg = data[index]['id'] + taggName + index.toString();
                 return GestureDetector(
                     onTap: () {
                       Navigator.pushNamed(context, '/detailspage', arguments: {
