@@ -6,6 +6,7 @@ import 'package:daizy_tv/components/Anime/coverImage.dart';
 import 'package:daizy_tv/components/Manga/mangaAllDetails.dart';
 import 'package:daizy_tv/components/Manga/mangaFloater.dart';
 import 'package:daizy_tv/components/Manga/chapterList.dart';
+import 'package:daizy_tv/scraper/mangakakalot/manga_scrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -37,7 +38,7 @@ class _DetailsState extends State<Mangadetails> {
   void initState() {
     super.initState();
     _controller = TextEditingController(text: value);
-    fetchData();
+    scrap();
   }
 
   @override
@@ -54,10 +55,8 @@ class _DetailsState extends State<Mangadetails> {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         setState(() {
-          mangaData = jsonData;
-          chapterList = List<Map<String, dynamic>>.from(jsonData['chapterList']);
-          filteredChapterList = chapterList; 
-          loading = false;
+          // mangaData = jsonData;
+          
         });
       } else {
         throw Exception("Failed to load data");
@@ -67,13 +66,25 @@ class _DetailsState extends State<Mangadetails> {
     }
   }
 
+  Future<void> scrap() async{
+        final data = await fetchMangaDetails(widget.id);
+        if(data != null){
+          setState(() {
+          mangaData = data;
+          chapterList = List<Map<String, dynamic>>.from(data['chapterList']);
+          filteredChapterList = chapterList; 
+          loading = false;
+          });
+        }
+  }
+
   void handleChapterList(String value) {
     setState(() {
       if (value.isEmpty) {
         filteredChapterList = chapterList; 
       } else {
         filteredChapterList = chapterList?.where((chapter) {
-          final chapters = chapter['name']?.toLowerCase() ?? '';
+          final chapters = chapter['title']?.toLowerCase() ?? '';
           return chapters.contains(value.toLowerCase());
         }).toList();
       }
