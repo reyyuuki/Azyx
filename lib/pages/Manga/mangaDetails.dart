@@ -47,25 +47,6 @@ class _DetailsState extends State<Mangadetails> {
     super.dispose();
   }
 
-  Future<void> fetchData() async {
-    try {
-      final response = await http.get(Uri.parse(
-          '${dotenv.get("KAKALOT_URL")}api/manga/${widget.id}'));
-          log('https://anymey-proxy.vercel.app/cors?url=https://${dotenv.get("KAKALOT_URL")}api/manga/${widget.id}');
-      if (response.statusCode == 200) {
-        final jsonData = jsonDecode(response.body);
-        setState(() {
-          // mangaData = jsonData;
-          
-        });
-      } else {
-        throw Exception("Failed to load data");
-      }
-    } catch (error) {
-      log("Failed to load data");
-    }
-  }
-
   Future<void> scrap() async{
         final data = await fetchMangaDetails(widget.id);
         if(data != null){
