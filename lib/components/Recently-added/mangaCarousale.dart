@@ -52,7 +52,7 @@ class Mangacarousale extends StatelessWidget {
                   )
                 : InfiniteCarousel.builder(
                     itemCount: carosaleData!.length,
-                    itemExtent: MediaQuery.of(context).size.width / 2.3,
+                    itemExtent: MediaQuery.of(context).size.width / 2.9,
                     loop: false,
                     center: false,
                     anchor: 0,
@@ -79,26 +79,52 @@ class Mangacarousale extends StatelessWidget {
                                   arguments: {"id": id, "image": proxyUrl + poster},
                                 );
                               },
-                              child: SizedBox(
-                                height: 150,
-                                width: 103,
-                                child: Hero(
-                                  tag: id ?? "defaultTag",
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(15),
-                                    child: CachedNetworkImage(
-                                      imageUrl: poster ?? '',
-                                      fit: BoxFit.cover,
-                                      placeholder: (context, url) => Container(
-                                        color: Colors.grey[300],
-                                      ),
-                                      errorWidget: (context, url, error) => const Icon(
-                                        Icons.error,
-                                        color: Colors.red,
+                              child: Stack(
+                                children: [
+                                  SizedBox(
+                                    height: 150,
+                                    width: 103,
+                                    child: Hero(
+                                      tag: id ?? "defaultTag",
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(15),
+                                        child: CachedNetworkImage(
+                                          imageUrl: poster ?? '',
+                                          fit: BoxFit.cover,
+                                          placeholder: (context, url) => Container(
+                                            color: Colors.grey[300],
+                                          ),
+                                          errorWidget: (context, url, error) => const Icon(
+                                            Icons.error,
+                                            color: Colors.red,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
+                                  Positioned(
+                                top: 0,
+                                child: Container(
+                                  height: 28,
+                                  width: 33,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainerHighest
+                                        .withOpacity(0.8),
+                                    borderRadius: const BorderRadius.only(
+                                        bottomRight: Radius.circular(10),
+                                        topLeft: Radius.circular(10)),
+                                  ),
+                                  child: Center(
+                                      child: Text(
+                                    '# ${1 + realIndex}',
+                                    style: const TextStyle(
+                                        fontFamily: "Poppins-Bold"),
+                                  )),
                                 ),
+                              ),
+                                ],
                               ),
                             ),
                             const SizedBox(height: 10),

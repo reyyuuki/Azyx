@@ -46,7 +46,7 @@ class Animecarousale extends StatelessWidget {
             height: 220,
             child: InfiniteCarousel.builder(
               itemCount: carosaleData!.length,
-              itemExtent: MediaQuery.of(context).size.width / 2.3,
+              itemExtent: MediaQuery.of(context).size.width / 2.9,
               loop: false,
               center: false,
               itemBuilder: (context, itemIndex,realIndex) {
