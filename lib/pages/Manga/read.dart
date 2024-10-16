@@ -39,7 +39,6 @@ class _ReadState extends State<Read> {
     super.initState();
     log(widget.chapterId);
     fetchChapterData();
-
   }
 
   final ScrollController _scrollController = ScrollController();
@@ -48,9 +47,7 @@ class _ReadState extends State<Read> {
     try {
       final resp = await fetchChapterDetails(mangaId: widget.mangaId, chapterId: widget.chapterId);
       final provider = Provider.of<Data>(context, listen: false);
-      log(resp);
-      if (resp != null) {
-        
+      if (resp.toString().isNotEmpty) {
         setState(() {
           chapterList = resp['chapterListIds'];
           chapterImages = resp['images'];
@@ -65,6 +62,7 @@ class _ReadState extends State<Read> {
             mangaTitle: resp['title'],
             currentChapter: currentChapter.toString(),
             mangaImage: widget.image);
+            log(chapterImages.toString());
       } else {
         setState(() {
           hasError = true;
@@ -85,17 +83,13 @@ class _ReadState extends State<Read> {
     setState(() {
       isLoading = true;
     });
-     String url =
-        '${dotenv.get("KAKALOT_URL")}api/manga/';
     try {
       final provider = Provider.of<Data>(context, listen: false);
-      final resp = await http.get(
-          Uri.parse('$url${widget.mangaId}/${chapterList?[index!]['id']}'));
-      if (resp.statusCode == 200) {
-        final tempData = jsonDecode(resp.body);
+          final data = await fetchChapterDetails(mangaId: widget.mangaId, chapterId: chapterList?[index!]['id']);
+      if (data.toString().isNotEmpty) {
         setState(() {
-          chapterImages = tempData['images'];
-          currentChapter = tempData['currentChapter'];
+          chapterImages = data['images'];
+          currentChapter = data['currentChapter'];
           isLoading = false;
         });
         provider.addReadsManga(
