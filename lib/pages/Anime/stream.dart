@@ -53,6 +53,7 @@ class _StreamState extends State<Stream> {
       final response = await http.get(Uri.parse(baseUrl + widget.id));
       final episodeResponse =
           await scrapeAnimeEpisodes(widget.id);
+          log(episodeResponse.toString());
           setState(() {
             episodeData = episodeResponse['episodes'];
           filteredEpisodes = episodeData;
