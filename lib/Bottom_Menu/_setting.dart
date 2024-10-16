@@ -1,7 +1,8 @@
 
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/setting_tile.dart';
-import 'package:daizy_tv/scraper/miruro/scrapper_home.dart';
+import 'package:daizy_tv/scraper/Anilist/anilist.dart';
+import 'package:daizy_tv/scraper/Anilist/scrapper_home.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
@@ -108,9 +109,9 @@ class _SettingState extends State<Setting> {
               const SizedBox(
                 height: 10,
               ),
-              ElevatedButton(onPressed: () async {
-                await scrapeSliderItems();
-              }, child: const Text('Fetch Data'))
+              ElevatedButton(onPressed: () async{
+                await scrapeAnimeData();
+              }, child: Text("Fetch"))
             ],
           ),
         ));
