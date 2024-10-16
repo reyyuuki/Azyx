@@ -21,12 +21,12 @@ final String? title;
     final currentChapter =
         provider.getCurrentChapterForManga(id!) ?? 'chapter-1';
     final currentChapterList = chapterList
-        .where((chapter) => chapter['name'] == currentChapter)
+        .where((chapter) => chapter['title'] == currentChapter)
         .toList();
     final currentChapterId = currentChapterList.isNotEmpty
         ? currentChapterList.first['id']
         : 'chapter-1';
-        log(currentChapter);
+        log(currentChapterId);
 
     return Positioned(
           bottom: 0,
@@ -81,7 +81,7 @@ final String? title;
                       ElevatedButton(
                         onPressed: () {
                           Navigator.pushNamed(context, '/read',
-                              arguments: {"mangaId": id, "chapterId":'/$id/$currentChapterId', "image": image});
+                              arguments: {"mangaId": id, "chapterId":currentChapterId, "image": image});
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:  Theme.of(context).colorScheme.inverseSurface,
