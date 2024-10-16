@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:daizy_tv/components/Manga/_manga_grid.dart';
 import 'package:daizy_tv/components/Manga/_manga_list.dart';
+import 'package:daizy_tv/scraper/mangakakalot/manga_scrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -35,20 +37,17 @@ class _SearchpageState extends State<SearchManga> {
   }
 
   Future<void> fetchdata() async {
-    String url =
-        '${dotenv.get("KAKALOT_URL")}api/search/${widget.name}';
     try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final jsondata = jsonDecode(response.body);
+      final response = await scrapeMangaSearch(widget.name);
+      if (response.toString().isNotEmpty) {
         setState(() {
-          data = jsondata['mangaList'];
+          data = response['mangaList'];
         });
       } else {
-        print('Failed to load data');
+        log('Failed to load data');
       }
     } catch (e) {
-      print('Error fetching data: $e');
+      log('Error fetching data: $e');
     }
   }
 
