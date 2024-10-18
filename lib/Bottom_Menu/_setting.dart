@@ -1,9 +1,6 @@
 
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/setting_tile.dart';
-import 'package:daizy_tv/scraper/Anilist/anilist.dart';
-import 'package:daizy_tv/scraper/Anilist/scrapper_home.dart';
-import 'package:daizy_tv/scraper/Flames%20Comics/scrap_manwha.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
@@ -49,17 +46,16 @@ class _SettingState extends State<Setting> {
                   SizedBox(
                     width: 200,
                     height: 200,
-                    child: ClipRRect(
+                    child: image != "" && image.isNotEmpty ? ClipRRect(
                         borderRadius: BorderRadius.circular(100),
-                        child: image.isNotEmpty
-                            ? Image.network(
+                        child: Image.network(
                                 image,
                                 fit: BoxFit.cover,
                               )
-                            : const Icon(
+                            ) : const Icon(
                                 Iconsax.user,
                                 size: 150,
-                              )),
+                              )
                   ),
                   const SizedBox(
                     height: 5,
@@ -111,7 +107,7 @@ class _SettingState extends State<Setting> {
                 height: 10,
               ),
               ElevatedButton(onPressed: () async{
-                await fetchAnilistAnimes();
+             
               }, child: Text("Fetch"))
             ],
           ),
