@@ -111,7 +111,7 @@ class _SettingState extends State<Setting> {
                 height: 10,
               ),
               ElevatedButton(onPressed: () async{
-                await scrapeSliderData();
+                await fetchAnilistAnimes();
               }, child: Text("Fetch"))
             ],
           ),
