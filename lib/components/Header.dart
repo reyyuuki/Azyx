@@ -57,23 +57,16 @@ class _HeaderState extends State<Header> {
                     borderRadius: BorderRadius.circular(50),
                     color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   ),
-                  child: isLoggedIn
+                  child: image.isNotEmpty
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(25),
                           child: Image.network(
                             image,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
-                                Icons.settings,
-                                color: Colors.white,
-                                size: 30,
-                              );
-                            },
                           ),
                         )
                       : const Icon(
-                          Iconsax.user,
+                          Icons.settings,
                           color: Colors.white,
                           size: 30,
                         ),
