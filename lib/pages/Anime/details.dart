@@ -5,6 +5,7 @@ import 'package:daizy_tv/components/Anime/animeDetails.dart';
 import 'package:daizy_tv/components/Anime/floater.dart';
 import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/coverImage.dart';
+import 'package:daizy_tv/scraper/Anilist/anilist_anime_details.dart';
 import 'package:daizy_tv/scraper/anime_detail_scraper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -35,7 +36,7 @@ class _DetailsState extends State<Details> {
 
 Future<void> scrapedData() async {
   try {
-    final data = await scrapeAnimeAboutInfo(widget.id);
+    final data = await fetchAnilistAnimeDetails(widget.id);
 
     if (data.isNotEmpty) {
       setState(() {
@@ -112,7 +113,7 @@ Future<void> scrapedData() async {
           ListView(children: [
             Stack(
               children: [
-                CoverImage(imageUrl: cover),
+               animeData?['poster'] != null ? CoverImage(imageUrl: animeData['poster']) : const SizedBox.shrink(),
                 Container(
                   height: 870,
                   margin: const EdgeInsets.only(top: 220),
@@ -123,7 +124,7 @@ Future<void> scrapedData() async {
                   ),
                 ),
                 Poster(imageUrl: widget.image, id : widget.tagg),
-                AnimeDetails(animeData: animeData, description: description,),
+                AnimeDetails(animeData: animeData, id: widget.id,),
               ],
             ),
           ]),
