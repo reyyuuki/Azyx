@@ -1,5 +1,6 @@
 
 import 'package:daizy_tv/backupData/anime.dart';
+import 'package:daizy_tv/scraper/Anilist/anilist.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:daizy_tv/components/Anime/carousel.dart';
@@ -26,7 +27,7 @@ class _HomepageState extends State<Animepage> {
   @override
   void initState() {
     super.initState();
-    backUpData();
+    fetchdata();
   }
 
   void backUpData() {
@@ -38,6 +39,18 @@ class _HomepageState extends State<Animepage> {
       });
   }
 
+Future<void> fetchdata() async {
+
+  final data = await fetchAnilistAnimes();
+  if(data.isNotEmpty){
+    setState(() {
+      mostPopularAnimes = data['popular'];
+      trendingAnime = data['trending'];
+      latestEpisodesAnime = data['latest'];
+      topUpComingAnime = data['completed'];
+    });
+  }
+}
 
   @override
   Widget build(BuildContext context) {
