@@ -1,7 +1,6 @@
 
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/backupData/anime.dart';
-import 'package:daizy_tv/scraper/Anilist/anilist.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:daizy_tv/components/Anime/carousel.dart';
