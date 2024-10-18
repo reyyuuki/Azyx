@@ -6,7 +6,6 @@ import 'package:daizy_tv/components/Anime/floater.dart';
 import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/coverImage.dart';
 import 'package:daizy_tv/scraper/Anilist/anilist_anime_details.dart';
-import 'package:daizy_tv/scraper/anime_detail_scraper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
