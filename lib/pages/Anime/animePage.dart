@@ -1,4 +1,5 @@
 
+import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/backupData/anime.dart';
 import 'package:daizy_tv/scraper/Anilist/anilist.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:daizy_tv/components/Anime/carousel.dart';
 import 'package:daizy_tv/components/Header.dart';
 import 'package:daizy_tv/components/Anime/reusableList.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:provider/provider.dart';
 
 class Animepage extends StatefulWidget {
   const Animepage({super.key});
@@ -39,9 +41,8 @@ class _HomepageState extends State<Animepage> {
       });
   }
 
-Future<void> fetchdata() async {
-
-  final data = await fetchAnilistAnimes();
+void fetchdata()  {
+  final data =  Provider.of<AniListProvider>(context,listen: false).anilistData;
   if(data.isNotEmpty){
     setState(() {
       mostPopularAnimes = data['popular'];
