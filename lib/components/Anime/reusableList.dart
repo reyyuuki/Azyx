@@ -89,27 +89,45 @@ class ReusableList extends StatelessWidget {
                               ),
                             ),
                             Positioned(
-                              top: 0,
-                              child: Container(
-                                height: 28,
-                                width: 33,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest
-                                      .withOpacity(0.8),
-                                  borderRadius: const BorderRadius.only(
-                                      bottomRight: Radius.circular(10),
-                                      topLeft: Radius.circular(10)),
-                                ),
-                                child: Center(
-                                    child: Text(
-                                  '# ${1 +index}',
-                                  style: const TextStyle(
-                                      fontFamily: "Poppins-Bold"),
+                                bottom: 0,
+                                right: 0,
+                                child: Container(
+                                  height: 22,
+                                  width: 50,
+                                  margin: const EdgeInsets.only(right: 10),
+                                  decoration: const BoxDecoration(
+                                      color: Color.fromARGB(255, 231, 179, 254),
+                                      borderRadius: BorderRadius.only(
+                                          bottomRight: Radius.circular(10),
+                                          topLeft: Radius.circular(25))),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          data[index]['rating'] != null
+                                              ? (double.tryParse(data[index]
+                                                              ['rating']
+                                                          .toString())! /
+                                                      10)
+                                                  .toStringAsFixed(1)
+                                              : "N/A",
+                                          style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Color.fromARGB(
+                                                  255, 75, 24, 101),
+                                              fontFamily: "Poppins-Bold"),
+                                        ),
+                                        const Icon(
+                                          Iconsax.star1,
+                                          size: 16,
+                                          color: Color.fromARGB(255, 75, 24, 101),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 )),
-                              ),
-                            ),
                           ],
                         ),
                         const SizedBox(

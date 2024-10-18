@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:text_scroll/text_scroll.dart';
@@ -81,13 +82,36 @@ class Carousel extends StatelessWidget {
                               ),
                             ),
                             Positioned(
-                                top: 0,
-                                left: 0,
+                                bottom: 0,
+                                right: 0,
                                 child: Container(
-                                  height: 40,
-                                  width: 40,
-                                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.onSecondaryFixedVariant.withOpacity(0.8), borderRadius: const BorderRadius.only(bottomRight: Radius.circular(10), topLeft: Radius.circular(10))),
-                                  child: Center(child: Text('#${anime['rank']}', style: const TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),)),
+                                  height: 22,
+                                  width: 50,
+                                  decoration: const BoxDecoration(
+                                      color: Color.fromARGB(255, 231, 179, 254),
+                                      borderRadius: BorderRadius.only(
+                                          bottomRight: Radius.circular(10),
+                                          topLeft: Radius.circular(25))),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          (anime['rating'] / 10).toString(),
+                                          style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Color.fromARGB(255, 75, 24, 101),
+                                              fontFamily: "Poppins-Bold"),
+                                        ),
+                                        const Icon(
+                                          Iconsax.star1,
+                                          size: 16,
+                                          color: Color.fromARGB(255, 75, 24, 101),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 )),
                           ],
                         ),
@@ -101,7 +125,8 @@ class Carousel extends StatelessWidget {
                           pauseBetween: const Duration(milliseconds: 1000),
                           textAlign: TextAlign.center,
                           selectable: true,
-                          style: const TextStyle(fontSize: 16, fontFamily: "Poppins-Bold"),
+                          style: const TextStyle(
+                              fontSize: 16, fontFamily: "Poppins-Bold"),
                         ),
                         const SizedBox(height: 15),
                         Row(
@@ -122,7 +147,10 @@ class Carousel extends StatelessWidget {
                                 child: Center(
                                   child: Text(
                                     item,
-                                    style: const TextStyle(fontSize: 10,  fontFamily: "Poppins-Bold", color: Colors.white),
+                                    style: const TextStyle(
+                                        fontSize: 10,
+                                        fontFamily: "Poppins-Bold",
+                                        color: Colors.white),
                                   ),
                                 ),
                               ),
@@ -144,7 +172,10 @@ class Carousel extends StatelessWidget {
                               children: [
                                 Text(
                                   "Watch now",
-                                  style: TextStyle(fontSize: 16, fontFamily: "Poppins-Bold", color: Colors.white),
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontFamily: "Poppins-Bold",
+                                      color: Colors.white),
                                 ),
                                 SizedBox(
                                   width: 5,
