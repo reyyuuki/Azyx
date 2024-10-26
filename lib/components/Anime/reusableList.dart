@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:daizy_tv/components/Anime/anime_item.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -52,95 +53,8 @@ class ReusableList extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               itemCount: data!.length,
               itemBuilder: (context, index) {
-                final tagg = data[index]['id'] + taggName + index.toString();
-                return GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/detailspage', arguments: {
-                        "id": data[index]['id'],
-                        "image": data[index]['poster'],
-                        "tagg": tagg
-                      });
-                    },
-                    child: Column(
-                      children: [
-                        Stack(
-                          children: [
-                            Container(
-                              height: 150,
-                              width: 103,
-                              margin: const EdgeInsets.only(right: 10),
-                              child: Hero(
-                                tag: tagg,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(15),
-                                  child: CachedNetworkImage(
-                                    imageUrl: data[index]['poster'],
-                                    fit: BoxFit.cover,
-                                    progressIndicatorBuilder:
-                                        (context, url, downloadProgress) =>
-                                            Center(
-                                      child: CircularProgressIndicator(
-                                          value: downloadProgress.progress),
-                                    ),
-                                    errorWidget: (context, url, error) =>
-                                        const Icon(Icons.error),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: Container(
-                                  height: 22,
-                                  width: 50,
-                                  margin: const EdgeInsets.only(right: 10),
-                                  decoration: const BoxDecoration(
-                                      color: Color.fromARGB(255, 231, 179, 254),
-                                      borderRadius: BorderRadius.only(
-                                          bottomRight: Radius.circular(10),
-                                          topLeft: Radius.circular(25))),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 5),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          data[index]['rating'] != null
-                                              ? (double.tryParse(data[index]
-                                                              ['rating']
-                                                          .toString())! /
-                                                      10)
-                                                  .toStringAsFixed(1)
-                                              : "N/A",
-                                          style: const TextStyle(
-                                              fontSize: 12,
-                                              color: Color.fromARGB(
-                                                  255, 75, 24, 101),
-                                              fontFamily: "Poppins-Bold"),
-                                        ),
-                                        const Icon(
-                                          Iconsax.star1,
-                                          size: 16,
-                                          color: Color.fromARGB(255, 75, 24, 101),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          data?[index]['name'].length > 12
-                              ? '${data![index]['name'].toString().substring(0, 10)}...'
-                              : data![index]['name'],
-                          style: const TextStyle(fontFamily: "Poppins-Bold"),
-                        )
-                      ],
-                    ));
+                final tagg = data[index]['id'].toString() + taggName! + index.toString();
+                return AnimeItem(id: data[index]['id'].toString(), poster: data[index]['poster'], type: data[index]['type'], name: data[index]['name'], rating: data[index]['rating'], tagg: tagg, status: data[index]['status'],);
               },
             ),
           ),
