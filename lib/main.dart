@@ -2,11 +2,11 @@ import 'dart:ui';
 
 import 'package:daizy_tv/Bottom_Menu/_profile.dart';
 import 'package:daizy_tv/Bottom_Menu/_setting.dart';
-import 'package:daizy_tv/On-Boarding_Screen/login_page.dart';
 import 'package:daizy_tv/Provider/theme_provider.dart';
 import 'package:daizy_tv/auth/auth_provider.dart';
-import 'package:daizy_tv/dataBase/appDatabase.dart';
-import 'package:daizy_tv/dataBase/user.dart';
+import 'package:daizy_tv/Hive_Data/appDatabase.dart';
+import 'package:daizy_tv/Hive_Data/user.dart';
+import 'package:daizy_tv/pages/Anime/watch_screen.dart';
 import 'package:daizy_tv/pages/Lists/animelist.dart';
 import 'package:daizy_tv/pages/Lists/mangalist.dart';
 import 'package:daizy_tv/pages/Manga/mangaDetails.dart';
@@ -20,7 +20,6 @@ import 'package:flutter/material.dart';
 import 'package:daizy_tv/pages/Anime/details.dart';
 import 'package:daizy_tv/pages/_homepage.dart';
 import 'package:daizy_tv/pages/Manga/mangaPage.dart';
-import 'package:daizy_tv/pages/Anime/stream.dart';
 import 'package:daizy_tv/pages/Anime/animePage.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -64,10 +63,7 @@ class _MainAppState extends State<MainApp> {
       onGenerateRoute: (settings) {
         final args = settings.arguments as Map<String, dynamic>?;
         switch (settings.name) {
-          //On-Boarding_Screen
-          case '/login-page':
-            return MaterialPageRoute(builder: (context) => const LoginPage());
-
+       
           // Anime - Routes
           case '/detailspage':
             final id = args?['id'] ?? '';
@@ -78,10 +74,21 @@ class _MainAppState extends State<MainApp> {
             );
 
           case '/stream':
-            final id = args?['id'] ?? '';
-            return MaterialPageRoute(
-              builder: (context) => Stream(id: id),
-            );
+  return MaterialPageRoute(
+    builder: (context) => WatchPage(
+      episodeSrc: args!['episodeSrc'], 
+      episodeData: args['episodeData'], 
+      currentEpisode: args['currentEpisode'], 
+      episodeTitle: args['episodeTitle'], 
+      subtitleTracks: args['subtitleTracks'], 
+      animeTitle: args['animeTitle'], 
+      activeServer: args['activeServer'], 
+      isDub: args['isDub'],
+      animeId: int.parse(args['animeId']) ,
+    ),
+  );
+
+
 
           case '/searchAnime':
             final name = args?['name'] ?? '';
@@ -172,22 +179,24 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
+      extendBodyBehindAppBar: true,
       body: _pages[_selectedIndex],
       bottomNavigationBar: Container(
         height: 60,
-        margin: const EdgeInsets.only(bottom: 30),
+        margin: const EdgeInsets.only(bottom: 40),
         child: Center(
           child: SizedBox(
-            width: 250,
+            width: 230,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(40),
+              borderRadius: BorderRadius.circular(30),
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white
-                          .withOpacity(0.1), // Glass-like transparency
-                      borderRadius: BorderRadius.circular(30),
+                       // Glass-like transparency
+                      borderRadius: BorderRadius.circular(230),
+                      border: Border.all(width: 1, color: Theme.of(context).colorScheme.inverseSurface
+                          .withOpacity(0.4),)
                     ),
                     child: FlashyTabBar(
                       selectedIndex: _selectedIndex,
