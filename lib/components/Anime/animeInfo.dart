@@ -94,8 +94,8 @@ const AnimeInfo({super.key,this.animeData});
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Text(
-                animeData['description'].length > 400
-                    ? animeData['description'].substring(0, 400) + '...'
+                animeData['description'].length > 300
+                    ? animeData['description'].substring(0, 300) + '...'
                     : animeData['description'],
                     style: const TextStyle( fontFamily: "Poppins-Bold")
               ),
