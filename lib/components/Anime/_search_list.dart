@@ -16,14 +16,15 @@ class SearchList extends StatelessWidget {
         itemBuilder: (context, index) {
           final item = data[index];
           final title = item['name'];
-          final episodes = item['episodes']['sub'].toString();
+          final episodes = item['episodes'];
           final image = item['poster'];
+          final cover = item['cover'];
           final id = item['id'];
-          final tagg = id + "List";
+          final tagg = "${id}List";
           return GestureDetector(
             onTap: () {
               Navigator.pushNamed(context, "/detailspage",
-                  arguments: {"id": id, "image": image, "tagg": tagg});
+                  arguments: {"id": id.toString(), "image": image, "tagg": tagg});
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -43,7 +44,7 @@ class SearchList extends StatelessWidget {
                       child: ImageFiltered(
                         imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                         child: CachedNetworkImage(
-                          imageUrl: image,
+                          imageUrl: cover ?? image,
                           fit: BoxFit.cover,
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) => Center(
@@ -66,7 +67,7 @@ class SearchList extends StatelessWidget {
                           gradient: LinearGradient(
                             colors: [
                               Colors.transparent,
-                              Theme.of(context).colorScheme.primary,
+                              Colors.black87.withOpacity(0.5),
                             ],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
