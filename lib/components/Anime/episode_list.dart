@@ -4,14 +4,20 @@ import 'package:ionicons/ionicons.dart';
 class EpisodeList extends StatelessWidget {
   final List<dynamic>? filteredEpisodes;
   final dynamic episodeId;
-  final Function(int)? handleEpisode;
+  final Function? handleEpisode;
+  final Function()? fetchEpisodeUrl;
+  final String? url;
 
   const EpisodeList({
     super.key,
     this.filteredEpisodes,
     this.episodeId,
     this.handleEpisode,
+    this.fetchEpisodeUrl,
+    this.url
   });
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +38,10 @@ class EpisodeList extends StatelessWidget {
             final title = item['title'];
             final episodeNumber = item['number'];
             return GestureDetector(
-              onTap: () => handleEpisode!(episodeNumber),
+              // onTap: () => handleEpisode!(episodeNumber),
+              onTap: () { 
+                displayBottomSheet(context, episodeNumber);
+                },
               child: Container(
                 margin: const EdgeInsets.only(top: 10),
                 decoration: BoxDecoration(
@@ -93,4 +102,53 @@ class EpisodeList extends StatelessWidget {
       ),
     );
   }
+  Future<void> displayBottomSheet(BuildContext context,int number) async{
+    return showModalBottomSheet(context: context, 
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+    backgroundColor: Theme.of(context).colorScheme.primary,
+    barrierColor: Colors.black87.withOpacity(0.5),
+    builder: (context) =>  Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SizedBox(
+        height: 300,
+        child: Column(
+          children: [
+            server(context, "HD - 1",number,"vidstreaming"),
+            const SizedBox(height: 10,),
+            server(context, "HD - 2",number,"megacloud"),
+            const SizedBox(height: 10,),
+            server(context, "Vidstream",number,"streamsb"),
+          ],
+        ),
+      ),
+    ) );
+  }
+
+  GestureDetector server(BuildContext context, name,int number,String serverType) {
+    return GestureDetector(
+      onTap: () {
+        handleEpisode!(number,serverType);
+        Navigator.pushNamed(
+          context,
+          '/stream',
+          arguments: {
+            'episodeSrc': url,
+            'episodeData': number,       // Modify as necessary
+            'currentEpisode': number,
+            'episodeTitle': number.toString(), // Modify as necessary
+            'subtitleTracks': [], // Add actual subtitle tracks if available
+            'animeTitle': 'Your Anime Title', // Modify as necessary
+            'activeServer': serverType,
+            'isDub': false, // Set true/false based on your logic
+          },
+        );
+      } ,
+      child: Container(
+            height: 60,
+            decoration: BoxDecoration(color: Theme.of(context).colorScheme.inversePrimary, borderRadius: BorderRadius.circular(10)),
+            child: Center(child: Text(name, style: const TextStyle(fontSize: 18, fontFamily: "Poppins-Bold" ),),),
+          ),
+    );
+  }
 }
+
