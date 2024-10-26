@@ -82,32 +82,61 @@ class Carousel extends StatelessWidget {
                               ),
                             ),
                             Positioned(
+                                top: 0,
+                                left: 0,
+                                child: Container(
+                                  height: 30,
+                                  decoration: const BoxDecoration(
+                                      color: Color.fromARGB(255, 231, 179, 254),
+                                      borderRadius: BorderRadius.only(
+                                          bottomRight: Radius.circular(15),
+                                          topLeft: Radius.circular(10))),
+                                  child: Center(
+                                      child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 5),
+                                    child: Text(
+                                      anime['type'],
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          color:
+                                              Color.fromARGB(255, 75, 24, 101),
+                                          fontFamily: "Poppins-Bold"),
+                                    ),
+                                  )),
+                                )),
+                            Positioned(
                                 bottom: 0,
                                 right: 0,
                                 child: Container(
-                                  height: 22,
-                                  width: 50,
+                                  height: 30,
                                   decoration: const BoxDecoration(
                                       color: Color.fromARGB(255, 231, 179, 254),
                                       borderRadius: BorderRadius.only(
                                           bottomRight: Radius.circular(10),
                                           topLeft: Radius.circular(25))),
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10),
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         Text(
-                                          (anime['rating'] / 10).toString(),
+                                          anime?['rating'] != null
+                                              ? (anime['rating'] / 10)
+                                                  .toString()
+                                              : 'N/A',
                                           style: const TextStyle(
-                                              fontSize: 12,
-                                              color: Color.fromARGB(255, 75, 24, 101),
+                                              fontSize: 16,
+                                              color: Color.fromARGB(
+                                                  255, 75, 24, 101),
                                               fontFamily: "Poppins-Bold"),
                                         ),
                                         const Icon(
                                           Iconsax.star1,
-                                          size: 16,
-                                          color: Color.fromARGB(255, 75, 24, 101),
+                                          size: 18,
+                                          color:
+                                              Color.fromARGB(255, 75, 24, 101),
                                         ),
                                       ],
                                     ),
@@ -131,7 +160,10 @@ class Carousel extends StatelessWidget {
                         const SizedBox(height: 15),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: generes.map((item) {
+                          children: (anime?['genres'] as String)
+                              .split(', ')
+                              .take(3)
+                              .map((item) {
                             return Container(
                               height: 30,
                               margin: const EdgeInsets.only(right: 5.0),
