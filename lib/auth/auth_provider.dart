@@ -45,7 +45,7 @@ class AniListProvider with ChangeNotifier {
             code, clientId, clientSecret, redirectUri, context);
       }
     } catch (e) {
-      print('Error during login: $e');
+      log('Error during login: $e');
     }
   }
 
@@ -323,20 +323,22 @@ class AniListProvider with ChangeNotifier {
   }
 
   Future<Map<String, List<Map<String, dynamic>>>> fetchAnilistAnimes() async {
-    String url = 'https://graphql.anilist.co/';
-    Map<String, String> headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
+  String url = 'https://graphql.anilist.co/';
+  Map<String, String> headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
 
-    // Define the GraphQL query to fetch all sections with rating and type
-    String query = r'''
+  // Define the GraphQL query to fetch all sections with rating, type, and status
+  String query = r'''
   query {
     trending: Page {
       media(type: ANIME, sort: TRENDING_DESC) {
         id
         title {
+          english
           romaji
+          native
         }
         episodes
         coverImage {
@@ -350,13 +352,16 @@ class AniListProvider with ChangeNotifier {
         genres
         averageScore
         format
+        status
       }
     }
     popular: Page {
       media(type: ANIME, sort: POPULARITY_DESC) {
         id
         title {
+          english
           romaji
+          native
         }
         episodes
         coverImage {
@@ -370,13 +375,16 @@ class AniListProvider with ChangeNotifier {
         genres
         averageScore
         format
+        status
       }
     }
     latest: Page {
       media(type: ANIME, status: RELEASING, sort: START_DATE_DESC) {
         id
         title {
+          english
           romaji
+          native
         }
         episodes
         coverImage {
@@ -390,13 +398,16 @@ class AniListProvider with ChangeNotifier {
         genres
         averageScore
         format
+        status
       }
     }
     completed: Page {
       media(type: ANIME, status: FINISHED, sort: END_DATE_DESC) {
         id
         title {
+          english
           romaji
+          native
         }
         episodes
         coverImage {
@@ -410,89 +421,91 @@ class AniListProvider with ChangeNotifier {
         genres
         averageScore
         format
+        status
       }
     }
   }
   ''';
 
-    // Send the POST request to the AniList GraphQL API
-    final response = await http.post(
-      Uri.parse(url),
-      headers: headers,
-      body: jsonEncode({'query': query}),
-    );
+  // Send the POST request to the AniList GraphQL API
+  final response = await http.post(
+    Uri.parse(url),
+    headers: headers,
+    body: jsonEncode({'query': query}),
+  );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
 
-      // Extract sections into a map
-      Map<String, List<Map<String, dynamic>>> sections = {
-        'trending': (data['data']['trending']['media'] as List)
-            .map((anime) => {
-                  'id': anime['id'].toString(),
-                  'name': anime['title']['romaji'],
-                  'episodes':
-                      anime['episodes']?.toString() ?? 'Unknown episodes',
-                  'poster': anime['coverImage']['large'],
-                  'studio': (anime['studios']['nodes'] as List).isNotEmpty
-                      ? anime['studios']['nodes'][0]['name']
-                      : 'Unknown studio',
-                  'genres': (anime['genres'] as List).join(', '),
-                  'rating': anime['averageScore'],
-                  'type': anime['format'] ?? 'Unknown format',
-                })
-            .toList(),
-        'popular': (data['data']['popular']['media'] as List)
-            .map((anime) => {
-                  'id': anime['id'].toString(),
-                  'name': anime['title']['romaji'],
-                  'episodes':
-                      anime['episodes']?.toString() ?? 'Unknown episodes',
-                  'poster': anime['coverImage']['large'],
-                  'studio': (anime['studios']['nodes'] as List).isNotEmpty
-                      ? anime['studios']['nodes'][0]['name']
-                      : 'Unknown studio',
-                  'genres': (anime['genres'] as List).join(', '),
-                  'rating': anime['averageScore'],
-                  'type': anime['format'] ?? 'Unknown format',
-                })
-            .toList(),
-        'latest': (data['data']['latest']['media'] as List)
-            .map((anime) => {
-                  'id': anime['id'].toString(),
-                  'name': anime['title']['romaji'],
-                  'episodes':
-                      anime['episodes']?.toString() ?? 'Unknown episodes',
-                  'poster': anime['coverImage']['large'],
-                  'studio': (anime['studios']['nodes'] as List).isNotEmpty
-                      ? anime['studios']['nodes'][0]['name']
-                      : 'Unknown studio',
-                  'genres': (anime['genres'] as List).join(', '),
-                  'rating': anime['averageScore'],
-                  'type': anime['format'] ?? 'Unknown format',
-                })
-            .toList(),
-        'completed': (data['data']['completed']['media'] as List)
-            .map((anime) => {
-                  'id': anime['id'].toString(),
-                  'name': anime['title']['romaji'],
-                  'episodes':
-                      anime['episodes']?.toString() ?? 'Unknown episodes',
-                  'poster': anime['coverImage']['large'],
-                  'studio': (anime['studios']['nodes'] as List).isNotEmpty
-                      ? anime['studios']['nodes'][0]['name']
-                      : 'Unknown studio',
-                  'genres': (anime['genres'] as List).join(', '),
-                  'rating': anime['averageScore'],
-                  'type': anime['format'] ?? 'Unknown format',
-                })
-            .toList(),
-      };
-      notifyListeners();
-      log(sections.toString());
-      return sections;
-    } else {
-      throw Exception('Failed to load data');
-    }
+    // Extract sections into a map
+    Map<String, List<Map<String, dynamic>>> sections = {
+      'trending': (data['data']['trending']['media'] as List)
+          .map((anime) => {
+                'id': anime['id'].toString(),
+                'name': anime['title']['english'] ?? anime['title']['romaji'] ?? anime['title']['native'] ?? "Unkown Anime",
+                'episodes': anime['episodes']?.toString() ?? 'Unknown episodes',
+                'poster': anime['coverImage']['large'],
+                'studio': (anime['studios']['nodes'] as List).isNotEmpty
+                    ? anime['studios']['nodes'][0]['name']
+                    : 'Unknown studio',
+                'genres': (anime['genres'] as List).join(', '),
+                'rating': anime['averageScore'],
+                'type': anime['format'] ?? 'Unknown format',
+                'status': anime['status'] ?? 'Unknown status',
+              })
+          .toList(),
+      'popular': (data['data']['popular']['media'] as List)
+          .map((anime) => {
+                'id': anime['id'].toString(),
+                'name': anime['title']['english'] ?? anime['title']['romaji'] ?? anime['title']['native'] ?? "Unkown Anime",
+                'episodes': anime['episodes']?.toString() ?? 'Unknown episodes',
+                'poster': anime['coverImage']['large'],
+                'studio': (anime['studios']['nodes'] as List).isNotEmpty
+                    ? anime['studios']['nodes'][0]['name']
+                    : 'Unknown studio',
+                'genres': (anime['genres'] as List).join(', '),
+                'rating': anime['averageScore'],
+                'type': anime['format'] ?? 'Unknown format',
+                'status': anime['status'] ?? 'Unknown status',
+              })
+          .toList(),
+      'latest': (data['data']['latest']['media'] as List)
+          .map((anime) => {
+                'id': anime['id'].toString(),
+                'name': anime['title']['english'] ?? anime['title']['romaji'] ?? anime['title']['native'] ?? "Unkown Anime",
+                'episodes': anime['episodes']?.toString() ?? 'Unknown episodes',
+                'poster': anime['coverImage']['large'],
+                'studio': (anime['studios']['nodes'] as List).isNotEmpty
+                    ? anime['studios']['nodes'][0]['name']
+                    : 'Unknown studio',
+                'genres': (anime['genres'] as List).join(', '),
+                'rating': anime['averageScore'],
+                'type': anime['format'] ?? 'Unknown format',
+                'status': anime['status'] ?? 'Unknown status',
+              })
+          .toList(),
+      'completed': (data['data']['completed']['media'] as List)
+          .map((anime) => {
+                'id': anime['id'].toString(),
+                'name': anime['title']['english'] ?? anime['title']['romaji'] ?? anime['title']['native'] ?? "Unkown Anime",
+                'episodes': anime['episodes']?.toString() ?? 'Unknown episodes',
+                'poster': anime['coverImage']['large'],
+                'studio': (anime['studios']['nodes'] as List).isNotEmpty
+                    ? anime['studios']['nodes'][0]['name']
+                    : 'Unknown studio',
+                'genres': (anime['genres'] as List).join(', '),
+                'rating': anime['averageScore'],
+                'type': anime['format'] ?? 'Unknown format',
+                'status': anime['status'] ?? 'Unknown status',
+              })
+          .toList(),
+    };
+    
+    notifyListeners(); 
+    log(sections.toString()); 
+    return sections;
+  } else {
+    throw Exception('Failed to load data');
   }
+}
 }
