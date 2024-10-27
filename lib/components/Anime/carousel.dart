@@ -178,7 +178,7 @@ class Carousel extends StatelessWidget {
                                     const EdgeInsets.symmetric(horizontal: 8),
                                 child: Center(
                                   child: Text(
-                                    item,
+                                    item.length > 6 ? '${item.substring(0,5)}..' : item,
                                     style: const TextStyle(
                                         fontSize: 10,
                                         fontFamily: "Poppins-Bold",
