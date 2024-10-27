@@ -4,7 +4,7 @@ import 'package:daizy_tv/backupData/anime.dart';
 import 'package:daizy_tv/backupData/manga.dart';
 import 'package:daizy_tv/components/Anime/reusableList.dart';
 import 'package:daizy_tv/components/Common/user_lists.dart';
-import 'package:daizy_tv/components/Header.dart';
+import 'package:daizy_tv/components/Common/Header.dart';
 import 'package:daizy_tv/components/Manga/mangaReusableCarousale.dart';
 import 'package:daizy_tv/components/Recently-added/animeCarousale.dart';
 import 'package:daizy_tv/components/Recently-added/mangaCarousale.dart';

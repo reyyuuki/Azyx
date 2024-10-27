@@ -4,7 +4,7 @@ import 'package:daizy_tv/backupData/anime.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:daizy_tv/components/Anime/carousel.dart';
-import 'package:daizy_tv/components/Header.dart';
+import 'package:daizy_tv/components/Common/Header.dart';
 import 'package:daizy_tv/components/Anime/reusableList.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';

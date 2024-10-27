@@ -7,7 +7,7 @@ import 'package:daizy_tv/components/Manga/mangaReusableCarousale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:daizy_tv/components/Header.dart';
+import 'package:daizy_tv/components/Common/Header.dart';
 import 'package:iconsax/iconsax.dart';
 
 

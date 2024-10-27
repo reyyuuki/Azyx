@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:daizy_tv/components/Manga/_manga_grid.dart';
 import 'package:daizy_tv/components/Manga/_manga_list.dart';
-import 'package:daizy_tv/scraper/mangakakalot/manga_scrapper.dart';
+import 'package:daizy_tv/utils/scraper/mangakakalot/manga_scrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;

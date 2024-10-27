@@ -1,4 +1,4 @@
-import 'package:daizy_tv/components/Anime/videoplayer.dart';
+import 'package:daizy_tv/components/Video_palyer/videoplayer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

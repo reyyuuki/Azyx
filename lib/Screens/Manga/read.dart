@@ -3,8 +3,8 @@ import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:daizy_tv/components/Manga/sliderBar.dart';
-import 'package:daizy_tv/dataBase/appDatabase.dart';
-import 'package:daizy_tv/scraper/mangakakalot/manga_scrapper.dart';
+import 'package:daizy_tv/Hive_Data/appDatabase.dart';
+import 'package:daizy_tv/utils/scraper/mangakakalot/manga_scrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
