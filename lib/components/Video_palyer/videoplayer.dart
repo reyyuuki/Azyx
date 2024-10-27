@@ -1,7 +1,7 @@
 import 'dart:developer';
 
-import 'package:daizy_tv/_anime_api.dart';
-import 'package:daizy_tv/components/Anime/player.dart';
+import 'package:daizy_tv/utils/api/_anime_api.dart';
+import 'package:daizy_tv/components/Video_palyer/player.dart';
 import 'package:flutter/material.dart';
 import 'package:better_player/better_player.dart';
 import 'package:flutter/services.dart';
