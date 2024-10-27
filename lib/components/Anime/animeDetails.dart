@@ -3,12 +3,16 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:animated_segmented_tab_control/animated_segmented_tab_control.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:daizy_tv/components/Anime/animeInfo.dart';
-import 'package:daizy_tv/dataBase/appDatabase.dart';
-import 'package:daizy_tv/scraper/episodeScrapper.dart';
+import 'package:daizy_tv/Hive_Data/appDatabase.dart';
+import 'package:daizy_tv/utils/scraper/Anilist/anilist_add.dart';
+import 'package:daizy_tv/utils/scraper/other/episodeScrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
 import 'package:text_scroll/text_scroll.dart';
 import 'package:http/http.dart' as http;
@@ -34,9 +38,24 @@ class _AnimeDetailsState extends State<AnimeDetails> {
   bool dub = false;
   String? title;
   bool isloading = false;
+  String selectedValue = "WATCHING";
+  double score = 5.0;
+  final TextEditingController _scoreController =
+      TextEditingController(text: '10.0');
+  final TextEditingController _episodeController =
+      TextEditingController(text: '1');
 
   final String episodeUrl =
       '${dotenv.get("HIANIME_URL")}anime/episode-srcs?id=';
+
+  final List<String> _items = [
+    "CURRENT",
+    "PLANNING",
+    "COMPLETED",
+    "REPEATING",
+    "PAUSED",
+    "DROPPED"
+  ];
 
   @override
   void initState() {
@@ -175,6 +194,245 @@ class _AnimeDetailsState extends State<AnimeDetails> {
     });
   }
 
+
+
+  void showDecimalPickerDialog(BuildContext context) {
+  
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text("Select a Score"),
+        content: SizedBox(
+          height: 200,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+               DecimalNumberPicker(
+                value: score,
+                minValue: 0,
+                maxValue: 10,
+                decimalPlaces: 2,
+                onChanged: (value) => setState(() => score = value),
+              ),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: const Text("Save"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
+
+  void addToList(BuildContext context) {
+    String localSelectedValue = "CURRENT";
+  
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      barrierColor: Colors.black87.withOpacity(0.5),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+      backgroundColor: Theme.of(context).colorScheme.inverseSurface,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return SizedBox(
+              height: 640,
+              child: ListView(
+                children: [
+                  SizedBox(
+                    height: 250,
+                    child: Stack(
+                      children: [
+                        SizedBox(
+                          height: 200,
+                          child: ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(30)),
+                            child: CachedNetworkImage(
+                              imageUrl: widget.animeData['coverImage'],
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          child: Container(
+                            height: 200,
+                            width: MediaQuery.of(context).size.width,
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Colors.transparent, Colors.black87],
+                                begin: Alignment.center,
+                                end: Alignment.bottomCenter,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          left: 25,
+                          child: SizedBox(
+                            width: 85,
+                            height: 120,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: CachedNetworkImage(
+                                imageUrl: widget.animeData['poster'],
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 55,
+                          left: 130,
+                          child: Text(
+                            widget.animeData['name'],
+                            style: const TextStyle(
+                              fontFamily: "Poppins-Bold",
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Status",
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.surface),
+                        ),
+                        const SizedBox(height: 5),
+                        Container(
+                          height: 45,
+                          padding: const EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            borderRadius: BorderRadius.circular(8.0),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: DropdownButton<String>(
+                            value: localSelectedValue,
+                            isExpanded: true,
+                            underline: const SizedBox.shrink(),
+                            isDense: true,
+                            icon: const Icon(Iconsax.arrow_bottom),
+                            items: _items
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  localSelectedValue = newValue;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 20,),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Score",style: TextStyle(color: Theme.of(context).colorScheme.surface),),
+                            const SizedBox(height: 5,),
+                            GestureDetector(
+                              onTap: () {
+                                showDecimalPickerDialog(context);
+                              },
+                              child: Container(
+                                height: 45,
+                                width: MediaQuery.of(context).size.width,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surface,
+                                  borderRadius: BorderRadius.circular(10)
+                                ),
+                                child:  Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 10),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(score.toStringAsFixed(1)),
+                                      Icon(Iconsax.arrow_bottom)
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                        inputbox(context, "Episode progress",
+                            _episodeController, filteredEpisodes.length),
+                        const SizedBox(height: 30),
+                        GestureDetector(
+                          onTap: () {
+                            addToAniList(
+                              mediaId: int.parse(widget.id),
+                              status:
+                                  localSelectedValue, // Use the updated local value
+                              score: score,
+                              progress: int.parse(_episodeController.text),
+                            );
+                            Navigator.pop(
+                                context); // Close the modal after saving
+                          },
+                          child: Container(
+                            height: 45,
+                            width: MediaQuery.of(context).size.width,
+                            decoration: BoxDecoration(
+                              color:
+                                  Theme.of(context).colorScheme.inversePrimary,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                "Save",
+                                style: TextStyle(
+                                    fontFamily: "Poppins-Bold", fontSize: 16),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.animeData == null) {
@@ -182,7 +440,9 @@ class _AnimeDetailsState extends State<AnimeDetails> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(height: 440,),
+            SizedBox(
+              height: 440,
+            ),
             CircularProgressIndicator(),
           ],
         ),
@@ -204,7 +464,7 @@ class _AnimeDetailsState extends State<AnimeDetails> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: TextScroll(
-                widget.animeData['name'].toString(),
+                widget.animeData['name'],
                 mode: TextScrollMode.bouncing,
                 velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
                 delayBefore: const Duration(milliseconds: 500),
@@ -232,7 +492,37 @@ class _AnimeDetailsState extends State<AnimeDetails> {
                 ),
               ],
             ),
-            const SizedBox(height: 60),
+            const SizedBox(
+              height: 10,
+            ),
+            GestureDetector(
+              onTap: () {
+                addToList(context);
+              },
+              child: Container(
+                width: 300,
+                height: 45,
+                decoration: BoxDecoration(
+                    border: Border.all(
+                      width: 2,
+                      color: Theme.of(context).colorScheme.inversePrimary,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                    gradient: LinearGradient(colors: [
+                      Theme.of(context)
+                          .colorScheme
+                          .inversePrimary
+                          .withOpacity(0.3),
+                      Theme.of(context).colorScheme.inversePrimary
+                    ], begin: Alignment.center, end: Alignment.bottomCenter)),
+                child: const Center(
+                    child: Text(
+                  "Add to list",
+                  style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 16),
+                )),
+              ),
+            ),
+            const SizedBox(height: 25),
             DefaultTabController(
               length: 2,
               child: Column(
@@ -261,113 +551,7 @@ class _AnimeDetailsState extends State<AnimeDetails> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  SizedBox(
-                    height: 600,
-                    child: TabBarView(
-                      physics: const BouncingScrollPhysics(),
-                      children: [
-                        AnimeInfo(animeData: widget.animeData),
-                        Column(
-                          children: [
-                            const SizedBox(height: 10),
-                            Container(
-                              height: 440,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHigh,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              width: MediaQuery.of(context).size.width,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 10),
-                                child: ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: filteredEpisodes?.length ?? 0,
-                                  itemBuilder: (context, index) {
-                                    final item = filteredEpisodes![index];
-                                    final title = item['title'];
-                                    final episodeNumber = item['number'];
-                                    return GestureDetector(
-                                      onTap: () {
-                                        displayBottomSheet(
-                                            context, episodeNumber, title);
-                                      },
-                                      child: Container(
-                                        margin: const EdgeInsets.only(top: 10),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          border: Border(
-                                            left: BorderSide(
-                                              width: 5,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                            ),
-                                          ),
-                                          color: episodeNumber == episodeId
-                                              ? Theme.of(context)
-                                                  .colorScheme
-                                                  .inversePrimary
-                                              : Theme.of(context)
-                                                  .colorScheme
-                                                  .surfaceContainerHighest,
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(15),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              SizedBox(
-                                                width: 220,
-                                                child: Text(
-                                                  title.length > 25
-                                                      ? '${title.substring(0, 25)}...'
-                                                      : title,
-                                                  style: TextStyle(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .inverseSurface,
-                                                    fontFamily: "Poppins-Bold",
-                                                  ),
-                                                ),
-                                              ),
-                                              episodeNumber == episodeId
-                                                  ? Icon(
-                                                      Ionicons.play,
-                                                      color: Theme.of(context)
-                                                          .colorScheme
-                                                          .inverseSurface,
-                                                    )
-                                                  : Text(
-                                                      'Ep- $episodeNumber',
-                                                      style: TextStyle(
-                                                        fontSize: 14,
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .inverseSurface,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                    ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+                  tabs(context),
                 ],
               ),
             ),
@@ -377,23 +561,210 @@ class _AnimeDetailsState extends State<AnimeDetails> {
     );
   }
 
-  Future<void> displayBottomSheet(
-      BuildContext context, int number, String setTitle) async {
-    log(episodeLink.toString());
-    return showModalBottomSheet(
+  SizedBox tabs(BuildContext context) {
+    return SizedBox(
+                  height: 600,
+                  child: TabBarView(
+                    physics: const BouncingScrollPhysics(),
+                    children: [
+                      AnimeInfo(animeData: widget.animeData),
+                      Column(
+                        children: [
+                          const SizedBox(height: 10),
+                          episodeList(context),
+                          const SizedBox(height: 10),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+  }
+
+  Container episodeList(BuildContext context) {
+    return Container(
+                          height: 440,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHigh,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          width: MediaQuery.of(context).size.width,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 10),
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: filteredEpisodes?.length ?? 0,
+                              itemBuilder: (context, index) {
+                                final item = filteredEpisodes![index];
+                                final title = item['title'];
+                                final episodeNumber = item['number'];
+                                return GestureDetector(
+                                  onTap: () {
+                                    displayBottomSheet(
+                                        context, episodeNumber, title);
+                                  },
+                                  child: Container(
+                                    margin: const EdgeInsets.only(top: 10),
+                                    decoration: BoxDecoration(
+                                      borderRadius:
+                                          BorderRadius.circular(10),
+                                      border: Border(
+                                        left: BorderSide(
+                                          width: 5,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        ),
+                                      ),
+                                      color: episodeNumber == episodeId
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .inversePrimary
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .surfaceContainerHighest,
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(15),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          SizedBox(
+                                            width: 220,
+                                            child: Text(
+                                              title.length > 25
+                                                  ? '${title.substring(0, 25)}...'
+                                                  : title,
+                                              style: TextStyle(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .inverseSurface,
+                                                fontFamily: "Poppins-Bold",
+                                              ),
+                                            ),
+                                          ),
+                                          episodeNumber == episodeId
+                                              ? Icon(
+                                                  Ionicons.play,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .inverseSurface,
+                                                )
+                                              : Text(
+                                                  'Ep- $episodeNumber',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .inverseSurface,
+                                                    fontWeight:
+                                                        FontWeight.w500,
+                                                  ),
+                                                ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+  }
+
+  Column inputbox(BuildContext context, String name, _controller, int max) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(
+          height: 20,
+        ),
+        Text(
+          name,
+          style: TextStyle(color: Theme.of(context).colorScheme.surface),
+        ),
+        const SizedBox(
+          height: 5,
+        ),
+        Container(
+          height: 45,
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+          width: MediaQuery.of(context).size.width,
+          child: TextField(
+            controller: _controller,
+            onChanged: (value) {
+              int number = int.parse(value);
+              if (number <= max || number == 0) {
+                 _controller.text = TextEditingValue(text: number.toString());
+              }
+            },
+            keyboardType: TextInputType.number,
+            
+            decoration: InputDecoration(
+              suffixIcon: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Text(
+                  '/ $max',
+                  style: const TextStyle(fontFamily: "Poppins-Bold", fontSize: 16),
+                ),
+              ),
+              contentPadding: const EdgeInsets.all(10),
+              fillColor: Theme.of(context).colorScheme.surface,
+              filled: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: BorderSide(
+                    width: 2,
+                    color: Theme.of(context).colorScheme.inversePrimary),
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  void displayBottomSheet(BuildContext context, int number, String setTitle) {
+    showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      backgroundColor: Theme.of(context).colorScheme.onSecondaryFixedVariant,
+      backgroundColor: Theme.of(context).colorScheme.inverseSurface,
       showDragHandle: true,
       barrierColor: Colors.black87.withOpacity(0.5),
       builder: (context) => Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: SizedBox(
-          height: 300,
+          height: 240,
           child: Column(
             children: [
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Text(
+                  "Select server",
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontFamily: "Poppins-Bold",
+                      color: Theme.of(context).colorScheme.inversePrimary),
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
+                Icon(
+                  Ionicons.earth,
+                  color: Theme.of(context).colorScheme.onSecondary,
+                )
+              ]),
+              const SizedBox(
+                height: 10,
+              ),
               serverContainer(
                   context, "HD - 1", number, "vidstreaming", setTitle),
               const SizedBox(height: 10),
@@ -434,7 +805,9 @@ class _AnimeDetailsState extends State<AnimeDetails> {
       child: Container(
         height: 50,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.onInverseSurface,
+          border: Border.all(
+              width: 1, color: Theme.of(context).colorScheme.inverseSurface),
+          color: Theme.of(context).colorScheme.inversePrimary,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Center(
