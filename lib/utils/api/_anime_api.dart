@@ -32,6 +32,7 @@ Future<dynamic>? fetchAnimeDetailsConsumet(String id) async {
 
     if (resp.statusCode == 200) {
       final data = jsonDecode(resp.body);
+      log(data);
       return data;
     } else {
       log('Failed to fetch data: ${resp.statusCode}');
@@ -81,11 +82,12 @@ Future<dynamic> fetchStreamingLinksAniwatch(
     String id, String server, String category) async {
   try {
     final url =
-        '${aniwatchUrl}episode-srcs?id=$id?server=$server&category=$category';
-        log('${aniwatchUrl}episode-srcs?id=$id?server=$server&category=$category');
+        '${aniwatchUrl}anime/episode-srcs?id=$id?server=$server&category=$category';
+        log('${aniwatchUrl}anime/episode-srcs?id=$id?server=$server&category=$category');
     final resp = await http.get(Uri.parse(url));
     if (resp.statusCode == 200) {
       final tempData = jsonDecode(resp.body);
+      log('done');
       return tempData;
     } else {
       return null;
