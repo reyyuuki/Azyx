@@ -1,6 +1,9 @@
 
+import 'dart:typed_data';
+
 import 'package:daizy_tv/auth/auth_provider.dart';
-import 'package:daizy_tv/components/setting_tile.dart';
+import 'package:daizy_tv/components/Common/setting_tile.dart';
+import 'package:daizy_tv/utils/scraper/Anilist/anilist_add.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +19,14 @@ class _SettingState extends State<Setting> {
   @override
   void initState() {
     super.initState();
+  }
+
+Uint8List? _imageData;
+    Future<void> fetchImage() async {
+    final imageData = await fetchImageWithHeaders();
+    setState(() {
+      _imageData = imageData; // Update the state with the fetched image data
+    });
   }
 
   @override
@@ -103,12 +114,13 @@ class _SettingState extends State<Setting> {
                 name: "About",
                 routeName: "./about",
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              ElevatedButton(onPressed: () async{
-             
-              }, child: Text("Fetch"))
+              // ElevatedButton(onPressed: () async {
+              //  fetchImage();
+              // }, child: Text("Image")),
+
+              // SizedBox(
+              //   height: 200,
+              //   child:_imageData != null Image.memory(_imageData!)),
             ],
           ),
         ));
