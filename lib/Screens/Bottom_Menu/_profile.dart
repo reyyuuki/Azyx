@@ -7,7 +7,6 @@ import 'package:daizy_tv/components/Recently-added/mangaCarousale.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class Profile extends StatefulWidget {
@@ -30,76 +29,10 @@ class _ProfileState extends State<Profile> {
   @override
   void initState() {
     super.initState();
-    imagePath = box.get("imagePath") ?? "";
-    userName = box.get("userName") ?? "";
     animeWatches = appData.get("currently-Watching");
     mangaReads = appData.get("currently-Reading");
     _nameController.text = userName;
   }
-
-  Future<void> _pickImage() async {
-    try {
-      final pickedImage =
-          await ImagePicker().pickImage(source: ImageSource.gallery);
-
-      if (pickedImage != null) {
-        setState(() {
-          imagePath = pickedImage.path;
-        });
-        box.put("imagePath", imagePath);
-      }
-    } catch (e) {
-      print('Error picking image: $e');
-    }
-  }
-
-  Future<void> _showEditDialog() async {
-    AwesomeDialog(
-      context: context,
-      headerAnimationLoop: false,
-      animType: AnimType.bottomSlide,
-      dialogBackgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-      dialogBorderRadius: BorderRadius.circular(20),
-      customHeader: Icon(
-        Iconsax.user_edit,
-        size: 50,
-        color: Theme.of(context).colorScheme.primary,
-      ),
-      title: 'Edit Username',
-      btnOkIcon: Iconsax.user_edit,
-      btnCancelIcon: Iconsax.close_circle,
-      body: Column(
-        children: [
-          const Text(
-            'Enter your Username',
-            style: TextStyle(fontSize: 16, fontFamily: "Poppins-Bold"),
-          ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                labelText: 'Username',
-                prefixIcon: const Icon(Icons.person),
-              ),
-            ),
-          ),
-        ],
-      ),
-      btnOkOnPress: () {
-        setState(() {
-          userName = _nameController.text;
-          box.put("userName", userName);
-        });
-      },
-      btnCancelOnPress: () {},
-    ).show();
-  }
-
  
 
   @override
@@ -162,7 +95,7 @@ class _ProfileState extends State<Profile> {
                 child: Column(
                   children: [
                     GestureDetector(
-                      onTap: _pickImage,
+                      onTap: (){},
                       child: SizedBox(
                         width: 200,
                         height: 200,
