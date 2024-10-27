@@ -4,7 +4,7 @@
 import 'dart:developer';
 import 'package:daizy_tv/components/Anime/_gridlist.dart';
 import 'package:daizy_tv/components/Anime/_search_list.dart';
-import 'package:daizy_tv/scraper/Anilist/anilist_search.dart';
+import 'package:daizy_tv/utils/scraper/Anilist/anilist_search.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:ionicons/ionicons.dart';

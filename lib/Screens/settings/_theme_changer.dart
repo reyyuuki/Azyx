@@ -1,9 +1,9 @@
-import 'package:daizy_tv/components/_colorball.dart';
-import 'package:daizy_tv/settings/mode.dart';
+import 'package:daizy_tv/components/Common/_colorball.dart';
+import 'package:daizy_tv/Screens/settings/mode.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
-import '../Provider/theme_provider.dart';
+import '../../Provider/theme_provider.dart';
 
 class ThemeChange extends StatefulWidget {
   const ThemeChange({super.key});

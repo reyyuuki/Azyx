@@ -1,5 +1,5 @@
 import 'package:daizy_tv/Provider/theme_provider.dart';
-import 'package:daizy_tv/components/_theme_template.dart';
+import 'package:daizy_tv/components/Common/_theme_template.dart';
 import 'package:flutter/material.dart';
 
 class Mode extends StatefulWidget {
