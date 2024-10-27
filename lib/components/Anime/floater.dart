@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:daizy_tv/dataBase/appDatabase.dart';
+import 'package:daizy_tv/Hive_Data/appDatabase.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
