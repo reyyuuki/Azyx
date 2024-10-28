@@ -680,6 +680,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  infinite_listview:
+    dependency: transitive
+    description:
+      name: infinite_listview
+      sha256: f6062c1720eb59be553dfa6b89813d3e8dd2f054538445aaa5edaddfa5195ce6
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   interactive_slider:
     dependency: "direct main"
     description:
@@ -816,6 +824,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  numberpicker:
+    dependency: "direct main"
+    description:
+      name: numberpicker
+      sha256: "4c129154944b0f6b133e693f8749c3f8bfb67c4d07ef9dcab48b595c22d1f156"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.2"
   octo_image:
     dependency: transitive
     description:
