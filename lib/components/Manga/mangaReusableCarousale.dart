@@ -57,8 +57,8 @@ class Mangareusablecarousale extends StatelessWidget {
               itemCount: data!.length,
               itemBuilder: (context, index) {
                 final item = data![index];
-                final imageUrl = item['image'] ?? '';
-                final title = item['title'] ?? '';
+                final imageUrl = item['coverImage'] ?? '';
+                final title = item['name'] ?? '';
                 final id = item['id'] ?? '';
                 final tagg = id + taggName;
 
