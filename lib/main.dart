@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:daizy_tv/Provider/manga_sources.dart';
 import 'package:daizy_tv/Screens/Bottom_Menu/_profile.dart';
 import 'package:daizy_tv/Screens/Bottom_Menu/_setting.dart';
 import 'package:daizy_tv/Provider/theme_provider.dart';
@@ -39,6 +40,7 @@ void main() async {
       ChangeNotifierProvider(create: (_) => Data()),
       ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ChangeNotifierProvider(create: (_) => AniListProvider()..tryAutoLogin()),
+      ChangeNotifierProvider(create: (_) => MangaSourcesProvider()..allMangaSources())
     ],
     child: const MainApp(),
   ));
@@ -88,8 +90,6 @@ class _MainAppState extends State<MainApp> {
     ),
   );
 
-
-
           case '/searchAnime':
             final name = args?['name'] ?? '';
             return MaterialPageRoute(
@@ -108,11 +108,11 @@ class _MainAppState extends State<MainApp> {
 
           case '/read':
             final mangaId = args?['mangaId'] ?? '';
-            final chapterId = args?['chapterId'] ?? '';
+            final chapterLink = args?['chapterLink'] ?? '';
             final image = args?['image'] ?? '';
             return MaterialPageRoute(
               builder: (context) =>
-                  Read(mangaId: mangaId, chapterId: chapterId, image: image),
+                  Read(mangaId: mangaId, chapterLink: chapterLink, image: image,),
             );
 
           case '/searchManga':
