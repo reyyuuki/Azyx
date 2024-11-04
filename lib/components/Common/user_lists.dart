@@ -56,7 +56,7 @@ class _UserListsState extends State<UserLists> {
           ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, './animelist');
-                provider.fetchUserAnimeList();
+                
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
@@ -89,7 +89,6 @@ class _UserListsState extends State<UserLists> {
           ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, './mangalist');
-                provider.fetchUserMangaList();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
