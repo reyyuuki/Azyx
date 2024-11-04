@@ -1,11 +1,12 @@
-import 'dart:convert';
+
+// ignore_for_file: must_be_immutable, file_names
+
 import 'dart:developer';
-import 'package:daizy_tv/components/Manga/_manga_grid.dart';
+import 'package:daizy_tv/components/Anime/_gridlist.dart';
 import 'package:daizy_tv/components/Manga/_manga_list.dart';
-import 'package:daizy_tv/utils/scraper/mangakakalot/manga_scrapper.dart';
+import 'package:daizy_tv/utils/api/Anilist/manga_search.dart';
+import 'package:daizy_tv/utils/scraper/Manga/Manga_Sources/mangakakalot_unofficial.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
 import 'package:iconsax/iconsax.dart';
 import 'package:ionicons/ionicons.dart';
 
@@ -19,7 +20,8 @@ class SearchManga extends StatefulWidget {
 
 class _SearchpageState extends State<SearchManga> {
   dynamic data;
-  bool isGrid = false;
+  bool isGrid = true;
+  final mangaScrapper = MangakakalotUnofficial();
 
   TextEditingController? _controller;
 
@@ -38,10 +40,10 @@ class _SearchpageState extends State<SearchManga> {
 
   Future<void> fetchdata() async {
     try {
-      final response = await scrapeMangaSearch(widget.name);
+      final response = await searchAnilistManga(widget.name);
       if (response.toString().isNotEmpty) {
         setState(() {
-          data = response['mangaList'];
+          data = response;
         });
       } else {
         log('Failed to load data');
@@ -95,6 +97,8 @@ class _SearchpageState extends State<SearchManga> {
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Iconsax.search_normal),
                     hintText: 'Search Manga',
+                    labelText: 'Search Manga',
+                    labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
                       borderSide: BorderSide(
@@ -102,10 +106,10 @@ class _SearchpageState extends State<SearchManga> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide.none,
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
                     ),
                     fillColor:
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                        Theme.of(context).colorScheme.surface,
                     filled: true,
                   ),
                 ),
@@ -160,8 +164,8 @@ class _SearchpageState extends State<SearchManga> {
           ),
           Expanded(
             child: isGrid
-                ? MangaGrid(data: data, key: ValueKey<bool>(isGrid))
-                : MangaSearchList(data: data, key: ValueKey<bool>(!isGrid)),
+                ? GridList(data: data, route: '/mangaDetail',)
+                : MangaSearchList(data: data, ),
           ),
         ],
       ),
