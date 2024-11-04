@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:daizy_tv/components/Anime/animeDetails.dart';
-import 'package:daizy_tv/components/Anime/floater.dart';
 import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/coverImage.dart';
 import 'package:daizy_tv/utils/scraper/Anilist/anilist_anime_details.dart';
@@ -29,7 +28,6 @@ class _DetailsState extends State<Details> {
   @override
   void initState() {
     super.initState();
-    fetchData();
     scrapedData();
   }
 
@@ -52,42 +50,12 @@ Future<void> scrapedData() async {
 }
 
  
-  Future<void> fetchData() async {
-    String aniwatchUrl = dotenv.get("HIANIME_URL");
-    String consumetUrl = dotenv.get("CONSUMET_URL");
-    String proxy = "https://goodproxy.goodproxy.workers.dev/fetch?url=";
-    try {
-      final response = await http.get(Uri.parse(
-          '$proxy${aniwatchUrl}anime/info?id=${widget.id}'));
-          log('$proxy${aniwatchUrl}anime/info?id=${widget.id}');
-          
-      if (response.statusCode == 200) {
-        final jsonData = jsonDecode(response.body);
-        final newResponse = await http.get(Uri.parse(
-            '$proxy${consumetUrl}meta/anilist/info/${jsonData['anime']['info']['anilistId']}'));
-
-          log('$proxy${consumetUrl}meta/anilist/info/${jsonData['anime']['info']['anilistId']}');
-        if (newResponse.statusCode == 200) {
-          final newData = jsonDecode(newResponse.body);
-          setState(() {
-            // animeData = jsonData['anime'];
-            log("data anilist : ${jsonData['anime']['info']['anilistId']}");
-            cover = newData['cover'];
-            description = newData['description'];
-          });
-        }
-      }
-    } catch (error) {
-      log("Failed to load data : $error");
-    }
-  }
-
   @override
   Widget build(BuildContext context) {   
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         title: TextScroll(
           animeData == null ? "Loading..." :
@@ -115,12 +83,12 @@ Future<void> scrapedData() async {
               children: [
                animeData?['poster'] != null ? CoverImage(imageUrl: animeData['coverImage']) : const SizedBox.shrink(),
                 Container(
-                  height: 870,
+                  height: 900,
                   margin: const EdgeInsets.only(top: 220),
                   decoration:  BoxDecoration(
                     borderRadius:
                         const BorderRadius.vertical(top: Radius.circular(50)),
-                    color: Theme.of(context).colorScheme.surfaceContainer,
+                    color: Theme.of(context).colorScheme.surface,
                   ),
                 ),
                 Poster(imageUrl: widget.image, id : widget.tagg),
