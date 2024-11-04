@@ -1,21 +1,20 @@
-// ignore_for_file: file_names
+// ignore_for_file: file_names, prefer_const_constructors
 
 import 'dart:convert';
 import 'dart:developer';
 import 'package:animated_segmented_tab_control/animated_segmented_tab_control.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:daizy_tv/Screens/Anime/episode_src.dart';
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/Anime/animeInfo.dart';
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
 import 'package:daizy_tv/utils/api/_anime_api.dart';
-import 'package:daizy_tv/utils/scraper/Anilist/anilist_add.dart';
 import 'package:daizy_tv/utils/scraper/other/episodeScrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:lite_rolling_switch/lite_rolling_switch.dart';
-import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
 import 'package:text_scroll/text_scroll.dart';
 import 'package:http/http.dart' as http;
@@ -43,15 +42,12 @@ class _AnimeDetailsState extends State<AnimeDetails> {
   String? title;
   bool isloading = false;
   bool withPhoto = true;
-  String selectedValue = "CURRENT";
+  bool isScrapper = true;
   double score = 5.0;
   String localSelectedValue = "CURRENT";
   String defaultScore = "1.0";
   final TextEditingController _episodeController =
       TextEditingController(text: '1');
-
-  final String episodeUrl =
-      '${dotenv.get("HIANIME_URL")}anime/episode-srcs?id=';
 
   final List<String> _items = [
     "CURRENT",
@@ -134,7 +130,6 @@ class _AnimeDetailsState extends State<AnimeDetails> {
         final episodeResponse = await scrapeAnimeEpisodes(animeId!);
         final consumetEpisodes =
             await fetchStreamingDataConsumet(int.parse(widget.id));
-  log(widget.animeData.toString());
         if (episodeResponse.isNotEmpty && episodeResponse != null) {
           setState(() {
             episodeData = episodeResponse['episodes'];
@@ -144,6 +139,7 @@ class _AnimeDetailsState extends State<AnimeDetails> {
                 widget.animeData['id']?.toString() ?? '1')!);
             category = dub ? "dub" : "sub";
           });
+          log(consumetEpisodes);
         }
       } else {
         log('No Zoro URL found.');
@@ -154,33 +150,44 @@ class _AnimeDetailsState extends State<AnimeDetails> {
   Future<void> fetchEpisodeUrl() async {
     if (episodeData == null || episodeId == null) return;
     setState(() {
-      category = dub ? "dub": "sub";
+      category = dub ? "dub" : "sub";
     });
     try {
       final provider = Provider.of<Data>(context, listen: false);
       final episodeIdValue = episodeData[(episodeId! - 1)]['episodeId'];
-          final trackResponse = await fetchStreamingLinksAniwatch(episodeIdValue, server!,"sub");
-      log('$episodeUrl$episodeIdValue?server=$server&category=$category');
-      final response = await fetchStreamingLinksAniwatch(episodeIdValue, server!, category!);
-      log(category!);
-      if (response != null) {
-        setState(() {
-          episodeLink = response['sources'][0]["url"];
-          isloading = false;
-          tracks = trackResponse['tracks'];
-        });
-        Navigator.pop(context);
-        route();
-        provider.addWatchedAnimes(
-          animeId: widget.animeData['id'],
-          animeTitle: widget.animeData['name'],
-          currentEpisode: episodeId!.toString(),
-          posterImage: widget.animeData['poster'],
-        );
+      final trackResponse =
+          await fetchStreamingLinksAniwatch(episodeIdValue, server!, "sub");
+      if (!isScrapper) {
+        final response = await fetchStreamingLinksAniwatch(
+            episodeIdValue, server!, category!);
+        log("Api");
+        if (response != null) {
+          setState(() {
+            episodeLink = response['sources'][0]["url"];
+            tracks = trackResponse['tracks'];
+            isloading = false;
+          });
+        }
       } else {
-        log('Error fetching episode data');
-        isloading = true;
+        final scraprLink = await scrapeAnimeEpisodeSources(episodeIdValue,
+            category: dub ? "dub" : "sub");
+        log("scrapeeer:${scraprLink.sources}");
+        setState(() {
+          episodeLink = scraprLink.sources[0]['url'];
+          tracks = scraprLink.tracks;
+          isloading = false;
+        });
       }
+      log("Api");
+      log(isScrapper.toString());
+      Navigator.pop(context);
+      route();
+      provider.addWatchedAnimes(
+        animeId: widget.animeData['id'],
+        animeTitle: widget.animeData['name'],
+        currentEpisode: episodeId!.toString(),
+        posterImage: widget.animeData['poster'],
+      );
     } catch (e) {
       log("Error in fetchEpisode: $e");
       isloading = true;
@@ -223,46 +230,6 @@ class _AnimeDetailsState extends State<AnimeDetails> {
     });
   }
 
-  void showDecimalPickerDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Select a Score"),
-          content: SizedBox(
-            height: 200,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                DecimalNumberPicker(
-                  value: score,
-                  minValue: 0,
-                  maxValue: 10,
-                  decimalPlaces: 2,
-                  onChanged: (value) => setState(() => score = value),
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text("Save"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void addToList(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -271,7 +238,7 @@ class _AnimeDetailsState extends State<AnimeDetails> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
-      backgroundColor: Theme.of(context).colorScheme.inverseSurface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
@@ -279,7 +246,7 @@ class _AnimeDetailsState extends State<AnimeDetails> {
               padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom * 1),
               child: SizedBox(
-                height: 640,
+                height: 600,
                 child: ListView(
                   children: [
                     SizedBox(
@@ -329,7 +296,9 @@ class _AnimeDetailsState extends State<AnimeDetails> {
                             bottom: 55,
                             left: 130,
                             child: Text(
-                              widget.animeData['name'],
+                              widget.animeData['name'].length > 20
+                                  ? '${widget.animeData['name'].substring(0, 20)}...'
+                                  : widget.animeData['name'],
                               style: const TextStyle(
                                 fontFamily: "Poppins-Bold",
                                 fontSize: 16,
@@ -347,83 +316,95 @@ class _AnimeDetailsState extends State<AnimeDetails> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Status",
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.surface),
-                          ),
-                          const SizedBox(height: 5),
-                          Container(
-                            height: 45,
-                            padding: const EdgeInsets.all(10.0),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface,
-                              borderRadius: BorderRadius.circular(8.0),
-                              border: Border.all(color: Colors.grey),
+                          DropdownButtonFormField<String>(
+                            value: localSelectedValue,
+                            isExpanded: true,
+                            decoration: InputDecoration(
+                              labelText: 'Choose Status',
+                              filled: true,
+                              fillColor: Theme.of(context).colorScheme.surface,
+                              labelStyle: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary),
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryFixedVariant),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
+                              ),
                             ),
-                            child: DropdownButton<String>(
-                              value: localSelectedValue,
-                              isExpanded: true,
-                              underline: const SizedBox.shrink(),
-                              isDense: true,
-                              icon: const Icon(Iconsax.arrow_bottom),
-                              items: _items.map<DropdownMenuItem<String>>(
-                                  (String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                if (newValue != null) {
-                                  setState(() {
-                                    localSelectedValue = newValue;
-                                  });
-                                }
-                              },
-                            ),
+                            isDense: true,
+                            items: _items
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  localSelectedValue = newValue;
+                                });
+                              }
+                            },
                           ),
                           const SizedBox(
                             height: 20,
                           ),
-                          Text(
-                            "Score",
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.surface),
-                          ),
-                          const SizedBox(height: 5),
-                          Container(
-                            height: 45,
-                            padding: const EdgeInsets.all(10.0),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface,
-                              borderRadius: BorderRadius.circular(8.0),
-                              border: Border.all(color: Colors.grey),
+                          DropdownButtonFormField<String>(
+                            value: defaultScore,
+                            isExpanded: true,
+                            decoration: InputDecoration(
+                              labelText: 'Choose Score',
+                              filled: true,
+                              fillColor: Theme.of(context).colorScheme.surface,
+                              labelStyle: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary),
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryFixedVariant),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
+                              ),
                             ),
-                            child: DropdownButton<String>(
-                              value: defaultScore,
-                              isExpanded: true,
-                              underline: const SizedBox.shrink(),
-                              isDense: true,
-                              icon: const Icon(Iconsax.arrow_bottom),
-                              items: _scoresItems.map<DropdownMenuItem<String>>(
-                                  (String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                if (newValue != null) {
-                                  setState(() {
-                                    defaultScore = newValue;
-                                  });
-                                }
-                              },
-                            ),
+                            isDense: true,
+                            items: _scoresItems
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  defaultScore = newValue;
+                                });
+                              }
+                            },
                           ),
-                          inputbox(context, "Episode progress",
-                              _episodeController, filteredEpisodes.length),
+                          inputbox(context, _episodeController,
+                              filteredEpisodes.length),
                           const SizedBox(height: 30),
                           saveAnime(localSelectedValue, context),
                         ],
@@ -442,7 +423,7 @@ class _AnimeDetailsState extends State<AnimeDetails> {
   GestureDetector saveAnime(String localSelectedValue, BuildContext context) {
     return GestureDetector(
       onTap: () {
-        addToAniList(
+       Provider.of<AniListProvider>(context,listen: false).addToAniList(
           mediaId: int.parse(widget.id),
           status: localSelectedValue,
           score: double.tryParse(defaultScore),
@@ -485,6 +466,31 @@ class _AnimeDetailsState extends State<AnimeDetails> {
 
     final textStyle = Theme.of(context).textTheme.bodyLarge;
     final selectedTextStyle = textStyle?.copyWith(fontWeight: FontWeight.bold);
+    final provider = Provider.of<AniListProvider>(context, listen: false)
+        .userData['animeList'];
+    final anime = provider?.firstWhere(
+        (anime) => widget.id == anime['media']['id'].toString(),
+        orElse: () => null);
+
+    localSelectedValue = anime?['status'] ?? "CURRENT";
+    String getAnimeStatus(dynamic anime) {
+      switch (anime['status']) {
+        case 'CURRENT':
+          return "Currently Watching";
+        case 'COMPLETED':
+          return "Completed";
+        case 'PAUSED':
+          return "Paused";
+        case 'DROPPED':
+          return "Dropped";
+        case 'PLANNING':
+          return "Planning to Watch";
+          case 'REPEATING':
+          return "Repeating";
+        default:
+          return "Unknown Status";
+      }
+    }
 
     return Positioned(
       top: 340,
@@ -536,16 +542,18 @@ class _AnimeDetailsState extends State<AnimeDetails> {
                     null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: const Text(
-                        "Whoa there! 🛑 You’re not logged in! Let’s fix that 😜",
-                        style:
-                            TextStyle(fontFamily: "Poppins-Bold", fontSize: 16),
-                      ),
+                      content: Text(
+                          "Whoa there! 🛑 You’re not logged in! Let’s fix that 😜",
+                          style: TextStyle(
+                            fontFamily: "Poppins-Bold",
+                            fontSize: 16,
+                            color: Theme.of(context).colorScheme.inverseSurface,
+                          )),
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
                       duration: const Duration(seconds: 2),
                     ),
                   );
@@ -553,16 +561,23 @@ class _AnimeDetailsState extends State<AnimeDetails> {
                   if (filteredEpisodes == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: const Text(
-                          '🍿 Hold tight! Grabbing those episodes like a ninja... 🥷',
-                          style: TextStyle(
-                              fontSize: 16, fontFamily: "Poppins-Bold"),
+                        content: Center(
+                          child: Text(
+                            '🍿 Hold tight! like a ninja... 🥷',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontFamily: "Poppins-Bold",
+                              color:
+                                  Theme.of(context).colorScheme.inverseSurface,
+                            ),
+                          ),
                         ),
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.surfaceBright,
                         duration: const Duration(seconds: 2),
                       ),
                     );
@@ -575,35 +590,46 @@ class _AnimeDetailsState extends State<AnimeDetails> {
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Container(
                   width: MediaQuery.of(context).size.width,
-                  height: 85,
+                  height: 65,
                   decoration: BoxDecoration(
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(10),
                       ),
-                      border: Border(bottom: BorderSide(
-                        color: Colors.grey.withOpacity(0.4)
-                      )),
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHigh),
+                      border: Border(
+                          bottom: BorderSide(
+                              color: const Color.fromARGB(255, 71, 70, 70)
+                                  .withOpacity(0.8))),
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainer),
                   child: Padding(
-                    padding: const EdgeInsets.all(15),
+                    padding: const EdgeInsets.all(10),
                     child: Container(
-                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Theme.of(context).colorScheme.surfaceBright),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Iconsax.add),
-                          SizedBox(width: 5,),
-                          Text(
-                            "Add to list",
-                            style: TextStyle(
-                              fontFamily: "Poppins-Bold",
-                              fontSize: 16,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Theme.of(context).colorScheme.surfaceBright),
+                      child: anime != null
+                          ? Center(
+                              child: Text(
+                              getAnimeStatus(anime),
+                              style: const TextStyle(
+                                  fontFamily: "Poppins-Bold", fontSize: 16),
+                            ))
+                          : const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Iconsax.add),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text(
+                                  "Add to list",
+                                  style: TextStyle(
+                                    fontFamily: "Poppins-Bold",
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                 ),
@@ -629,20 +655,21 @@ class _AnimeDetailsState extends State<AnimeDetails> {
                       squeezeIntensity: 2,
                       textStyle: textStyle,
                       selectedTextStyle: selectedTextStyle,
-                      indicatorDecoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+                      indicatorDecoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20)),
                       tabs: [
                         SegmentTab(
                           label: 'Details',
                           color: Theme.of(context).colorScheme.inversePrimary,
                           backgroundColor: Theme.of(context)
                               .colorScheme
-                              .surfaceContainerHigh,
+                              .surfaceContainer,
                         ),
                         SegmentTab(
                             label: 'Watch',
                             backgroundColor: Theme.of(context)
                                 .colorScheme
-                                .surfaceContainerHigh,
+                                .surfaceContainer,
                             color:
                                 Theme.of(context).colorScheme.inversePrimary),
                       ],
@@ -701,27 +728,6 @@ class _AnimeDetailsState extends State<AnimeDetails> {
                   ],
                 ),
               ),
-              LiteRollingSwitch(
-                value: true,
-                width: 150,
-                textOn: 'Sub',
-                textOff: 'Dub',
-                textOnColor: Colors.white,
-                colorOn: Theme.of(context).colorScheme.onSecondaryFixedVariant,
-                colorOff: Theme.of(context).colorScheme.onTertiaryFixedVariant,
-                iconOn: Icons.closed_caption,
-                iconOff: Icons.mic,
-                animationDuration: const Duration(milliseconds: 300),
-                onChanged: (bool state) {
-                  setState(() {
-                    dub = !dub;
-                  });
-                  log(dub.toString());
-                },
-                onDoubleTap: () => {},
-                onSwipe: () => {},
-                onTap: () => {},
-              ),
               const SizedBox(
                 height: 10,
               ),
@@ -747,9 +753,9 @@ class _AnimeDetailsState extends State<AnimeDetails> {
                                   final item = filteredEpisodes![index];
                                   final title = item['title'];
                                   final episodeNumber = item['number'];
-                                  final proxy = dotenv.get("PROXY_URL");
+                                  const proxy = "https://goodproxy.goodproxy.workers.dev/fetch?url=";
                                   final image = proxy +
-                                      consumetEpisodesList![index]['image'];
+                                      consumetEpisodesList[index]['image'];
                                   return GestureDetector(
                                     onTap: () {
                                       displayBottomSheet(
@@ -916,25 +922,18 @@ class _AnimeDetailsState extends State<AnimeDetails> {
     );
   }
 
-  Column inputbox(BuildContext context, String name, _controller, int max) {
+  Column inputbox(BuildContext context, _controller, int max) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(
           height: 20,
         ),
-        Text(
-          name,
-          style: TextStyle(color: Theme.of(context).colorScheme.surface),
-        ),
-        const SizedBox(
-          height: 5,
-        ),
-        Container(
-          height: 45,
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
-          width: MediaQuery.of(context).size.width,
+        SizedBox(
+          height: 57,
           child: TextField(
+            expands: true,
+            maxLines: null,
             controller: _controller,
             onChanged: (value) {
               if (value.isNotEmpty) {
@@ -953,7 +952,7 @@ class _AnimeDetailsState extends State<AnimeDetails> {
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
               suffixIcon: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
+                padding: const EdgeInsets.symmetric(vertical: 15),
                 child: Text(
                   '/ $max',
                   style:
@@ -961,18 +960,22 @@ class _AnimeDetailsState extends State<AnimeDetails> {
                 ),
               ),
               contentPadding: const EdgeInsets.all(10),
-              fillColor: Theme.of(context).colorScheme.surface,
+              labelText: 'Episode Progress',
               filled: true,
+              fillColor: Theme.of(context).colorScheme.surface,
+              labelStyle:
+                  TextStyle(color: Theme.of(context).colorScheme.primary),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
-                borderSide: BorderSide.none,
+                borderSide:
+                    BorderSide(color: Theme.of(context).colorScheme.primary),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.onPrimaryFixedVariant),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
-                borderSide: BorderSide(
-                  width: 2,
-                  color: Theme.of(context).colorScheme.inversePrimary,
-                ),
+                borderSide:
+                    BorderSide(color: Theme.of(context).colorScheme.primary),
               ),
             ),
           ),
@@ -987,33 +990,76 @@ class _AnimeDetailsState extends State<AnimeDetails> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      backgroundColor: Theme.of(context).colorScheme.inverseSurface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       showDragHandle: true,
       barrierColor: Colors.black87.withOpacity(0.5),
       builder: (context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 15),
         child: SizedBox(
-          height: 240,
+          height: 320,
           child: Column(
             children: [
-              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Text(
-                  "Select server",
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontFamily: "Poppins-Bold",
-                      color: Theme.of(context).colorScheme.inversePrimary),
-                ),
-                const SizedBox(
-                  width: 5,
-                ),
-                Icon(
-                  Ionicons.earth,
-                  color: Theme.of(context).colorScheme.onSecondary,
-                )
-              ]),
+              
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  LiteRollingSwitch(
+                value: !dub,
+                width: 150,
+                textOn: "Sub",
+                textOff: "Dub",
+                textOnColor: Colors.white,
+                colorOn: Theme.of(context).colorScheme.primaryFixedDim,
+                colorOff: Theme.of(context).colorScheme.inversePrimary,
+                iconOn: Icons.closed_caption,
+                iconOff: Icons.mic,
+                animationDuration: const Duration(milliseconds: 300),
+                onChanged: (bool state) {
+                  setState(() {
+                    dub = !dub;
+                  });
+                  log(dub.toString());
+                },
+                onDoubleTap: () => {},
+                onSwipe: () => {},
+                onTap: () => {},
+              ),
+                  LiteRollingSwitch(
+                    value: isScrapper,
+                    width: 150,
+                    textOn: "Scraper",
+                    textOff: "Api",
+                    textOnColor: Colors.white,
+                    colorOn:
+                        Theme.of(context).colorScheme.onSecondaryFixedVariant,
+                    colorOff:
+                        Theme.of(context).colorScheme.onTertiaryFixedVariant,
+                    iconOn: Iconsax.scan,
+                    iconOff: Iconsax.happyemoji,
+                    animationDuration: const Duration(milliseconds: 300),
+                    onChanged: (bool state) {
+                      setState(() {
+                        isScrapper = !isScrapper;
+                      });
+                      log(isScrapper.toString());
+                    },
+                    onDoubleTap: () => {},
+                    onSwipe: () => {},
+                    onTap: () => {},
+                  ),
+                ],
+              ),
               const SizedBox(
-                height: 10,
+                height: 30,
+              ),
+              Text(
+                "Select server",
+                style: TextStyle(
+                    fontSize: 20,
+                    fontFamily: "Poppins-Bold"),
+              ),
+              const SizedBox(
+                height: 20,
               ),
               serverContainer(
                   context, "HD - 1", number, "vidstreaming", setTitle),
@@ -1055,10 +1101,9 @@ class _AnimeDetailsState extends State<AnimeDetails> {
       child: Container(
         height: 50,
         decoration: BoxDecoration(
-          border: Border.all(
-              width: 1, color: Theme.of(context).colorScheme.inverseSurface),
-          color: Theme.of(context).colorScheme.inversePrimary,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(10),
+          border: Border.all(width: 1, color: Theme.of(context).colorScheme.inversePrimary)
         ),
         child: Center(
           child: Text(
