@@ -7,7 +7,6 @@ import 'package:text_scroll/text_scroll.dart';
 
 class Carousel extends StatelessWidget {
   dynamic animeData;
-  final List<String> generes = ["Action", "Adventure", "Fantasy"];
 
   Carousel({super.key, this.animeData});
 
@@ -40,9 +39,9 @@ class Carousel extends StatelessWidget {
               return GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/detailspage', arguments: {
-                    "id": anime['id'],
-                    "image": anime['poster'],
-                    "tagg": anime['id'] + "MainCarousale"
+                    "id": anime['id'] ?? '',
+                    "image": anime['coverImage']['large'] ?? '',
+                    "tagg": (anime['id'] ?? '') + "MainCarousale"
                   });
                 },
                 child: Container(
@@ -63,11 +62,11 @@ class Carousel extends StatelessWidget {
                               height: 280,
                               width: 230,
                               child: Hero(
-                                tag: anime['id'] + "MainCarousale",
+                                tag: "${anime['id']}MainCarousale",
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(10),
                                   child: CachedNetworkImage(
-                                    imageUrl: anime['poster'],
+                                    imageUrl: anime['coverImage']['large'],
                                     fit: BoxFit.cover,
                                     progressIndicatorBuilder:
                                         (context, url, downloadProgress) =>
@@ -86,9 +85,9 @@ class Carousel extends StatelessWidget {
                                 left: 0,
                                 child: Container(
                                   height: 30,
-                                  decoration: const BoxDecoration(
-                                      color: Color.fromARGB(255, 231, 179, 254),
-                                      borderRadius: BorderRadius.only(
+                                  decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      borderRadius: const BorderRadius.only(
                                           bottomRight: Radius.circular(15),
                                           topLeft: Radius.circular(10))),
                                   child: Center(
@@ -96,11 +95,11 @@ class Carousel extends StatelessWidget {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 5),
                                     child: Text(
-                                      anime['type'],
-                                      style: const TextStyle(
+                                      anime['type'] ?? 'N/A',
+                                      style:  TextStyle(
                                           fontSize: 16,
                                           color:
-                                              Color.fromARGB(255, 75, 24, 101),
+                                              Theme.of(context).colorScheme.onPrimaryFixedVariant,
                                           fontFamily: "Poppins-Bold"),
                                     ),
                                   )),
@@ -110,9 +109,9 @@ class Carousel extends StatelessWidget {
                                 right: 0,
                                 child: Container(
                                   height: 30,
-                                  decoration: const BoxDecoration(
-                                      color: Color.fromARGB(255, 231, 179, 254),
-                                      borderRadius: BorderRadius.only(
+                                  decoration: BoxDecoration(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      borderRadius: const BorderRadius.only(
                                           bottomRight: Radius.circular(10),
                                           topLeft: Radius.circular(25))),
                                   child: Padding(
@@ -122,9 +121,9 @@ class Carousel extends StatelessWidget {
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         Text(
-                                          anime?['rating'] != null
-                                              ? (anime['rating'] / 10)
-                                                  .toString()
+                                          anime['averageScore'] != null
+                                              ? (anime['averageScore'] / 10)
+                                                  .toStringAsFixed(1)
                                               : 'N/A',
                                           style: const TextStyle(
                                               fontSize: 16,
@@ -132,11 +131,11 @@ class Carousel extends StatelessWidget {
                                                   255, 75, 24, 101),
                                               fontFamily: "Poppins-Bold"),
                                         ),
-                                        const Icon(
+                                        Icon(
                                           Iconsax.star1,
                                           size: 18,
                                           color:
-                                              Color.fromARGB(255, 75, 24, 101),
+                                              Theme.of(context).colorScheme.onPrimaryFixedVariant,
                                         ),
                                       ],
                                     ),
@@ -146,7 +145,7 @@ class Carousel extends StatelessWidget {
                         ),
                         const SizedBox(height: 15),
                         TextScroll(
-                          anime['name'],
+                          anime['title']['english'] ?? anime['title']['romaji'] ?? 'Unknown',
                           mode: TextScrollMode.bouncing,
                           velocity:
                               const Velocity(pixelsPerSecond: Offset(30, 0)),
@@ -160,7 +159,7 @@ class Carousel extends StatelessWidget {
                         const SizedBox(height: 15),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: (anime?['genres'] as String)
+                          children: anime['genres'] != null ? (anime?['genres'] as String)
                               .split(', ')
                               .take(3)
                               .map((item) {
@@ -187,7 +186,7 @@ class Carousel extends StatelessWidget {
                                 ),
                               ),
                             );
-                          }).toList(),
+                          }).toList() : []
                         ),
                         const SizedBox(height: 10),
                         Container(
