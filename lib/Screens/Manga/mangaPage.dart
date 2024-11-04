@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:daizy_tv/backupData/manga.dart';
+import 'package:daizy_tv/auth/auth_provider.dart';
+import 'package:daizy_tv/backupData/anilist_manga.dart';
+import 'package:daizy_tv/components/Anime/carousel.dart';
+import 'package:daizy_tv/components/Anime/reusableList.dart';
 import 'package:daizy_tv/components/Manga/mangaCarousale.dart';
 import 'package:daizy_tv/components/Manga/mangaReusableCarousale.dart';
 import 'package:flutter/material.dart';
@@ -9,39 +12,39 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:daizy_tv/components/Common/Header.dart';
 import 'package:iconsax/iconsax.dart';
-
+import 'package:provider/provider.dart';
 
 class Mangapage extends StatefulWidget {
   const Mangapage({super.key});
 
   @override
-  State<Mangapage> createState() => _HomepageState();
+  State<Mangapage> createState() => _MangapageState();
 }
 
-class _HomepageState extends State<Mangapage> {
-    dynamic manga_Data;
-    dynamic mangaList1;
-    dynamic mangaList2;
-    dynamic mangaList3;
+class _MangapageState extends State<Mangapage> {
+  dynamic mangaData;
+  dynamic trendingManga;
+  dynamic latestManga;
+  dynamic topOngoing;
 
   @override
   void initState() {
     super.initState();
     backUpData();
-    fetchData();
   }
 
   void backUpData() {
-    manga_Data = mangaData['mangaList'];
-    mangaList1 = manga_Data!.sublist(0, 8);
-    mangaList2 = manga_Data!.sublist(8, 16);
-    mangaList3 = manga_Data!.sublist(16, 24);
+    setState(() {
+    mangaData = fallbackMangaData['data']['popularMangas']['media'];
+    trendingManga = fallbackMangaData['data']['trendingManga']['media'];
+    latestManga = fallbackMangaData['data']['latestMangas']['media'];
+    topOngoing = fallbackMangaData['data']['topOngoing']['media'];
+    });
+    
   }
 
-
-
   Future<void> fetchData() async {
-     String url =
+    String url =
         'https://anymey-proxy.vercel.app/cors?url=${dotenv.get("KAKALOT_URL")}api/mangalist';
 
     try {
@@ -49,11 +52,11 @@ class _HomepageState extends State<Mangapage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          manga_Data = data['mangaList'];
-          if (manga_Data != null && manga_Data!.length == 24) {
-            mangaList1 = manga_Data!.sublist(0, 8);
-            mangaList2 = manga_Data!.sublist(8, 16);
-            mangaList3 = manga_Data!.sublist(16, 24);
+          mangaData = data['mangaList'];
+          if (mangaData != null && mangaData!.length == 24) {
+            trendingManga = mangaData!.sublist(0, 8);
+            latestManga = mangaData!.sublist(8, 16);
+            topOngoing = mangaData!.sublist(16, 24);
           } else {
             throw Exception('Data is not found');
           }
@@ -68,62 +71,81 @@ class _HomepageState extends State<Mangapage> {
 
   @override
   Widget build(BuildContext context) {
-    if(mangaData == null){
-      return const Center(child: CircularProgressIndicator());
-    }
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: ListView(
-          children: [
-            const Header(name: "Manga",),
-            const SizedBox(
-              height: 20,
-            ),
-             Padding(
-             padding: const EdgeInsets.symmetric(horizontal: 10),
-             child: SizedBox(
-              height: 50,
-               child: TextField(
-                onSubmitted: (String value) {
-                    Navigator.pushNamed(
-                      context,
-                      '/searchManga',
-                      arguments: {"name": value},
-                    );
-                  },
-                  decoration: InputDecoration(
-                     prefixIcon: const Icon(Iconsax.search_normal),
-                      hintText: 'Search Manga',
-                      focusedBorder:  OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide(color: Theme.of(context).colorScheme.primary)),
-                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
-                      fillColor: Theme.of(context).colorScheme.surfaceContainer,
-                      filled: true,
+        child:
+         Consumer<AniListProvider>(
+          builder: (context, provider, child) {
+            mangaData = provider.mangalistData['trending'] ?? mangaData;
+            trendingManga = provider.mangalistData['popular'] ?? trendingManga;
+            latestManga = provider.mangalistData['completed'] ?? latestManga;
+            topOngoing = provider.mangalistData['latest'] ?? topOngoing;
+
+           return  ListView(
+              children: [
+                const Header(name: "Manga"),
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: SizedBox(
+                    height: 50,
+                    child: TextField(
+                      onSubmitted: (String value) {
+                        Navigator.pushNamed(
+                          context,
+                          '/searchManga',
+                          arguments: {"name": value},
+                        );
+                      },
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Iconsax.search_normal),
+                        hintText: 'Search Manga',
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide.none,
+                        ),
+                        fillColor:
+                            Theme.of(context).colorScheme.surfaceContainer,
+                        filled: true,
                       ),
+                    ),
+                  ),
                 ),
-             ),
-           ),
-            const SizedBox(
-              height: 30.0,
-            ),
-            Mangacarousale(
-              mangaData: manga_Data,
-            ),
-            const SizedBox(
-              height: 30.0,
-            ),
-            Mangareusablecarousale(name: 'Popular', data: mangaList1, taggName: "Carosale1",),
-            const SizedBox(
-              height: 10,
-            ),
-            Mangareusablecarousale(name: 'Latest Manga', data: mangaList2, taggName: "Carosale2"),
-            const SizedBox(
-              height: 10,
-            ),
-            Mangareusablecarousale(name: 'Trending Mnaga', data: mangaList3, taggName: "Carosale3"),
-          ],
-        ),
+                const SizedBox(height: 30.0),
+                Mangacarousale(mangaData: mangaData,),
+                const SizedBox(height: 30.0),
+                ReusableList(
+                  name: 'Popular',
+                  data: trendingManga,
+                  taggName: "Carosale1",
+                  route: '/mangaDetail',
+                ),
+                const SizedBox(height: 10),
+                ReusableList(
+                  name: 'Latest Manga',
+                  data: latestManga,
+                  taggName: "Carosale2",
+                  route: '/mangaDetail',
+                ),
+                const SizedBox(height: 10),
+                ReusableList(
+                  name: 'Trending Manga',
+                  data: topOngoing,
+                  taggName: "Carosale3",
+                  route: '/mangaDetail',
+                ),
+              ],
+            );
+          }
+         )
       ),
     );
   }
