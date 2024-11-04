@@ -1,4 +1,4 @@
-import 'package:cached_network_image/cached_network_image.dart';
+
 import 'package:daizy_tv/components/Anime/anime_item.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -8,9 +8,10 @@ class ReusableList extends StatelessWidget {
   dynamic data;
   final String? name;
   final String? taggName;
+  final String route;
 
   ReusableList(
-      {super.key, this.data, required this.name, required this.taggName});
+      {super.key, this.data, required this.name, required this.taggName,required this.route});
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +55,7 @@ class ReusableList extends StatelessWidget {
               itemCount: data!.length,
               itemBuilder: (context, index) {
                 final tagg = data[index]['id'].toString() + taggName! + index.toString();
-                return AnimeItem(id: data[index]['id'].toString(), poster: data[index]['poster'], type: data[index]['type'], name: data[index]['name'], rating: data[index]['rating'], tagg: tagg, status: data[index]['status'],);
+                return ItemCard(id: data[index]['id'].toString(), poster: data[index]['coverImage']['large'], type: data[index]['type'] ?? '', name: data[index]['title']['english'] ?? data[index]['title']['native'] ?? data[index]['title']['romaji'] ?? "Unknown", rating: data[index]['averageScore'] ?? 0, tagg: tagg, status: data[index]['status'], route: route,);
               },
             ),
           ),
