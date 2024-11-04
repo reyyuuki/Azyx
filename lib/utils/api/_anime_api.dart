@@ -9,7 +9,7 @@ var box = Hive.box("app-data");
 bool isConsumet = box.get("isConsumet", defaultValue: false);
 String proxy = dotenv.get("PROXY_URL");
 String aniwatchUrl = dotenv.get("HIANIME_URL");
-String consumetUrl = dotenv.get("CONSUMET_URL");
+String consumetUrl = "${dotenv.get('CONSUMET_URL')}meta/anilist/";
 
 Future<dynamic> fetchHomePageData() async {
   try {
@@ -62,8 +62,9 @@ Future<dynamic> fetchAnimeDetailsAniwatch(String id) async {
 
 Future<dynamic>? fetchSearchesAniwatch(String id) async {}
 Future<dynamic>? fetchSearchesConsumet(String id) async {}
-Future<dynamic>? fetchStreamingDataConsumet(String id) async {
-  final resp = await http.get(Uri.parse('$proxy${consumetUrl}episodes/$id'));
+Future<dynamic>? fetchStreamingDataConsumet(int id) async {
+  final resp = await http.get(Uri.parse('${consumetUrl}episodes/$id'));
+  log('${consumetUrl}episodes/$id');
   if (resp.statusCode == 200) {
     final tempData = jsonDecode(resp.body);
     return tempData;
@@ -83,11 +84,9 @@ Future<dynamic> fetchStreamingLinksAniwatch(
   try {
     final url =
         '${aniwatchUrl}anime/episode-srcs?id=$id?server=$server&category=$category';
-        log('${aniwatchUrl}anime/episode-srcs?id=$id?server=$server&category=$category');
     final resp = await http.get(Uri.parse(url));
     if (resp.statusCode == 200) {
       final tempData = jsonDecode(resp.body);
-      log('done');
       return tempData;
     } else {
       return null;
