@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 
 typedef ButtonTapCallback = void Function(String? index);
@@ -9,8 +11,10 @@ class Sliderbar extends StatefulWidget {
   final int? totalImages;
   final ScrollController scrollController;
   final ButtonTapCallback handleChapter;
+  bool isNext;
+  bool isPrev;
 
-  const Sliderbar({
+   Sliderbar({
     super.key,
     required this.child,
     required this.title,
@@ -18,6 +22,8 @@ class Sliderbar extends StatefulWidget {
     required this.totalImages,
     required this.scrollController,
     required this.handleChapter,
+    required this.isNext,
+    required this.isPrev
   });
 
   @override
@@ -84,14 +90,14 @@ class _SlidebarState extends State<Sliderbar> {
               child: Container(
                 height: 60,
                 padding: const EdgeInsets.symmetric(horizontal: 5),
-                color: Theme.of(context).colorScheme.tertiary.withOpacity(0.9),
+                color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
                 child: Row(
                   children: [
                     IconButton(
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).colorScheme.surface,),
+                      icon: Icon(Icons.arrow_back_ios),
                     ),
                     const SizedBox(width: 10),
                     Column(
@@ -100,10 +106,10 @@ class _SlidebarState extends State<Sliderbar> {
                       children: [
                         Text(widget.title!,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 16,  color: Theme.of(context).colorScheme.surface,)),
+                            style: TextStyle(fontSize: 16,)),
                         const SizedBox(height: 3),
                         Text(widget.chapter!,
-                            style: TextStyle(fontSize: 12,  color: Theme.of(context).colorScheme.surface,)),
+                            style: TextStyle(fontSize: 12,)),
                       ],
                     ),
                   ],
@@ -125,10 +131,10 @@ class _SlidebarState extends State<Sliderbar> {
                         Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(30),
-                            color: Theme.of(context).colorScheme.tertiary,
+                            color: widget.isPrev ? Theme.of(context).colorScheme.surface.withOpacity(0.5) : Colors.white.withOpacity(0.5),
                           ),
                           child: IconButton(
-                            icon: Icon(Icons.skip_previous, color: Theme.of(context).colorScheme.surface,),
+                            icon: Icon(Icons.skip_previous, color: widget.isPrev ? Theme.of(context).colorScheme.primary : Colors.white.withOpacity(0.5),),
                             onPressed: () {
                               widget.handleChapter('left');
                             },
@@ -141,11 +147,11 @@ class _SlidebarState extends State<Sliderbar> {
                               borderRadius: BorderRadius.circular(30),
                               color: Theme.of(context)
                                   .colorScheme
-                                  .tertiary
-                                  .withOpacity(0.8),
+                                  .surface
+                                  .withOpacity(0.5),
                             ),
                             child: Slider(
-                              thumbColor: Theme.of(context).colorScheme.inversePrimary,
+                              thumbColor: Theme.of(context).colorScheme.primary,
                               value: _scrollProgress,
                               onChanged: (value) {
                                 setState(() {
@@ -153,10 +159,10 @@ class _SlidebarState extends State<Sliderbar> {
                                 });
                                 _onProgressBarTap(value);
                               },
-                              activeColor: Theme.of(context).colorScheme.inversePrimary,
+                              activeColor: Theme.of(context).colorScheme.primary,
                               inactiveColor: Theme.of(context)
                                   .colorScheme
-                                  .surface
+                                  .surfaceContainerHighest
                                   .withOpacity(0.5),
                             ),
                           ),
@@ -165,10 +171,10 @@ class _SlidebarState extends State<Sliderbar> {
                         Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(30),
-                            color: Theme.of(context).colorScheme.tertiary,
+                            color: widget.isNext ? Theme.of(context).colorScheme.surface.withOpacity(0.5) : Colors.white.withOpacity(0.5),
                           ),
                           child: IconButton(
-                            icon: Icon(Icons.skip_next, color: Theme.of(context).colorScheme.surface,),
+                            icon: Icon(Icons.skip_next, color: widget.isNext ? Theme.of(context).colorScheme.primary :  Colors.white.withOpacity(0.5),),
                             onPressed: () {
                               widget.handleChapter('right');
                             },

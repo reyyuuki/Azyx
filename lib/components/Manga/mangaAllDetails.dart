@@ -32,7 +32,7 @@ class Mangaalldetails extends StatelessWidget {
             child: TextScroll(
               mangaData == null
                   ? "Loading"
-                  : mangaData['name'].toString(),
+                  : mangaData['name'],
               mode: TextScrollMode.bouncing,
               velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
               delayBefore: const Duration(milliseconds: 500),
@@ -70,8 +70,9 @@ class Mangaalldetails extends StatelessWidget {
           ),
           MangaInfo(mangaData: mangaData,),
           const SizedBox(
-            height: 30,
+            height: 10,
           ),
+          Text(mangaData['description'].length > 380 ? '${mangaData['description'].substring(0,380)}...' : mangaData['description'], style: const TextStyle(fontStyle: FontStyle.italic, color: Color.fromARGB(232, 165, 159, 159)),),
         ],
       ),
     );
