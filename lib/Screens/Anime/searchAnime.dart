@@ -71,6 +71,7 @@ class _SearchpageState extends State<SearchAnime> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 45),
           Row(
@@ -94,7 +95,9 @@ class _SearchpageState extends State<SearchAnime> {
                   },
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Iconsax.search_normal),
+                    labelText: "Search Anime",
                     hintText: 'Search Anime',
+                    labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
                       borderSide: BorderSide(
@@ -102,10 +105,20 @@ class _SearchpageState extends State<SearchAnime> {
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide.none,
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 1
+                      )
+                    ),
+                    disabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.inversePrimary,
+                        width: 5
+                      )
                     ),
                     fillColor:
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                        Theme.of(context).colorScheme.surface,
                     filled: true,
                   ),
                 ),
@@ -161,7 +174,7 @@ class _SearchpageState extends State<SearchAnime> {
           
           Expanded(
             child: isGrid
-              ? GridList(data: data)
+              ? GridList(data: data,route: '/detailspage',)
               : SearchList(data: data),
           ),
         ],
