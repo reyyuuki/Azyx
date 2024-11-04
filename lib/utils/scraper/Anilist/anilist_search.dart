@@ -56,7 +56,7 @@ Future<List<Map<String, dynamic>>> searchAnilistAnime(String query) async {
               "Unkown Anime",
           'poster': anime['coverImage']['large'],
           'cover': anime['bannerImage'],
-          'averageScore': anime?['averageScore'] != null ? (anime?['averageScore'] / 10).toString() : "N/A",
+          'averageScore': anime['averageScore'],
           'episodes': anime['episodes'].toString(),
           'season': anime['season'],
           'seasonYear': anime['seasonYear'],
