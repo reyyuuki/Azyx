@@ -1,9 +1,9 @@
 
-import 'package:daizy_tv/utils/scraper/Manga/Manga_Sources/extract_class.dart';
-import 'package:daizy_tv/utils/scraper/Manga/Manga_Sources/mangaKakalot.dart';
-import 'package:daizy_tv/utils/scraper/Manga/Manga_Sources/manga_bat.dart';
-import 'package:daizy_tv/utils/scraper/Manga/Manga_Sources/manga_nato.dart';
-import 'package:daizy_tv/utils/scraper/Manga/Manga_Sources/mangakakalot_unofficial.dart';
+import 'package:daizy_tv/utils/scraper/Manga/Manga_Extenstions/extract_class.dart';
+import 'package:daizy_tv/utils/scraper/Manga/Manga_Extenstions/mangaKakalot.dart';
+import 'package:daizy_tv/utils/scraper/Manga/Manga_Extenstions/manga_bat.dart';
+import 'package:daizy_tv/utils/scraper/Manga/Manga_Extenstions/manga_nato.dart';
+import 'package:daizy_tv/utils/scraper/Manga/Manga_Extenstions/mangakakalot_unofficial.dart';
 import 'package:flutter/material.dart';
 
  class MangaSourcesProvider with ChangeNotifier {

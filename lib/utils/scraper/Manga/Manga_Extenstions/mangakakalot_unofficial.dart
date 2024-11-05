@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:daizy_tv/utils/scraper/Manga/Manga_Sources/extract_class.dart';
+import 'package:daizy_tv/utils/scraper/Manga/Manga_Extenstions/extract_class.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;

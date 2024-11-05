@@ -62,8 +62,7 @@ Future<Map<String, dynamic>?> searchMostSimilarManga(
     log("Manga List: ${mangaList.toString()}");
 
     for (var manga in mangaList) {
-      try {
-        log("Processing manga item: ${manga.toString()}");
+      
 
         // Check that `manga` is a Map with the expected keys and types
         if (manga is Map<String, dynamic> &&
@@ -76,11 +75,6 @@ Future<Map<String, dynamic>?> searchMostSimilarManga(
           final id = manga['id'] as String;
 
           log("Manga title: $title, Manga ID: $id");
-
-          if (title.isEmpty) {
-            log("Warning: Title is empty for manga item: ${manga.toString()}");
-            continue;
-          }
 
           final similarity = jaroWinklerDistance(query, title);
 
@@ -96,12 +90,10 @@ Future<Map<String, dynamic>?> searchMostSimilarManga(
         } else {
           log("Error: Manga item does not have the expected structure or types: ${manga.toString()}");
         }
-      } catch (e) {
-        log("Error processing manga item: ${manga.toString()}, Error: $e");
-      }
     }
 
     log("Most similar manga found: ${mostSimilarManga.toString()}");
+    
     return mostSimilarManga;
 
   } catch (e, stackTrace) {
