@@ -753,9 +753,8 @@ class _AnimeDetailsState extends State<AnimeDetails> {
                                   final item = filteredEpisodes![index];
                                   final title = item['title'];
                                   final episodeNumber = item['number'];
-                                  const proxy = "https://goodproxy.goodproxy.workers.dev/fetch?url=";
-                                  final image = proxy +
-                                      consumetEpisodesList[index]['image'];
+                                  final image = 
+                                      "https://goodproxy.goodproxy.workers.dev/fetch?url=${consumetEpisodesList[index]['image']}";
                                   return GestureDetector(
                                     onTap: () {
                                       displayBottomSheet(
@@ -786,10 +785,8 @@ class _AnimeDetailsState extends State<AnimeDetails> {
                                                     .horizontal(
                                                     left: Radius.circular(10)),
                                                 child: CachedNetworkImage(
-                                                  imageUrl: image.isNotEmpty
-                                                      ? image
-                                                      : widget
-                                                          .animeData['image'],
+                                                  imageUrl:widget
+                                                          .animeData['poster'],
                                                   fit: BoxFit.cover,
                                                 )),
                                           ),
