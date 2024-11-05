@@ -23,7 +23,9 @@ import 'package:daizy_tv/Screens/Home/_homepage.dart';
 import 'package:daizy_tv/Screens/Manga/mangaPage.dart';
 import 'package:daizy_tv/Screens/Anime/animePage.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
@@ -34,13 +36,17 @@ void main() async {
   await Hive.openBox('mybox');
   await Hive.openBox("app-data");
   await dotenv.load(fileName: ".env");
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(systemNavigationBarColor: Colors.transparent));
 
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => Data()),
       ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ChangeNotifierProvider(create: (_) => AniListProvider()..tryAutoLogin()),
-      ChangeNotifierProvider(create: (_) => MangaSourcesProvider()..allMangaSources())
+      ChangeNotifierProvider(
+          create: (_) => MangaSourcesProvider()..allMangaSources())
     ],
     child: const MainApp(),
   ));
@@ -65,7 +71,6 @@ class _MainAppState extends State<MainApp> {
       onGenerateRoute: (settings) {
         final args = settings.arguments as Map<String, dynamic>?;
         switch (settings.name) {
-       
           // Anime - Routes
           case '/detailspage':
             final id = args?['id'] ?? '';
@@ -76,19 +81,19 @@ class _MainAppState extends State<MainApp> {
             );
 
           case '/stream':
-  return MaterialPageRoute(
-    builder: (context) => WatchPage(
-      episodeSrc: args!['episodeSrc'], 
-      episodeData: args['episodeData'], 
-      currentEpisode: args['currentEpisode'], 
-      episodeTitle: args['episodeTitle'], 
-      subtitleTracks: args['subtitleTracks'], 
-      animeTitle: args['animeTitle'], 
-      activeServer: args['activeServer'], 
-      isDub: args['isDub'],
-      animeId: int.parse(args['animeId']) ,
-    ),
-  );
+            return MaterialPageRoute(
+              builder: (context) => WatchPage(
+                episodeSrc: args!['episodeSrc'],
+                episodeData: args['episodeData'],
+                currentEpisode: args['currentEpisode'],
+                episodeTitle: args['episodeTitle'],
+                subtitleTracks: args['subtitleTracks'],
+                animeTitle: args['animeTitle'],
+                activeServer: args['activeServer'],
+                isDub: args['isDub'],
+                animeId: int.parse(args['animeId']),
+              ),
+            );
 
           case '/searchAnime':
             final name = args?['name'] ?? '';
@@ -111,8 +116,11 @@ class _MainAppState extends State<MainApp> {
             final chapterLink = args?['chapterLink'] ?? '';
             final image = args?['image'] ?? '';
             return MaterialPageRoute(
-              builder: (context) =>
-                  Read(mangaId: mangaId, chapterLink: chapterLink, image: image,),
+              builder: (context) => Read(
+                mangaId: mangaId,
+                chapterLink: chapterLink,
+                image: image,
+              ),
             );
 
           case '/searchManga':
@@ -139,13 +147,12 @@ class _MainAppState extends State<MainApp> {
           case './about':
             return MaterialPageRoute(builder: (context) => const About());
 
-
-          //Lists 
-          case './animelist': 
+          //Lists
+          case './animelist':
             return MaterialPageRoute(builder: (context) => const Animelist());
           case './mangalist':
             return MaterialPageRoute(builder: (context) => const Mangalist());
-            
+
           default:
             return MaterialPageRoute(
               builder: (context) => const Scaffold(
@@ -179,70 +186,65 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      extendBodyBehindAppBar: true,
       body: _pages[_selectedIndex],
       bottomNavigationBar: Container(
-        height: 60,
-        margin: const EdgeInsets.only(bottom: 40),
-        child: Center(
-          child: SizedBox(
-            width: 230,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(30),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                    decoration: BoxDecoration(
-                       // Glass-like transparency
-                      borderRadius: BorderRadius.circular(230),
-                      border: Border.all(width: 1, color: Theme.of(context).colorScheme.inverseSurface
-                          .withOpacity(0.4),)
-                    ),
-                    child: FlashyTabBar(
-                      selectedIndex: _selectedIndex,
-                      showElevation: true,
-                      onItemSelected: (index) => setState(() {
-                        _selectedIndex = index;
-                      }),
-                      backgroundColor: Colors.transparent,
-                      items: [
-                        FlashyTabBarItem(
-                          icon: _selectedIndex == 0
-                              ? const SizedBox.shrink()
-                              : const Icon(Icons.movie),
-                          title: const Text(
-                            'Anime',
-                            style: TextStyle(fontFamily: "Poppins-Bold"),
-                          ),
-                          activeColor: Colors.white,
-                          inactiveColor: Theme.of(context).colorScheme.primary,
-                        ),
-                        FlashyTabBarItem(
-                          icon: _selectedIndex == 1
-                              ? const SizedBox.shrink()
-                              : const Icon(Iconsax.home_15),
-                          title: const Text(
-                            'Home',
-                            style: TextStyle(fontFamily: "Poppins-Bold"),
-                          ),
-                          activeColor: Colors.white,
-                          inactiveColor: Theme.of(context).colorScheme.primary,
-                        ),
-                        FlashyTabBarItem(
-                          icon: _selectedIndex == 2
-                              ? const SizedBox.shrink()
-                              : const Icon(Icons.book),
-                          title: const Text(
-                            'Manga',
-                            style: TextStyle(fontFamily: "Poppins-Bold"),
-                          ),
-                          activeColor: Colors.white,
-                          inactiveColor: Theme.of(context).colorScheme.primary,
-                        ),
-                      ],
-                    )),
+        margin: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(50),
+            color: Colors.black.withOpacity(0.2),
+            border: Border.all(
+                color: Theme.of(context).colorScheme.inverseSurface, width: 2)),
+        clipBehavior: Clip.antiAlias,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: GNav(
+            selectedIndex: _selectedIndex,
+            onTabChange: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            tabMargin: const EdgeInsets.symmetric(horizontal:  10),
+            backgroundColor: Colors.transparent,
+            tabs: [
+              GButton(
+                padding: const EdgeInsets.all(10),
+                gap: 7,
+                icon: Icons.movie,
+                text: 'Anime',
+                backgroundColor:
+                    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.6),
+                rippleColor:
+                    Theme.of(context).colorScheme.primary.withOpacity(0.4),
+                iconActiveColor: Theme.of(context).colorScheme.primary,
+                iconColor: Theme.of(context).colorScheme.primary,
               ),
-            ),
+              GButton(
+                padding: const EdgeInsets.all(10),
+                margin: const EdgeInsets.symmetric(vertical: 10),
+                backgroundColor:
+                    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.6),
+                gap: 7,
+                icon: Iconsax.home_15,
+                text: 'Home',
+                rippleColor:
+                    Theme.of(context).colorScheme.primary.withOpacity(0.4),
+                iconColor: Theme.of(context).colorScheme.primary,
+                iconActiveColor: Theme.of(context).colorScheme.primary,
+              ),
+              GButton(
+                 padding: const EdgeInsets.all(10),
+                backgroundColor:
+                    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.6),
+                gap: 7,
+                icon: Icons.book_rounded,
+                text: 'Home',
+                iconColor: Theme.of(context).colorScheme.primary,
+                rippleColor:
+                    Theme.of(context).colorScheme.primary.withOpacity(0.4),
+                iconActiveColor: Theme.of(context).colorScheme.primary,
+              ),
+            ],
           ),
         ),
       ),
