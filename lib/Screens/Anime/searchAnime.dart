@@ -114,7 +114,7 @@ class _SearchpageState extends State<SearchAnime> {
                       borderRadius: BorderRadius.circular(20),
                       borderSide: BorderSide(
                         color: Theme.of(context).colorScheme.inversePrimary,
-                        width: 5
+                        width: 1
                       )
                     ),
                     fillColor:

@@ -1,4 +1,4 @@
-// ignore_for_file: file_names
+// ignore_for_file: file_names, prefer_const_constructors
 
 import 'dart:developer';
 
@@ -12,11 +12,9 @@ import 'package:daizy_tv/components/Manga/mangaAllDetails.dart';
 import 'package:daizy_tv/components/Manga/chapterList.dart';
 import 'package:daizy_tv/utils/api/Anilist/Manga/manga_details_anilist.dart';
 import 'package:daizy_tv/utils/helper/jaro_winkler.dart';
-import 'package:daizy_tv/utils/scraper/Anilist/anilist_add.dart';
-import 'package:daizy_tv/utils/scraper/Manga/Manga_Sources/extract_class.dart';
+import 'package:daizy_tv/utils/scraper/Manga/Manga_Extenstions/extract_class.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:text_scroll/text_scroll.dart';
 
@@ -34,6 +32,7 @@ class Mangadetails extends StatefulWidget {
 
 class _DetailsState extends State<Mangadetails> {
   dynamic mangaData;
+  dynamic wrongTitleSearchData;
   String? mappedId;
   List<Map<String, dynamic>>? chapterList;
   List<Map<String, dynamic>>? filteredChapterList;
@@ -41,6 +40,7 @@ class _DetailsState extends State<Mangadetails> {
   String? cover;
   bool loading = true;
   TextEditingController? _controller;
+  late String searchTerm;
   ExtractClass? mangaScarapper;
   List<ExtractClass>? sources;
 
@@ -114,6 +114,20 @@ class _DetailsState extends State<Mangadetails> {
     }
   }
 
+Future<void> wrongTitleSearch(String name) async {
+  try{
+    final response = await mangaScarapper!.fetchSearchsManga(name);
+    if(response.toString().isNotEmpty){
+      setState(() {
+        wrongTitleSearchData = response['mangaList'];
+      });
+      log(response['mangaList'].toString());
+    }
+  }catch(e){
+    log(e.toString());
+  }
+}
+
   Future<void> scrap() async {
     final data = await getMangaDetails(widget.id);
     final provider = Provider.of<MangaSourcesProvider>(context, listen: false);
@@ -127,6 +141,83 @@ class _DetailsState extends State<Mangadetails> {
       });
       test();
     }
+  }
+  void wrongTitle( BuildContext context){
+     TextEditingController wrongTittle = TextEditingController();
+  wrongTittle.text = mangaData['name']; 
+  wrongTitleSearch(mangaData['name']);
+    showModalBottomSheet(
+       context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      barrierColor: Colors.black87.withOpacity(0.5),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+    backgroundColor: Theme.of(context).colorScheme.surface,
+     builder: (context) {
+      return StatefulBuilder(builder: (context, setState) {
+        return  Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SizedBox(
+            height: 400,
+            child: Column(children: [
+              TextField(
+                onSubmitted: (value){
+                
+                  wrongTitleSearch(value);
+                },
+                controller: wrongTittle,
+                decoration: InputDecoration(
+                  labelText: "Search here",
+                  prefixIcon: Icon(Iconsax.search_normal),
+                  isDense: true,
+                  enabledBorder: OutlineInputBorder(borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                  ), borderRadius: BorderRadius.circular(20)),
+                  focusedBorder: OutlineInputBorder(borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                  ), borderRadius: BorderRadius.circular(20)),
+                  
+                ),
+              ),
+              const SizedBox(height: 30,),
+              SizedBox(
+                height: 280,
+                child: wrongTitleSearchData == null ? const Center(child: CircularProgressIndicator(),) : ListView.builder(
+                  itemCount:  wrongTitleSearchData.length,
+                  itemBuilder: (context, index) {
+                    final title = wrongTitleSearchData[index]['title'];
+                    return Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: Container(
+                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),
+                        border: Border.all(color: Theme.of(context).colorScheme.primary)
+                        ),
+                        height: 90,
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              height: 90,
+                              width: 140,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.horizontal(left: Radius.circular(5)),
+                                child: CachedNetworkImage(imageUrl: wrongTitleSearchData[index]['image'], fit: BoxFit.cover, alignment: Alignment.topCenter,),
+                              ),
+                            ),
+                            const SizedBox(width: 15,),
+                            Text(title.length > 25 ? '${title.substring(0,25)}...' : title)
+                          ],
+                        ),
+                      ),
+                    );
+                }),
+              )
+            ],),
+          ),
+        );
+      });
+    });
   }
 
   @override
@@ -155,7 +246,7 @@ class _DetailsState extends State<Mangadetails> {
           return "Planning to Read";
         case 'REPEATING':
           return "Repeating";
-          default:
+        default:
           return "Unkown";
       }
     }
@@ -460,14 +551,30 @@ class _DetailsState extends State<Mangadetails> {
                       style:
                           TextStyle(fontFamily: "Poppins-Bold", fontSize: 22),
                     ),
-                    IconButton(
-                        onPressed: () {
-                          setState(() {
-                            filteredChapterList =
-                                filteredChapterList?.reversed.toList();
-                          });
-                        },
-                        icon: const Icon(Iconsax.refresh)),
+                    Row(
+                      children: [
+                        IconButton(
+                            onPressed: () {
+                              setState(() {
+                                filteredChapterList =
+                                    filteredChapterList?.reversed.toList();
+                              });
+                            },
+                            icon: const Icon(Iconsax.refresh)),
+                        GestureDetector(
+                          onTap: () {
+                            wrongTitle(context);
+                          },
+                          child: Text(
+                            "Wrong title?",
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontFamily: "Poppins-Bold",
+                                color: Theme.of(context).colorScheme.primary,),
+                          ),
+                        )
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -495,6 +602,7 @@ class _DetailsState extends State<Mangadetails> {
       ),
     );
   }
+
 
   void addToList(BuildContext context) {
     showModalBottomSheet(
@@ -669,8 +777,8 @@ class _DetailsState extends State<Mangadetails> {
                               }
                             },
                           ),
-                          inputbox(context,
-                              _episodeController, filteredChapterList!.length),
+                          inputbox(context, _episodeController,
+                              filteredChapterList!.length),
                           const SizedBox(height: 30),
                           saveAnime(localSelectedValue, context),
                         ],
@@ -727,7 +835,8 @@ class _DetailsState extends State<Mangadetails> {
               filled: true,
               isDense: true,
               fillColor: Theme.of(context).colorScheme.surface,
-              labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
+              labelStyle:
+                  TextStyle(color: Theme.of(context).colorScheme.primary),
               border: OutlineInputBorder(
                 borderSide:
                     BorderSide(color: Theme.of(context).colorScheme.primary),
