@@ -49,6 +49,7 @@ class MangakakalotUnofficial implements ExtractClass {
         final metaData = {
           'chapterList': chapters,
         };
+        // log(metaData.toString());
         return metaData;
       } else {
         log('Failed to load manga details, status code: ${response.statusCode}');
@@ -109,7 +110,8 @@ class MangakakalotUnofficial implements ExtractClass {
           'images': images,
           'totalImages': index,
           'nextChapter': nextChapter,
-          'previousChapter': previousChapter
+          'previousChapter': previousChapter,
+          'link': link,
         };
 
       //  log(assets.toString());

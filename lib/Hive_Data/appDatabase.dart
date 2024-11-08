@@ -48,7 +48,6 @@ class Data extends ChangeNotifier {
     animeWatches!.removeWhere((anime) => anime['animeId'] == animeId);
     animeWatches!.add(newAnime);
 
-
     var box = Hive.box("app-data");
     box.put("currently-Watching", animeWatches);
     log("Updated anime watches: $animeWatches");
@@ -87,7 +86,7 @@ class Data extends ChangeNotifier {
   }
 
   Map<String, dynamic>? getAnimeById(String animeId) {
-     return animeWatches?.firstWhere(
+    return animeWatches?.firstWhere(
       (anime) => anime['animeId'] == animeId,
       orElse: () => {},
     );
@@ -109,6 +108,7 @@ class Data extends ChangeNotifier {
   String? getCurrentChapterForManga(String mangaId) {
     final manga = getMangaById(mangaId);
     log('Manga fetched for current chapter: $manga');
-    return manga?['currentChapter'] ?? 'chapter 1';
+    return manga?['currentChapter'];
   }
+
 }

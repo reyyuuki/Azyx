@@ -59,8 +59,7 @@ Future<Map<String, dynamic>?> searchMostSimilarManga(
     Map<String, dynamic>? mostSimilarManga;
     double highestSimilarity = 0.0;
 
-    log("Manga List: ${mangaList.toString()}");
-
+   
     for (var manga in mangaList) {
       
 
@@ -74,7 +73,6 @@ Future<Map<String, dynamic>?> searchMostSimilarManga(
           final title = manga['title'] as String;
           final id = manga['id'] as String;
 
-          log("Manga title: $title, Manga ID: $id");
 
           final similarity = jaroWinklerDistance(query, title);
 

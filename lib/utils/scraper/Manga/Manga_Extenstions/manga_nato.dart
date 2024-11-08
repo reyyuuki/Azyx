@@ -90,7 +90,8 @@ class MangaNato implements ExtractClass {
           'images': images,
           'totalImages': index,
           'nextChapter': nextChapter,
-          'previousChapter': previousChapter
+          'previousChapter': previousChapter,
+          'link': link,
         };
         log(assets.toString());
         return assets;

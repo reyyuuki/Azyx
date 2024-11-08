@@ -8,25 +8,17 @@ import 'package:provider/provider.dart';
 import 'package:text_scroll/text_scroll.dart';
 
 class Mangafloater extends StatelessWidget {
-final List<dynamic> chapterList;
 final String? id;
 final String? image;
 final String? title;
 
-  const Mangafloater({super.key,required this.chapterList,required this.id, this.image, this.title});
+  const Mangafloater({super.key,required this.id, this.image, this.title});
 
   @override
   Widget build(BuildContext context) {    
      final provider = Provider.of<Data>(context);
     final currentChapter =
         provider.getCurrentChapterForManga(id!) ?? 'chapter-1';
-    final currentChapterList = chapterList
-        .where((chapter) => chapter['title'] == currentChapter)
-        .toList();
-    final currentChapterId = currentChapterList.isNotEmpty
-        ? currentChapterList.first['id']
-        : 'chapter-1';
-        log(currentChapterId);
 
     return Positioned(
           bottom: 0,
@@ -81,7 +73,7 @@ final String? title;
                       ElevatedButton(
                         onPressed: () {
                           Navigator.pushNamed(context, '/read',
-                              arguments: {"mangaId": id, "chapterId":currentChapterId, "image": image});
+                              arguments: {"mangaId": id, "chapterId":currentChapter, "image": image});
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:  Theme.of(context).colorScheme.inverseSurface,

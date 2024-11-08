@@ -30,9 +30,7 @@ class _AnimelistState extends State<Animelist> {
       {"name": "All", "view": AllAnimeLists(data: provider['animeList'])},
       {"name": "Completed", "view": AnimeLists(data: provider['animeList'], status: "COMPLETED")},
       {"name": "Planning", "view": AnimeLists(data: provider['animeList'], status: "PLANNING")},
-      {"name": "Continue", "view": AnimeLists(data: provider['animeList'], status: "CONTINUE")},
-      {"name": "Watched", "view": AnimeLists(data: provider['animeList'], status: "WATCHED")},
-      {"name": "Scheduled", "view": AnimeLists(data: provider['animeList'], status: "SCHEDULED")},
+      {"name": "Watching", "view": AnimeLists(data: provider['animeList'], status: "CURRENT")},
       {"name": "Paused", "view": AnimeLists(data: provider['animeList'], status: "PAUSED")},
     ];
 

@@ -1,8 +1,8 @@
 
-import 'dart:typed_data';
 
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/Common/setting_tile.dart';
+import 'package:daizy_tv/utils/scraper/Novel/novel_buddy.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
@@ -40,7 +40,7 @@ class _SettingState extends State<Setting> {
           centerTitle: true,
         ),
         body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
+          padding: const EdgeInsets.fromLTRB(15,0,15,100),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -106,6 +106,7 @@ class _SettingState extends State<Setting> {
                 name: "About",
                 routeName: "./about",
               ),
+              
             ],
           ),
         ));
