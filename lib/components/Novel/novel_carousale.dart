@@ -123,7 +123,7 @@ class NovelCarousale extends StatelessWidget {
                                   height: 5,
                                 ),
                                 Container(
-                                  width: 110,
+                                  width: 120,
                                   decoration: BoxDecoration(
                                       color:
                                           Theme.of(context).colorScheme.primary,
@@ -133,7 +133,7 @@ class NovelCarousale extends StatelessWidget {
                                     child: Row(
                                       children: [
                                         Icon(
-                                          Icons.play_circle_fill,
+                                          Icons.book_online,
                                           color: Theme.of(context)
                                               .colorScheme
                                               .inversePrimary,
@@ -142,7 +142,7 @@ class NovelCarousale extends StatelessWidget {
                                           width: 5,
                                         ),
                                         Text(
-                                          "Play now",
+                                          "Read now",
                                           style: TextStyle(
                                               color: Theme.of(context)
                                                   .colorScheme
