@@ -753,8 +753,8 @@ class _AnimeDetailsState extends State<AnimeDetails> {
                                   final item = filteredEpisodes![index];
                                   final title = item['title'];
                                   final episodeNumber = item['number'];
-                                  final image = 
-                                      "https://goodproxy.goodproxy.workers.dev/fetch?url=${consumetEpisodesList[index]['image']}";
+                                  // final image = 
+                                  //     "https://goodproxy.goodproxy.workers.dev/fetch?url=${consumetEpisodesList[index]['image']}";
                                   return GestureDetector(
                                     onTap: () {
                                       displayBottomSheet(

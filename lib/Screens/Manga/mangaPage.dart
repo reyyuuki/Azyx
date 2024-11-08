@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/backupData/anilist_manga.dart';
+import 'package:daizy_tv/components/Anime/anime_carousale.dart';
 import 'package:daizy_tv/components/Anime/carousel.dart';
 import 'package:daizy_tv/components/Anime/reusableList.dart';
 import 'package:daizy_tv/components/Manga/mangaCarousale.dart';
@@ -78,8 +79,8 @@ class _MangapageState extends State<Mangapage> {
         child:
          Consumer<AniListProvider>(
           builder: (context, provider, child) {
-            mangaData = provider.mangalistData['trending'] ?? mangaData;
-            trendingManga = provider.mangalistData['popular'] ?? trendingManga;
+            mangaData = provider.mangalistData['popular'] ?? mangaData;
+            trendingManga = trendingManga;
             latestManga = provider.mangalistData['completed'] ?? latestManga;
             topOngoing = provider.mangalistData['latest'] ?? topOngoing;
 
@@ -120,11 +121,11 @@ class _MangapageState extends State<Mangapage> {
                   ),
                 ),
                 const SizedBox(height: 30.0),
-                Mangacarousale(mangaData: mangaData,),
+                AnimeCarousale(animeData: trendingManga, route: '/mangaDetail',),
                 const SizedBox(height: 30.0),
                 ReusableList(
                   name: 'Popular',
-                  data: trendingManga,
+                  data: mangaData,
                   taggName: "Carosale1",
                   route: '/mangaDetail',
                 ),

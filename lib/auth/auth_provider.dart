@@ -566,6 +566,7 @@ class AniListProvider with ChangeNotifier {
           romaji
           native
         }
+        description
         chapters
         coverImage {
           large
@@ -679,6 +680,7 @@ class AniListProvider with ChangeNotifier {
                     'romaji': manga['title']['romaji'] ?? "Unknown Title",
                     'native': manga['title']['native'] ?? "Unknown Title",
                   },
+                  'description': manga['ddescription'] ?? "N/A",
                   'chapters':
                       manga['chapters']?.toString() ?? 'Unknown chapters',
                   'coverImage':{

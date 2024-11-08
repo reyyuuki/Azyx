@@ -167,6 +167,7 @@ class MangaKakalot implements ExtractClass {
           'currentChapter': currentChapter,
           'nextChapter': nextChapterLink,
           'previousChapter': prevChapterLink,
+          'link': link,
           'images': images,
           'totalImages': index,
         };

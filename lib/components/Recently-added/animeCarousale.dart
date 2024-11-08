@@ -1,4 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:developer';
+
+import 'package:daizy_tv/components/Anime/anime_item.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:infinite_carousel/infinite_carousel.dart';
@@ -6,14 +8,15 @@ import 'package:infinite_carousel/infinite_carousel.dart';
 class Animecarousale extends StatelessWidget {
   final List<dynamic>? carosaleData;
 
+
   const Animecarousale({super.key,required this.carosaleData});
 
   @override
   Widget build(BuildContext context) {
-    if(carosaleData == null){
+    
+  if(carosaleData == null){
       return const SizedBox.shrink();
     }
-
     return Padding(
       padding: const EdgeInsets.only(left: 15),
       child: Column(
@@ -31,7 +34,7 @@ class Animecarousale extends StatelessWidget {
                       ..shader = LinearGradient(
                         colors: [
                          Theme.of(context).colorScheme.inverseSurface,
-                          Theme.of(context).colorScheme.primary,
+                        Theme.of(context).colorScheme.primary,
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -51,86 +54,26 @@ class Animecarousale extends StatelessWidget {
               center: false,
               itemBuilder: (context, itemIndex,realIndex) {
                 final anime = carosaleData![itemIndex];
-                final id = anime['animeId'];
-                final poster = anime['posterImage'];
-                final title = anime['animeTitle'];
-                final currentEpisode = anime['currentEpisode'];
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, "/detailspage",
-                          arguments: {"id": id, "image": poster}
-                          );
-                        },
-                        child: Stack(
-                          children: [
-                            SizedBox(
-                              height: 150,
-                              width: 103,
-                              child: Hero(
-                                tag: id,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(15),
-                                  child: CachedNetworkImage(
-                                    imageUrl: poster ?? '',
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                                top: 0,
-                                child: Container(
-                                  height: 28,
-                                  width: 33,
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .surfaceContainerHighest
-                                        .withOpacity(0.8),
-                                    borderRadius: const BorderRadius.only(
-                                        bottomRight: Radius.circular(10),
-                                        topLeft: Radius.circular(10)),
-                                  ),
-                                  child: Center(
-                                      child: Text(
-                                    '# ${1 + realIndex}',
-                                    style: const TextStyle(
-                                        fontFamily: "Poppins-Bold"),
-                                  )),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                            title.length > 12 ? '${title.substring(0, 12)}...' : title,
-                            style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .inverseSurface,
-                                fontFamily: "Poppins-Bold"),
-                          ),
-                      Text(
-                        'Episode ${currentEpisode ?? 'N/A'}',
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontFamily: "Poppins"
-                        ),
-                      ),
-                    ],
-                  ),
+                final id = anime['media']['id'];
+                final poster = anime['media']['coverImage']['large'];
+                final title = anime['media']['title']['english'] ?? anime['media']['title']['romaji'] ?? "N/A";
+                final currentEpisode = anime['progress'] ?? "??";
+                final type = anime['media']['format'];
+                final rating = anime['media']['averageScore'];
+                final tagg = '${id.toString()}current';
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ItemCard(id: id.toString(), poster: poster, type: type, name: title, rating: rating, tagg: tagg, route: '/detailspage'),
+                    Center(child: Text('Episode $currentEpisode')),
+                  ],
                 );
-              },
-            ),
-          ),
-        ],
-      ),
+              }
+            )
+          )
+        ]
+      )
     );
+
   }
 }

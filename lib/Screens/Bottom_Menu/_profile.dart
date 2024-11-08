@@ -1,6 +1,4 @@
 import 'dart:ui';
-
-import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/Recently-added/animeCarousale.dart';
 import 'package:daizy_tv/components/Recently-added/mangaCarousale.dart';
@@ -219,10 +217,10 @@ class _ProfileState extends State<Profile> {
           const SizedBox(
             height: 20,
           ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Animecarousale(carosaleData: animeWatches),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.all(10),
+          //   child: Animecarousale(carosaleData: animeWatches),
+          // ),
           Padding(
             padding: const EdgeInsets.all(10),
             child: Mangacarousale(carosaleData: mangaReads),
