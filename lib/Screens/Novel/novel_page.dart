@@ -2,7 +2,8 @@ import 'dart:developer';
 
 import 'package:daizy_tv/components/Common/Header.dart';
 import 'package:daizy_tv/components/Novel/novel_carousale.dart';
-import 'package:daizy_tv/utils/scraper/Novel/novel_buddy.dart';
+import 'package:daizy_tv/components/Novel/reusable_list.dart';
+import 'package:daizy_tv/utils/scraper/Novel/wuxia_novel.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -25,7 +26,7 @@ class _NovelPageState extends State<NovelPage> {
 List<Map<String, dynamic>>? data;
   Future<void> loadData() async{
     try{
-      final response = await scrapeNovelsHomePage();
+      final response = await scrapeHomePageData();
   if(response != null){
     setState(() {
       data = response;
@@ -74,7 +75,13 @@ List<Map<String, dynamic>>? data;
                   ),
                 ),
                 const SizedBox(height: 30.0),
-               NovelCarousale(route: '/detailsPage', animeData: data,)
+               NovelCarousale(route: '/detailsPage', animeData: data,),
+               const SizedBox(height: 20,),
+               NovelList(name: "Popular Novel", taggName: "Popular", route: '', data: data?.sublist(0,10),),
+                const SizedBox(height: 20,),
+               NovelList(name: "Trending Novel", taggName: "Popular", route: '', data: data?.sublist(10,20),),
+                const SizedBox(height: 20,),
+               NovelList(name: "Latest Novel", taggName: "Popular", route: '', data: data?.sublist(20,30),)
         ],
       ),
     );
