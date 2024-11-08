@@ -88,8 +88,7 @@ class _VideoPlayerAltState extends State<VideoPlayerAlt>
             ),
             autoPlay: true,
             expandToFill: true,
-            looping: false,
-            allowedScreenSleep: false);
+            looping: false,);
 
     _betterPlayerController = BetterPlayerController(betterPlayerConfiguration);
     _betterPlayerController!.setupDataSource(BetterPlayerDataSource(
