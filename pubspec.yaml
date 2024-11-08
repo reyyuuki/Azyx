@@ -20,20 +20,14 @@ dependencies:
   text_scroll: ^0.2.0
   lite_rolling_switch: ^1.0.1
   cached_network_image: ^3.4.1
-  flashy_tab_bar2: ^0.0.10
   interactive_slider: ^0.2.2
   provider:
   hive_flutter: ^1.1.0
   hive: ^2.2.3
-  image_picker: ^1.1.2
   dynamic_color: ^1.7.0
   wakelock_plus: ^1.2.8
-  dropdown_button2: ^2.3.9
   flutter_launcher_icons: ^0.13.1
-  awesome_dialog: ^3.2.1
-  animated_button: ^0.2.0
   html: ^0.15.0
-  rename_app: ^1.6.1
   change_app_package_name: ^1.4.0
   url_launcher: ^6.3.0
   flutter_dotenv: ^5.1.0
@@ -41,9 +35,10 @@ dependencies:
   flutter_web_auth: ^0.5.0
   buttons_tabbar: ^1.3.13
   animated_segmented_tab_control: ^2.0.0
-  numberpicker: ^2.1.2
   pointycastle: ^3.9.1
   encrypt: ^5.0.3
+  google_nav_bar: ^5.0.7
+  dio: ^5.7.0
 
 dev_dependencies:
   flutter_test:
