@@ -4,6 +4,7 @@ import 'package:daizy_tv/Provider/manga_sources.dart';
 import 'package:daizy_tv/Screens/Bottom_Menu/_profile.dart';
 import 'package:daizy_tv/Screens/Bottom_Menu/_setting.dart';
 import 'package:daizy_tv/Provider/theme_provider.dart';
+import 'package:daizy_tv/Screens/Novel/novel_page.dart';
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
 import 'package:daizy_tv/Hive_Data/user.dart';
@@ -22,7 +23,6 @@ import 'package:daizy_tv/Screens/Anime/details.dart';
 import 'package:daizy_tv/Screens/Home/_homepage.dart';
 import 'package:daizy_tv/Screens/Manga/mangaPage.dart';
 import 'package:daizy_tv/Screens/Anime/animePage.dart';
-import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -177,9 +177,11 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 1;
 
   final List<Widget> _pages = [
+
     const Animepage(),
     const HomePage(),
     const Mangapage(),
+    const NovelPage()
   ];
 
   @override
@@ -188,15 +190,15 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBody: true,
       body: _pages[_selectedIndex],
       bottomNavigationBar: Container(
-        margin: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+        margin: const EdgeInsets.symmetric(vertical: 40, horizontal: 10),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(50),
             color: Colors.black.withOpacity(0.2),
             border: Border.all(
-                color: Theme.of(context).colorScheme.inverseSurface, width: 2)),
+                color: Theme.of(context).colorScheme.inverseSurface, width: 1)),
         clipBehavior: Clip.antiAlias,
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           child: GNav(
             selectedIndex: _selectedIndex,
             onTabChange: (index) {
@@ -204,18 +206,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 _selectedIndex = index;
               });
             },
-            tabMargin: const EdgeInsets.symmetric(horizontal:  10),
+            tabMargin: const EdgeInsets.symmetric(horizontal: 10),
             backgroundColor: Colors.transparent,
+            // padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
             tabs: [
-              GButton(
+               GButton(
                 padding: const EdgeInsets.all(10),
                 gap: 7,
                 icon: Icons.movie,
                 text: 'Anime',
                 backgroundColor:
                     Theme.of(context).colorScheme.inversePrimary.withOpacity(0.6),
-                rippleColor:
-                    Theme.of(context).colorScheme.primary.withOpacity(0.4),
                 iconActiveColor: Theme.of(context).colorScheme.primary,
                 iconColor: Theme.of(context).colorScheme.primary,
               ),
@@ -227,21 +228,28 @@ class _HomeScreenState extends State<HomeScreen> {
                 gap: 7,
                 icon: Iconsax.home_15,
                 text: 'Home',
-                rippleColor:
-                    Theme.of(context).colorScheme.primary.withOpacity(0.4),
                 iconColor: Theme.of(context).colorScheme.primary,
                 iconActiveColor: Theme.of(context).colorScheme.primary,
               ),
+             
               GButton(
                  padding: const EdgeInsets.all(10),
                 backgroundColor:
                     Theme.of(context).colorScheme.inversePrimary.withOpacity(0.6),
                 gap: 7,
                 icon: Icons.book_rounded,
-                text: 'Home',
+                text: 'Manga',
                 iconColor: Theme.of(context).colorScheme.primary,
-                rippleColor:
-                    Theme.of(context).colorScheme.primary.withOpacity(0.4),
+                iconActiveColor: Theme.of(context).colorScheme.primary,
+              ),
+              GButton(
+                 padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                backgroundColor:
+                    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.6),
+                gap: 7,
+                icon: Iconsax.book5,
+                text: 'Novel',
+                iconColor: Theme.of(context).colorScheme.primary,
                 iconActiveColor: Theme.of(context).colorScheme.primary,
               ),
             ],

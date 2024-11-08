@@ -66,7 +66,7 @@ class _ReadState extends State<Read> {
           dataProvider.addReadsManga(
             mangaId: widget.mangaId,
             mangaTitle: resp['title'],
-            currentChapter: currentChapter.toString(),
+            currentChapter: chapterData['link'],
             mangaImage: widget.image,
           );
         } else {
@@ -106,9 +106,10 @@ class _ReadState extends State<Read> {
         dataProvider.addReadsManga(
           mangaId: widget.mangaId,
           mangaTitle: mangaTitle!,
-          currentChapter: currentChapter.toString(),
+          currentChapter: chapterData['link'],
           mangaImage: widget.image,
         );
+
       } else {
         setState(() {
           hasError = true;

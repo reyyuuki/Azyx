@@ -4,6 +4,7 @@ import 'dart:developer';
 
 import 'package:animated_segmented_tab_control/animated_segmented_tab_control.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:daizy_tv/Hive_Data/appDatabase.dart';
 import 'package:daizy_tv/Provider/manga_sources.dart';
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/Anime/poster.dart';
@@ -43,12 +44,14 @@ class _DetailsState extends State<Mangadetails> {
   late String searchTerm;
   ExtractClass? mangaScarapper;
   List<ExtractClass>? sources;
+  String? currentLink;
 
   String localSource = "MangaKakalot Unofficial";
   String localSelectedValue = "CURRENT";
   String defaultScore = "1.0";
-  final TextEditingController _episodeController =
+  final TextEditingController _chapterController =
       TextEditingController(text: '1');
+  TextEditingController wrongTittle = TextEditingController();
 
   final List<String> _items = [
     "CURRENT",
@@ -93,11 +96,10 @@ class _DetailsState extends State<Mangadetails> {
     super.dispose();
   }
 
-  Future<void> test() async {
+  Future<void> mappingData() async {
     try {
       final searchData = await searchMostSimilarManga(
           mangaData['name'], mangaScarapper!.fetchSearchsManga);
-      log("name: ${searchData.toString()}");
       if (searchData!.isNotEmpty) {
         final chaptersData =
             await mangaScarapper!.fetchChapters(searchData['id']);
@@ -106,118 +108,195 @@ class _DetailsState extends State<Mangadetails> {
             mappedId = searchData['id'];
             filteredChapterList = chaptersData['chapterList'];
           });
-          log(mappedId!);
+          wrongTittle.text = mangaData['name'];
+          wrongTitleSearch(wrongTittle.text);
         }
+        continueReading();
       }
     } catch (e) {
       log("Errors: $e");
     }
   }
 
-Future<void> wrongTitleSearch(String name) async {
-  try{
-    final response = await mangaScarapper!.fetchSearchsManga(name);
-    if(response.toString().isNotEmpty){
-      setState(() {
-        wrongTitleSearchData = response['mangaList'];
-      });
-      log(response['mangaList'].toString());
+  Future<void> wrongTitleSearch(String name) async {
+    try {
+      wrongTittle.text = name;
+      final response = await mangaScarapper!.fetchSearchsManga(name);
+      if (response.toString().isNotEmpty) {
+        setState(() {
+          wrongTitleSearchData = response['mangaList'];
+        });
+      }
+    } catch (e) {
+      log(e.toString());
     }
-  }catch(e){
-    log(e.toString());
   }
-}
+
+  Future<void> changeChapterData(id) async {
+    filteredChapterList = [];
+    final response = await mangaScarapper!.fetchChapters(id);
+    if (response != null) {
+      setState(() {
+        filteredChapterList = response['chapterList'];
+      });
+    } else {
+      log('not scrapped');
+    }
+  }
 
   Future<void> scrap() async {
     final data = await getMangaDetails(widget.id);
     final provider = Provider.of<MangaSourcesProvider>(context, listen: false);
     mangaScarapper = provider.instance;
-    log("perfect: ${mangaScarapper.toString()}");
-
     if (data != null) {
       setState(() {
         mangaData = data;
         loading = false;
       });
-      test();
+      mappingData();
     }
   }
-  void wrongTitle( BuildContext context){
-     TextEditingController wrongTittle = TextEditingController();
-  wrongTittle.text = mangaData['name']; 
-  wrongTitleSearch(mangaData['name']);
+
+  Future<void> continueReading() async {
+    try {
+      final provider = Provider.of<AniListProvider>(context, listen: false)
+          .userData['mangaList'];
+      final manga = provider?.firstWhere(
+          (manga) => widget.id == manga['media']['id'].toString(),
+          orElse: () => null);
+      // log(manga.toString());
+      final index = provider != null ? filteredChapterList!
+          .firstWhere((chapter) => chapter['id'].toString().contains(
+                manga['progress'].toString(),
+                //  orElse: () => null
+              )) : null;
+      log(index.toString());
+      final data = Provider.of<Data>(context, listen: false)
+          .getCurrentChapterForManga(mappedId!);
+      if (data != null) {
+        currentLink = data;
+      } else {
+        currentLink = provider != null
+            ? index!['link']
+            : filteredChapterList![filteredChapterList!.length - 1]['link'];
+      }
+      log(currentLink!);
+    } catch (e) {
+      log(e.toString());
+      currentLink = filteredChapterList![filteredChapterList!.length - 1]['link'];
+    }
+  }
+
+  void wrongTitle(BuildContext context) async {
     showModalBottomSheet(
-       context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      barrierColor: Colors.black87.withOpacity(0.5),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
-    backgroundColor: Theme.of(context).colorScheme.surface,
-     builder: (context) {
-      return StatefulBuilder(builder: (context, setState) {
-        return  Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SizedBox(
-            height: 400,
-            child: Column(children: [
-              TextField(
-                onSubmitted: (value){
-                
-                  wrongTitleSearch(value);
-                },
-                controller: wrongTittle,
-                decoration: InputDecoration(
-                  labelText: "Search here",
-                  prefixIcon: Icon(Iconsax.search_normal),
-                  isDense: true,
-                  enabledBorder: OutlineInputBorder(borderSide: BorderSide(
-                    color: Theme.of(context).colorScheme.primary,
-                  ), borderRadius: BorderRadius.circular(20)),
-                  focusedBorder: OutlineInputBorder(borderSide: BorderSide(
-                    color: Theme.of(context).colorScheme.primary,
-                  ), borderRadius: BorderRadius.circular(20)),
-                  
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        barrierColor: Colors.black87.withOpacity(0.5),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        builder: (context) {
+          return StatefulBuilder(builder: (context, setState) {
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SizedBox(
+                height: 400,
+                child: Column(
+                  children: [
+                    TextField(
+                      onSubmitted: (value) async {
+                        log('come:$value');
+                        setState(() => wrongTitleSearchData = []);
+                        await wrongTitleSearch(value);
+                        setState(() {});
+                      },
+                      controller: wrongTittle,
+                      decoration: InputDecoration(
+                        labelText: "Search here",
+                        prefixIcon: Icon(Iconsax.search_normal),
+                        isDense: true,
+                        enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            borderRadius: BorderRadius.circular(20)),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            borderRadius: BorderRadius.circular(20)),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    SizedBox(
+                      height: 280,
+                      child: wrongTitleSearchData == null
+                          ? const Center(
+                              child: CircularProgressIndicator(),
+                            )
+                          : ListView.builder(
+                              itemCount: wrongTitleSearchData.length,
+                              itemBuilder: (context, index) {
+                                final title =
+                                    wrongTitleSearchData[index]['title'];
+                                return Padding(
+                                  padding: const EdgeInsets.all(5),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      changeChapterData(
+                                          wrongTitleSearchData[index]['id']);
+                                      Navigator.pop(context);
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                          border: Border.all(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary)),
+                                      height: 90,
+                                      child: Row(
+                                        children: [
+                                          SizedBox(
+                                            height: 90,
+                                            width: 140,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.horizontal(
+                                                      left: Radius.circular(5)),
+                                              child: CachedNetworkImage(
+                                                imageUrl:
+                                                    wrongTitleSearchData[index]
+                                                        ['image'],
+                                                fit: BoxFit.cover,
+                                                alignment: Alignment.topCenter,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            width: 15,
+                                          ),
+                                          Text(title.length > 15
+                                              ? '${title.substring(0, 15)}...'
+                                              : title)
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }),
+                    )
+                  ],
                 ),
               ),
-              const SizedBox(height: 30,),
-              SizedBox(
-                height: 280,
-                child: wrongTitleSearchData == null ? const Center(child: CircularProgressIndicator(),) : ListView.builder(
-                  itemCount:  wrongTitleSearchData.length,
-                  itemBuilder: (context, index) {
-                    final title = wrongTitleSearchData[index]['title'];
-                    return Padding(
-                      padding: const EdgeInsets.all(5),
-                      child: Container(
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),
-                        border: Border.all(color: Theme.of(context).colorScheme.primary)
-                        ),
-                        height: 90,
-                        child: Row(
-                          children: [
-                            SizedBox(
-                              height: 90,
-                              width: 140,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.horizontal(left: Radius.circular(5)),
-                                child: CachedNetworkImage(imageUrl: wrongTitleSearchData[index]['image'], fit: BoxFit.cover, alignment: Alignment.topCenter,),
-                              ),
-                            ),
-                            const SizedBox(width: 15,),
-                            Text(title.length > 25 ? '${title.substring(0,25)}...' : title)
-                          ],
-                        ),
-                      ),
-                    );
-                }),
-              )
-            ],),
-          ),
-        );
-      });
-    });
+            );
+          });
+        });
   }
 
   @override
@@ -229,7 +308,6 @@ Future<void> wrongTitleSearch(String name) async {
     final manga = provider?.firstWhere(
         (manga) => widget.id == manga['media']['id'].toString(),
         orElse: () => null);
-    log(provider.toString());
 
     localSelectedValue = manga?['status'] ?? "CURRENT";
     String getMangaStatus(dynamic manga) {
@@ -532,7 +610,7 @@ Future<void> wrongTitleSearch(String name) async {
                         ));
                         mangaScarapper = sourceProvider.instance;
                         filteredChapterList = [];
-                        test();
+                        mappingData();
                       });
                     }
                   },
@@ -568,9 +646,10 @@ Future<void> wrongTitleSearch(String name) async {
                           child: Text(
                             "Wrong title?",
                             style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: "Poppins-Bold",
-                                color: Theme.of(context).colorScheme.primary,),
+                              fontSize: 16,
+                              fontFamily: "Poppins-Bold",
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                           ),
                         )
                       ],
@@ -581,14 +660,26 @@ Future<void> wrongTitleSearch(String name) async {
               const SizedBox(
                 height: 10,
               ),
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/read', arguments: {
+                      "mangaId": widget.id,
+                      "chapterLink": currentLink,
+                      "image": widget.image,
+                    });
+                  },
+                  child: Text("Continue")),
+              const SizedBox(
+                height: 10,
+              ),
               SizedBox(
-                height: 545,
+                height: 485,
                 child: filteredChapterList != null &&
                         filteredChapterList!.isNotEmpty
                     ? ListView(
                         children: filteredChapterList!.map<Widget>((chapter) {
                           return Chapterlist(
-                            id: mappedId,
+                            id: widget.id,
                             chapter: chapter,
                             image: widget.image,
                           );
@@ -602,7 +693,6 @@ Future<void> wrongTitleSearch(String name) async {
       ),
     );
   }
-
 
   void addToList(BuildContext context) {
     showModalBottomSheet(
@@ -777,10 +867,10 @@ Future<void> wrongTitleSearch(String name) async {
                               }
                             },
                           ),
-                          inputbox(context, _episodeController,
+                          inputbox(context, _chapterController,
                               filteredChapterList!.length),
                           const SizedBox(height: 30),
-                          saveAnime(localSelectedValue, context),
+                          saveManga(localSelectedValue, context),
                         ],
                       ),
                     ),
@@ -856,14 +946,14 @@ Future<void> wrongTitleSearch(String name) async {
     );
   }
 
-  GestureDetector saveAnime(String localSelectedValue, BuildContext context) {
+  GestureDetector saveManga(String localSelectedValue, BuildContext context) {
     return GestureDetector(
       onTap: () {
         Provider.of<AniListProvider>(context, listen: false).addToAniList(
           mediaId: int.parse(widget.id),
           status: localSelectedValue,
           score: double.tryParse(defaultScore),
-          progress: int.parse(_episodeController.text),
+          progress: int.parse(_chapterController.text),
         );
         Navigator.pop(context);
       },
