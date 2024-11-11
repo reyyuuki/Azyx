@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:daizy_tv/Hive_Data/appDatabase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_auth/flutter_web_auth.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class AniListProvider with ChangeNotifier {
   final storage = const FlutterSecureStorage();
@@ -12,8 +15,10 @@ class AniListProvider with ChangeNotifier {
   dynamic _anilistData = {};
   dynamic _mangalistData = {};
   bool _isLoading = false;
+  dynamic _favorites = {};
 
   dynamic get userData => _userData;
+  dynamic get favorites => _favorites;
   dynamic get anilistData => _anilistData;
   dynamic get mangalistData => _mangalistData;
   bool get isLoading => _isLoading;
@@ -27,6 +32,7 @@ class AniListProvider with ChangeNotifier {
       await fetchUserProfile();
       await fetchUserAnimeList();
       await fetchUserMangaList();
+      await fetchAniListFavorites();
     }
 
     return log('Auth token not available!');
@@ -460,9 +466,7 @@ class AniListProvider with ChangeNotifier {
                   'bannerImage': anime['bannerImage'],
                   'episodes':
                       anime['episodes']?.toString() ?? 'Unknown episodes',
-                  'coverImage':{
-                    'large': anime['coverImage']['large']
-                  },
+                  'coverImage': {'large': anime['coverImage']['large']},
                   'studio': (anime['studios']['nodes'] as List).isNotEmpty
                       ? anime['studios']['nodes'][0]['name']
                       : 'Unknown studio',
@@ -470,7 +474,8 @@ class AniListProvider with ChangeNotifier {
                   'averageScore': anime['averageScore'],
                   'type': anime['format'] ?? 'Unknown format',
                   'status': anime['status'] ?? 'Unknown status',
-                  'description': anime['description'] ?? 'No description available'
+                  'description':
+                      anime['description'] ?? 'No description available'
                 })
             .toList(),
         'popular': (data['data']['popular']['media'] as List)
@@ -483,9 +488,7 @@ class AniListProvider with ChangeNotifier {
                   },
                   'episodes':
                       anime['episodes']?.toString() ?? 'Unknown episodes',
-                  'coverImage':{
-                    'large': anime['coverImage']['large']
-                  },
+                  'coverImage': {'large': anime['coverImage']['large']},
                   'studio': (anime['studios']['nodes'] as List).isNotEmpty
                       ? anime['studios']['nodes'][0]['name']
                       : 'Unknown studio',
@@ -505,9 +508,7 @@ class AniListProvider with ChangeNotifier {
                   },
                   'episodes':
                       anime['episodes']?.toString() ?? 'Unknown episodes',
-                  'coverImage':{
-                    'large': anime['coverImage']['large']
-                  },
+                  'coverImage': {'large': anime['coverImage']['large']},
                   'studio': (anime['studios']['nodes'] as List).isNotEmpty
                       ? anime['studios']['nodes'][0]['name']
                       : 'Unknown studio',
@@ -527,9 +528,7 @@ class AniListProvider with ChangeNotifier {
                   },
                   'episodes':
                       anime['episodes']?.toString() ?? 'Unknown episodes',
-                  'coverImage':{
-                    'large': anime['coverImage']['large']
-                  },
+                  'coverImage': {'large': anime['coverImage']['large']},
                   'studio': (anime['studios']['nodes'] as List).isNotEmpty
                       ? anime['studios']['nodes'][0]['name']
                       : 'Unknown studio',
@@ -683,9 +682,7 @@ class AniListProvider with ChangeNotifier {
                   'description': manga['ddescription'] ?? "N/A",
                   'chapters':
                       manga['chapters']?.toString() ?? 'Unknown chapters',
-                  'coverImage':{
-                    'large': manga['coverImage']['large']
-                  },
+                  'coverImage': {'large': manga['coverImage']['large']},
                   'author': (manga['staff']['nodes'] as List).isNotEmpty
                       ? manga['staff']['nodes'][0]['name']['full']
                       : 'Unknown author',
@@ -705,9 +702,7 @@ class AniListProvider with ChangeNotifier {
                   },
                   'chapters':
                       manga['chapters']?.toString() ?? 'Unknown chapters',
-                  'coverImage':{
-                    'large': manga['coverImage']['large']
-                  },
+                  'coverImage': {'large': manga['coverImage']['large']},
                   'author': (manga['staff']['nodes'] as List).isNotEmpty
                       ? manga['staff']['nodes'][0]['name']['full']
                       : 'Unknown author',
@@ -727,9 +722,7 @@ class AniListProvider with ChangeNotifier {
                   },
                   'chapters':
                       manga['chapters']?.toString() ?? 'Unknown chapters',
-                  'coverImage':{
-                    'large': manga['coverImage']['large']
-                  },
+                  'coverImage': {'large': manga['coverImage']['large']},
                   'author': (manga['staff']['nodes'] as List).isNotEmpty
                       ? manga['staff']['nodes'][0]['name']['full']
                       : 'Unknown author',
@@ -749,9 +742,7 @@ class AniListProvider with ChangeNotifier {
                   },
                   'chapters':
                       manga['chapters']?.toString() ?? 'Unknown chapters',
-                  'coverImage':{
-                    'large': manga['coverImage']['large']
-                  },
+                  'coverImage': {'large': manga['coverImage']['large']},
                   'author': (manga['staff']['nodes'] as List).isNotEmpty
                       ? manga['staff']['nodes'][0]['name']['full']
                       : 'Unknown author',
@@ -824,4 +815,131 @@ class AniListProvider with ChangeNotifier {
     await fetchUserAnimeList();
     await fetchUserMangaList();
   }
+
+  Future<void> fetchAniListFavorites() async {
+    const String url = 'https://graphql.anilist.co';
+    String username = _userData['name'];
+
+    const query = '''
+  query (\$username: String) {
+    User(name: \$username) {
+      id
+      name
+      favourites {
+        anime {
+          nodes {
+            id
+            title {
+              romaji
+              english
+            }
+            coverImage {
+              large
+            }
+          }
+        }
+        manga {
+          nodes {
+            id
+            title {
+              romaji
+              english
+            }
+            coverImage {
+              large
+            }
+          }
+        }
+      }
+    }
+  }
+  ''';
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "query": query,
+        "variables": {"username": username}
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      // Mapping the data and extracting only anime and manga favorites with titles
+      _favorites = {
+        'userId': data['data']['User']['id'],
+        'anime': (data['data']['User']['favourites']['anime']['nodes'] as List)
+            .map((anime) {
+          return {
+            'id': anime['id'],
+            'title': anime['title']['english'] ?? anime['title']['romaji'],
+            'image': anime['coverImage']['large'],
+          };
+        }).toList(),
+        'manga': (data['data']['User']['favourites']['manga']['nodes'] as List)
+            .map((manga) {
+          return {
+            'id': manga['id'],
+            'title': manga['title']['english'] ?? manga['title']['romaji'],
+            'image': manga['coverImage']['large'],
+          };
+        }).toList(),
+      };
+
+      log(_favorites.toString());
+      log(_favorites['userId'].toString());
+    } else {
+      throw Exception('Failed to load favorites');
+    }
+    notifyListeners();
+  }
+
+Future<bool> addFavorite(int mediaId, String type) async {
+  const String url = 'https://api.anilist.co/v2/user/6611206/favorites';
+
+  log('Adding to favorites: $url');  // Debug log
+  log('Media ID: $mediaId, Type: $type');  // Log details
+
+  try {
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        // Add any additional headers (e.g., authentication token) if needed
+      },
+      body: jsonEncode({
+        'mediaId': mediaId,
+        'type': type == 'anime' ? 'anime' : 'manga',
+      }),
+    );
+
+    log('Response status: ${response.statusCode}');
+    log('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw Exception('Failed to add to favorites. Status: ${response.statusCode}');
+    }
+  } catch (e) {
+    log('Error: $e');
+    throw Exception('Network request failed');
+  }
+}
+
+
+
+  void migratefavoritesdata(BuildContext context) {
+    final dataProvider = Provider.of<Data>(context, listen: false);
+    final bool isLoogedIn = _userData['name'] != null;
+    dataProvider.favoriteManga =
+        isLoogedIn ? _favorites['manga'] + dataProvider.favoriteManga : dataProvider.favoriteManga;
+    var box = Hive.box("app-data");
+    box.put("favoriteManga", dataProvider.favoriteManga);
+    log(dataProvider.favoriteManga.toString());
+    notifyListeners();
+  }
+
 }
