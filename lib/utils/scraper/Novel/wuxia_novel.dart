@@ -110,7 +110,8 @@ Future<dynamic> scrapeNovelDetails(String url) async {
       'reviews': reviews,
       'image': imageUrl,
       'description': description,
-      'chapterList': chapters,
+      'chapterList': chapters.reversed.toList(),
+      'id': url
     };
     return novelDetailsList;
   } else {
@@ -164,16 +165,16 @@ Future<Map<String, dynamic>> scrapeNovelWords(String url) async {
     final novelData = {
       'title': title,
       'currentChapter': currentChapter ?? 'Chapter ?',
-      'prevChapterId': previousChapterLink ?? '',
+      'prevChapterId': previousChapterLink,
       'nextChapterId': nextChapterLink ?? '',
       'words': words,
     };
 
-    log(novelData.toString());
+    // log(novelData.toString());
 
     return novelData;
   } else {
-    print('Failed to load page: ${response.statusCode}');
+    log('Failed to load page: ${response.statusCode}');
     return {};
   }
 }
