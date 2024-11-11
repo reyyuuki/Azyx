@@ -11,6 +11,7 @@ import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/coverImage.dart';
 import 'package:daizy_tv/components/Manga/mangaAllDetails.dart';
 import 'package:daizy_tv/components/Manga/chapterList.dart';
+import 'package:daizy_tv/components/Manga/mangaFloater.dart';
 import 'package:daizy_tv/utils/api/Anilist/Manga/manga_details_anilist.dart';
 import 'package:daizy_tv/utils/helper/jaro_winkler.dart';
 import 'package:daizy_tv/utils/scraper/Manga/Manga_Extenstions/extract_class.dart';
@@ -45,6 +46,7 @@ class _DetailsState extends State<Mangadetails> {
   ExtractClass? mangaScarapper;
   List<ExtractClass>? sources;
   String? currentLink;
+ late String currentChapter;
 
   String localSource = "MangaKakalot Unofficial";
   String localSelectedValue = "CURRENT";
@@ -159,31 +161,34 @@ class _DetailsState extends State<Mangadetails> {
 
   Future<void> continueReading() async {
     try {
-      final provider = Provider.of<AniListProvider>(context, listen: false)
+      final progress = Provider.of<AniListProvider>(context, listen: false)
           .userData['mangaList'];
-      final manga = provider?.firstWhere(
+      final manga = progress?.firstWhere(
           (manga) => widget.id == manga['media']['id'].toString(),
           orElse: () => null);
-      // log(manga.toString());
-      final index = provider != null ? filteredChapterList!
-          .firstWhere((chapter) => chapter['id'].toString().contains(
-                manga['progress'].toString(),
-                //  orElse: () => null
-              )) : null;
-      log(index.toString());
-      final data = Provider.of<Data>(context, listen: false)
-          .getCurrentChapterForManga(mappedId!);
-      if (data != null) {
-        currentLink = data;
+      final index = filteredChapterList!.firstWhere((chapter) =>
+          chapter['id'].toString().contains(manga['progress'].toString()));
+      final provider = Provider.of<Data>(context, listen: false);
+      final link = provider.getCurrentChapterForManga(widget.id);
+      if (link != null && link['currentChapterTitle'] != null) {
+        setState(() {
+          currentLink = link['currentChapter'];
+          currentChapter = link['currentChapterTitle'];
+        });
       } else {
-        currentLink = provider != null
-            ? index!['link']
-            : filteredChapterList![filteredChapterList!.length - 1]['link'];
+        setState(() {
+          currentLink = progress != null
+              ? index['link']
+              : filteredChapterList!.last['link'];
+          currentChapter = progress != null ? index['title'] : filteredChapterList!.last['title'];
+        });
       }
-      log(currentLink!);
+      log(currentLink ?? "No link available");
     } catch (e) {
-      log(e.toString());
-      currentLink = filteredChapterList![filteredChapterList!.length - 1]['link'];
+      log("Error: ${e.toString()}");
+      setState(() {
+        currentLink = filteredChapterList?.last['link'];
+      });
     }
   }
 
@@ -335,7 +340,7 @@ class _DetailsState extends State<Mangadetails> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         title: TextScroll(
-          loading ? "Loading..." : mangaData['name'].toString(),
+          loading ? "Loading..." : mangaData['name'],
           mode: TextScrollMode.bouncing,
           velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
           delayBefore: const Duration(milliseconds: 500),
@@ -546,6 +551,15 @@ class _DetailsState extends State<Mangadetails> {
               ),
             ],
           ),
+          mangaData != null && currentLink != null 
+              ? Mangafloater(
+                  data: mangaData,
+                  currentLink: currentLink!,
+                  chapterList: filteredChapterList!,
+                  source: mangaScarapper!,
+                  currentChapter: currentChapter,
+                )
+              : const SizedBox.shrink(),
         ],
       ),
     );
@@ -554,8 +568,6 @@ class _DetailsState extends State<Mangadetails> {
   SizedBox tabs(BuildContext context) {
     final sourceProvider =
         Provider.of<MangaSourcesProvider>(context, listen: false);
-    log('source: ${mangaScarapper.toString()}');
-    sourceProvider.allMangaSources;
     return SizedBox(
       height: 700,
       child: TabBarView(
@@ -660,18 +672,18 @@ class _DetailsState extends State<Mangadetails> {
               const SizedBox(
                 height: 10,
               ),
-              ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/read', arguments: {
-                      "mangaId": widget.id,
-                      "chapterLink": currentLink,
-                      "image": widget.image,
-                    });
-                  },
-                  child: Text("Continue")),
-              const SizedBox(
-                height: 10,
-              ),
+              // ElevatedButton(
+              //     onPressed: () {
+              //       Navigator.pushNamed(context, '/read', arguments: {
+              //         "mangaId": widget.id,
+              //         "chapterLink": currentLink,
+              //         "image": widget.image,
+              //       });
+              //     },
+              //     child: Text("Continue")),
+              // const SizedBox(
+              //   height: 10,
+              // ),
               SizedBox(
                 height: 485,
                 child: filteredChapterList != null &&
