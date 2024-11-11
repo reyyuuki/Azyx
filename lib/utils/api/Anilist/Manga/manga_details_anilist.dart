@@ -15,7 +15,7 @@ Future<Map<String, dynamic>?> getMangaDetails(String mangaId) async {
         }
         coverImage {
           extraLarge
-          color
+          large
         }
         bannerImage
         description(asHtml: false)
@@ -56,6 +56,8 @@ Future<Map<String, dynamic>?> getMangaDetails(String mangaId) async {
     // Format the manga details
     final formattedDetails = {
       'coverImage': manga['bannerImage'] ??  manga['coverImage']['extraLarge'],
+      'poster': manga['coverImage']['large'],
+      'id': mangaId,
       'name': manga['title']['english'] ?? manga['title']['romaji'] ?? manga['title']['native'] ?? 'N/A',
       'jname': manga['title']['native'] ?? 'N/A',
       'authors': manga['staff']['edges']
