@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:daizy_tv/backupData/novel_buddy_fallback.dart';
 import 'package:daizy_tv/components/Common/Header.dart';
 import 'package:daizy_tv/components/Novel/novel_carousale.dart';
 import 'package:daizy_tv/components/Novel/reusable_list.dart';
@@ -20,10 +21,15 @@ class _NovelPageState extends State<NovelPage> {
   @override
   void initState() {
     super.initState();
-    loadData();
+    backupdata();
   }
 
 List<Map<String, dynamic>>? data;
+
+void backupdata(){
+  data = novelFallbackData;
+}
+
   Future<void> loadData() async{
     try{
       final response = await scrapeHomePageData();
@@ -38,51 +44,58 @@ List<Map<String, dynamic>>? data;
   }
   @override
   Widget build(BuildContext context) {
+
+    if(data == null){
+      return const Center(child: CircularProgressIndicator(),);
+    }
     return Scaffold(
-      body: ListView(
-        children: [
-         const Header(),
-         const SizedBox(height: 10,),
-         Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: SizedBox(
-                    height: 50,
-                    child: TextField(
-                      onSubmitted: (String value) {
-                        Navigator.pushNamed(
-                          context,
-                          '/searchAnime',
-                          arguments: {"name": value},
-                        );
-                      },
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Iconsax.search_normal),
-                        hintText: 'Search Anime...',
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(
-                              color: Theme.of(context).colorScheme.primary),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ListView(
+          children: [
+           const Header(),
+           const SizedBox(height: 10,),
+           Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: SizedBox(
+                      height: 50,
+                      child: TextField(
+                        onSubmitted: (String value) {
+                          Navigator.pushNamed(
+                            context,
+                            '/searchNovel',
+                            arguments: {"name": value},
+                          );
+                        },
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Iconsax.search_normal),
+                          labelText: 'Search Novel',
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.primary),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide.none,
+                          ),
+                          fillColor:
+                              Theme.of(context).colorScheme.surfaceContainer,
+                          filled: true,
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide.none,
-                        ),
-                        fillColor:
-                            Theme.of(context).colorScheme.surfaceContainer,
-                        filled: true,
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 30.0),
-               NovelCarousale(route: '/detailsPage', animeData: data,),
-               const SizedBox(height: 20,),
-               NovelList(name: "Popular Novel", taggName: "Popular", route: '', data: data?.sublist(0,10),),
-                const SizedBox(height: 20,),
-               NovelList(name: "Trending Novel", taggName: "Popular", route: '', data: data?.sublist(10,20),),
-                const SizedBox(height: 20,),
-               NovelList(name: "Latest Novel", taggName: "Popular", route: '', data: data?.sublist(20,30),)
-        ],
+                  const SizedBox(height: 30.0),
+                 NovelCarousale(route: '/novelDetail', animeData: data,),
+                 const SizedBox(height: 20,),
+                 NovelList(name: "Popular Novel", taggName: "Popular", route: '', data: data?.sublist(0,10),),
+                  const SizedBox(height: 20,),
+                 NovelList(name: "Trending Novel", taggName: "Popular", route: '', data: data?.sublist(11,20),),
+                  const SizedBox(height: 20,),
+                 NovelList(name: "Latest Novel", taggName: "Popular", route: '', data: data?.sublist(21,28),)
+          ],
+        ),
       ),
     );
   }
