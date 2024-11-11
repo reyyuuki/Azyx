@@ -62,12 +62,14 @@ class _ReadState extends State<Read> {
             isNext = resp['nextChapter'] != null;
             isPrev = resp['previousChapter'] != null;
           });
+          log(chapterData.toString());
 
           dataProvider.addReadsManga(
             mangaId: widget.mangaId,
             mangaTitle: resp['title'],
             currentChapter: chapterData['link'],
             mangaImage: widget.image,
+            currentChapterTitle: resp['currentChapter']
           );
         } else {
           setState(() {
@@ -108,6 +110,7 @@ class _ReadState extends State<Read> {
           mangaTitle: mangaTitle!,
           currentChapter: chapterData['link'],
           mangaImage: widget.image,
+          currentChapterTitle: data['currentChapter']
         );
 
       } else {
