@@ -1,23 +1,21 @@
-import 'dart:ui';
-
 import 'package:daizy_tv/Provider/manga_sources.dart';
 import 'package:daizy_tv/Screens/Bottom_Menu/_profile.dart';
 import 'package:daizy_tv/Screens/Bottom_Menu/_setting.dart';
 import 'package:daizy_tv/Provider/theme_provider.dart';
+import 'package:daizy_tv/Screens/Favrouite/favrouite_page.dart';
+import 'package:daizy_tv/Screens/Favrouite/manga_favourite_page.dart';
+import 'package:daizy_tv/Screens/Novel/novel_detailspage.dart';
 import 'package:daizy_tv/Screens/Novel/novel_page.dart';
+import 'package:daizy_tv/Screens/Novel/novel_search.dart';
+import 'package:daizy_tv/Screens/Novel/reading_page.dart';
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
-import 'package:daizy_tv/Hive_Data/user.dart';
 import 'package:daizy_tv/Screens/Anime/watch_screen.dart';
-import 'package:daizy_tv/Screens/Lists/animelist.dart';
-import 'package:daizy_tv/Screens/Lists/mangalist.dart';
 import 'package:daizy_tv/Screens/Manga/mangaDetails.dart';
 import 'package:daizy_tv/Screens/Manga/read.dart';
 import 'package:daizy_tv/Screens/Anime/searchAnime.dart';
 import 'package:daizy_tv/Screens/Manga/searchManga.dart';
-import 'package:daizy_tv/Screens/settings/_about.dart';
-import 'package:daizy_tv/Screens/settings/_languages.dart';
-import 'package:daizy_tv/Screens/settings/_theme_changer.dart';
+import 'package:daizy_tv/utils/helper/migrating_favortes.dart';
 import 'package:flutter/material.dart';
 import 'package:daizy_tv/Screens/Anime/details.dart';
 import 'package:daizy_tv/Screens/Home/_homepage.dart';
@@ -25,16 +23,15 @@ import 'package:daizy_tv/Screens/Manga/mangaPage.dart';
 import 'package:daizy_tv/Screens/Anime/animePage.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
-  // init the Hive
+  WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
+  await Hive.openBox('app-data');
   await Hive.openBox('mybox');
-  await Hive.openBox("app-data");
   await dotenv.load(fileName: ".env");
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
@@ -60,7 +57,6 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  UserDataBase? userDataBase;
 
   @override
   Widget build(BuildContext context) {
@@ -111,6 +107,15 @@ class _MainAppState extends State<MainApp> {
                   Mangadetails(id: id, image: image, tagg: tagg),
             );
 
+             case '/mangaFavorite':
+            final id = args?['id'] ?? '';
+            final image = args?['image'] ?? '';
+            final tagg = args?['tagg'] ?? '';
+            return MaterialPageRoute(
+              builder: (context) =>
+                  MangaFavouritePage(id: id, image: image, tagg: tagg),
+            );
+
           case '/read':
             final mangaId = args?['mangaId'] ?? '';
             final chapterLink = args?['chapterLink'] ?? '';
@@ -129,29 +134,38 @@ class _MainAppState extends State<MainApp> {
               builder: (context) => SearchManga(name: name),
             );
 
-          // Main-Screen
-          case '/homeScreen':
-            return MaterialPageRoute(builder: (context) => const HomeScreen());
+          // Novel - Screens
+          case '/novelDetail':
+            final id = args?['id'] ?? '';
+            final image = args?['image'] ?? '';
+            final tagg = args?['tagg'] ?? '';
+            return MaterialPageRoute(
+                builder: (context) =>
+                    Noveldetails(id: id, image: image, tagg: tagg));
 
+          case '/novelRead':
+            final novelId = args?['novelId'] ?? '';
+            final chapterLink = args?['chapterLink'] ?? '';
+            final image = args?['image'] ?? '';
+            final title = args?['title'] ?? '';
+            return MaterialPageRoute(
+              builder: (context) => NovelRead(
+                novelId: novelId,
+                chapterLink: chapterLink,
+                image: image,
+                title: title
+              ),
+            );
+            
+        case '/searchNovel':
+          final name = args?['name'];
+          return MaterialPageRoute(builder: (context) => NovelSearch(name: name));
           //Bottom-Menu-Screens
           case './profile':
             return MaterialPageRoute(builder: (context) => const Profile());
           case './settings':
             return MaterialPageRoute(builder: (context) => const Setting());
 
-          //Setting-Screens
-          case './theme-changer':
-            return MaterialPageRoute(builder: (context) => const ThemeChange());
-          case './languages':
-            return MaterialPageRoute(builder: (context) => const Languages());
-          case './about':
-            return MaterialPageRoute(builder: (context) => const About());
-
-          //Lists
-          case './animelist':
-            return MaterialPageRoute(builder: (context) => const Animelist());
-          case './mangalist':
-            return MaterialPageRoute(builder: (context) => const Mangalist());
 
           default:
             return MaterialPageRoute(
@@ -174,12 +188,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 1;
+  int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-
-    const Animepage(),
     const HomePage(),
+    const FavrouitePage(),
+    const Animepage(),
     const Mangapage(),
     const NovelPage()
   ];
@@ -189,72 +203,41 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       extendBody: true,
       body: _pages[_selectedIndex],
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.symmetric(vertical: 40, horizontal: 10),
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(50),
-            color: Colors.black.withOpacity(0.2),
-            border: Border.all(
-                color: Theme.of(context).colorScheme.inverseSurface, width: 1)),
-        clipBehavior: Clip.antiAlias,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: GNav(
-            selectedIndex: _selectedIndex,
-            onTabChange: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
-            tabMargin: const EdgeInsets.symmetric(horizontal: 10),
-            backgroundColor: Colors.transparent,
-            // padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
-            tabs: [
-               GButton(
-                padding: const EdgeInsets.all(10),
-                gap: 7,
-                icon: Icons.movie,
-                text: 'Anime',
-                backgroundColor:
-                    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.6),
-                iconActiveColor: Theme.of(context).colorScheme.primary,
-                iconColor: Theme.of(context).colorScheme.primary,
-              ),
-              GButton(
-                padding: const EdgeInsets.all(10),
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                backgroundColor:
-                    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.6),
-                gap: 7,
-                icon: Iconsax.home_15,
-                text: 'Home',
-                iconColor: Theme.of(context).colorScheme.primary,
-                iconActiveColor: Theme.of(context).colorScheme.primary,
-              ),
-             
-              GButton(
-                 padding: const EdgeInsets.all(10),
-                backgroundColor:
-                    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.6),
-                gap: 7,
-                icon: Icons.book_rounded,
-                text: 'Manga',
-                iconColor: Theme.of(context).colorScheme.primary,
-                iconActiveColor: Theme.of(context).colorScheme.primary,
-              ),
-              GButton(
-                 padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                backgroundColor:
-                    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.6),
-                gap: 7,
-                icon: Iconsax.book5,
-                text: 'Novel',
-                iconColor: Theme.of(context).colorScheme.primary,
-                iconActiveColor: Theme.of(context).colorScheme.primary,
-              ),
-            ],
+      bottomNavigationBar: NavigationBar(
+        onDestinationSelected: (int index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        indicatorColor: Theme.of(context).colorScheme.secondaryContainer,
+        selectedIndex: _selectedIndex,
+        destinations: const <Widget>[
+          NavigationDestination(
+            selectedIcon: Icon(Icons.home),
+            icon: Icon(Icons.home_outlined),
+            label: 'Home',
           ),
-        ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.favorite),
+            icon: Icon(Icons.favorite_border),
+            label: 'Favorites',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.movie_filter),
+            icon: Icon(Icons.movie_filter_outlined),
+            label: 'Anime',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Ionicons.book),
+            icon: Icon(Ionicons.book_outline),
+            label: 'Manga',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.book),
+            icon: Icon(Icons.book_outlined),
+            label: 'Novel',
+          ),
+        ],
       ),
     );
   }
