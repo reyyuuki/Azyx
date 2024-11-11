@@ -1,5 +1,9 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:developer';
+
+import 'package:daizy_tv/Provider/theme_provider.dart';
+import 'package:daizy_tv/components/Common/slider.dart';
 import 'package:flutter/material.dart';
 
 typedef ButtonTapCallback = void Function(String? index);
@@ -8,23 +12,22 @@ class Sliderbar extends StatefulWidget {
   final Widget child;
   final String? title;
   final String? chapter;
-  final int? totalImages;
+  final int totalImages;
   final ScrollController scrollController;
   final ButtonTapCallback handleChapter;
   bool isNext;
   bool isPrev;
 
-   Sliderbar({
-    super.key,
-    required this.child,
-    required this.title,
-    required this.chapter,
-    required this.totalImages,
-    required this.scrollController,
-    required this.handleChapter,
-    required this.isNext,
-    required this.isPrev
-  });
+  Sliderbar(
+      {super.key,
+      required this.child,
+      required this.title,
+      required this.chapter,
+      required this.totalImages,
+      required this.scrollController,
+      required this.handleChapter,
+      required this.isNext,
+      required this.isPrev});
 
   @override
   State<Sliderbar> createState() => _SlidebarState();
@@ -48,26 +51,26 @@ class _SlidebarState extends State<Sliderbar> {
   }
 
   void _updateScrollProgress() {
-    if (widget.scrollController.hasClients && widget.totalImages! > 0) {
+    if (widget.scrollController.hasClients && widget.totalImages > 0) {
       final maxScrollExtent = widget.scrollController.position.maxScrollExtent;
       final currentScroll = widget.scrollController.position.pixels;
       final progress = currentScroll / maxScrollExtent;
 
       setState(() {
         _scrollProgress = progress.clamp(0.0, 1.0);
-        _currentPage = ((progress * (widget.totalImages! - 1)) + 1).round();
+        _currentPage = ((progress * (widget.totalImages - 1)) + 1).round();
       });
     }
   }
 
   void _onProgressBarTap(double progress) {
     if (widget.scrollController.hasClients) {
-      final targetPage = (progress * (widget.totalImages! - 1)).round();
+      final targetPage = (progress * (widget.totalImages - 1)).round();
 
       widget.scrollController.jumpTo(
         targetPage *
             (widget.scrollController.position.maxScrollExtent /
-                (widget.totalImages! - 1)),
+                (widget.totalImages - 1)),
       );
     }
   }
@@ -90,7 +93,7 @@ class _SlidebarState extends State<Sliderbar> {
               child: Container(
                 height: 60,
                 padding: const EdgeInsets.symmetric(horizontal: 5),
-                color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
+                color: Theme.of(context).colorScheme.surface.withOpacity(0.7),
                 child: Row(
                   children: [
                     IconButton(
@@ -104,12 +107,16 @@ class _SlidebarState extends State<Sliderbar> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(widget.title!,
+                        Text(widget.title!.length > 30 ? '${widget.title!.substring(0,30)}...' : widget.title!,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 16,)),
+                            style: TextStyle(
+                              fontSize: 16,
+                            )),
                         const SizedBox(height: 3),
                         Text(widget.chapter!,
-                            style: TextStyle(fontSize: 12,)),
+                            style: TextStyle(
+                              fontSize: 12,
+                            )),
                       ],
                     ),
                   ],
@@ -131,10 +138,20 @@ class _SlidebarState extends State<Sliderbar> {
                         Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(30),
-                            color: widget.isPrev ? Theme.of(context).colorScheme.surface.withOpacity(0.5) : Colors.white.withOpacity(0.5),
+                            color: widget.isPrev
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .surface
+                                    .withOpacity(0.5)
+                                : Colors.white.withOpacity(0.5),
                           ),
                           child: IconButton(
-                            icon: Icon(Icons.skip_previous, color: widget.isPrev ? Theme.of(context).colorScheme.primary : Colors.white.withOpacity(0.5),),
+                            icon: Icon(
+                              Icons.skip_previous,
+                              color: widget.isPrev
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Colors.white.withOpacity(0.5),
+                            ),
                             onPressed: () {
                               widget.handleChapter('left');
                             },
@@ -142,39 +159,59 @@ class _SlidebarState extends State<Sliderbar> {
                         ),
                         const SizedBox(width: 5),
                         Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(30),
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surface
-                                  .withOpacity(0.5),
-                            ),
-                            child: Slider(
-                              thumbColor: Theme.of(context).colorScheme.primary,
-                              value: _scrollProgress,
-                              onChanged: (value) {
-                                setState(() {
-                                  _scrollProgress = value;
-                                });
-                                _onProgressBarTap(value);
-                              },
-                              activeColor: Theme.of(context).colorScheme.primary,
-                              inactiveColor: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest
-                                  .withOpacity(0.5),
+                          child: CustomSlider(
+                            value: _scrollProgress,
+                            onChanged: (value) {
+                              setState(() {
+                                _scrollProgress = value;
+                              });
+                              _onProgressBarTap(value);
+                            },
+                            max: 1.0,
+                            min: 0.0,
+                            divisions: 10,
+                            customValueIndicatorSize:
+                                RoundedSliderValueIndicator(
+                              ThemeProvider().themeData.colorScheme,
+                              width: 35,
+                              height: 30,
+                              radius: 10
                             ),
                           ),
                         ),
+                        // Slider(
+                        //   thumbColor: Theme.of(context).colorScheme.primary,
+                        //   value: _scrollProgress,
+                        //   onChanged: (value) {
+                        //     setState(() {
+                        //       _scrollProgress = value;
+                        //     });
+                        //     _onProgressBarTap(value);
+                        //   },
+                        //   activeColor: Theme.of(context).colorScheme.primary,
+                        //   inactiveColor: Theme.of(context)
+                        //       .colorScheme
+                        //       .surfaceContainerHighest
+                        //       .withOpacity(0.5),
+                        // ),
                         const SizedBox(width: 5),
                         Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(30),
-                            color: widget.isNext ? Theme.of(context).colorScheme.surface.withOpacity(0.5) : Colors.white.withOpacity(0.5),
+                            color: widget.isNext
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .surface
+                                    .withOpacity(0.5)
+                                : Colors.white.withOpacity(0.5),
                           ),
                           child: IconButton(
-                            icon: Icon(Icons.skip_next, color: widget.isNext ? Theme.of(context).colorScheme.primary :  Colors.white.withOpacity(0.5),),
+                            icon: Icon(
+                              Icons.skip_next,
+                              color: widget.isNext
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Colors.white.withOpacity(0.5),
+                            ),
                             onPressed: () {
                               widget.handleChapter('right');
                             },
@@ -191,9 +228,11 @@ class _SlidebarState extends State<Sliderbar> {
               width: MediaQuery.of(context).size.width,
               child: Center(
                 child: Text(
-                            '$_currentPage / ${widget.totalImages}',
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black),
-                          ),
+                  '$_currentPage / ${widget.totalImages}',
+                  style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,),
+                ),
               ),
             ),
           ],
