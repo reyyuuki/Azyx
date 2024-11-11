@@ -1,6 +1,7 @@
 // ignore_for_file: file_names
 
 import 'dart:developer';
+import 'package:daizy_tv/utils/scraper/Manga/Manga_Extenstions/extract_class.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -16,26 +17,53 @@ class Data extends ChangeNotifier {
     loadData();
   }
 
-  Future<void> loadData() async {
-    try {
-      var box = Hive.box("app-data");
-      animeWatches = List<Map<String, dynamic>>.from(
-          box.get("currently-Watching", defaultValue: []));
-      readsmanga = List<Map<String, dynamic>>.from(
-          box.get("currently-Reading", defaultValue: []));
-      readsnovel = List<Map<String, dynamic>>.from(
-          box.get("readsnovel", defaultValue: []));
-      favoriteManga = List<Map<String, dynamic>>.from(
-          box.get("favoriteManga", defaultValue: []));
-      favoriteAnime = List<Map<String, dynamic>>.from(
-          box.get("favoriteAnime", defaultValue: []));
-      favoriteNovel = List<Map<String, dynamic>>.from(
-          box.get("favoriteNovel", defaultValue: []));
-    } catch (e) {
-      log("Failed to load data: $e");
-    }
+
+void loadData() async {
+  try {
+    var box = Hive.box("app-data");
+
+    favoriteManga = List<Map<String, dynamic>>.from(
+      (box.get("favoriteManga", defaultValue: []) as List)
+          .map((item) => Map<String, dynamic>.from(item)),
+    );
+    favoriteAnime = List<Map<String, dynamic>>.from(
+      (box.get("favoriteAnime", defaultValue: []) as List)
+          .map((item) => Map<String, dynamic>.from(item)),
+    );
+    favoriteNovel = List<Map<String, dynamic>>.from(
+      (box.get("favoriteNovel", defaultValue: []) as List)
+          .map((item) => Map<String, dynamic>.from(item)),
+    );
+
+    animeWatches = List<Map<String, dynamic>>.from(
+      (box.get("currently-Watching", defaultValue: []) as List)
+          .map((item) => Map<String, dynamic>.from(item)),
+    );
+    readsmanga = List<Map<String, dynamic>>.from(
+      (box.get("currently-Reading", defaultValue: []) as List)
+          .map((item) => Map<String, dynamic>.from(item)),
+    );
+    readsnovel = List<Map<String, dynamic>>.from(
+      (box.get("readsnovel", defaultValue: []) as List)
+          .map((item) => Map<String, dynamic>.from(item)),
+    );
+
+    log("Data updated from Hive box: ");
+    log("favoriteManga: $favoriteManga");
+    log("favoriteAnime: $favoriteAnime");
+    log("favoriteNovel: $favoriteNovel");
+    log("animeWatches: $animeWatches");
+    log("readsmanga: $readsmanga");
+    log("readsnovel: $readsnovel");
+
     notifyListeners();
+  } catch (e) {
+    log("Failed to update data: $e");
   }
+}
+
+
+
 
   void setWatchedAnimes(List<Map<String, dynamic>> animes) {
     animeWatches = animes;
@@ -80,6 +108,7 @@ class Data extends ChangeNotifier {
     required String mangaTitle,
     required String currentChapter,
     required String mangaImage,
+    required String currentChapterTitle
   }) {
     readsmanga ??= [];
 
@@ -88,6 +117,7 @@ class Data extends ChangeNotifier {
       'mangaTitle': mangaTitle,
       'currentChapter': currentChapter,
       'mangaImage': mangaImage,
+      'currentChapterTitle': currentChapterTitle,
     };
 
     readsmanga!.removeWhere((manga) => manga['mangaId'] == mangaId);
@@ -151,6 +181,13 @@ Map<String, dynamic>? getNovelById(String novelId) {
     );
   }
 
+Map<String, dynamic>? getFavoriteMangaById(String mangaId) {
+    return favoriteManga?.firstWhere(
+      (manga) => manga['id'] == mangaId,
+      orElse: () => {},
+    );
+  }  
+
 String? getCurrentChapterForNovel(String novelId) {
     final novel = getNovelById(novelId);
     log('Novel fetched for current chapter: $novel');
@@ -163,37 +200,21 @@ String? getCurrentChapterForNovel(String novelId) {
     return anime?['currentEpisode'];
   }
 
-  String? getCurrentChapterForManga(String mangaId) {
+  Map<String,dynamic>? getCurrentChapterForManga(String mangaId) {
     final manga = getMangaById(mangaId);
     log('Manga fetched for current chapter: $manga');
-    return manga?['currentChapter'];
-  }
-
-  void setFavoritemanga(List<Map<String, dynamic>> favrouite) {
-    favoriteManga = favrouite;
-    var box = Hive.box("app-data");
-    box.put("favoriteManga", favrouite);
-    notifyListeners();
-  }
-
-  void setFavoriteAnime(List<Map<String, dynamic>> favrouite) {
-    favoriteAnime = favrouite;
-    var box = Hive.box("app-data");
-    box.put("favoriteAnime", favrouite);
-    notifyListeners();
-  }
-
-  void setFavoriteNovel(List<Map<String, dynamic>> favrouite) {
-    favoriteNovel = favrouite;
-    var box = Hive.box("app-data");
-    box.put("favoriteNovel", favrouite);
-    notifyListeners();
+    return manga;
   }
 
   void addFavrouiteManga({
     required String title,
     required String id,
     required String image,
+    required String currentChapter,
+    required String currentLink,
+    required List<Map<String, dynamic>> chapterList,
+    required String description,
+    required ExtractClass source
   }) {
     favoriteManga ??= [];
 
@@ -201,6 +222,11 @@ String? getCurrentChapterForNovel(String novelId) {
       'title': title,
       'id': id,
       'image': image,
+      'currentChapter': currentChapter,
+      'currentLink': currentLink,
+      "chapterList": chapterList,
+      'description': description,
+      "source": source
     };
 
     favoriteManga!.removeWhere((manga) => manga['id'] == id);
@@ -272,7 +298,7 @@ String? getCurrentChapterForNovel(String novelId) {
     notifyListeners();
   }
 
-  void removefavrouite(String id) {
+   void removefavrouite(String id) {
     favoriteManga!.removeWhere((manga) => manga['id'] == id);
     var box = Hive.box("app-data");
     box.put("favoriteManga", favoriteManga);
@@ -284,6 +310,7 @@ String? getCurrentChapterForNovel(String novelId) {
     log(favoriteManga!.any((manga) => manga['id'] == id).toString());
     return favoriteManga!.any((manga) => manga['id'] == id);
   }
+
 
   bool getFavroiteAnime(String id) {
     log(favoriteAnime!.any((anime) => anime['id'] == id).toString());
