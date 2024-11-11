@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'package:daizy_tv/Screens/Anime/deps/scraper_megacloud.dart';
-import 'package:daizy_tv/Screens/Anime/deps/scraper_rapidcloud.dart';
-import 'package:daizy_tv/Screens/Anime/deps/scraper_streamsb.dart';
-import 'package:daizy_tv/Screens/Anime/deps/scraper_streamtap.dart';
+import 'package:daizy_tv/utils/deps/scraper_megacloud.dart';
+import 'package:daizy_tv/utils/deps/scraper_rapidcloud.dart';
+import 'package:daizy_tv/utils/deps/scraper_streamsb.dart';
+import 'package:daizy_tv/utils/deps/scraper_streamtap.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
 import 'package:html/dom.dart';

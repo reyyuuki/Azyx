@@ -1,4 +1,5 @@
-import 'package:aurora/hiveData/themeData/theme_provider.dart';
+
+import 'package:daizy_tv/Provider/theme_provider.dart';
 import 'package:flutter/material.dart';
 
 class CustomSlider extends StatefulWidget {
@@ -34,10 +35,11 @@ class CustomSliderState extends State<CustomSlider> {
       valueIndicator = widget.customValueIndicatorSize!;
     } else {
       valueIndicator = RoundedSliderValueIndicator(
+        ThemeProvider().themeData.colorScheme,
           width: 35,
           height: 30,
           radius: 10,
-          ThemeProvider().selectedTheme.colorScheme);
+          );
     }
   }
 
@@ -52,7 +54,7 @@ class CustomSliderState extends State<CustomSlider> {
         activeTrackColor: colorScheme.primary,
         inactiveTrackColor: colorScheme.inverseSurface,
         valueIndicatorShape: valueIndicator,
-        trackShape: MarginedTrack(),
+        trackShape: const MarginedTrack(),
         valueIndicatorTextStyle: TextStyle(
           color: colorScheme.surface,
           fontFamily: "Poppins",
@@ -212,10 +214,10 @@ class MarginedTrack extends SliderTrackShape {
         thumbCenter.dx + 12, trackRect.top, trackRect.right, trackRect.bottom);
 
     context.canvas.drawRRect(
-        RRect.fromRectAndRadius(leftTrackSegment, Radius.circular(5)),
+        RRect.fromRectAndRadius(leftTrackSegment, const Radius.circular(5)),
         leftTrackPaint);
     context.canvas.drawRRect(
-        RRect.fromRectAndRadius(rightTrackSegment, Radius.circular(5)),
+        RRect.fromRectAndRadius(rightTrackSegment, const Radius.circular(5)),
         rightTrackPaint);
   }
 }

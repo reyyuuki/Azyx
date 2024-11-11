@@ -59,32 +59,6 @@ class ItemCard extends StatelessWidget {
                   ),
                 ),
               ),
-              type.isNotEmpty ?
-              Positioned(
-                top: 0,
-                left: 0,
-                child: Container(
-                  height: 22,
-                  decoration:  BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.only(
-                        bottomRight: Radius.circular(15),
-                        topLeft: Radius.circular(15)),
-                  ),
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      child: Text(
-                        type,
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
-                            fontFamily: "Poppins-Bold"),
-                      ),
-                    ),
-                  ),
-                ),
-              ) : const SizedBox.shrink(),
               rating != null ?
               Positioned(
                 bottom: 0,
@@ -93,7 +67,7 @@ class ItemCard extends StatelessWidget {
                   height: 22,
                   margin: const EdgeInsets.only(right: 10),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Theme.of(context).colorScheme.secondaryContainer,
                     borderRadius: BorderRadius.only(
                         bottomRight: Radius.circular(10),
                         topLeft: Radius.circular(25)),
@@ -107,13 +81,13 @@ class ItemCard extends StatelessWidget {
                           rating != null ? (rating! / 10).toString() : "N/A",
                           style:  TextStyle(
                               fontSize: 12,
-                              color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
+                              color: Theme.of(context).colorScheme.primary,
                               fontFamily: "Poppins-Bold"),
                         ),
                          Icon(
                           Iconsax.star1,
                           size: 16,
-                          color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ],
                     ),

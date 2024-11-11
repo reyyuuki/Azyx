@@ -106,37 +106,23 @@ class NovelCarousale extends StatelessWidget {
                                   style: const TextStyle(
                                       fontSize: 20, fontFamily: "Poppins-Bold"),
                                 ),
-                                const SizedBox(
-                                  height: 5,
-                                ),
-                                Text(
-                                  (novel['description'] as String?)?.length !=
-                                              null &&
-                                          (novel['description'] as String)
-                                                  .length >
-                                              85
-                                      ? '${(novel['description'] as String).substring(0, 85)}...'
-                                      : novel['description'] ?? "N/A",
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                                const SizedBox(
-                                  height: 5,
-                                ),
+                                Text( novel['description'] != null ? novel['description'].length > 85 ? '${novel['description'].substring(0,85)}...': novel['description'] : "N/A"),
                                 Container(
                                   width: 120,
                                   decoration: BoxDecoration(
                                       color:
-                                          Theme.of(context).colorScheme.primary,
+                                          Theme.of(context).colorScheme.secondaryContainer,
                                       borderRadius: BorderRadius.circular(20)),
                                   child: Padding(
                                     padding: const EdgeInsets.all(5),
                                     child: Row(
                                       children: [
                                         Icon(
-                                          Icons.book_online,
+                                          Icons.book_outlined,
                                           color: Theme.of(context)
                                               .colorScheme
-                                              .inversePrimary,
+                                              .primary,
+                                              size: 20,
                                         ),
                                         const SizedBox(
                                           width: 5,
@@ -146,7 +132,7 @@ class NovelCarousale extends StatelessWidget {
                                           style: TextStyle(
                                               color: Theme.of(context)
                                                   .colorScheme
-                                                  .inversePrimary),
+                                                  .primary),
                                         )
                                       ],
                                     ),

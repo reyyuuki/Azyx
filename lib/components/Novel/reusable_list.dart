@@ -55,7 +55,7 @@ class NovelList extends StatelessWidget {
               itemCount: data!.length,
               itemBuilder: (context, index) {
                 final tagg = data[index]['id'] + taggName! + index.toString();
-                return NovelItem(id: data[index]['id'], poster: data[index]['image'] ?? '', name: data[index]['title'], rating: data[index]['rating'], tagg: tagg,);
+                return NovelItem(id: data[index]['id'], poster: data[index]['image'] ?? '', name: data[index]['title'], rating: data[index]['rating'].toString(), tagg: tagg,);
               },
             ),
           ),

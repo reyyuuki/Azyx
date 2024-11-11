@@ -9,9 +9,8 @@ import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/Anime/animeInfo.dart';
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
 import 'package:daizy_tv/utils/api/_anime_api.dart';
-import 'package:daizy_tv/utils/scraper/other/episodeScrapper.dart';
+import 'package:daizy_tv/utils/scraper/Anime/episodeScrapper.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:lite_rolling_switch/lite_rolling_switch.dart';
@@ -97,7 +96,7 @@ class _AnimeDetailsState extends State<AnimeDetails> {
           'episodeTitle': title,
           'subtitleTracks': tracks,
           'animeTitle': widget.animeData['name'],
-          'activeServer': server,
+          'activeServer': server ?? "megacloud",
           'isDub': dub,
           'animeId': widget.id,
         },
@@ -504,7 +503,7 @@ class _AnimeDetailsState extends State<AnimeDetails> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: TextScroll(
-                widget.animeData['name'],
+                widget.animeData['name'] ?? "Unknown",
                 mode: TextScrollMode.bouncing,
                 velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
                 delayBefore: const Duration(milliseconds: 500),
@@ -526,7 +525,7 @@ class _AnimeDetailsState extends State<AnimeDetails> {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  widget.animeData['rating'].toString(),
+                  widget.animeData['rating'].toString() ?? "??",
                   style:
                       const TextStyle(fontSize: 18, fontFamily: "Poppins-Bold"),
                 ),

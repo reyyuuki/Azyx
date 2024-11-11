@@ -15,7 +15,6 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  var box = Hive.box('mybox');
   var appData = Hive.box("app-data");
   String imagePath = "";
   String userName = "";
@@ -31,22 +30,42 @@ class _ProfileState extends State<Profile> {
     mangaReads = appData.get("currently-Reading");
     _nameController.text = userName;
   }
- 
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<AniListProvider>(context,listen: false);
+    final provider = Provider.of<AniListProvider>(context, listen: false);
     List<Map<String, dynamic>> data = [
-     {'title': 'Anime Count', 'value': provider.userData['statistics']['anime']['count']},
-    {'title': 'Episodes Watched', 'value': provider.userData['statistics']['anime']['episodesWatched']},
-    {'title': 'Minutes Watched', 'value': provider.userData['statistics']['anime']['minutesWatched']},
-    // {'title': 'Days Watched', 'value': provider.userData['statistics']['anime']['daysWatched']},
-    // {'title': 'Anime Mean Score', 'value': provider.userData['statistics']['anime']['episodeWatched']},
-    {'title': 'Manga Count', 'value': provider.userData['statistics']['manga']['count']},
-    {'title': 'Chapters Read', 'value': provider.userData['statistics']['manga']['chaptersRead']},
-    // {'title': 'Volumes Read', 'value': 0},
-    // {'title': 'Manga Mean Score', 'value': 0.0},
-  ];
+      {
+        'title': 'Anime Count',
+        'value': provider.userData['statistics']['anime']['count']
+      },
+      {
+        'title': 'Episodes Watched',
+        'value': provider.userData['statistics']['anime']['episodesWatched']
+      },
+      {
+        'title': 'Minutes Watched',
+        'value': provider.userData['statistics']['anime']['minutesWatched']
+      },
+      // {'title': 'Days Watched', 'value': provider.userData['statistics']['anime']['daysWatched']},
+      // {'title': 'Anime Mean Score', 'value': provider.userData['statistics']['anime']['episodeWatched']},
+      {
+        'title': 'Manga Count',
+        'value': provider.userData['statistics']['manga']['count']
+      },
+      {
+        'title': 'Chapters Read',
+        'value': provider.userData['statistics']['manga']['chaptersRead']
+      },
+      // {'title': 'Volumes Read', 'value': 0},
+      // {'title': 'Manga Mean Score', 'value': 0.0},
+    ];
+    final animeData = provider.userData['animeList']?.where((anime) => anime['status'] == "CURRENT")
+            .toList();
+
+    final mangaData = provider.userData['mangaList']?.where((manga) => manga['status'] == "CURRENT")
+            .toList();
+
     String name = provider.userData['name'] ?? "Guest";
     String image = provider.userData['avatar']['large'] ?? "";
     return Scaffold(
@@ -93,7 +112,7 @@ class _ProfileState extends State<Profile> {
                 child: Column(
                   children: [
                     GestureDetector(
-                      onTap: (){},
+                      onTap: () {},
                       child: SizedBox(
                         width: 200,
                         height: 200,
@@ -124,7 +143,7 @@ class _ProfileState extends State<Profile> {
                 ),
               )
             ],
-          ), 
+          ),
           const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -133,7 +152,8 @@ class _ProfileState extends State<Profile> {
                 width: 200,
                 height: 60,
                 decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(10)),
                 child: Padding(
                   padding:
@@ -146,10 +166,12 @@ class _ProfileState extends State<Profile> {
                           const Text(
                             "Anime",
                             style: TextStyle(
-                                fontFamily: "Poppins-Bold",),
+                              fontFamily: "Poppins-Bold",
+                            ),
                           ),
                           Text(
-                              provider.userData['statistics']['anime']['count'].toString(),
+                              provider.userData['statistics']['anime']['count']
+                                  .toString(),
                               style:
                                   const TextStyle(fontFamily: "Poppins-Bold")),
                         ],
@@ -158,12 +180,14 @@ class _ProfileState extends State<Profile> {
                         children: [
                           const Text("Manga",
                               style: TextStyle(
-                                  fontFamily: "Poppins-Bold",
-                                  )),
+                                fontFamily: "Poppins-Bold",
+                              )),
                           Text(
-                              provider.userData['statistics']['manga']['count'].toString(),
-                              style:
-                                  const TextStyle(fontFamily: "Poppins-Bold",)),
+                              provider.userData['statistics']['manga']['count']
+                                  .toString(),
+                              style: const TextStyle(
+                                fontFamily: "Poppins-Bold",
+                              )),
                         ],
                       )
                     ],
@@ -185,14 +209,18 @@ class _ProfileState extends State<Profile> {
             child: Padding(
               padding: const EdgeInsets.all(15),
               child: Container(
-                decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(10)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: data.map<Widget>((item) {
                     return Column(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 10),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -200,9 +228,12 @@ class _ProfileState extends State<Profile> {
                                   style: const TextStyle(
                                       fontSize: 17,
                                       fontFamily: "Poppins-Bold")),
-                               Text(
-                                item['value'].toString().isNotEmpty ? item['value'].toString() : "0" ,
-                                style: const TextStyle(fontFamily: "Poppins-Bold", fontSize: 16),
+                              Text(
+                                item['value'].toString().isNotEmpty
+                                    ? item['value'].toString()
+                                    : "0",
+                                style: const TextStyle(
+                                    fontFamily: "Poppins-Bold", fontSize: 16),
                               )
                             ],
                           ),
@@ -217,14 +248,18 @@ class _ProfileState extends State<Profile> {
           const SizedBox(
             height: 20,
           ),
-          // Padding(
-          //   padding: const EdgeInsets.all(10),
-          //   child: Animecarousale(carosaleData: animeWatches),
-          // ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Mangacarousale(carosaleData: mangaReads),
-          )
+          provider.userData['animeList'] != null
+              ? Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Animecarousale(carosaleData: animeData),
+                )
+              : const SizedBox.shrink(),
+          provider.userData['mangaList'] != null
+              ? Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Mangacarousale(carosaleData: mangaData),
+                )
+              : const SizedBox.shrink()
         ],
       ),
     );

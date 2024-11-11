@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 class SettingTile extends StatelessWidget {
   final Icon icon;
   final String name;
-  final String routeName;
+  final Widget routeName;
 
-  const SettingTile(
+   const SettingTile(
       {super.key,
       required this.icon,
       required this.name,
@@ -26,7 +26,11 @@ class SettingTile extends StatelessWidget {
           child: const Icon(Icons.arrow_back_ios),
         ),
         onTap: () {
-          Navigator.pushNamed(context, routeName);
+          Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => routeName,
+                    ));
         },
       ),
     );
