@@ -1,7 +1,10 @@
-
-
+import 'package:daizy_tv/Screens/Bottom_Menu/_profile.dart';
+import 'package:daizy_tv/Screens/settings/_about.dart';
+import 'package:daizy_tv/Screens/settings/_languages.dart';
+import 'package:daizy_tv/Screens/settings/_theme_changer.dart';
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/Common/setting_tile.dart';
+import 'package:daizy_tv/utils/helper/migrating_favortes.dart';
 import 'package:daizy_tv/utils/scraper/Novel/novel_buddy.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -19,7 +22,6 @@ class _SettingState extends State<Setting> {
   void initState() {
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -40,26 +42,26 @@ class _SettingState extends State<Setting> {
           centerTitle: true,
         ),
         body: Padding(
-          padding: const EdgeInsets.fromLTRB(15,0,15,100),
+          padding: const EdgeInsets.fromLTRB(15, 0, 15, 100),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Column(
                 children: [
                   SizedBox(
-                    width: 200,
-                    height: 200,
-                    child: image != "" && image.isNotEmpty ? ClipRRect(
-                        borderRadius: BorderRadius.circular(100),
-                        child: Image.network(
+                      width: 200,
+                      height: 200,
+                      child: image != "" && image.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(100),
+                              child: Image.network(
                                 image,
                                 fit: BoxFit.cover,
-                              )
-                            ) : const Icon(
-                                Iconsax.user,
-                                size: 150,
-                              )
-                  ),
+                              ))
+                          : const Icon(
+                              Iconsax.user,
+                              size: 150,
+                            )),
                   const SizedBox(
                     height: 5,
                   ),
@@ -76,7 +78,7 @@ class _SettingState extends State<Setting> {
               const SettingTile(
                 icon: Icon(Icons.palette),
                 name: "Themes",
-                routeName: './theme-changer',
+                routeName: ThemeChange(),
               ),
               const SizedBox(
                 height: 10,
@@ -84,7 +86,7 @@ class _SettingState extends State<Setting> {
               const SettingTile(
                 icon: Icon(Icons.language),
                 name: "Languages",
-                routeName: './languages',
+                routeName: Languages(),
               ),
               const SizedBox(
                 height: 10,
@@ -93,7 +95,7 @@ class _SettingState extends State<Setting> {
                   ? const SettingTile(
                       icon: Icon(Iconsax.user_tag),
                       name: "Profile",
-                      routeName: "./profile",
+                      routeName: Profile(),
                     )
                   : const SizedBox.shrink(),
               provider.userData['name'] != null
@@ -104,12 +106,14 @@ class _SettingState extends State<Setting> {
               const SettingTile(
                 icon: Icon(Iconsax.info_circle),
                 name: "About",
-                routeName: "./about",
+                routeName: About(),
               ),
-              
+              // ElevatedButton(onPressed: () {
+              //   // provider.fetchAniListFavorites();
+              //      provider.addFavorite(31061, "manga");
+              // }, child: Text("Fetch"))
             ],
           ),
         ));
   }
 }
-

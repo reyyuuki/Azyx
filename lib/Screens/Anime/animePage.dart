@@ -95,6 +95,7 @@ class _HomepageState extends State<Animepage> {
                 AnimeCarousale(
                   animeData: trendingAnime,
                   route: '/detailspage',
+                  name: "Play",
                 ),
                 const SizedBox(height: 30.0),
                 ReusableList(

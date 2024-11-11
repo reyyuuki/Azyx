@@ -13,7 +13,7 @@ class AnimeInfo extends StatelessWidget {
 
     return Column(
       children: [
-        Genres(genres: animeData['genres']),
+       animeData['genres'] != null ? Genres(genres: animeData['genres']) : const SizedBox.shrink(),
         const SizedBox(
           height: 30,
         ),

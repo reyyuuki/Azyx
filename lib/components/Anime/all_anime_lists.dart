@@ -25,27 +25,38 @@ class AllAnimeLists extends StatelessWidget {
               ),
               itemCount: data.length,
               itemBuilder: (context, index) {
-                final tagg = data[index]['media']['id']; 
+                final tagg = data[index]['media']['id'].toString(); 
                 return Column(
                   children: [
-                    Container(
-                      height: 150,
-                      width: 103,
-                      margin: const EdgeInsets.only(right: 10),
-                      child: Hero(
-                        tag: tagg,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
-                          child: CachedNetworkImage(
-                            imageUrl: data[index]['media']['coverImage']['large'],
-                            fit: BoxFit.cover,
-                            progressIndicatorBuilder: (context, url, downloadProgress) =>
-                                Center(
-                              child: CircularProgressIndicator(
-                                value: downloadProgress.progress,
+                    GestureDetector(
+                      onTap: (){
+                        Navigator.pushNamed(context, "/detailspage",
+                          arguments: {
+                            "id": tagg,
+                            "image": data[index]['media']['coverImage']['large'],
+                            "tagg": tagg
+                          }
+                        );
+                      },
+                      child: Container(
+                        height: 150,
+                        width: 103,
+                        margin: const EdgeInsets.only(right: 10),
+                        child: Hero(
+                          tag: tagg,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: CachedNetworkImage(
+                              imageUrl: data[index]['media']['coverImage']['large'],
+                              fit: BoxFit.cover,
+                              progressIndicatorBuilder: (context, url, downloadProgress) =>
+                                  Center(
+                                child: CircularProgressIndicator(
+                                  value: downloadProgress.progress,
+                                ),
                               ),
+                              errorWidget: (context, url, error) => const Icon(Icons.error),
                             ),
-                            errorWidget: (context, url, error) => const Icon(Icons.error),
                           ),
                         ),
                       ),

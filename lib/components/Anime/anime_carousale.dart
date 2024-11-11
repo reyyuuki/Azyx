@@ -1,12 +1,14 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:ionicons/ionicons.dart';
 
 class AnimeCarousale extends StatelessWidget {
   dynamic animeData;
   String route;
+  String name;
 
-  AnimeCarousale({super.key, this.animeData, required this.route});
+  AnimeCarousale({super.key, this.animeData, required this.route, required this.name});
 
   @override
   Widget build(BuildContext context) {
@@ -123,30 +125,32 @@ class AnimeCarousale extends StatelessWidget {
                                   height: 5,
                                 ),
                                 Container(
-                                  width: 110,
+                                  width: 115,
                                   decoration: BoxDecoration(
                                       color:
-                                          Theme.of(context).colorScheme.primary,
+                                          Theme.of(context).colorScheme.secondaryContainer,
                                       borderRadius: BorderRadius.circular(20)),
                                   child: Padding(
                                     padding: const EdgeInsets.all(5),
                                     child: Row(
                                       children: [
                                         Icon(
-                                          Icons.play_circle_fill,
+                                          name == "Play" ?
+                                          Icons.play_circle_fill : Ionicons.book,
+                                          size: 15,
                                           color: Theme.of(context)
                                               .colorScheme
-                                              .inversePrimary,
+                                              .primary,
                                         ),
                                         const SizedBox(
                                           width: 5,
                                         ),
                                         Text(
-                                          "Play now",
+                                          "$name now",
                                           style: TextStyle(
                                               color: Theme.of(context)
                                                   .colorScheme
-                                                  .inversePrimary),
+                                                  .primary),
                                         )
                                       ],
                                     ),
