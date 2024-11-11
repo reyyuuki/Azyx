@@ -121,7 +121,7 @@ class _MangapageState extends State<Mangapage> {
                   ),
                 ),
                 const SizedBox(height: 30.0),
-                AnimeCarousale(animeData: trendingManga, route: '/mangaDetail',),
+                AnimeCarousale(animeData: trendingManga, route: '/mangaDetail',name: "Read",),
                 const SizedBox(height: 30.0),
                 ReusableList(
                   name: 'Popular',
