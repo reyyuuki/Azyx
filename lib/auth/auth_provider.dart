@@ -27,7 +27,6 @@ class AniListProvider with ChangeNotifier {
     _anilistData = await fetchAnilistAnimes();
     _mangalistData = await fetchAnilistManga();
     final token = await storage.read(key: 'auth_token');
-    log('auto login $token');
     if (token != null) {
       await fetchUserProfile();
       await fetchUserAnimeList();
@@ -219,9 +218,6 @@ class AniListProvider with ChangeNotifier {
               data['data']['MediaListCollection']['lists'] as List<dynamic>;
           _userData['animeList'] =
               lists.expand((list) => list['entries'] as List<dynamic>).toList();
-          log('User anime list fetched successfully');
-          log('Fetched ${_userData['animeList'].length} anime entries');
-          log(data['data']['MediaListCollection']['lists']);
         } else {
           log('Unexpected response structure: ${response.body}');
         }
@@ -313,8 +309,6 @@ class AniListProvider with ChangeNotifier {
               data['data']['MediaListCollection']['lists'] as List<dynamic>;
           _userData['mangaList'] =
               lists.expand((list) => list['entries'] as List<dynamic>).toList();
-          log('User manga list fetched successfully');
-          log('Fetched ${_userData['mangaList'].length} manga entries');
         } else {
           log('Unexpected response structure: ${response.body}');
         }
@@ -325,7 +319,6 @@ class AniListProvider with ChangeNotifier {
     } catch (e) {
       log('Failed to load manga list: $e');
     }
-    log(userData['mangaList'].toString());
     _isLoading = false;
     notifyListeners();
   }
@@ -541,7 +534,6 @@ class AniListProvider with ChangeNotifier {
       };
 
       notifyListeners();
-      log(sections['popular'].toString());
       return sections;
     } else {
       throw Exception('Failed to load data');
@@ -887,9 +879,6 @@ class AniListProvider with ChangeNotifier {
           };
         }).toList(),
       };
-
-      log(_favorites.toString());
-      log(_favorites['userId'].toString());
     } else {
       throw Exception('Failed to load favorites');
     }
@@ -930,16 +919,15 @@ Future<bool> addFavorite(int mediaId, String type) async {
 }
 
 
-
-  void migratefavoritesdata(BuildContext context) {
-    final dataProvider = Provider.of<Data>(context, listen: false);
-    final bool isLoogedIn = _userData['name'] != null;
-    dataProvider.favoriteManga =
-        isLoogedIn ? _favorites['manga'] + dataProvider.favoriteManga : dataProvider.favoriteManga;
-    var box = Hive.box("app-data");
-    box.put("favoriteManga", dataProvider.favoriteManga);
-    log(dataProvider.favoriteManga.toString());
-    notifyListeners();
-  }
+  // void migratefavoritesdata(BuildContext context) {
+  //   final dataProvider = Provider.of<Data>(context, listen: false);
+  //   final bool isLoogedIn = _userData['name'] != null;
+  //   dataProvider.favoriteManga =
+  //       isLoogedIn ? _favorites['manga'] + dataProvider.favoriteManga : dataProvider.favoriteManga;
+  //   var box = Hive.box("app-data");
+  //   box.put("favoriteManga", dataProvider.favoriteManga);
+  //   log(dataProvider.favoriteManga.toString());
+  //   notifyListeners();
+  // }
 
 }

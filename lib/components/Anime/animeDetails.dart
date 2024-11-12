@@ -8,6 +8,7 @@ import 'package:daizy_tv/Screens/Anime/episode_src.dart';
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/Anime/animeInfo.dart';
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
+import 'package:daizy_tv/components/Anime/floater.dart';
 import 'package:daizy_tv/utils/api/_anime_api.dart';
 import 'package:daizy_tv/utils/scraper/Anime/episodeScrapper.dart';
 import 'package:flutter/material.dart';
@@ -129,7 +130,7 @@ class _AnimeDetailsState extends State<AnimeDetails> {
         final episodeResponse = await scrapeAnimeEpisodes(animeId!);
         final consumetEpisodes =
             await fetchStreamingDataConsumet(int.parse(widget.id));
-        if (episodeResponse.isNotEmpty && episodeResponse != null) {
+        if (episodeResponse.isNotEmpty) {
           setState(() {
             episodeData = episodeResponse['episodes'];
             filteredEpisodes = episodeResponse['episodes'];
@@ -676,9 +677,11 @@ class _AnimeDetailsState extends State<AnimeDetails> {
                   ),
                   const SizedBox(height: 10),
                   tabs(context),
+                
                 ],
               ),
             ),
+              // AnimeFloater(data: widget.animeData, chapterList: filteredEpisodes),
           ],
         ),
       ),

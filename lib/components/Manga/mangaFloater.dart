@@ -49,7 +49,6 @@ class _MangafloaterState extends State<Mangafloater> {
                           currentLink: widget.currentLink,
                           currentChapter: widget.currentChapter,
                           description: widget.data['description'],
-                          source: widget.source
                         );
                   setState(() {
                     isFavrouite = true;
@@ -115,7 +114,7 @@ class _MangafloaterState extends State<Mangafloater> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '${widget.currentChapter}',
+                      widget.currentChapter.length > 20 ?  '${widget.currentChapter.substring(0,20)}...' : widget.currentChapter,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                         fontFamily: "Poppins-Bold",
