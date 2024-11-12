@@ -21,7 +21,7 @@ class _NovelPageState extends State<NovelPage> {
   @override
   void initState() {
     super.initState();
-    backupdata();
+    loadData();
   }
 
 List<Map<String, dynamic>>? data;

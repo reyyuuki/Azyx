@@ -181,6 +181,10 @@ Map<String, dynamic>? getNovelById(String novelId) {
     );
   }
 
+Map<String,dynamic>? getFavoritesAnimeById(String id){
+  return favoriteAnime!.firstWhere((anime) => anime['id'] == id);
+}
+
 Map<String, dynamic>? getFavoriteMangaById(String mangaId) {
     return favoriteManga?.firstWhere(
       (manga) => manga['id'] == mangaId,
@@ -214,7 +218,6 @@ String? getCurrentChapterForNovel(String novelId) {
     required String currentLink,
     required List<Map<String, dynamic>> chapterList,
     required String description,
-    required ExtractClass source
   }) {
     favoriteManga ??= [];
 
@@ -226,7 +229,6 @@ String? getCurrentChapterForNovel(String novelId) {
       'currentLink': currentLink,
       "chapterList": chapterList,
       'description': description,
-      "source": source
     };
 
     favoriteManga!.removeWhere((manga) => manga['id'] == id);
@@ -234,7 +236,7 @@ String? getCurrentChapterForNovel(String novelId) {
 
     var box = Hive.box("app-data");
     box.put("favoriteManga", favoriteManga);
-    log('updates new favrouite: $favoriteManga');
+    // log('updates new favrouite: $favoriteManga');
     notifyListeners();
   }
 
@@ -242,6 +244,10 @@ String? getCurrentChapterForNovel(String novelId) {
     required String title,
     required String id,
     required String image,
+    required String server,
+    required String category,
+    required String description,
+    required List<Map<String,dynamic>> episodeList
   }) {
     favoriteAnime ??= [];
 
@@ -249,6 +255,10 @@ String? getCurrentChapterForNovel(String novelId) {
       'title': title,
       'id': id,
       'image': image,
+      'server': server,
+      'category': category,
+      'episodeList': episodeList,
+      'description': description
     };
 
     favoriteAnime!.removeWhere((anime) => anime['id'] == id);

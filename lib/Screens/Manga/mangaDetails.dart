@@ -188,6 +188,7 @@ class _DetailsState extends State<Mangadetails> {
       log("Error: ${e.toString()}");
       setState(() {
         currentLink = filteredChapterList?.last['link'];
+        currentChapter = filteredChapterList?.last['title'];
       });
     }
   }
@@ -551,7 +552,7 @@ class _DetailsState extends State<Mangadetails> {
               ),
             ],
           ),
-          mangaData != null && currentLink != null 
+          mangaData != null && currentLink != null && currentChapter.isNotEmpty
               ? Mangafloater(
                   data: mangaData,
                   currentLink: currentLink!,
