@@ -40,6 +40,9 @@ dependencies:
   google_nav_bar: ^5.0.7
   dio: ^5.7.0
   google_fonts: ^6.2.1
+  device_info_plus: any
+  permission_handler: any
+  flutter_local_notifications: any
 
 dev_dependencies:
   flutter_test:
