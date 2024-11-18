@@ -49,10 +49,10 @@ class _HomepageState extends State<Animepage> {
         child: Consumer<AniListProvider>(
           builder: (context, provider, child) {
            
-            mostPopularAnimes = provider.anilistData['popular'];
-            trendingAnime = provider.anilistData['trending'];
-            latestEpisodesAnime = provider.anilistData['latest'];
-            topUpComingAnime = provider.anilistData['completed'];
+            mostPopularAnimes = provider.anilistData['popular'] ?? mostPopularAnimes;
+            trendingAnime = provider.anilistData['trending'] ?? trendingAnime;
+            latestEpisodesAnime = latestEpisodesAnime;
+            topUpComingAnime = provider.anilistData['completed'] ?? topUpComingAnime;
 
           return ListView(
               children: [
