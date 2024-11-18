@@ -81,8 +81,8 @@ class _MangapageState extends State<Mangapage> {
           builder: (context, provider, child) {
             mangaData = provider.mangalistData['popular'] ?? mangaData;
             trendingManga = trendingManga;
-            latestManga = provider.mangalistData['completed'] ?? latestManga;
-            topOngoing = provider.mangalistData['latest'] ?? topOngoing;
+            latestManga =  latestManga;
+            topOngoing =  topOngoing;
 
            return  ListView(
               children: [

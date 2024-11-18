@@ -4,13 +4,15 @@ import 'dart:developer';
 
 import 'package:animated_segmented_tab_control/animated_segmented_tab_control.dart';
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
+import 'package:daizy_tv/Provider/manga_sources.dart';
 import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/coverImage.dart';
 import 'package:daizy_tv/components/Novel/novel_alldetails.dart';
 import 'package:daizy_tv/components/Novel/novel_chapters.dart';
 import 'package:daizy_tv/components/Novel/novel_floater.dart';
-import 'package:daizy_tv/utils/scraper/Manga/Manga_Extenstions/extract_class.dart';
-import 'package:daizy_tv/utils/scraper/Novel/wuxia_novel.dart';
+import 'package:daizy_tv/utils/helper/jaro_winkler.dart';
+import 'package:daizy_tv/utils/scraper/Novel/base/base_class.dart';
+import 'package:daizy_tv/utils/scraper/Novel/novel_buddy.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
@@ -39,9 +41,11 @@ class _DetailsState extends State<Noveldetails> {
   bool loading = true;
   TextEditingController? _controller;
   late String searchTerm;
-  ExtractClass? mangaScarapper;
-  List<ExtractClass>? sources;
+  NovelSourceBase? novelSource;
+  List<NovelSourceBase>? sources;
   String? currentLink;
+  String? currentChapterTitle;
+  String? localSource;
 
   @override
   void initState() {
@@ -56,46 +60,76 @@ class _DetailsState extends State<Noveldetails> {
     super.dispose();
   }
 
-
   Future<void> scrap() async {
-    final data = await scrapeNovelDetails(widget.id);
-    if (data != null) {
+    final data = await NovelBuddy().scrapeNovelDetails(widget.id);
+    if (data != null && data.isNotEmpty) {
       setState(() {
         novelData = data;
         filteredChapterList = data['chapterList'];
+        chapterList = data['chapterList'];
         loading = false;
       });
-      // log(data.toString());
     }
     continueReading();
+  }
+
+  Future<void> mappingData() async {
+    try {
+      final searchData = await searchMostSimilarNovel(
+          novelData['title'], novelSource!.scrapeNovelSearchData);
+      if (searchData!.isNotEmpty) {
+        final chaptersData =
+            await novelSource!.scrapeNovelDetails(searchData['id']);
+        if (chaptersData != null) {
+          setState(() {
+            mappedId = searchData['id'];
+            filteredChapterList = chaptersData['chapterList'];
+            chapterList = chaptersData['chapterList'];
+          });
+          // wrongTittle.text = novelData['name'];
+          // wrongTitleSearch(wrongTittle.text);
+        }
+        continueReading();
+      }
+    } catch (e) {
+      log("Errors: $e");
+    }
   }
 
   Future<void> continueReading() async {
     try {
       final provider = Provider.of<Data>(context, listen: false);
       final link = provider.getCurrentChapterForNovel(widget.id);
-      if (link != null) {
+      log(link.toString());
+      if (link!.isNotEmpty && link != null) {
         setState(() {
-          currentLink = link;
+          currentLink = link['currentChapter'];
+          currentChapterTitle = link['currentChapterTitle'];
         });
       } else {
         setState(() {
-          currentLink = filteredChapterList!.first['id'];
+          currentLink = filteredChapterList!.last['id'];
+          currentChapterTitle = filteredChapterList!.last['title'];
         });
       }
-      log(currentLink ?? "No link available");
+      log(filteredChapterList!.last['id'] + currentLink.toString());
     } catch (e) {
       log("Error: ${e.toString()}");
     }
   }
 
+  void searchChapter(String number) {
+    final list =
+        filteredChapterList!.where((chapter) => chapter["title"].contains(number)).toList();
+    setState(() {
+      chapterList = list;
+    });
+  }
 
   @override
   Widget build(context) {
     final textStyle = Theme.of(context).textTheme.bodyLarge;
     final selectedTextStyle = textStyle?.copyWith(fontWeight: FontWeight.bold);
-
-    
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
@@ -152,7 +186,7 @@ class _DetailsState extends State<Noveldetails> {
                                     const EdgeInsets.symmetric(horizontal: 20),
                                 child: SegmentedTabControl(
                                   height: 60,
-                                  barDecoration:  BoxDecoration(
+                                  barDecoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10)),
                                   selectedTabTextColor: Theme.of(context)
                                       .colorScheme
@@ -201,16 +235,25 @@ class _DetailsState extends State<Noveldetails> {
               ),
             ],
           ),
-         novelData != null  && currentLink != null ? NovelFloater(data: novelData, currentLink: currentLink!) : const SizedBox.shrink()
+          novelData != null &&
+                  currentLink != null &&
+                  currentChapterTitle != null
+              ? NovelFloater(
+                  data: novelData,
+                  currentLink: currentLink!,
+                  currentChapterTitle: currentChapterTitle!,
+                  image: widget.image,
+                )
+              : const SizedBox.shrink()
         ],
       ),
     );
   }
 
   SizedBox tabs(BuildContext context) {
-    
+    final sourceProvider = Provider.of<MangaSourcesProvider>(context,listen: false);
     return SizedBox(
-      height: 700,
+      height: 600,
       child: TabBarView(
         physics: const BouncingScrollPhysics(),
         children: [
@@ -218,6 +261,58 @@ class _DetailsState extends State<Noveldetails> {
           Column(
             children: [
               const SizedBox(height: 10),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                child: DropdownButtonFormField<String>(
+                  value: sourceProvider.novelInstance.sourceName,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    labelText: 'Choose Source',
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surface,
+                    labelStyle:
+                        TextStyle(color: Theme.of(context).colorScheme.primary),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.primary),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onPrimaryFixedVariant),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.primary),
+                    ),
+                  ),
+                  isDense: true,
+                  items: sourceProvider.novelSource
+                          ?.map<DropdownMenuItem<String>>((source) {
+                        return DropdownMenuItem<String>(
+                          value: source.sourceName,
+                          child: Text(source.sourceName),
+                        );
+                      }).toList() ??
+                      [],
+                  onChanged: (dynamic newValue) {
+                    if (newValue.toString().isNotEmpty) {
+                      setState(() {
+                        localSource = newValue;
+                        sourceProvider
+                            .setNovelInstance(sourceProvider.novelSource!.firstWhere(
+                          (source) => source.sourceName == newValue,
+                        ));
+                        novelSource = sourceProvider.novelInstance;
+                        chapterList = [];
+                      });
+                      mappingData();
+                    }
+                  },
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 15,
@@ -233,35 +328,44 @@ class _DetailsState extends State<Noveldetails> {
                     IconButton(
                         onPressed: () {
                           setState(() {
-                            filteredChapterList =
-                                filteredChapterList?.reversed.toList();
+                            chapterList =
+                                chapterList?.reversed.toList();
                           });
                         },
-                        icon: const Icon(Iconsax.refresh)),
+                        icon: const Icon(Iconsax.arrow_down)),
                   ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                child: TextField(
+                  onChanged: (String value){
+                    searchChapter(value);
+                  },
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Iconsax.search_normal),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surface,
+                      labelText: "Search Chapters",
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Theme.of(context).colorScheme.primary),
+                          borderRadius: BorderRadius.circular(20)),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(
+                              color: Theme.of(context).colorScheme.primary))),
                 ),
               ),
               const SizedBox(
                 height: 10,
               ),
-              // ElevatedButton(
-              //     onPressed: () {
-              //       Navigator.pushNamed(context, '/read', arguments: {
-              //         "mangaId": widget.id,
-              //         "chapterLink": currentLink,
-              //         "image": widget.image,
-              //       });
-              //     },
-              //     child: Text("Continue")),
-              // const SizedBox(
-              //   height: 10,
-              // ),
               SizedBox(
-                height: 580,
-                child: filteredChapterList != null &&
-                        filteredChapterList!.isNotEmpty
+                height: 350,
+                child: chapterList != null &&
+                        chapterList!.isNotEmpty
                     ? ListView(
-                        children: filteredChapterList!.map<Widget>((chapter) {
+                        children: chapterList!.map<Widget>((chapter) {
                           return NovelChapters(
                             id: widget.id,
                             chapter: chapter,
@@ -278,5 +382,4 @@ class _DetailsState extends State<Noveldetails> {
       ),
     );
   }
-
 }
