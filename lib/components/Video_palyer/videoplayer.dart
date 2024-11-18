@@ -1,11 +1,13 @@
 import 'dart:developer';
 
+import 'package:daizy_tv/Hive_Data/appDatabase.dart';
 import 'package:daizy_tv/utils/api/_anime_api.dart';
 import 'package:daizy_tv/components/Video_palyer/player.dart';
 import 'package:flutter/material.dart';
 import 'package:better_player/better_player.dart';
 import 'package:flutter/services.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:provider/provider.dart';
 
 class VideoPlayerAlt extends StatefulWidget {
   final String episodeSrc;
@@ -62,10 +64,14 @@ class _VideoPlayerAltState extends State<VideoPlayerAlt>
     super.initState();
     _initVars();
     initializePlayer();
-    // Provider.of<AniListProvider>(context, listen: false).updateAnimeProgress(
-    //     animeId: widget.animeId,
-    //     episodeProgress: widget.currentEpisode,
-    //     status: 'CURRENT');
+    Provider.of<Data>(context, listen: false).addWatchedAnimes(
+        animeId: widget.animeId.toString(),
+        animeTitle: widget.animeTitle,
+        currentEpisode: currentEpisode!,
+        episodeTitle: widget.episodeTitle,
+        episodesrc: episodeSrc!,
+        tracks: tracks
+        );
   }
 
   void _initVars() {
@@ -140,11 +146,15 @@ class _VideoPlayerAltState extends State<VideoPlayerAlt>
           subtitles: subtitles,
           videoFormat: BetterPlayerVideoFormat.hls,
         ));
-        // Provider.of<AniListProvider>(context, listen: false)
-        //     .updateAnimeProgress(
-        //         animeId: widget.animeId,
-        //         episodeProgress: currentEpisode!,
-        //         status: 'CURRENT');
+        Provider.of<Data>(context, listen: false)
+            .addWatchedAnimes(
+                animeId: widget.animeId.toString(),
+                animeTitle: widget.animeTitle,
+                currentEpisode: currentEpisode!,
+                episodeTitle: episodeTitle!,
+                episodesrc: episodeSrc!,
+                tracks: tracks
+                );
       }
       else{
         log("not complete");
