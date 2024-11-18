@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
 import 'package:daizy_tv/auth/auth_provider.dart';
+import 'package:daizy_tv/components/Favrouite/favourite_list.dart';
 import 'package:daizy_tv/components/Favrouite/favrouite_List.dart';
 import 'package:daizy_tv/utils/helper/migrating_favortes.dart';
 import 'package:flutter/material.dart';
@@ -66,11 +67,14 @@ class _FavrouitePageState extends State<FavrouitePage>
                 : const Center(
                     child: Text("No favorites manga"),
                   ),
-        
-            const Center(child: Text("No favorites Animes ")),
+            provider.favoriteAnime!.isNotEmpty
+                ? AnimeFavrouiteList(data: provider.favoriteAnime)
+                : const Center(
+                    child: Text("No favorites manga"),
+                  ),
         
         provider.favoriteNovel!.isNotEmpty ?
-            FavrouiteList(data: provider.favoriteNovel,route: "/novelDetail",) : const Center(child: Text("No favorite Novels"),)
+            FavrouiteList(data: provider.favoriteNovel,route: "/novelFavorite",) : const Center(child: Text("No favorite Novels"),)
           ],
         ),
       ),
