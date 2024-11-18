@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -17,8 +18,8 @@ class Downloader {
   Downloader() {
     _initializeNotifications();
     parallelDownloads =
-        Hive.box('app-data').get('parallelDownloads', defaultValue: 5);
-    retries = Hive.box('app-data').get('downloadRetries', defaultValue: 3);
+        Hive.box('app-data').get('parallelDownloads', defaultValue: 50);
+    retries = Hive.box('app-data').get('downloadRetries', defaultValue: 10);
   }
 
   Future<void> _initializeNotifications() async {
@@ -81,7 +82,7 @@ class Downloader {
         progress: 0);
 
     final downloadDir =
-        Directory('/storage/emulated/0/Download/AnymeX/$folderName');
+        Directory('/storage/emulated/0/Download/AzyX/$folderName');
     if (!downloadDir.existsSync()) {
       await downloadDir.create(recursive: true);
     }
@@ -148,7 +149,7 @@ class Downloader {
     final response = await _downloadSegmentWithRetry(url, retries);
     buffers.add(BufferItem(index: index, buffer: response.bodyBytes));
 
-    print("${buffers.length}/$totalSegments");
+    log("${buffers.length}/$totalSegments");
 
     await _updateDownloadNotification(notificationId, notificationTitle,
         (buffers.length / totalSegments) * 100);
