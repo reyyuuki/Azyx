@@ -157,44 +157,52 @@ class _SlidebarState extends State<Sliderbar> {
                             },
                           ),
                         ),
-                        const SizedBox(width: 5),
+                        // Expanded(
+                        //   child: CustomSlider(
+                        //     value: _scrollProgress,
+                        //     onChanged: (double value) {
+                        //       setState(() {
+                        //         _scrollProgress = value;
+                        //       });
+                        //       _onProgressBarTap(value);
+                        //     },
+                        //     max: 16.0,
+                        //     min: 0,
+                        //     customValueIndicatorSize:
+                        //         RoundedSliderValueIndicator(
+                        //       ThemeProvider().themeData.colorScheme,
+                        //       width: 35,
+                        //       height: 30,
+                        //       radius: 10
+                        //     ),
+                        //   ),
+                        // ),
                         Expanded(
-                          child: CustomSlider(
-                            value: _scrollProgress,
-                            onChanged: (value) {
-                              setState(() {
-                                _scrollProgress = value;
-                              });
-                              _onProgressBarTap(value);
-                            },
-                            max: 1.0,
-                            min: 0.0,
-                            divisions: 10,
-                            customValueIndicatorSize:
-                                RoundedSliderValueIndicator(
-                              ThemeProvider().themeData.colorScheme,
-                              width: 35,
-                              height: 30,
-                              radius: 10
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 3),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50),
+                                color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                              ),
+                              child: Slider(
+                                thumbColor: Theme.of(context).colorScheme.primary,
+                                value: _scrollProgress,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _scrollProgress = value;
+                                  });
+                                  _onProgressBarTap(value);
+                                },
+                                activeColor: Theme.of(context).colorScheme.primary,
+                                inactiveColor: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest
+                                    .withOpacity(0.5),
+                              ),
                             ),
                           ),
                         ),
-                        // Slider(
-                        //   thumbColor: Theme.of(context).colorScheme.primary,
-                        //   value: _scrollProgress,
-                        //   onChanged: (value) {
-                        //     setState(() {
-                        //       _scrollProgress = value;
-                        //     });
-                        //     _onProgressBarTap(value);
-                        //   },
-                        //   activeColor: Theme.of(context).colorScheme.primary,
-                        //   inactiveColor: Theme.of(context)
-                        //       .colorScheme
-                        //       .surfaceContainerHighest
-                        //       .withOpacity(0.5),
-                        // ),
-                        const SizedBox(width: 5),
                         Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(30),

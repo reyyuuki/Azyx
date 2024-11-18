@@ -30,11 +30,11 @@ class NovelInfo extends StatelessWidget {
                 SizedBox(
                   height: 5,
                 ),
-                Text("Review: ",style: TextStyle( fontFamily: "Poppins-Bold")),
+                Text("Chapters: ",style: TextStyle( fontFamily: "Poppins-Bold")),
                 SizedBox(
                   height: 5,
                 ),
-                Text("View: ",style: TextStyle( fontFamily: "Poppins-Bold")),
+                Text("Rating: ",style: TextStyle( fontFamily: "Poppins-Bold")),
                 SizedBox(
                   height: 5,
                 ),
@@ -47,7 +47,7 @@ class NovelInfo extends StatelessWidget {
                 SizedBox(
                   width: 220,
                   child: TextScroll(
-                    novelData['author'].toString(),
+                    novelData['authors'].toString(),
                     mode: TextScrollMode.bouncing,
                     velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
                     delayBefore: const Duration(milliseconds: 500),
@@ -64,11 +64,11 @@ class NovelInfo extends StatelessWidget {
               const SizedBox(
                 height: 5,
               ),
-              Text(novelData['reviews'],style: const TextStyle( fontFamily: "Poppins-Bold")),
+              Text(novelData['chapters'],style: const TextStyle( fontFamily: "Poppins-Bold")),
               const SizedBox(
                 height: 5,
               ),
-              Text(novelData['views'],style: const TextStyle( fontFamily: "Poppins-Bold")),
+              Text(novelData['rating'],style: const TextStyle( fontFamily: "Poppins-Bold")),
               const SizedBox(
                 height: 5,
               ),
