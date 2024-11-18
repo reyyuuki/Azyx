@@ -12,8 +12,7 @@ class Mangafloater extends StatefulWidget {
   String currentLink;
   String currentChapter;
   List<Map<String, dynamic>> chapterList;
-  ExtractClass source;
-  Mangafloater({super.key, required this.data, required this.currentLink, required this.chapterList,required this.source, required this.currentChapter});
+  Mangafloater({super.key, required this.data, required this.currentLink, required this.chapterList,required this.currentChapter});
 
   @override
   State<Mangafloater> createState() => _MangafloaterState();
@@ -114,7 +113,7 @@ class _MangafloaterState extends State<Mangafloater> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      widget.currentChapter.length > 20 ?  '${widget.currentChapter.substring(0,20)}...' : widget.currentChapter,
+                      widget.currentChapter.length > 15 ?  '${widget.currentChapter.substring(0,15)}...' : widget.currentChapter,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                         fontFamily: "Poppins-Bold",
