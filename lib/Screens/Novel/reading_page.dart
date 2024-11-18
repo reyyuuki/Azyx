@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
+import 'package:daizy_tv/Provider/manga_sources.dart';
 import 'package:daizy_tv/components/Manga/sliderBar.dart';
 import 'package:daizy_tv/components/Novel/novel_slider.dart';
 import 'package:daizy_tv/utils/scraper/Novel/wuxia_novel.dart';
@@ -44,16 +45,16 @@ class _ReadState extends State<NovelRead> {
   final ScrollController _scrollController = ScrollController();
 
   Future<void> fetchChapterData() async {
- 
+ final provider = Provider.of<MangaSourcesProvider>(context, listen: false).novelInstance;
+ log(provider.toString());
     try {
-      
-        final resp = await scrapeNovelWords(widget.chapterLink);
+        final resp = await provider.scrapeNovelWords(widget.chapterLink);
         final dataProvider = Provider.of<Data>(context, listen: false);
         
         if (resp.isNotEmpty) {
           setState(() {
             chapterWords = resp['words'];
-            currentChapter = resp['currentChapter'];
+            currentChapter = resp['chapterTitle'];
             chapterData = resp;
             isLoading = false;
             isNext = resp['nextChapterId'] != null;
@@ -65,6 +66,7 @@ class _ReadState extends State<NovelRead> {
           noveltitle: widget.title,
           currentChapter: widget.chapterLink,
           image: widget.image,
+          currentChapterTitle: currentChapter!
         );
         } else {
           setState(() {
@@ -86,13 +88,16 @@ class _ReadState extends State<NovelRead> {
     setState(() {
       isLoading = true;
     });
+    
     try {
+
+ final provider = Provider.of<MangaSourcesProvider>(context, listen: false).novelInstance;
       final dataProvider = Provider.of<Data>(context, listen: false);
-      final data = await scrapeNovelWords(url!);
+      final data = await provider.scrapeNovelWords(url!);
       if (data.isNotEmpty) {
         setState(() {
           chapterWords = data['words'];
-          currentChapter = data['currentChapter'];
+          currentChapter = data['chapterTitle'];
           isNext = data['nextChapterId'] != null;
           isPrev = data['prevChapterId'] != null;
           chapterData = data;
@@ -104,6 +109,7 @@ class _ReadState extends State<NovelRead> {
           noveltitle: widget.title,
           currentChapter: url!,
           image: widget.image,
+          currentChapterTitle: currentChapter!
         );
 
       } else {
