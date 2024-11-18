@@ -10,6 +10,7 @@ import 'package:daizy_tv/components/Manga/chapterList.dart';
 import 'package:daizy_tv/components/Manga/mangaFloater.dart';
 import 'package:daizy_tv/utils/scraper/Manga/Manga_Extenstions/extract_class.dart';
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:text_scroll/text_scroll.dart';
 
@@ -29,14 +30,13 @@ class _DetailsState extends State<MangaFavouritePage> {
   dynamic wrongTitleSearchData;
   String? mappedId;
   List<Map<String, dynamic>>? chapterList;
-  List<Map<String, dynamic>>? filteredChapterList;
+  dynamic filteredChapterList;
   String? value;
   String? cover;
   bool loading = true;
   TextEditingController? _controller;
   late String searchTerm;
   ExtractClass? mangaScarapper;
-  List<ExtractClass>? sources;
   String? currentLink;
   late String currentChapter;
   Map<String, dynamic>? mangaData;
@@ -59,7 +59,12 @@ class _DetailsState extends State<MangaFavouritePage> {
     if (provider.favoriteManga != null) {
       setState(() {
         mangaData = provider.getFavoriteMangaById(widget.id);
-        filteredChapterList = mangaData!['chapterList'];
+        filteredChapterList = List<Map<String, dynamic>>.from(
+          mangaData!['chapterList'].map((item) {
+            return Map<String, dynamic>.from(item);
+          }),
+        );
+        chapterList = List<Map<String, dynamic>>.from(filteredChapterList!);
       });
     }
     continueReading();
@@ -72,8 +77,10 @@ class _DetailsState extends State<MangaFavouritePage> {
       final manga = progress?.firstWhere(
           (manga) => widget.id == manga['media']['id'].toString(),
           orElse: () => null);
-      final index = filteredChapterList!.firstWhere((chapter) =>
-          chapter['id'].toString().contains(manga['progress'].toString()));
+      final index = manga != null
+          ? filteredChapterList!.firstWhere((chapter) =>
+              chapter['id'].toString().contains(manga['progress'].toString()))
+          : null;
       final provider = Provider.of<Data>(context, listen: false);
       final link = provider.getCurrentChapterForManga(widget.id);
       if (link != null && link['currentChapterTitle'] != null) {
@@ -86,7 +93,9 @@ class _DetailsState extends State<MangaFavouritePage> {
           currentLink = progress != null
               ? index['link']
               : filteredChapterList!.last['link'];
-          currentChapter = progress != null ? index['title'] : filteredChapterList!.last['title'];
+          currentChapter = progress != null
+              ? index['title']
+              : filteredChapterList!.last['title'];
         });
       }
       log(currentLink ?? "No link available");
@@ -94,8 +103,20 @@ class _DetailsState extends State<MangaFavouritePage> {
       log("Error: ${e.toString()}");
       setState(() {
         currentLink = filteredChapterList?.last['link'];
+        currentChapter = filteredChapterList?.last['title'];
       });
     }
+  }
+
+  void searchChapter(String number) {
+    final list = filteredChapterList
+        .where((chapter) =>
+            (chapter as Map<String, dynamic>)['title'].contains(number) ||
+            chapter['index'].toString() == number)
+        .toList();
+    setState(() {
+      chapterList = list;
+    });
   }
 
   @override
@@ -140,11 +161,44 @@ class _DetailsState extends State<MangaFavouritePage> {
                         const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                     child: Container(
                       margin: EdgeInsets.only(top: 370),
-                      child: Text(
-                        mangaData!['description'].length > 150
-                            ? '${mangaData!['description'].substring(0, 150)}...'
-                            : mangaData!['description'],
-                            style: TextStyle(fontSize: 14, color: Colors.grey.shade600, fontStyle: FontStyle.italic),
+                      child: Column(
+                        children: [
+                          Text(
+                            mangaData!['description'].length > 150
+                                ? '${mangaData!['description'].substring(0, 150)}...'
+                                : mangaData!['description'],
+                            style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                                fontStyle: FontStyle.italic),
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                          TextField(
+                            onChanged: (String value) {
+                              searchChapter(value);
+                            },
+                            decoration: InputDecoration(
+                                prefixIcon: Icon(Iconsax.search_normal),
+                                filled: true,
+                                fillColor:
+                                    Theme.of(context).colorScheme.surface,
+                                labelText: "Search Chapters",
+                                focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary),
+                                    borderRadius: BorderRadius.circular(20)),
+                                enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                    borderSide: BorderSide(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary))),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -155,8 +209,7 @@ class _DetailsState extends State<MangaFavouritePage> {
                 height: 485,
                 child: mangaData!['chapterList'] != null
                     ? ListView(
-                        children:
-                            mangaData!['chapterList']!.map<Widget>((chapter) {
+                        children: chapterList!.map<Widget>((chapter) {
                           return Chapterlist(
                             id: widget.id,
                             chapter: chapter,
@@ -173,7 +226,6 @@ class _DetailsState extends State<MangaFavouritePage> {
                   data: mangaData!,
                   currentLink: mangaData!['currentLink'],
                   chapterList: filteredChapterList!,
-                  source: mangaData!['source'],
                   currentChapter: currentChapter,
                 )
               : const SizedBox.shrink(),
