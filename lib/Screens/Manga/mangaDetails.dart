@@ -109,6 +109,7 @@ class _DetailsState extends State<Mangadetails> {
           setState(() {
             mappedId = searchData['id'];
             filteredChapterList = chaptersData['chapterList'];
+            chapterList = chaptersData['chapterList'];
           });
           wrongTittle.text = mangaData['name'];
           wrongTitleSearch(wrongTittle.text);
@@ -135,15 +136,23 @@ class _DetailsState extends State<Mangadetails> {
   }
 
   Future<void> changeChapterData(id) async {
-    filteredChapterList = [];
+    chapterList = [];
     final response = await mangaScarapper!.fetchChapters(id);
     if (response != null) {
       setState(() {
         filteredChapterList = response['chapterList'];
+        chapterList = response['chapterList'];
       });
     } else {
       log('not scrapped');
     }
+  }
+
+  void searchChapter(String number){
+    final list = filteredChapterList!.where((chapter) => chapter['title'].contains(number)).toList();
+    setState(() {
+      chapterList = list;
+    });
   }
 
   Future<void> scrap() async {
@@ -557,7 +566,6 @@ class _DetailsState extends State<Mangadetails> {
                   data: mangaData,
                   currentLink: currentLink!,
                   chapterList: filteredChapterList!,
-                  source: mangaScarapper!,
                   currentChapter: currentChapter,
                 )
               : const SizedBox.shrink(),
@@ -647,11 +655,11 @@ class _DetailsState extends State<Mangadetails> {
                         IconButton(
                             onPressed: () {
                               setState(() {
-                                filteredChapterList =
-                                    filteredChapterList?.reversed.toList();
+                                chapterList =
+                                    chapterList?.reversed.toList();
                               });
                             },
-                            icon: const Icon(Iconsax.refresh)),
+                            icon: const Icon(Iconsax.arrow_down)),
                         GestureDetector(
                           onTap: () {
                             wrongTitle(context);
@@ -670,27 +678,36 @@ class _DetailsState extends State<Mangadetails> {
                   ],
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                child: TextField(
+                  onChanged: (String value){
+                    searchChapter(value);
+                  },
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Iconsax.search_normal),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surface,
+                      labelText: "Search Chapters",
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Theme.of(context).colorScheme.primary),
+                          borderRadius: BorderRadius.circular(20)),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(
+                              color: Theme.of(context).colorScheme.primary))),
+                ),
+              ),
               const SizedBox(
                 height: 10,
               ),
-              // ElevatedButton(
-              //     onPressed: () {
-              //       Navigator.pushNamed(context, '/read', arguments: {
-              //         "mangaId": widget.id,
-              //         "chapterLink": currentLink,
-              //         "image": widget.image,
-              //       });
-              //     },
-              //     child: Text("Continue")),
-              // const SizedBox(
-              //   height: 10,
-              // ),
               SizedBox(
-                height: 485,
-                child: filteredChapterList != null &&
-                        filteredChapterList!.isNotEmpty
+                height: 400,
+                child: chapterList != null &&
+                        chapterList!.isNotEmpty
                     ? ListView(
-                        children: filteredChapterList!.map<Widget>((chapter) {
+                        children: chapterList!.map<Widget>((chapter) {
                           return Chapterlist(
                             id: widget.id,
                             chapter: chapter,
