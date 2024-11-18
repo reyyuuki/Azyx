@@ -2,8 +2,10 @@ import 'package:daizy_tv/Provider/manga_sources.dart';
 import 'package:daizy_tv/Screens/Bottom_Menu/_profile.dart';
 import 'package:daizy_tv/Screens/Bottom_Menu/_setting.dart';
 import 'package:daizy_tv/Provider/theme_provider.dart';
+import 'package:daizy_tv/Screens/Favrouite/anime_favorite.dart';
 import 'package:daizy_tv/Screens/Favrouite/favrouite_page.dart';
 import 'package:daizy_tv/Screens/Favrouite/manga_favourite_page.dart';
+import 'package:daizy_tv/Screens/Favrouite/novel_favourite.dart';
 import 'package:daizy_tv/Screens/Novel/novel_detailspage.dart';
 import 'package:daizy_tv/Screens/Novel/novel_page.dart';
 import 'package:daizy_tv/Screens/Novel/novel_search.dart';
@@ -57,7 +59,6 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -107,7 +108,7 @@ class _MainAppState extends State<MainApp> {
                   Mangadetails(id: id, image: image, tagg: tagg),
             );
 
-             case '/mangaFavorite':
+          case '/mangaFavorite':
             final id = args?['id'] ?? '';
             final image = args?['image'] ?? '';
             final tagg = args?['tagg'] ?? '';
@@ -115,6 +116,23 @@ class _MainAppState extends State<MainApp> {
               builder: (context) =>
                   MangaFavouritePage(id: id, image: image, tagg: tagg),
             );
+
+          case '/animeFavorite':
+            final id = args?['id'] ?? '';
+            final image = args?['image'] ?? '';
+            final tagg = args?['tagg'] ?? '';
+            return MaterialPageRoute(
+              builder: (context) =>
+                  AnimeFavouritePage(id: id, image: image, tagg: tagg),
+            );
+
+          case '/novelFavorite':
+            final id = args?['id'] ?? "";
+            final image = args?['image'] ?? '';
+            final tagg = args?['tagg'] ?? "";
+            return MaterialPageRoute(
+                builder: (context) =>
+                    NovelFavouritePage(id: id, image: image, tagg: tagg));
 
           case '/read':
             final mangaId = args?['mangaId'] ?? '';
@@ -150,22 +168,21 @@ class _MainAppState extends State<MainApp> {
             final title = args?['title'] ?? '';
             return MaterialPageRoute(
               builder: (context) => NovelRead(
-                novelId: novelId,
-                chapterLink: chapterLink,
-                image: image,
-                title: title
-              ),
+                  novelId: novelId,
+                  chapterLink: chapterLink,
+                  image: image,
+                  title: title),
             );
-            
-        case '/searchNovel':
-          final name = args?['name'];
-          return MaterialPageRoute(builder: (context) => NovelSearch(name: name));
+
+          case '/searchNovel':
+            final name = args?['name'];
+            return MaterialPageRoute(
+                builder: (context) => NovelSearch(name: name));
           //Bottom-Menu-Screens
           case './profile':
             return MaterialPageRoute(builder: (context) => const Profile());
           case './settings':
             return MaterialPageRoute(builder: (context) => const Setting());
-
 
           default:
             return MaterialPageRoute(
