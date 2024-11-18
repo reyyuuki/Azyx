@@ -2,6 +2,7 @@
 // ignore_for_file: must_be_immutable, file_names
 
 import 'dart:developer';
+import 'package:daizy_tv/Provider/manga_sources.dart';
 import 'package:daizy_tv/components/Anime/_gridlist.dart';
 import 'package:daizy_tv/components/Manga/_manga_list.dart';
 import 'package:daizy_tv/components/Novel/novel_gridlist.dart';
@@ -12,6 +13,7 @@ import 'package:daizy_tv/utils/scraper/Novel/wuxia_novel.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:provider/provider.dart';
 
 class NovelSearch extends StatefulWidget {
   String name;
@@ -42,8 +44,9 @@ class _SearchpageState extends State<NovelSearch> {
   }
 
   Future<void> fetchdata() async {
+    final provider = Provider.of<MangaSourcesProvider>(context, listen: false);
     try {
-      final response = await scrapeNovelSearchData(widget.name);
+      final response = await provider.novelInstance.scrapeNovelSearchData(widget.name);
       if (response.toString().isNotEmpty) {
         setState(() {
           data = response;

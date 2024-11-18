@@ -1,12 +1,14 @@
 import 'dart:developer';
 
+import 'package:daizy_tv/Provider/manga_sources.dart';
 import 'package:daizy_tv/backupData/novel_buddy_fallback.dart';
 import 'package:daizy_tv/components/Common/Header.dart';
 import 'package:daizy_tv/components/Novel/novel_carousale.dart';
 import 'package:daizy_tv/components/Novel/reusable_list.dart';
-import 'package:daizy_tv/utils/scraper/Novel/wuxia_novel.dart';
+import 'package:daizy_tv/utils/scraper/Novel/novel_buddy.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:provider/provider.dart';
 
 class NovelPage extends StatefulWidget {
   const NovelPage({super.key});
@@ -21,6 +23,7 @@ class _NovelPageState extends State<NovelPage> {
   @override
   void initState() {
     super.initState();
+    backupdata();
     loadData();
   }
 
@@ -32,7 +35,7 @@ void backupdata(){
 
   Future<void> loadData() async{
     try{
-      final response = await scrapeHomePageData();
+      final response = await NovelBuddy().scrapeNovelsHomePage();
   if(response != null){
     setState(() {
       data = response;
