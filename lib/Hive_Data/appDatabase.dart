@@ -1,7 +1,6 @@
 // ignore_for_file: file_names
 
 import 'dart:developer';
-import 'package:daizy_tv/utils/scraper/Manga/Manga_Extenstions/extract_class.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -48,13 +47,13 @@ void loadData() async {
           .map((item) => Map<String, dynamic>.from(item)),
     );
 
-    log("Data updated from Hive box: ");
-    log("favoriteManga: $favoriteManga");
-    log("favoriteAnime: $favoriteAnime");
-    log("favoriteNovel: $favoriteNovel");
-    log("animeWatches: $animeWatches");
-    log("readsmanga: $readsmanga");
-    log("readsnovel: $readsnovel");
+    // log("Data updated from Hive box: ");
+    // log("favoriteManga: $favoriteManga");
+    // log("favoriteAnime: $favoriteAnime");
+    // log("favoriteNovel: $favoriteNovel");
+    // log("animeWatches: $animeWatches");
+    // log("readsmanga: $readsmanga");
+    // log("readsnovel: $readsnovel");
 
     notifyListeners();
   } catch (e) {
@@ -75,8 +74,10 @@ void loadData() async {
   void addWatchedAnimes({
     required String animeId,
     required String animeTitle,
-    required String currentEpisode,
-    required String posterImage,
+    required int currentEpisode,
+    required String episodeTitle,
+    required String episodesrc,
+    required dynamic tracks,
   }) {
     animeWatches ??= [];
 
@@ -84,15 +85,19 @@ void loadData() async {
       'animeId': animeId,
       'animeTitle': animeTitle,
       'currentEpisode': currentEpisode,
-      'posterImage': posterImage,
+      'episodeTitle': episodeTitle,
+      'episodesrc':episodesrc,
+      'tracks': tracks
     };
 
+
+    log("Updated anime watches: ${newAnime['currentEpisode']}");
     animeWatches!.removeWhere((anime) => anime['animeId'] == animeId);
     animeWatches!.add(newAnime);
 
     var box = Hive.box("app-data");
     box.put("currently-Watching", animeWatches);
-    log("Updated anime watches: $animeWatches");
+    log("Updated anime watches: ${newAnime['currentEpisode']}");
     notifyListeners();
   }
 
@@ -141,6 +146,7 @@ void loadData() async {
     required String noveltitle,
     required String currentChapter,
     required String image,
+    required String currentChapterTitle
   }) {
     readsmanga ??= [];
 
@@ -149,6 +155,7 @@ void loadData() async {
       'noveltitle': noveltitle,
       'currentChapter': currentChapter,
       'image': image,
+      "currentChapterTitle": currentChapterTitle
     };
 
     readsnovel!.removeWhere((novel) => novel['novelId'] == novelId);
@@ -181,27 +188,29 @@ Map<String, dynamic>? getNovelById(String novelId) {
     );
   }
 
+
+
 Map<String,dynamic>? getFavoritesAnimeById(String id){
   return favoriteAnime!.firstWhere((anime) => anime['id'] == id);
 }
 
 Map<String, dynamic>? getFavoriteMangaById(String mangaId) {
-    return favoriteManga?.firstWhere(
-      (manga) => manga['id'] == mangaId,
-      orElse: () => {},
-    );
+    return favoriteManga?.firstWhere((manga) => manga['id'] == mangaId);
   }  
 
-String? getCurrentChapterForNovel(String novelId) {
-    final novel = getNovelById(novelId);
-    log('Novel fetched for current chapter: $novel');
-    return novel?['currentChapter'];
+  Map<String, dynamic>? getFavouriteNovelById(String id){
+    return favoriteNovel?.firstWhere((novel) => novel['id'] == id);
   }
 
-  String? getCurrentEpisodeForAnime(String animeId) {
+Map<String,dynamic>? getCurrentChapterForNovel(String novelId) {
+    final novel = getNovelById(novelId);
+    log('Novel fetched for current chapter: $novel');
+    return novel;
+  }
+
+  Map<String,dynamic>? getCurrentEpisodeForAnime(String animeId) {
     final anime = getAnimeById(animeId);
-    log('Anime fetched for current episode: $anime');
-    return anime?['currentEpisode'];
+    return anime;
   }
 
   Map<String,dynamic>? getCurrentChapterForManga(String mangaId) {
@@ -236,12 +245,11 @@ String? getCurrentChapterForNovel(String novelId) {
 
     var box = Hive.box("app-data");
     box.put("favoriteManga", favoriteManga);
-    // log('updates new favrouite: $favoriteManga');
     notifyListeners();
   }
 
   void addFavrouiteAnime({
-    required String title,
+    required String name,
     required String id,
     required String image,
     required String server,
@@ -252,7 +260,7 @@ String? getCurrentChapterForNovel(String novelId) {
     favoriteAnime ??= [];
 
     final anime = {
-      'title': title,
+      'name': name,
       'id': id,
       'image': image,
       'server': server,
@@ -282,6 +290,10 @@ String? getCurrentChapterForNovel(String novelId) {
     required String title,
     required String id,
     required String image,
+    required String currentChapter,
+    required String currentLink,
+    required List<Map<String, dynamic>> chapterList,
+    required String description,
   }) {
     favoriteNovel ??= [];
 
@@ -289,6 +301,10 @@ String? getCurrentChapterForNovel(String novelId) {
       'title': title,
       'id': id,
       'image': image,
+      'currentChapter': currentChapter,
+      'currentLink': currentLink,
+      "chapterList": chapterList,
+      'description': description,
     };
 
     favoriteNovel!.removeWhere((novel) => novel['id'] == id);
@@ -323,7 +339,6 @@ String? getCurrentChapterForNovel(String novelId) {
 
 
   bool getFavroiteAnime(String id) {
-    log(favoriteAnime!.any((anime) => anime['id'] == id).toString());
     return favoriteAnime!.any((anime) => anime['id'] == id);
   }
 
