@@ -9,3 +9,4 @@ abstract class ExtractClass {
   Future<dynamic> fetchSearchsManga(String name);
   Future<dynamic> fetchPages(String link);
 }
+  
