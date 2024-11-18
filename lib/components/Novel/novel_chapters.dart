@@ -37,18 +37,10 @@ class NovelChapters extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(
-                  
-                  child: TextScroll(
-                    chapter['title'],
-                    mode: TextScrollMode.bouncing,
-                    velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
-                    delayBefore: const Duration(milliseconds: 500),
-                    pauseBetween: const Duration(milliseconds: 1000),
-                    textAlign: TextAlign.center,
-                    selectable: true,
-                    style: const TextStyle(fontFamily: "Poppins-Bold"),
-                  ),
+                SizedBox(   
+                  child: Text(
+                    chapter['title'].length > 25 ? "${chapter['title'].substring(0,25)}...": chapter['title'],
+                   ),
                 ),
                 Container(
                     decoration: BoxDecoration(

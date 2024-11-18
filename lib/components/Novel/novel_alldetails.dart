@@ -48,14 +48,15 @@ class NovelAlldetails extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(
-                Ionicons.eye,
+                Ionicons.star,
                 size: 20,
+                color: Colors.yellow,
               ),
               const SizedBox(
                 width: 10,
               ),
               Text(
-                novelData['views'],
+                novelData['rating'],
                 style: const TextStyle(fontSize: 18),
               ),
             ],

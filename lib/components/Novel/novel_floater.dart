@@ -7,7 +7,9 @@ import 'package:provider/provider.dart';
 class NovelFloater extends StatefulWidget {
   Map<String, dynamic> data;
   String currentLink;
-  NovelFloater({super.key, required this.data, required this.currentLink});
+  String currentChapterTitle;
+  String image;
+  NovelFloater({super.key, required this.data, required this.currentLink, required this.currentChapterTitle, required this.image});
 
   @override
   State<NovelFloater> createState() => _NovelFloaterState();
@@ -37,7 +39,11 @@ class _NovelFloaterState extends State<NovelFloater> {
                   provider.addFavrouiteNovel(
                     title: widget.data['title'],
                     id: widget.data['id'],
-                    image: widget.data['image'],
+                    image: widget.image,
+                    description: widget.data['description'],
+                    chapterList: widget.data['chapterList'],
+                    currentChapter: widget.currentChapterTitle,
+                    currentLink: widget.currentLink
                   );
                   setState(() {
                     isFavrouite = true;
@@ -103,7 +109,7 @@ class _NovelFloaterState extends State<NovelFloater> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Read',
+                      widget.currentChapterTitle.length > 15 ? widget.currentChapterTitle.substring(0,15) : widget.currentChapterTitle,
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontFamily: "Poppins-Bold" // Text color
