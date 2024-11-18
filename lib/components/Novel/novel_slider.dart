@@ -114,7 +114,9 @@ class _SlidebarState extends State<NovelSlider> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Icon(Iconsax.text),
-                      const SizedBox(width: 10,),
+                      const SizedBox(
+                        width: 10,
+                      ),
                       Expanded(
                         child: CustomSlider(
                           min: 12,
@@ -131,9 +133,118 @@ class _SlidebarState extends State<NovelSlider> {
                           },
                         ),
                       ),
-                      const SizedBox(width: 10,),
+                      const SizedBox(
+                        width: 10,
+                      ),
                       Text(textSize.toStringAsFixed(1))
                     ],
+                  ),
+                  const SizedBox(height: 20),
+                  Text("Background Color",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (var entry in {
+                          'White': Colors.white,
+                          'Black': Colors.black,
+                          'Grey': Colors.grey,
+                          'Light Green': Colors.green.shade100,
+                          'Light Purple': Colors.purple.shade100,
+                          'Light Brown': Colors.brown.shade100,
+                          'Light Red': Colors.red.shade100,
+                          'Light Blue': Colors.lightBlue.shade100,
+                        }.entries)
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: ChoiceChip(
+                              label: Text(entry.key,
+                                  style: GoogleFonts.getFont(selectedFontFamily,
+                                      color: selectedTextColor)),
+                              selected: selectedBackgroundColor == entry.value,
+                              onSelected: (isSelected) {
+                                if (isSelected) {
+                                  setBottomState(() {
+                                    selectedBackgroundColor = entry.value;
+                                  });
+
+                                  setState(() {
+                                    selectedBackgroundColor;
+                                  });
+                                }
+                              },
+                              selectedColor: entry.value,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.surface,
+                              labelStyle: TextStyle(
+                                color: selectedBackgroundColor == entry.value
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .inverseSurface,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Text("Text Color",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (var entry in {
+                          'Black': Colors.black,
+                          'White': Colors.white,
+                          'Grey': Colors.grey.shade300,
+                          'Teal': Colors.teal.shade300,
+                          'Deep Orange': Colors.deepOrange.shade400,
+                          'Purple': Colors.purple.shade300,
+                          'Blue Grey': Colors.blueGrey.shade300,
+                          'Green': Colors.green.shade400,
+                        }.entries)
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: ChoiceChip(
+                              label: Text(entry.key,
+                                  style:
+                                      GoogleFonts.getFont(selectedFontFamily)),
+                              selected: selectedTextColor == entry.value,
+                              onSelected: (isSelected) {
+                                if (isSelected) {
+                                  setBottomState(() {
+                                    selectedTextColor = entry.value;
+                                  });
+                                }
+                              },
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.surface,
+                              labelStyle: TextStyle(
+                                color: selectedTextColor == entry.value
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .inverseSurface,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 20),
                   Wrap(
@@ -159,7 +270,7 @@ class _SlidebarState extends State<NovelSlider> {
                               selectedFontFamily = font;
                             });
                             setState(() {
-                              this.selectedFontFamily;
+                              selectedFontFamily;
                             });
                           }
                         },
@@ -174,115 +285,7 @@ class _SlidebarState extends State<NovelSlider> {
                       );
                     }).toList(),
                   ),
-                  const SizedBox(height: 20),
-                  Text("Background Color",
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        Colors.white,
-                        Colors.black,
-                        Colors.grey,
-                        Colors.green.shade100,
-                        Colors.purple.shade100,
-                        Colors.brown.shade100,
-                        Colors.red.shade100,
-                        Colors.lightBlue.shade100,
-                      ].map((color) {
-                        return GestureDetector(
-                          onTap: () {
-                            setBottomState(() {
-                              selectedBackgroundColor = color;
-                            });
-                            setState(() {
-                              this.selectedBackgroundColor;
-                            });
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: selectedBackgroundColor == color
-                                      ? color // Highlight selected background color
-                                      : Colors.transparent,
-                                  width: 2,
-                                ),
-                                borderRadius: BorderRadius.circular(50)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(3),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(50),
-                                  color: color,
-                                ),
-                                width: 30,
-                                height: 30,
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-              const SizedBox(height: 20,),
-                  Text("Text Color",
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        Colors.black,
-                        Colors.white,
-                        Colors.grey.shade300,
-                        Colors.teal.shade300,
-                        Colors.deepOrange.shade400,
-                        Colors.purple.shade300,
-                        Colors.blueGrey.shade300,
-                        Colors.green.shade400,
-                      ].map((color) {
-                        return GestureDetector(
-                          onTap: () {
-                            setBottomState(() {
-                              selectedTextColor = color;
-                            });
-                            setState(() {
-                              this.selectedTextColor;
-                            });
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: selectedTextColor == color
-                                      ? color
-                                      : Colors.transparent,
-                                  width: 2,
-                                ),
-                                borderRadius: BorderRadius.circular(50)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(3),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(50),
-                                  color: color,
-                                ),
-                                width: 30,
-                                height: 30,
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-
+                  
                   const SizedBox(
                     height: 20,
                   ),
@@ -359,7 +362,10 @@ class _SlidebarState extends State<NovelSlider> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      icon: Icon(Icons.arrow_back_ios, color: selectedTextColor,),
+                      icon: Icon(
+                        Icons.arrow_back_ios,
+                        color: selectedTextColor,
+                      ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -372,12 +378,14 @@ class _SlidebarState extends State<NovelSlider> {
                                 ? '${widget.title!.substring(0, 25)}...'
                                 : widget.title!,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 16, color: selectedTextColor),
+                            style: TextStyle(
+                                fontSize: 16, color: selectedTextColor),
                           ),
                           const SizedBox(height: 3),
                           Text(
                             widget.chapter!,
-                            style: TextStyle(fontSize: 12, color: selectedTextColor),
+                            style: TextStyle(
+                                fontSize: 12, color: selectedTextColor),
                           ),
                         ],
                       ),
@@ -423,7 +431,7 @@ class _SlidebarState extends State<NovelSlider> {
                               color: widget.isPrev
                                   ? selectedTextColor
                                   : Colors.white.withOpacity(0.5),
-                                  size: 30,
+                              size: 30,
                             ),
                             onPressed: () {
                               widget.handleChapter('left');
@@ -447,7 +455,7 @@ class _SlidebarState extends State<NovelSlider> {
                               color: widget.isNext
                                   ? selectedTextColor
                                   : Colors.white.withOpacity(0.5),
-                                  size: 30,
+                              size: 30,
                             ),
                             onPressed: () {
                               widget.handleChapter('right');
