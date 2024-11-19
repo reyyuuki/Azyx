@@ -31,7 +31,11 @@ class _DownloadSettingsState extends State<DownloadSettings> {
           "Download Settings",
           style: TextStyle(fontFamily: "Poppins-Bold"),
         ),
-        leading: const Icon(Icons.arrow_back_ios),
+        leading:  IconButton(
+          onPressed: (){
+            Navigator.pop(context);
+          },
+         icon: Icon(Icons.arrow_back_ios)),
         centerTitle: true,
       ),
       body: Padding(
