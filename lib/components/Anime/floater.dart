@@ -4,7 +4,6 @@ import 'dart:developer';
 
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 
 // ignore: must_be_immutable
@@ -156,13 +155,13 @@ class _AnimefloaterState extends State<AnimeFloater> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Ionicons.book_outline,
+                      Icons.movie_filter_sharp,
                       color:
                           Theme.of(context).colorScheme.primary, // Icon color
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      "Episode",
+                      "Episode ${widget.currentEpisode}",
                       // widget.currentChapter.length > 20 ?  '${widget.currentChapter.substring(0,20)}...' : widget.currentChapter,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
