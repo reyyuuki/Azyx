@@ -52,7 +52,7 @@ class _HomepageState extends State<Animepage> {
             mostPopularAnimes = provider.anilistData['popular'] ?? mostPopularAnimes;
             trendingAnime = provider.anilistData['trending'] ?? trendingAnime;
             latestEpisodesAnime = latestEpisodesAnime;
-            topUpComingAnime = provider.anilistData['completed'] ?? topUpComingAnime;
+            topUpComingAnime = trendingAnime;
 
           return ListView(
               children: [
