@@ -193,26 +193,21 @@ class _DetailsState extends State<AnimeFavouritePage> {
     final dataBase = Provider.of<Data>(context, listen: false);
     final animestoredData = dataBase.getCurrentEpisodeForAnime(widget.id);
 
-    if (animestoredData != null &&
-        animestoredData.isNotEmpty &&
-        animestoredData['episodesrc'] != null &&
-        animestoredData['episodesrc'].toString().isNotEmpty) {
-
-      // Use stored episode data if it's valid
-      setState(() {
-        episodeNumber = animestoredData['currentEpisode'] ?? 1;
-        episodeTitle = animestoredData['episodeTitle'] ?? 'Episode 1';
-        tracks = animestoredData['tracks'] ?? [];
-        episodeLink = animestoredData['episodesrc'] ?? '';
+     setState(() {
+        episodeNumber = animestoredData?['currentEpisode'] ?? 1;
+        episodeTitle = animestoredData?['episodeTitle'] ?? 'Episode 1';
+        tracks = animestoredData?['tracks'] ?? [];
+        episodeLink = animestoredData?['episodesrc'] ?? '';
       });
-      log('Loaded from database: $animestoredData');
 
-    } else {
-      // If no valid data, use `contineEpisode` with a fallback of episode 1
-      log('No valid stored data, defaulting to episode 1.');
-      contineEpisode(animestoredData?['currentEpisode'] ?? 1);
-    }
-
+    if (animestoredData == null &&
+        animestoredData!.isEmpty &&
+        animestoredData['episodesrc'] == null &&
+        animestoredData['episodesrc'].toString().isEmpty) {
+log('No valid stored data, defaulting to episode 1.');
+      contineEpisode(animestoredData['currentEpisode'] ?? 1);
+      
+    } 
     log('Episode link after loading: $episodeLink');
 
   } catch (e) {
@@ -585,8 +580,7 @@ class _DetailsState extends State<AnimeFavouritePage> {
               ),
             ],
           ),
-          animeData != null
-              ? AnimeFloater(
+           AnimeFloater(      
                   data: animeData!,
                   episodeLink: episodeLink,
                   episodeList: filteredEpisodes,
@@ -597,7 +591,6 @@ class _DetailsState extends State<AnimeFavouritePage> {
                   id: widget.id,
                   tracks: tracks,
                 )
-              : const SizedBox.shrink(),
         ],
       ),
     );
