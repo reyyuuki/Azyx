@@ -4,10 +4,7 @@ import 'dart:developer';
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/backupData/anilist_manga.dart';
 import 'package:daizy_tv/components/Anime/anime_carousale.dart';
-import 'package:daizy_tv/components/Anime/carousel.dart';
 import 'package:daizy_tv/components/Anime/reusableList.dart';
-import 'package:daizy_tv/components/Manga/mangaCarousale.dart';
-import 'package:daizy_tv/components/Manga/mangaReusableCarousale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -81,7 +78,7 @@ class _MangapageState extends State<Mangapage> {
           builder: (context, provider, child) {
             mangaData = provider.mangalistData['popular'] ?? mangaData;
             trendingManga = trendingManga;
-            latestManga =  latestManga;
+            latestManga =  provider.mangalistData['trending'];
             topOngoing =  topOngoing;
 
            return  ListView(
