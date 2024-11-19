@@ -6,6 +6,7 @@ import 'package:daizy_tv/Screens/settings/_theme_changer.dart';
 import 'package:daizy_tv/Screens/settings/download_settings.dart';
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/Common/setting_tile.dart';
+import 'package:daizy_tv/utils/scraper/Anime/aniwibe_scrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:ionicons/ionicons.dart';
@@ -109,12 +110,15 @@ class _SettingState extends State<Setting> {
                 name: "Download settings",
                 routeName: DownloadSettings(),
               ),
-              const SizedBox(height: 10,),
-              const SettingTile(
-                icon: Icon(Iconsax.info_circle),
-                name: "About",
-                routeName: About(),
-              ),
+              // const SizedBox(height: 10,),
+              // const SettingTile(
+              //   icon: Icon(Iconsax.info_circle),
+              //   name: "About",
+              //   routeName: About(),
+              // ),
+              ElevatedButton(onPressed: (){
+                scrapeSearchdata();
+              }, child: Text("Fetch"))
             ],
           ),
         ));
