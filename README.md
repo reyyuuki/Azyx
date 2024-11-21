@@ -1,3 +1,25 @@
+<div align="center">
+    <img src='assets/icon/icon.png' alt='AzyX Icon' style="border-radius: 50px; height: 300px; width: 300px;"/>
+    <h1 style="font-size:2rem; font-weight:bold;">AzyX</h1>
+  <a href="https://github.com/reyyuuki/Azyx/releases"/>
+    <img src="https://img.shields.io/github/downloads/reyyuuki/azyx/total.svg?color=white&labelColor=purple&style=for-the-badge" alt="Total Downloads"/>
+  </a>
+  <a href="https://github.com/reyyuuki/Azyx/releases/latest">
+    <img src="https://img.shields.io/github/v/release/reyyuuki/Azyx?color=white&labelColor=purple&style=for-the-badge" alt="Latest Release"/>
+  </a>
+  <a href="https://github.com/reyyuuki/Azyx/stargazers">
+    <img src="https://img.shields.io/github/stars/reyyuuki/Azyx?color=white&labelColor=purple&style=for-the-badge" alt="GitHub Stars"/>
+  </a>
+</div>
+<div align="center">
+   <a href="https://discord.gg/72YnN4bK">
+      <img src="https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&color=white&labelColor=purple&logoColor=white" alt="Discord"/></a>
+   
+   <a href="https://t.me/Azyxanime">
+      <img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&color=white&labelColor=purple&logoColor=white" alt="Telegram"/></a>
+</div>
+
+
 # 🎉 Azyx - Your Ultimate Anime & Manga Hub 🎉
 
 Welcome to **Azyx**, your one-stop solution for watching anime and reading manga! Packed with powerful features, a sleek UI, and tons of customization options, Azyx brings your favorite entertainment straight to your device in style. 🌟✨
