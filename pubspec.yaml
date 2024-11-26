@@ -34,6 +34,7 @@ dependencies:
   device_info_plus: any
   permission_handler: any
   flutter_local_notifications: any
+  dio: ^5.7.0
   
 
 dev_dependencies:
