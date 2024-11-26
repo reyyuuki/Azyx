@@ -5,6 +5,7 @@ import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 
 class Header extends StatefulWidget {
@@ -97,7 +98,7 @@ class _HeaderState extends State<Header> {
       builder: (context) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: SizedBox(
-          height: 200,
+          height: 250,
           child: Column(
             mainAxisAlignment: userData['name'] != null ? MainAxisAlignment.spaceBetween : MainAxisAlignment.spaceEvenly,
             children: [
@@ -149,14 +150,11 @@ class _HeaderState extends State<Header> {
                   color: Colors.transparent,
                   width: MediaQuery.of(context).size.width,
                   height: 40,
-                  child: const Row(
+                  child:  Row(
                     children: [
-                      Icon(
-                        Iconsax.user,
-                        size: 20,
-                      ),
-                      SizedBox(width: 20),
-                      Text(
+                      coloredIcon(context, const Icon(Ionicons.people)),
+                      const SizedBox(width: 20),
+                      const Text(
                         "Profile",
                         style: TextStyle(fontSize: 18),
                       ),
@@ -175,15 +173,35 @@ class _HeaderState extends State<Header> {
                   color: Colors.transparent,
                   height: 40,
                   width: MediaQuery.of(context).size.width,
-                  child: const Row(
+                  child:  Row(
                     children: [
-                      Icon(
-                        Iconsax.setting,
-                        size: 20,
+                     coloredIcon(context, const Icon(Icons.settings)),
+                      const SizedBox(width: 20),
+                      const Text(
+                        "Setting",
+                        style: TextStyle(fontSize: 18),
                       ),
+                    ],
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Future.delayed(const Duration(milliseconds: 200), () {
+                    Navigator.pushNamed(context, './settings');
+                  });
+                },
+                child: Container(
+                  color: Colors.transparent,
+                  height: 40,
+                  width: MediaQuery.of(context).size.width,
+                  child:  Row(
+                    children: [
+                      coloredIcon(context, const Icon(Icons.home_repair_service)),
                       SizedBox(width: 20),
                       Text(
-                        "Setting",
+                        "Backup Portal",
                         style: TextStyle(fontSize: 18),
                       ),
                     ],
@@ -204,14 +222,9 @@ class _HeaderState extends State<Header> {
                   child:  Row(
                     children: [
                       box.get("userName") != null ?
-                      const Icon(
-                        Iconsax.login,
-                        size: 20,
-                      ) : 
-                      const Icon(
-                        Iconsax.logout,
-                        size: 20,
-                      ),
+                      coloredIcon(context, const Icon(Iconsax.login))
+                      : 
+                      coloredIcon(context, const Icon(Iconsax.logout)),
                       const SizedBox(width: 20),
                       Text(
                         userData['name'] != null ? "LogOut" : "LogIn",
@@ -226,5 +239,14 @@ class _HeaderState extends State<Header> {
         ),
       ),
     );
+  }
+
+  Container coloredIcon(BuildContext context, Icon icon) {
+    return Container(
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(color: Theme.of(context).colorScheme.inversePrimary, borderRadius: BorderRadius.circular(50)),
+                      child: icon
+                    );
   }
 }
