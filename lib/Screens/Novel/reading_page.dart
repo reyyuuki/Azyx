@@ -1,9 +1,10 @@
 import 'dart:developer';
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
-import 'package:daizy_tv/Provider/manga_sources.dart';
+import 'package:daizy_tv/Provider/sources_provider.dart';
 import 'package:daizy_tv/components/Manga/sliderBar.dart';
 import 'package:daizy_tv/components/Novel/novel_slider.dart';
-import 'package:daizy_tv/utils/scraper/Novel/wuxia_novel.dart';
+import 'package:daizy_tv/utils/sources/Novel/Extensions/wuxia_novel.dart';
+import 'package:daizy_tv/utils/sources/Novel/SourceHandler/novel_sourcehandler.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -30,6 +31,7 @@ class _ReadState extends State<NovelRead> {
   List<dynamic>? chapterWords;
   String? currentChapter;
   String? url;
+  late NovelSourcehandler sourcehandler;
 
   bool isLoading = true;
   bool hasError = false;
@@ -39,16 +41,15 @@ class _ReadState extends State<NovelRead> {
   @override
   void initState() {
     super.initState();
+    sourcehandler = Provider.of<SourcesProvider>(context,listen: false).getNovelInstance();
     fetchChapterData();
   }
 
   final ScrollController _scrollController = ScrollController();
 
   Future<void> fetchChapterData() async {
- final provider = Provider.of<MangaSourcesProvider>(context, listen: false).novelInstance;
- log(provider.toString());
     try {
-        final resp = await provider.scrapeNovelWords(widget.chapterLink);
+        final resp = await sourcehandler.fetchWords(widget.chapterLink);
         final dataProvider = Provider.of<Data>(context, listen: false);
         
         if (resp.isNotEmpty) {
@@ -90,10 +91,8 @@ class _ReadState extends State<NovelRead> {
     });
     
     try {
-
- final provider = Provider.of<MangaSourcesProvider>(context, listen: false).novelInstance;
       final dataProvider = Provider.of<Data>(context, listen: false);
-      final data = await provider.scrapeNovelWords(url!);
+      final data = await sourcehandler.fetchWords(url!);
       if (data.isNotEmpty) {
         setState(() {
           chapterWords = data['words'];
