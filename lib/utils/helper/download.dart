@@ -10,42 +10,59 @@ Future<List<Map<String, dynamic>>> extractStreams(String url) async {
   final content = response.body;
   final List<Map<String, dynamic>> streams = [];
 
+  log(content); // Log the content to inspect
+
+  // Updated regex to match both formats
   final regex = RegExp(
-    r'#EXT-X-STREAM-INF:.*?BANDWIDTH=(\d+),RESOLUTION=(\d+x\d+),FRAME-RATE=([\d.]+),CODECS="([^"]+)"\n(.*.m3u8)',
+    r'#EXT-X-STREAM-INF:.*?BANDWIDTH=(\d+),RESOLUTION=(\d+x\d+)(?:,NAME="([^"]+)")?(?:,FRAME-RATE=([\d.]+),CODECS="([^"]+)")?\n(.*\.m3u8)',
     multiLine: true,
   );
 
+  // Loop through each match of the regex in the playlist content
   for (final match in regex.allMatches(content)) {
     final bandwidth = int.parse(match.group(1)!);
     final resolution = match.group(2)!;
-    final frameRate = double.parse(match.group(3)!);
-    final codecs = match.group(4)!;
-    final url = match.group(5)!;
+    final name = match.group(3); // Optional, used for Anivibe source
+    final frameRate = match.group(4); // Optional, can be null
+    final codecs = match.group(5); // Optional, can be null
+    final streamUrl = match.group(6)!;
 
+    // Determine the quality based on resolution or name
     String quality;
-    if (resolution == "1920x1080") {
-      quality = "1080p";
-    } else if (resolution == "1280x720") {
-      quality = "720p";
-    } else if (resolution == "640x360") {
-      quality = "360p";
+    if (name != null) {
+      quality = name; // If the 'NAME' field exists (like Anivibe)
     } else {
-      quality = "unknown";
+      if (resolution == "1920x1080") {
+        quality = "1080p";
+      } else if (resolution == "1280x720") {
+        quality = "720p";
+      } else if (resolution == "854x480") {
+        quality = "480p";
+      } else if (resolution == "640x360") {
+        quality = "360p";
+      } else {
+        quality = "unknown";
+      }
     }
 
-    streams.add({
+    // Create the stream data
+    final streamData = {
       "quality": quality,
       "resolution": resolution,
       "bandwidth": bandwidth,
-      "frameRate": frameRate,
-      "codecs": codecs,
-      "url": url,
-    });
+      "frameRate": frameRate, // Will be null if absent
+      "codecs": codecs, // Will be null if absent
+      "url": streamUrl,
+    };
+
+    // Add the stream data to the list
+    streams.add(streamData);
   }
 
-  log('Master playlist streams: ${streams[0]['url']}');
+  log('Master playlist streams: $streams');
   return streams;
 }
+
 
 Future<List<String>> getSegmentLinks(String baseUrl, String link) async {
   final response = await http.get(Uri.parse('$baseUrl/$link'));
