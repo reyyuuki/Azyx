@@ -1,13 +1,12 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'package:aurora/utils/sources/manga/base/source_base.dart';
-import 'package:aurora/utils/sources/manga/helper/jaro_helper.dart';
+import 'package:daizy_tv/utils/sources/Manga/Base/extract_class.dart';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 
-class Comick implements SourceBase {
+class Comick implements ExtractClass {
   @override
-  Future<List<Map<String, dynamic>>> fetchMangaSearchResults(
+  Future<dynamic> fetchSearchsManga(
       String query) async {
     final url = Uri.parse(
         "https://api.comick.fun/v1.0/search?q=${Uri.encodeComponent(query)}&limit=25&page=1");
@@ -32,7 +31,9 @@ class Comick implements SourceBase {
         });
       }
       log(results.toString());
-      return results;
+      return {
+        "mangaList": results
+      };
     } else {
       throw Exception("Failed to load manga search results");
     }
@@ -63,7 +64,7 @@ class Comick implements SourceBase {
   }
 
   @override
-  Future<Map<String, dynamic>> fetchMangaChapters(String mangaId) async {
+  Future<Map<String, dynamic>> fetchChapters(String mangaId) async {
     Map<String, String> id = await getComicId(mangaId);
 
     final url = Uri.parse(
@@ -92,9 +93,9 @@ class Comick implements SourceBase {
               .replaceAll('[', '')
               .replaceAll(']', '');
           final chapterData = {
-            'id': chapter['hid'] ?? "",
+            'link': chapter['hid'] ?? "",
             'title': chapterTitle,
-            'path': "/comic/$mangaId/chapter/${chapter['hid']}",
+            'id': "/comic/$mangaId/chapter/${chapter['hid']}",
             'views': chapter['up_count']?.toString() ?? '0.0',
             'date': formattedGroup,
             'number': chapter['chap']?.toString() ?? '0',
@@ -110,9 +111,10 @@ class Comick implements SourceBase {
       final manga = {
         'id': mangaId,
         'title': id['title'] ?? '??',
-        'chapterList': chapterList.reversed.toList(),
+        'chapterList': chapterList,
         'groups': filteredGroups,
       };
+      // log(chapterList.toString());
       return manga;
     } else {
       throw Exception("Failed to load manga details");
@@ -120,9 +122,9 @@ class Comick implements SourceBase {
   }
 
   @override
-  Future<Map<String, dynamic>> fetchChapterImages(
-      {String? chapterId, String? mangaId}) async {
-    final url = Uri.parse("https://api.comick.fun/chapter/$chapterId");
+  Future<dynamic> fetchPages(String chapter,
+      {String? mangaId ,String? chapterId}) async {
+    final url = Uri.parse("https://api.comick.fun/chapter/$chapter");
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -136,11 +138,12 @@ class Comick implements SourceBase {
       final mangaData = {
         'title': data?['md_comics']?['title'] ?? "Unknown",
         'currentChapter': 'Chapter ${data['chap']}',
-        'nextChapterId': document?['next']?['hid'] ?? "",
-        'prevChapterId': document?['prev']?['hid'] ?? "",
+        'nextChapter': document?['next']?['hid'] ?? "",
+        'previousChapter': document?['prev']?['hid'] ?? "",
         'chapterListIds': document?['chapters'] ?? [],
         'images': images,
         'totalImages': images.length,
+        'link':chapterId
       };
       return mangaData;
     } else {
@@ -149,18 +152,18 @@ class Comick implements SourceBase {
   }
 
   @override
-  String get baseUrl => 'https://comick.io/';
+  String get url => 'https://comick.io/';
 
-  @override
-  Future<dynamic> mapToAnilist(String id, {int page = 1}) async {
-    final mangaList = await fetchMangaSearchResults(id);
-    String bestMatchId = findBestMatch(id, mangaList);
-    if (bestMatchId.isNotEmpty) {
-      return await fetchMangaChapters(bestMatchId);
-    } else {
-      throw Exception('No suitable match found for the query');
-    }
-  }
+  // @override
+  // Future<dynamic> mapToAnilist(String id, {int page = 1}) async {
+  //   final mangaList = await fetchMangaSearchResults(id);
+  //   String bestMatchId = findBestMatch(id, mangaList);
+  //   if (bestMatchId.isNotEmpty) {
+  //     return await fetchMangaChapters(bestMatchId);
+  //   } else {
+  //     throw Exception('No suitable match found for the query');
+  //   }
+  // }
 
   @override
   String get sourceName => 'ComicK';
