@@ -1,8 +1,10 @@
 import 'dart:developer';
 
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
-import 'package:daizy_tv/utils/api/_anime_api.dart';
+import 'package:daizy_tv/Provider/sources_provider.dart';
+import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/Video_palyer/player.dart';
+import 'package:daizy_tv/utils/sources/Anime/SourceHandler/sourcehandler.dart';
 import 'package:flutter/material.dart';
 import 'package:better_player/better_player.dart';
 import 'package:flutter/services.dart';
@@ -52,6 +54,7 @@ class _VideoPlayerAltState extends State<VideoPlayerAlt>
   dynamic tracks;
   String? episodeTitle;
   int? currentEpisode;
+  late AnimeSourcehandler sourcehandler;
   List<BoxFit> resizeModes = [
     BoxFit.contain,
     BoxFit.fill,
@@ -64,14 +67,20 @@ class _VideoPlayerAltState extends State<VideoPlayerAlt>
     super.initState();
     _initVars();
     initializePlayer();
-    Provider.of<Data>(context, listen: false).addWatchedAnimes(
-        animeId: widget.animeId.toString(),
-        animeTitle: widget.animeTitle,
-        currentEpisode: currentEpisode!,
-        episodeTitle: widget.episodeTitle,
-        episodesrc: episodeSrc!,
-        tracks: tracks
-        );
+    if (mounted) {
+      Provider.of<Data>(context, listen: false).addWatchedAnimes(
+          animeId: widget.animeId.toString(),
+          animeTitle: widget.animeTitle,
+          currentEpisode: currentEpisode!,
+          episodeTitle: widget.episodeTitle,
+          episodesrc: episodeSrc!,
+          tracks: tracks);
+      sourcehandler = Provider.of<SourcesProvider>(context, listen: false)
+          .getAnimeInstace();
+      final anilist = Provider.of<AniListProvider>(context, listen: false);
+       anilist.userData?['name'] != null ? anilist.addToAniList(
+            mediaId: widget.animeId, progress: widget.currentEpisode) : [];
+    }
   }
 
   void _initVars() {
@@ -88,13 +97,14 @@ class _VideoPlayerAltState extends State<VideoPlayerAlt>
 
     BetterPlayerConfiguration betterPlayerConfiguration =
         const BetterPlayerConfiguration(
-            fit: BoxFit.contain,
-            controlsConfiguration: BetterPlayerControlsConfiguration(
-              showControls: false,
-            ),
-            autoPlay: true,
-            expandToFill: true,
-            looping: false,);
+      fit: BoxFit.contain,
+      controlsConfiguration: BetterPlayerControlsConfiguration(
+        showControls: false,
+      ),
+      autoPlay: true,
+      expandToFill: true,
+      looping: false,
+    );
 
     _betterPlayerController = BetterPlayerController(betterPlayerConfiguration);
     _betterPlayerController!.setupDataSource(BetterPlayerDataSource(
@@ -128,14 +138,18 @@ class _VideoPlayerAltState extends State<VideoPlayerAlt>
   Future<void> fetchSrcHelper(String episodeId) async {
     episodeSrc = null;
     try {
-      final response = await fetchStreamingLinksAniwatch(
+      final response = await sourcehandler.fetchEpisodesSrcs(
           episodeId, widget.activeServer, widget.isDub ? 'dub' : 'sub');
-          log(episodeId + widget.activeServer + (widget.isDub ? 'dub' : 'sub'));
+      log(episodeId + widget.activeServer + (widget.isDub ? 'dub' : 'sub'));
       if (response != null) {
         final episodeSrcs = response;
         setState(() {
-          tracks = episodeSrcs['tracks'];
-          episodeSrc = episodeSrcs['sources'][0]['url'];
+          tracks = sourcehandler.selectedSource == "Hianime (Scrapper)"
+              ? episodeSrcs.tracks
+              : episodeSrcs['tracks'];
+          episodeSrc = sourcehandler.selectedSource == "Hianime (Scrapper)"
+              ? episodeSrcs.sources[0]['url']
+              : episodeSrcs['sources'][0]['url'];
         });
 
         filterSubtitles(tracks);
@@ -146,17 +160,17 @@ class _VideoPlayerAltState extends State<VideoPlayerAlt>
           subtitles: subtitles,
           videoFormat: BetterPlayerVideoFormat.hls,
         ));
-        Provider.of<Data>(context, listen: false)
-            .addWatchedAnimes(
-                animeId: widget.animeId.toString(),
-                animeTitle: widget.animeTitle,
-                currentEpisode: currentEpisode!,
-                episodeTitle: episodeTitle!,
-                episodesrc: episodeSrc!,
-                tracks: tracks
-                );
-      }
-      else{
+        Provider.of<Data>(context, listen: false).addWatchedAnimes(
+            animeId: widget.animeId.toString(),
+            animeTitle: widget.animeTitle,
+            currentEpisode: currentEpisode!,
+            episodeTitle: episodeTitle!,
+            episodesrc: episodeSrc!,
+            tracks: tracks);
+        final anilist = Provider.of<AniListProvider>(context, listen: false);
+       anilist.userData?['name'] != null ? anilist.addToAniList(
+            mediaId: widget.animeId, progress: widget.currentEpisode) : [];
+      } else {
         log("not complete");
       }
     } catch (e) {
