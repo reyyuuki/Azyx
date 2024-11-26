@@ -1,4 +1,4 @@
-import 'package:daizy_tv/Provider/manga_sources.dart';
+import 'package:daizy_tv/Provider/sources_provider.dart';
 import 'package:daizy_tv/Screens/Bottom_Menu/_profile.dart';
 import 'package:daizy_tv/Screens/Bottom_Menu/_setting.dart';
 import 'package:daizy_tv/Provider/theme_provider.dart';
@@ -17,7 +17,6 @@ import 'package:daizy_tv/Screens/Manga/mangaDetails.dart';
 import 'package:daizy_tv/Screens/Manga/read.dart';
 import 'package:daizy_tv/Screens/Anime/searchAnime.dart';
 import 'package:daizy_tv/Screens/Manga/searchManga.dart';
-import 'package:daizy_tv/utils/helper/migrating_favortes.dart';
 import 'package:flutter/material.dart';
 import 'package:daizy_tv/Screens/Anime/details.dart';
 import 'package:daizy_tv/Screens/Home/_homepage.dart';
@@ -45,7 +44,7 @@ void main() async {
       ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ChangeNotifierProvider(create: (_) => AniListProvider()..tryAutoLogin()),
       ChangeNotifierProvider(
-          create: (_) => MangaSourcesProvider()..allMangaSources())
+          create: (_) => SourcesProvider()..allMangaSources())
     ],
     child: const MainApp(),
   ));
