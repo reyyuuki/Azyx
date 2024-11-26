@@ -3,19 +3,17 @@ import 'dart:developer';
 import 'package:animated_segmented_tab_control/animated_segmented_tab_control.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
-import 'package:daizy_tv/Provider/manga_sources.dart';
+import 'package:daizy_tv/Provider/sources_provider.dart';
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/Anime/animeInfo.dart';
 import 'package:daizy_tv/components/Anime/floater.dart';
 import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/coverImage.dart';
-import 'package:daizy_tv/utils/api/_anime_api.dart';
+import 'package:daizy_tv/utils/api/Anilist/Anime/_anime_api.dart';
 import 'package:daizy_tv/utils/downloader/downloader.dart';
 import 'package:daizy_tv/utils/helper/download.dart';
-import 'package:daizy_tv/utils/helper/jaro_winkler.dart';
-import 'package:daizy_tv/utils/scraper/Anilist/anilist_anime_details.dart';
-import 'package:daizy_tv/utils/scraper/Anime/base_class.dart';
-import 'package:daizy_tv/utils/scraper/Anime/sources/hianime_scrapper.dart';
+import 'package:daizy_tv/utils/api/Anilist/Anime/anilist_anime_details.dart';
+import 'package:daizy_tv/utils/sources/Anime/SourceHandler/sourcehandler.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:ionicons/ionicons.dart';
@@ -55,15 +53,18 @@ class _DetailsState extends State<Details> {
   bool isScrapper = true;
   bool isWaiting = false;
   double score = 5.0;
+  dynamic scrapeData;
   String localSelectedValue = "CURRENT";
-  EXtractAnimes? instance;
-  EXtractAnimes? sources;
-  String localSource = "Hianime";
+  late AnimeSourcehandler sourcehandler;
+  List<Map<String, String>> animeSources = [];
+  String selectedSource = '';
   String defaultScore = "1.0";
   final TextEditingController _episodeController =
       TextEditingController(text: '1');
   ValueNotifier<List<dynamic>> streamDataNotifier =
       ValueNotifier<List<dynamic>>([]);
+  List<Map<String, dynamic>> wrongTitleSearchData = [];
+  TextEditingController wrongTitle = TextEditingController();
 
   final List<String> _items = [
     "CURRENT",
@@ -98,6 +99,10 @@ class _DetailsState extends State<Details> {
   @override
   void initState() {
     super.initState();
+    final sourceProvider = Provider.of<SourcesProvider>(context, listen: false);
+    sourcehandler = sourceProvider.getAnimeInstace();
+    animeSources = sourcehandler.getAvailableSources();
+    selectedSource = sourcehandler.selectedSource;
     scrapedData();
   }
 
@@ -111,54 +116,13 @@ class _DetailsState extends State<Details> {
     try {
       final data = await fetchAnilistAnimeDetails(widget.id);
 
-      if (data.isNotEmpty) {
+      if (data.isNotEmpty && mounted) {
         setState(() {
           animeData = data;
           log(animeData['episodes']);
         });
       } else {
         log("Error: Unexpected data type from scrapDetail");
-      }
-      Future<void> fetchEpisodeUrl() async {
-        if (episodeData == null || episodeId == null) return;
-
-        setState(() {
-          category = dub ? "dub" : "sub";
-        });
-
-        try {
-          final episodeIdValue = episodeData[(episodeId! - 1)]['episodeId'];
-          final trackResponse =
-              await fetchStreamingLinksAniwatch(episodeIdValue, server, "sub");
-
-          final scraprLink = await instance?.fetchStreamingLinksAniwatch(
-              episodeIdValue, server, dub ? "dub" : "sub");
-
-          log("scrapeeer response: $instance");
-
-          // Check if scraprLink is null or doesn't contain sources
-          if (scraprLink != null) {
-            setState(() {
-              episodeLink = instance is HianimeScrapper
-                  ? scraprLink.sources[0]['url']
-                  : scraprLink['sources'][0]['url'];
-              tracks = trackResponse['tracks'];
-              isloading = false;
-            });
-          } else {
-            log("Error: 'sources' key missing or empty in scraprLink response.");
-          }
-
-          log("Api call completed");
-          log(isScrapper.toString());
-          Navigator.pop(context);
-          route();
-        } catch (e) {
-          log("Error in fetchEpisode: $e");
-          setState(() {
-            isloading = true;
-          });
-        }
       }
     } catch (error) {
       log("Error in scrapedData: $error");
@@ -187,6 +151,22 @@ class _DetailsState extends State<Details> {
     }
   }
 
+  Future<void> wrongTitleSearch() async {
+    try {
+      final data = await sourcehandler.fetchSearchResults(animeData['name']);
+      if (data != null) {
+        setState(() {
+          wrongTitleSearchData = data;
+          wrongTitle.text = animeData['name'];
+        });
+        Navigator.pop(context);
+        wrongTitleSheet(context);
+      }
+    } catch (e) {
+      log('Error in wrongTitle: $e');
+    }
+  }
+
   Future<void> fetchm3u8(int episodeNumber) async {
     streamDataNotifier.value = [];
     setState(() {
@@ -195,8 +175,8 @@ class _DetailsState extends State<Details> {
     });
 
     try {
-      final episodeValue = episodeData[(episodeNumber - 1)]['episodeId'];
-      final streamingLink = await instance!.fetchStreamingLinksAniwatch(
+      final episodeValue = filteredEpisodes![(episodeNumber - 1)]['episodeId'];
+      final streamingLink = await sourcehandler.fetchEpisodesSrcs(
         episodeValue,
         "megacloud",
         category!,
@@ -206,7 +186,7 @@ class _DetailsState extends State<Details> {
           await fetchStreamingLinksAniwatch(episodeValue, server, "sub");
 
       if (streamingLink != null) {
-        final link = instance is HianimeScrapper
+        final link = sourcehandler.selectedSource == "Hianime (Scrapper)"
             ? streamingLink.sources[0]['url']
             : streamingLink['sources'][0]['url'];
 
@@ -262,32 +242,23 @@ class _DetailsState extends State<Details> {
   }
 
   Future<void> fetchEpisodeList() async {
-    final provider = Provider.of<MangaSourcesProvider>(context, listen: false);
-    instance = provider.animeInstance;
-
     final dataProvider = Provider.of<Data>(context, listen: false);
-
+    log(sourcehandler.selectedSource);
     try {
-      final mapped = await searchMostSimilarAnime(
-          animeData['name'], instance!.scrapeAnimeSearch);
+      final scrapeEpisodes =
+          await sourcehandler.mappedSourceId(animeData['name']);
 
-      if (mapped != null) {
-        final animeId = mapped['id'];
-
-        final episodeResponse = await instance!.scrapeAnimeEpisodes(animeId);
-        if (episodeResponse != null && episodeResponse.isNotEmpty) {
-          setState(() {
-            episodeData = episodeResponse['episodes'] ?? [];
-            filteredEpisodes = episodeResponse['episodes'] ?? [];
-            final anime = dataProvider
-                .getCurrentEpisodeForAnime(animeData['id']?.toString() ?? '1');
-            episodeId = anime?['currentEpisode'] ?? 1;
-            category = dub ? "dub" : "sub";
-          });
-          continueWatching();
-        } else {
-          log('No episodes found in episodeResponse.');
-        }
+      if (scrapeEpisodes != null) {
+        setState(() {
+          episodeData = scrapeEpisodes['episodes'] ?? [];
+          filteredEpisodes = scrapeEpisodes['episodes'] ?? [];
+          scrapeData = scrapeEpisodes;
+          final anime = dataProvider
+              .getCurrentEpisodeForAnime(animeData['id']?.toString() ?? '1');
+          episodeId = anime?['currentEpisode'] ?? 1;
+          category = dub ? "dub" : "sub";
+        });
+        continueWatching();
       } else {
         log('No mapping found for anime search.');
       }
@@ -297,29 +268,26 @@ class _DetailsState extends State<Details> {
   }
 
   Future<void> fetchEpisodeUrl() async {
-    if (episodeData == null || episodeId == null) return;
+    if (filteredEpisodes == null || episodeId == null) return;
 
     setState(() {
       category = dub ? "dub" : "sub";
     });
 
     try {
-      final episodeIdValue = episodeData[(episodeId! - 1)]['episodeId'];
+      final episodeIdValue = filteredEpisodes![(episodeId! - 1)]['episodeId'];
       final trackResponse =
           await fetchStreamingLinksAniwatch(episodeIdValue, server, "sub");
 
-      final scraprLink = await instance?.fetchStreamingLinksAniwatch(
+      final scraprLink = await sourcehandler.fetchEpisodesSrcs(
           episodeIdValue, server, dub ? "dub" : "sub");
-
-      log("scrapeeer response: $instance");
-
-      // Check if scraprLink is null or doesn't contain sources
+  log("anivibe: ${scraprLink.toString()}");
       if (scraprLink != null) {
         setState(() {
-          episodeLink = instance is HianimeScrapper
+          episodeLink = sourcehandler.selectedSource == "Hianime (Scrapper)"
               ? scraprLink.sources[0]['url']
               : scraprLink['sources'][0]['url'];
-          tracks = trackResponse['tracks'];
+          tracks = trackResponse?['tracks'] != null ? trackResponse['tracks'] : [];
           isloading = false;
         });
       } else {
@@ -338,6 +306,160 @@ class _DetailsState extends State<Details> {
     }
   }
 
+  void showloader() {
+    showModalBottomSheet(
+        context: context,
+        showDragHandle: true,
+        builder: (context) {
+          return const SizedBox(
+            height: 100,
+            child: Column(
+              children: [
+                Text(
+                  "Getting data",
+                  style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 20),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  void wrongTitleSheet(context) {
+    showModalBottomSheet(
+        context: context,
+        showDragHandle: true,
+        enableDrag: true,
+        builder: (context) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child:
+                StatefulBuilder(builder: (context, StateSetter setWrongState) {
+              return SizedBox(
+                height: 400,
+                child: Column(
+                  children: [
+                    const Text(
+                      "WrongTitle Serach",
+                      style:
+                          TextStyle(fontFamily: "Poppins-Bold", fontSize: 20),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    TextField(
+                      onSubmitted: (value) async {
+                        log('Searching for: $value');
+                        setWrongState(() {
+                          wrongTitleSearchData = [];
+                        });
+                        final data =
+                            await sourcehandler.fetchSearchResults(value);
+                        setWrongState(() {
+                          wrongTitleSearchData = data;
+                        });
+                      },
+                      controller: wrongTitle,
+                      decoration: InputDecoration(
+                        labelText: "Search here",
+                        prefixIcon: const Icon(Iconsax.search_normal),
+                        isDense: true,
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Expanded(
+                      child: wrongTitleSearchData.isEmpty
+                          ? const Center(
+                              child: CircularProgressIndicator(),
+                            )
+                          : ListView(
+                              children: wrongTitleSearchData.map((item) {
+                              final title = item['name'];
+                              final image = item['poster'];
+                              final id = item['id'];
+                              return Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    setState(() {
+                                      filteredEpisodes = [];
+                                      episodeData = [];
+                                    });
+                                    Navigator.pop(context);
+                                    final data =
+                                        await sourcehandler.fetchEpisodes(id!);
+                                    setState(() {
+                                      filteredEpisodes = data['episodes'];
+                                      episodeData = data['episodes'];
+                                      scrapeData = data;
+                                    });
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5),
+                                      border: Border.all(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      ),
+                                    ),
+                                    height: 90,
+                                    child: Row(
+                                      children: [
+                                        SizedBox(
+                                          height: 90,
+                                          width: 140,
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                const BorderRadius.horizontal(
+                                              left: Radius.circular(5),
+                                            ),
+                                            child: CachedNetworkImage(
+                                              imageUrl: image!,
+                                              fit: BoxFit.cover,
+                                              alignment: Alignment.topCenter,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 15),
+                                        SizedBox(
+                                          width: 150,
+                                          child: Text(title)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList()),
+                    )
+                  ],
+                ),
+              );
+            }),
+          );
+        });
+  }
+
   void handleEpisode(int? episode, String selectedServer, String getTitle) {
     if (episode != null && selectedServer.isNotEmpty) {
       setState(() {
@@ -352,7 +474,7 @@ class _DetailsState extends State<Details> {
   }
 
   void handleCategory(String newCategory) {
-    if (episodeData != null) {
+    if (filteredEpisodes != null) {
       setState(() {
         category = newCategory;
         episodeLink = "";
@@ -361,16 +483,12 @@ class _DetailsState extends State<Details> {
     }
   }
 
-  void handleEpisodeList(String value) {
+  void searchEpisode(String number) {
+    final list = filteredEpisodes!
+        .where((episode) => episode["number"].toString().contains(number))
+        .toList();
     setState(() {
-      if (value.isEmpty) {
-        filteredEpisodes = episodeData;
-      } else {
-        filteredEpisodes = episodeData?.where((episode) {
-          final episodes = episode['number']?.toString() ?? '';
-          return episodes.contains(value);
-        }).toList();
-      }
+      episodeData = list;
     });
   }
 
@@ -593,10 +711,8 @@ class _DetailsState extends State<Details> {
   }
 
   SizedBox tabs(BuildContext context) {
-    final sourceProvider =
-        Provider.of<MangaSourcesProvider>(context, listen: false);
     return SizedBox(
-      height: 700,
+      height: 750,
       child: TabBarView(
         physics: const BouncingScrollPhysics(),
         children: [
@@ -605,9 +721,9 @@ class _DetailsState extends State<Details> {
             children: [
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
                 child: DropdownButtonFormField<String>(
-                  value: sourceProvider.animeInstance.sourceName,
+                  value: sourcehandler.selectedSource,
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: 'Choose Source',
@@ -631,23 +747,17 @@ class _DetailsState extends State<Details> {
                     ),
                   ),
                   isDense: true,
-                  items: sourceProvider.animeSources
-                          ?.map<DropdownMenuItem<String>>((source) {
-                        return DropdownMenuItem<String>(
-                          value: source.sourceName,
-                          child: Text(source.sourceName),
-                        );
-                      }).toList() ??
-                      [],
+                  items: animeSources.map<DropdownMenuItem<String>>((source) {
+                    return DropdownMenuItem<String>(
+                      value: source['name'],
+                      child: Text(source['name'].toString()),
+                    );
+                  }).toList(),
                   onChanged: (dynamic newValue) {
                     if (newValue.toString().isNotEmpty) {
                       setState(() {
-                        localSource = newValue;
-                        sourceProvider.setAnimeInstance(
-                            sourceProvider.animeSources!.firstWhere(
-                          (source) => source.sourceName == newValue,
-                        ));
-                        instance = sourceProvider.animeInstance;
+                        selectedSource = newValue;
+                        sourcehandler.selectedSource = selectedSource;
                         filteredEpisodes = [];
                         fetchEpisodeList();
                       });
@@ -656,6 +766,18 @@ class _DetailsState extends State<Details> {
                 ),
               ),
               const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      width: 178,
+                      child: Text("Found: ${scrapeData?['name'] ?? "Unkonwn"}",style: TextStyle(fontFamily: "Poppins-Bold", color: Theme.of(context).colorScheme.primary), )),
+                    Text("Total Episodes: ${scrapeData?['totalEpisodes'] ?? "??"}",style: TextStyle(fontFamily: "Poppins-Bold", color: Theme.of(context).colorScheme.primary), ),
+                  ],
+                ),
+              ),
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -667,59 +789,100 @@ class _DetailsState extends State<Details> {
                       style:
                           TextStyle(fontFamily: "Poppins-Bold", fontSize: 22),
                     ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          height: 40,
-                          child: LiteRollingSwitch(
-                            value: !dub,
-                            width: 100,
-                            textOn: "Sub",
-                            textOff: "Dub",
-                            textOnColor: Colors.white,
-                            colorOn:
-                                Theme.of(context).colorScheme.tertiaryContainer,
-                            colorOff:
-                                Theme.of(context).colorScheme.inversePrimary,
-                            iconOn: Icons.closed_caption,
-                            iconOff: Icons.mic,
-                            animationDuration:
-                                const Duration(milliseconds: 300),
-                            onChanged: (bool state) {
-                              setState(() {
-                                dub = !dub;
-                              });
-                              log(dub.toString());
-                            },
-                            onDoubleTap: () => {},
-                            onSwipe: () => {},
-                            onTap: () => {},
-                          ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceBright,
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          withPhoto ? Iconsax.image : Iconsax.menu_board,
                         ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceBright,
-                            shape: BoxShape.rectangle,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: IconButton(
-                            icon: Icon(
-                              withPhoto ? Iconsax.image : Iconsax.menu_board,
-                              size: 25,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                withPhoto = !withPhoto;
-                              });
-                            },
-                          ),
-                        ),
-                      ],
+                        onPressed: () {
+                          setState(() {
+                            withPhoto = !withPhoto;
+                          });
+                        },
+                      ),
                     )
                   ],
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      height: 40,
+                      child: LiteRollingSwitch(
+                        value: !dub,
+                        width: 100,
+                        textOn: "Sub",
+                        textOff: "Dub",
+                        textOnColor: Colors.white,
+                        colorOn:
+                            Theme.of(context).colorScheme.tertiaryContainer,
+                        colorOff: Theme.of(context).colorScheme.inversePrimary,
+                        iconOn: Icons.closed_caption,
+                        iconOff: Icons.mic,
+                        animationDuration: const Duration(milliseconds: 300),
+                        onChanged: (bool state) {
+                          setState(() {
+                            dub = !dub;
+                          });
+                          log(dub.toString());
+                        },
+                        onDoubleTap: () => {},
+                        onSwipe: () => {},
+                        onTap: () => {},
+                      ),
+                    ),
+                    GestureDetector(
+                        onTap: () {
+                          showloader();
+                          wrongTitleSearch();
+                        },
+                        child: Text(
+                          "Wrong Title?",
+                          style: TextStyle(
+                              fontFamily: "Poppins-Bold",
+                              fontSize: 18,
+                              color: Theme.of(context).colorScheme.primary),
+                        ))
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: TextField(
+                  onChanged: (String value) {
+                    searchEpisode(value);
+                  },
+                  decoration: InputDecoration(
+                      prefixIcon: const Icon(Iconsax.search_normal),
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.surface,
+                      labelText: "Search Chapters",
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Theme.of(context).colorScheme.primary),
+                          borderRadius: BorderRadius.circular(20)),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(
+                              color: Theme.of(context).colorScheme.primary))),
                 ),
               ),
               const SizedBox(
@@ -728,7 +891,7 @@ class _DetailsState extends State<Details> {
               !withPhoto
                   ? episodeList(context)
                   : Container(
-                      height: 440,
+                      height: 400,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                       ),
@@ -739,8 +902,7 @@ class _DetailsState extends State<Details> {
                           child: filteredEpisodes != null &&
                                   filteredEpisodes!.isNotEmpty
                               ? ListView(
-                                  children:
-                                      filteredEpisodes!.map<Widget>((item) {
+                                  children: episodeData!.map<Widget>((item) {
                                   final title = item['title'];
                                   final episodeNumber = item['number'];
                                   return GestureDetector(
@@ -850,7 +1012,10 @@ class _DetailsState extends State<Details> {
                                                   ),
                                                 ),
                                                 child: Icon(
-                                                    Icons.download_for_offline, color: Theme.of(context).colorScheme.inversePrimary),
+                                                    Icons.download_for_offline,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .inversePrimary),
                                               ),
                                             ),
                                           ),
@@ -937,7 +1102,7 @@ class _DetailsState extends State<Details> {
                               ),
                             ),
                           );
-                        }).toList(),
+                        }),
                       ],
                     ),
             );
@@ -957,71 +1122,80 @@ class _DetailsState extends State<Details> {
       width: MediaQuery.of(context).size.width,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: filteredEpisodes?.length ?? 0,
-          itemBuilder: (context, index) {
-            final item = filteredEpisodes![index];
-            final title = item['title'];
-            final episodeNumber = item['number'];
-            return GestureDetector(
-              onTap: () {
-                displayBottomSheet(context, episodeNumber, title);
-              },
-              child: Container(
-                margin: const EdgeInsets.only(top: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border(
-                    left: BorderSide(
-                      width: 5,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  color: episodeNumber == episodeId
-                      ? Theme.of(context).colorScheme.inversePrimary
-                      : Theme.of(context).colorScheme.surfaceContainerHighest,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(15),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(
-                        width: 220,
-                        child: Text(
-                          title.length > 25
-                              ? '${title.substring(0, 25)}...'
-                              : title,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.inverseSurface,
-                            fontFamily: "Poppins-Bold",
+        child: episodeData == null
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : ListView.builder(
+                shrinkWrap: true,
+                itemCount: episodeData?.length ?? 0,
+                itemBuilder: (context, index) {
+                  final item = episodeData[index];
+                  final title = item['title'];
+                  final episodeNumber = item['number'];
+                  return GestureDetector(
+                    onTap: () {
+                      displayBottomSheet(context, episodeNumber, title);
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border(
+                          left: BorderSide(
+                            width: 5,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
+                        color: episodeNumber == episodeId
+                            ? Theme.of(context).colorScheme.inversePrimary
+                            : Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
                       ),
-                      episodeNumber == episodeId
-                          ? Icon(
-                              Ionicons.play,
-                              color:
-                                  Theme.of(context).colorScheme.inverseSurface,
-                            )
-                          : Text(
-                              'Ep- $episodeNumber',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .inverseSurface,
-                                fontWeight: FontWeight.w500,
+                      child: Padding(
+                        padding: const EdgeInsets.all(15),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                              width: 220,
+                              child: Text(
+                                title.length > 25
+                                    ? '${title.substring(0, 25)}...'
+                                    : title,
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .inverseSurface,
+                                  fontFamily: "Poppins-Bold",
+                                ),
                               ),
                             ),
-                    ],
-                  ),
-                ),
+                            episodeNumber == episodeId
+                                ? Icon(
+                                    Ionicons.play,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .inverseSurface,
+                                  )
+                                : Text(
+                                    'Ep- $episodeNumber',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .inverseSurface,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
-            );
-          },
-        ),
       ),
     );
   }
@@ -1226,7 +1400,7 @@ class _DetailsState extends State<Details> {
                     ? CoverImage(imageUrl: animeData['coverImage'])
                     : const SizedBox.shrink(),
                 Container(
-                  height: 1000,
+                  height: 1100,
                   margin: const EdgeInsets.only(top: 220),
                   decoration: BoxDecoration(
                     borderRadius:
@@ -1285,7 +1459,7 @@ class _DetailsState extends State<Details> {
                                   ),
                                   const SizedBox(width: 10),
                                   Text(
-                                    animeData['rating'].toString() ?? "??",
+                                    animeData?['rating'].toString() ?? "??",
                                     style: const TextStyle(
                                         fontSize: 18,
                                         fontFamily: "Poppins-Bold"),
