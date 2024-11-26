@@ -1,9 +1,10 @@
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/backupData/anilist_anime.dart';
 import 'package:daizy_tv/components/Anime/anime_carousale.dart';
+import 'package:daizy_tv/components/Common/check_platform.dart';
+import 'package:daizy_tv/components/windows/anime/windows_carousale.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:daizy_tv/components/Anime/carousel.dart';
 import 'package:daizy_tv/components/Common/Header.dart';
 import 'package:daizy_tv/components/Anime/reusableList.dart';
 import 'package:iconsax/iconsax.dart';
@@ -92,11 +93,12 @@ class _HomepageState extends State<Animepage> {
                   ),
                 ),
                 const SizedBox(height: 30.0),
-                AnimeCarousale(
+                PlatformWidget(androidWidget: AnimeCarousale(
                   animeData: trendingAnime,
                   route: '/detailspage',
                   name: "Play",
-                ),
+                ), windowsWidget: WindowsCarousale(route: '/detailspage', name: "Play", animeData: trendingAnime,)),
+               
                 const SizedBox(height: 30.0),
                 ReusableList(
                   name: 'Popular Animes',
