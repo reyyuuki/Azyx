@@ -1,7 +1,7 @@
 // ignore_for_file: file_names
 
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
-import 'package:daizy_tv/utils/scraper/Manga/Manga_Extenstions/extract_class.dart';
+import 'package:daizy_tv/utils/sources/Manga/Base/extract_class.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
