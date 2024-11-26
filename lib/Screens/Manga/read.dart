@@ -1,9 +1,11 @@
 import 'dart:developer';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:daizy_tv/Provider/manga_sources.dart';
+import 'package:daizy_tv/Provider/sources_provider.dart';
+import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/Manga/sliderBar.dart';
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
-import 'package:daizy_tv/utils/scraper/Manga/Manga_Extenstions/extract_class.dart';
+import 'package:daizy_tv/utils/sources/Manga/Base/extract_class.dart';
+import 'package:daizy_tv/utils/sources/Manga/SourceHandler/sourcehandler.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -30,6 +32,7 @@ class _ReadState extends State<Read> {
   String? mangaTitle;
   String? url;
   ExtractClass? source;
+  late MangaSourcehandler sourcehandler;
 
   bool isLoading = true;
   bool hasError = false;
@@ -39,45 +42,51 @@ class _ReadState extends State<Read> {
   @override
   void initState() {
     super.initState();
+    log(widget.chapterLink);
+    sourcehandler =
+        Provider.of<SourcesProvider>(context, listen: false).getMangaInstance();
     fetchChapterData();
   }
 
   final ScrollController _scrollController = ScrollController();
 
   Future<void> fetchChapterData() async {
-    final provider = Provider.of<MangaSourcesProvider>(context, listen: false);
-    source = provider.instance;
     try {
-      if (source != null) {
-        final resp = await source!.fetchPages(widget.chapterLink);
-        final dataProvider = Provider.of<Data>(context, listen: false);
-        
-        if (resp != null && resp.toString().isNotEmpty) {
-          setState(() {
-            chapterImages = resp['images'];
-            currentChapter = resp['currentChapter'];
-            mangaTitle = resp['title'];
-            chapterData = resp;
-            isLoading = false;
-            isNext = resp['nextChapter'] != null;
-            isPrev = resp['previousChapter'] != null;
-          });
-          log(chapterData.toString());
+      final resp = await sourcehandler.fetchPages(widget.chapterLink);
+      final dataProvider = Provider.of<Data>(context, listen: false);
+      if (resp != null && resp.toString().isNotEmpty) {
+        setState(() {
+          chapterImages = resp['images'];
+          currentChapter = resp['currentChapter'];
+          mangaTitle = resp['title'];
+          chapterData = resp;
+          isLoading = false;
+          isNext = resp['nextChapter'] != null;
+          isPrev = resp['previousChapter'] != null;
+        });
 
-          dataProvider.addReadsManga(
+        // log(currentChapter.toString());
+        dataProvider.addReadsManga(
             mangaId: widget.mangaId,
             mangaTitle: resp['title'],
-            currentChapter: chapterData['link'],
+            currentChapter: widget.chapterLink,
             mangaImage: widget.image,
-            currentChapterTitle: resp['currentChapter']
-          );
-        } else {
-          setState(() {
-            hasError = true;
-            isLoading = false;
-          });
-          log('Error: Chapter data is empty');
+            currentChapterTitle: resp['currentChapter']);
+        final progress = resp['currentChapter'].split(" ").last;
+        log(progress);
+        final anilist = Provider.of<AniListProvider>(context, listen: false);
+        if (progress != null) {
+          anilist.userData?['name'] != null
+              ? anilist.addToAniList(
+                  mediaId: int.parse(widget.mangaId), progress:int.parse(progress))
+              : [];
         }
+      } else {
+        setState(() {
+          hasError = true;
+          isLoading = false;
+        });
+        log('Error: Chapter data is empty');
       }
     } catch (e) {
       log('Error: $e');
@@ -94,7 +103,7 @@ class _ReadState extends State<Read> {
     });
     try {
       final dataProvider = Provider.of<Data>(context, listen: false);
-      final data = await source!.fetchPages(url!);
+      final data = await sourcehandler.fetchPages(url!);
       if (data != null && data.toString().isNotEmpty) {
         setState(() {
           chapterImages = data['images'];
@@ -106,13 +115,20 @@ class _ReadState extends State<Read> {
         });
 
         dataProvider.addReadsManga(
-          mangaId: widget.mangaId,
-          mangaTitle: mangaTitle!,
-          currentChapter: chapterData['link'],
-          mangaImage: widget.image,
-          currentChapterTitle: data['currentChapter']
-        );
-
+            mangaId: widget.mangaId,
+            mangaTitle: mangaTitle!,
+            currentChapter: url!,
+            mangaImage: widget.image,
+            currentChapterTitle: data['currentChapter']);
+            final progress = data['currentChapter'].split(" ").last;
+        log(progress);
+        final anilist = Provider.of<AniListProvider>(context, listen: false);
+        if (progress != null) {
+          anilist.userData?['name'] != null
+              ? anilist.addToAniList(
+                  mediaId: int.parse(widget.mangaId), progress:int.parse(progress))
+              : [];
+        }
       } else {
         setState(() {
           hasError = true;
@@ -128,30 +144,30 @@ class _ReadState extends State<Read> {
     }
   }
 
- void handleChapter(String? direction) async {
-  if ((direction == 'right' && chapterData['nextChapter'] != null) ||
-      (direction == 'left' && chapterData['previousChapter'] != null)) {
-        log(direction == 'right '? 'isright' : 'isleft');
-        setState(() {
-          url = direction == 'right' ? chapterData['nextChapter'] : chapterData['previousChapter'];
-        });
- 
-    setState(() {
-      isNext = false;
-      isPrev = false;
-      isLoading = true;
-    });
+  void handleChapter(String? direction) async {
+    if ((direction == 'right' && chapterData['nextChapter'] != null) ||
+        (direction == 'left' && chapterData['previousChapter'] != null)) {
+      log(direction == 'right ' ? 'isright' : 'isleft');
+      setState(() {
+        url = direction == 'right'
+            ? chapterData['nextChapter']
+            : chapterData['previousChapter'];
+      });
 
-    await fetchChapterImages();
+      setState(() {
+        isNext = false;
+        isPrev = false;
+        isLoading = true;
+      });
 
-    setState(() {
-      isNext = chapterData['nextChapter'] != null;
-      isPrev = chapterData['previousChapter'] != null;
-    });
+      await fetchChapterImages();
 
+      setState(() {
+        isNext = chapterData['nextChapter'] != null;
+        isPrev = chapterData['previousChapter'] != null;
+      });
+    }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +203,8 @@ class _ReadState extends State<Read> {
                             ),
                           ),
                         ),
-                        errorWidget: (context, url, error) => const Icon(Icons.error),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.error),
                       );
                     },
                   ),
