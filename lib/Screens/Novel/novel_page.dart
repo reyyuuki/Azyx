@@ -1,11 +1,11 @@
 import 'dart:developer';
 
-import 'package:daizy_tv/Provider/manga_sources.dart';
+import 'package:daizy_tv/Provider/sources_provider.dart';
 import 'package:daizy_tv/backupData/novel_buddy_fallback.dart';
 import 'package:daizy_tv/components/Common/Header.dart';
 import 'package:daizy_tv/components/Novel/novel_carousale.dart';
 import 'package:daizy_tv/components/Novel/reusable_list.dart';
-import 'package:daizy_tv/utils/scraper/Novel/novel_buddy.dart';
+import 'package:daizy_tv/utils/sources/Novel/Extensions/novel_buddy.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
