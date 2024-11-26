@@ -5,7 +5,7 @@ import 'dart:developer';
 import 'package:animated_segmented_tab_control/animated_segmented_tab_control.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
-import 'package:daizy_tv/Provider/manga_sources.dart';
+import 'package:daizy_tv/Provider/sources_provider.dart';
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/coverImage.dart';
@@ -13,8 +13,8 @@ import 'package:daizy_tv/components/Manga/mangaAllDetails.dart';
 import 'package:daizy_tv/components/Manga/chapterList.dart';
 import 'package:daizy_tv/components/Manga/mangaFloater.dart';
 import 'package:daizy_tv/utils/api/Anilist/Manga/manga_details_anilist.dart';
-import 'package:daizy_tv/utils/helper/jaro_winkler.dart';
-import 'package:daizy_tv/utils/scraper/Manga/Manga_Extenstions/extract_class.dart';
+import 'package:daizy_tv/utils/sources/Manga/Base/extract_class.dart';
+import 'package:daizy_tv/utils/sources/Manga/SourceHandler/sourcehandler.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
@@ -45,8 +45,11 @@ class _DetailsState extends State<Mangadetails> {
   late String searchTerm;
   ExtractClass? mangaScarapper;
   List<ExtractClass>? sources;
+  late MangaSourcehandler sourcehandler;
+  List<Map<String, String>> mangaSources = [];
+  String selectedSource = '';
   String? currentLink;
- late String currentChapter;
+  late String currentChapter;
 
   String localSource = "MangaKakalot Unofficial";
   String localSelectedValue = "CURRENT";
@@ -89,6 +92,10 @@ class _DetailsState extends State<Mangadetails> {
   void initState() {
     super.initState();
     _controller = TextEditingController(text: value);
+    sourcehandler =
+        Provider.of<SourcesProvider>(context, listen: false).getMangaInstance();
+    mangaSources = sourcehandler.getAvailableSources();
+    selectedSource = sourcehandler.selectedSource;
     scrap();
   }
 
@@ -100,22 +107,15 @@ class _DetailsState extends State<Mangadetails> {
 
   Future<void> mappingData() async {
     try {
-      final searchData = await searchMostSimilarManga(
-          mangaData['name'], mangaScarapper!.fetchSearchsManga);
-      if (searchData!.isNotEmpty) {
-        final chaptersData =
-            await mangaScarapper!.fetchChapters(searchData['id']);
-        if (chaptersData != null) {
-          setState(() {
-            mappedId = searchData['id'];
-            filteredChapterList = chaptersData['chapterList'];
-            chapterList = chaptersData['chapterList'];
-          });
-          wrongTittle.text = mangaData['name'];
-          wrongTitleSearch(wrongTittle.text);
-        }
-        continueReading();
+      final chaptersData = await sourcehandler.mappingData(mangaData['name']);
+      if (chaptersData != null) {
+        setState(() {
+          filteredChapterList = chaptersData['chapterList'];
+          chapterList = chaptersData['chapterList'];
+        });
+        wrongTittle.text = mangaData['name'];
       }
+      continueReading();
     } catch (e) {
       log("Errors: $e");
     }
@@ -124,12 +124,15 @@ class _DetailsState extends State<Mangadetails> {
   Future<void> wrongTitleSearch(String name) async {
     try {
       wrongTittle.text = name;
-      final response = await mangaScarapper!.fetchSearchsManga(name);
+      final response = await sourcehandler.fetchSearchData(name);
       if (response.toString().isNotEmpty) {
         setState(() {
           wrongTitleSearchData = response['mangaList'];
         });
+        Navigator.pop(context);
+        wrongTitle(context);
       }
+      log(wrongTitleSearchData);
     } catch (e) {
       log(e.toString());
     }
@@ -137,7 +140,7 @@ class _DetailsState extends State<Mangadetails> {
 
   Future<void> changeChapterData(id) async {
     chapterList = [];
-    final response = await mangaScarapper!.fetchChapters(id);
+    final response = await sourcehandler.fetchChapters(id);
     if (response != null) {
       setState(() {
         filteredChapterList = response['chapterList'];
@@ -148,8 +151,10 @@ class _DetailsState extends State<Mangadetails> {
     }
   }
 
-  void searchChapter(String number){
-    final list = filteredChapterList!.where((chapter) => chapter['title'].contains(number)).toList();
+  void searchChapter(String number) {
+    final list = filteredChapterList!
+        .where((chapter) => chapter['title'].contains(number))
+        .toList();
     setState(() {
       chapterList = list;
     });
@@ -157,8 +162,6 @@ class _DetailsState extends State<Mangadetails> {
 
   Future<void> scrap() async {
     final data = await getMangaDetails(widget.id);
-    final provider = Provider.of<MangaSourcesProvider>(context, listen: false);
-    mangaScarapper = provider.instance;
     if (data != null) {
       setState(() {
         mangaData = data;
@@ -166,6 +169,30 @@ class _DetailsState extends State<Mangadetails> {
       });
       mappingData();
     }
+  }
+
+  void showBottomLoader() {
+    showModalBottomSheet(
+        context: context,
+        showDragHandle: true,
+        enableDrag: true,
+        builder: (context) => SizedBox(
+              height: 100,
+              child: Column(
+                children: const [
+                  Text(
+                    "Getting data",
+                    style: TextStyle(fontSize: 20, fontFamily: "Poppins-Bold"),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ],
+              ),
+            ));
   }
 
   Future<void> continueReading() async {
@@ -189,7 +216,9 @@ class _DetailsState extends State<Mangadetails> {
           currentLink = progress != null
               ? index['link']
               : filteredChapterList!.last['link'];
-          currentChapter = progress != null ? index['title'] : filteredChapterList!.last['title'];
+          currentChapter = progress != null
+              ? index['title']
+              : filteredChapterList!.last['title'];
         });
       }
       log(currentLink ?? "No link available");
@@ -204,114 +233,120 @@ class _DetailsState extends State<Mangadetails> {
 
   void wrongTitle(BuildContext context) async {
     showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        showDragHandle: true,
-        barrierColor: Colors.black87.withOpacity(0.5),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-        ),
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        builder: (context) {
-          return StatefulBuilder(builder: (context, setState) {
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SizedBox(
-                height: 400,
-                child: Column(
-                  children: [
-                    TextField(
-                      onSubmitted: (value) async {
-                        log('come:$value');
-                        setState(() => wrongTitleSearchData = []);
-                        await wrongTitleSearch(value);
-                        setState(() {});
-                      },
-                      controller: wrongTittle,
-                      decoration: InputDecoration(
-                        labelText: "Search here",
-                        prefixIcon: Icon(Iconsax.search_normal),
-                        isDense: true,
-                        enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            borderRadius: BorderRadius.circular(20)),
-                        focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            borderRadius: BorderRadius.circular(20)),
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      barrierColor: Colors.black87.withOpacity(0.5),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setWrongState) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              height: 400,
+              child: Column(
+                children: [
+                  TextField(
+                    onSubmitted: (value) async {
+                      log('Searching for: $value');
+                      setWrongState(() {
+                        wrongTitleSearchData = null;
+                      });
+
+                      final data = await sourcehandler.fetchSearchData(value);
+                      setWrongState(() {
+                        wrongTitleSearchData = data['mangaList'];
+                      });
+                    },
+                    controller: wrongTittle,
+                    decoration: InputDecoration(
+                      labelText: "Search here",
+                      prefixIcon: Icon(Iconsax.search_normal),
+                      isDense: true,
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    SizedBox(
-                      height: 280,
-                      child: wrongTitleSearchData == null
-                          ? const Center(
-                              child: CircularProgressIndicator(),
-                            )
-                          : ListView.builder(
-                              itemCount: wrongTitleSearchData.length,
-                              itemBuilder: (context, index) {
-                                final title =
-                                    wrongTitleSearchData[index]['title'];
-                                return Padding(
-                                  padding: const EdgeInsets.all(5),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      changeChapterData(
-                                          wrongTitleSearchData[index]['id']);
-                                      Navigator.pop(context);
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(5),
-                                          border: Border.all(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary)),
-                                      height: 90,
-                                      child: Row(
-                                        children: [
-                                          SizedBox(
-                                            height: 90,
-                                            width: 140,
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.horizontal(
-                                                      left: Radius.circular(5)),
-                                              child: CachedNetworkImage(
-                                                imageUrl:
-                                                    wrongTitleSearchData[index]
-                                                        ['image'],
-                                                fit: BoxFit.cover,
-                                                alignment: Alignment.topCenter,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            width: 15,
-                                          ),
-                                          Text(title.length > 15
-                                              ? '${title.substring(0, 15)}...'
-                                              : title)
-                                        ],
+                  ),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    height: 280,
+                    child: wrongTitleSearchData == null
+                        ? const Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        : ListView.builder(
+                            itemCount: wrongTitleSearchData.length,
+                            itemBuilder: (context, index) {
+                              final title =
+                                  wrongTitleSearchData[index]['title'];
+                              return Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    changeChapterData(
+                                        wrongTitleSearchData[index]['id']);
+                                    Navigator.pop(context);
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5),
+                                      border: Border.all(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
                                       ),
                                     ),
+                                    height: 90,
+                                    child: Row(
+                                      children: [
+                                        SizedBox(
+                                          height: 90,
+                                          width: 140,
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                const BorderRadius.horizontal(
+                                              left: Radius.circular(5),
+                                            ),
+                                            child: CachedNetworkImage(
+                                              imageUrl:
+                                                  wrongTitleSearchData[index]
+                                                      ['image'],
+                                              fit: BoxFit.cover,
+                                              alignment: Alignment.topCenter,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 15),
+                                        Text(title.length > 15
+                                            ? '${title.substring(0, 15)}...'
+                                            : title),
+                                      ],
+                                    ),
                                   ),
-                                );
-                              }),
-                    )
-                  ],
-                ),
+                                ),
+                              );
+                            }),
+                  ),
+                ],
               ),
-            );
-          });
+            ),
+          );
         });
+      },
+    );
   }
 
   @override
@@ -575,8 +610,6 @@ class _DetailsState extends State<Mangadetails> {
   }
 
   SizedBox tabs(BuildContext context) {
-    final sourceProvider =
-        Provider.of<MangaSourcesProvider>(context, listen: false);
     return SizedBox(
       height: 700,
       child: TabBarView(
@@ -589,7 +622,7 @@ class _DetailsState extends State<Mangadetails> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                 child: DropdownButtonFormField<String>(
-                  value: sourceProvider.instance.sourceName,
+                  value: sourcehandler.selectedSource,
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: 'Choose Source',
@@ -613,25 +646,20 @@ class _DetailsState extends State<Mangadetails> {
                     ),
                   ),
                   isDense: true,
-                  items: sourceProvider.sources
-                          ?.map<DropdownMenuItem<String>>((source) {
-                        return DropdownMenuItem<String>(
-                          value: source.sourceName,
-                          child: Text(source.sourceName),
-                        );
-                      }).toList() ??
-                      [],
+                  items: mangaSources.map<DropdownMenuItem<String>>((source) {
+                    return DropdownMenuItem<String>(
+                      value: source['name'],
+                      child: Text(source['name'].toString()),
+                    );
+                  }).toList(),
                   onChanged: (dynamic newValue) {
                     if (newValue.toString().isNotEmpty) {
                       setState(() {
-                        localSource = newValue;
-                        sourceProvider
-                            .setInstance(sourceProvider.sources!.firstWhere(
-                          (source) => source.sourceName == newValue,
-                        ));
-                        mangaScarapper = sourceProvider.instance;
-                        filteredChapterList = [];
+                        selectedSource = newValue;
+                        sourcehandler.selectedSource = selectedSource;
+                        chapterList = [];
                         mappingData();
+                        log(sourcehandler.selectedSource);
                       });
                     }
                   },
@@ -655,14 +683,14 @@ class _DetailsState extends State<Mangadetails> {
                         IconButton(
                             onPressed: () {
                               setState(() {
-                                chapterList =
-                                    chapterList?.reversed.toList();
+                                chapterList = chapterList?.reversed.toList();
                               });
                             },
                             icon: const Icon(Iconsax.arrow_down)),
                         GestureDetector(
                           onTap: () {
-                            wrongTitle(context);
+                            wrongTitleSearch(mangaData['name']);
+                            showBottomLoader();
                           },
                           child: Text(
                             "Wrong title?",
@@ -679,15 +707,16 @@ class _DetailsState extends State<Mangadetails> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                 child: TextField(
-                  onChanged: (String value){
+                  onChanged: (String value) {
                     searchChapter(value);
                   },
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Iconsax.search_normal),
-                    filled: true,
-                    fillColor: Theme.of(context).colorScheme.surface,
+                      prefixIcon: Icon(Iconsax.search_normal),
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       labelText: "Search Chapters",
                       focusedBorder: OutlineInputBorder(
                           borderSide: BorderSide(
@@ -704,8 +733,7 @@ class _DetailsState extends State<Mangadetails> {
               ),
               SizedBox(
                 height: 400,
-                child: chapterList != null &&
-                        chapterList!.isNotEmpty
+                child: chapterList != null && chapterList!.isNotEmpty
                     ? ListView(
                         children: chapterList!.map<Widget>((chapter) {
                           return Chapterlist(
