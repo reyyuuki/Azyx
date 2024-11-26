@@ -1,7 +1,5 @@
 import 'dart:developer';
 
-
-
 double jaroWinklerDistance(String s1, String s2) {
   if (s1 == s2) return 1.0;
   final maxLength = [s1.length, s2.length].reduce((a, b) => a > b ? a : b);
@@ -12,7 +10,8 @@ double jaroWinklerDistance(String s1, String s2) {
 
   for (int i = 0; i < s1.length; i++) {
     final start = i - matchWindow >= 0 ? i - matchWindow : 0;
-    final end = i + matchWindow + 1 < s2.length ? i + matchWindow + 1 : s2.length;
+    final end =
+        i + matchWindow + 1 < s2.length ? i + matchWindow + 1 : s2.length;
 
     for (int j = start; j < end; j++) {
       if (!s2Matches[j] && s1[i] == s2[j]) {
@@ -58,47 +57,41 @@ Future<Map<String, dynamic>?> searchMostSimilarAnime(
     Map<String, dynamic>? mostSimiliarAnime;
     double highestSimilarity = 0.0;
 
-   
     for (var anime in animeList) {
-      
+      if (anime is Map<String, dynamic> &&
+          anime.containsKey('name') &&
+          anime.containsKey('id') &&
+          anime['name'] is String &&
+          anime['id'] is String) {
+        final name = anime['name'] as String;
+        final id = anime['id'] as String;
 
-        if (anime is Map<String, dynamic> &&
-            anime.containsKey('name') &&
-            anime.containsKey('id') &&
-            anime['name'] is String &&
-            anime['id'] is String) {
+        final similarity = jaroWinklerDistance(query, name);
 
-          final name = anime['name'] as String;
-          final id = anime['id'] as String;
-
-
-          final similarity = jaroWinklerDistance(query, name);
-
-          if (similarity > highestSimilarity) {
-            highestSimilarity = similarity;
-            mostSimiliarAnime = {
-              'name': name,
-              'similarity': similarity,
-              'details': anime,
-              'id': id
-            };
-          }
-        } else {
-          log("Error: Manga item does not have the expected structure or types: ${anime.toString()}");
+        if (similarity > highestSimilarity) {
+          highestSimilarity = similarity;
+          mostSimiliarAnime = {
+            'name': name,
+            'similarity': similarity,
+            'details': anime,
+            'id': id
+          };
         }
+      } else {
+        log("Error: Manga item does not have the expected structure or types: ${anime.toString()}");
+      }
     }
 
     log("Most similar anime found: ${mostSimiliarAnime.toString()}");
-    
-    return mostSimiliarAnime;
 
+    return mostSimiliarAnime;
   } catch (e, stackTrace) {
     log("Error in searchMostSimilarManga function: $e\n$stackTrace");
     return null;
   }
 }
 
-Future<Map<String, dynamic>?> searchMostSimilarManga(
+Future<String> searchMostSimilarManga(
     String query, Future<dynamic> Function(String) scrapeFunction) async {
   try {
     final result = await scrapeFunction(query);
@@ -106,54 +99,44 @@ Future<Map<String, dynamic>?> searchMostSimilarManga(
 
     if (mangaList == null) {
       log('No manga data found.');
-      return null;
+      return '';
     }
 
     Map<String, dynamic>? mostSimilarManga;
     double highestSimilarity = 0.0;
 
-   
     for (var manga in mangaList) {
-      
+      if (manga is Map<String, dynamic> &&
+          manga.containsKey('title') &&
+          manga.containsKey('id') &&
+          manga['title'] is String &&
+          manga['id'] is String) {
+        final title = manga['title'] as String;
+        final id = manga['id'] as String;
 
-        // Check that `manga` is a Map with the expected keys and types
-        if (manga is Map<String, dynamic> &&
-            manga.containsKey('title') &&
-            manga.containsKey('id') &&
-            manga['title'] is String &&
-            manga['id'] is String) {
+        final similarity = jaroWinklerDistance(query, title);
 
-          final title = manga['title'] as String;
-          final id = manga['id'] as String;
-
-
-          final similarity = jaroWinklerDistance(query, title);
-
-          if (similarity > highestSimilarity) {
-            highestSimilarity = similarity;
-            mostSimilarManga = {
-              'title': title,
-              'similarity': similarity,
-              'details': manga,
-              'id': id
-            };
-          }
-        } else {
-          log("Error: Manga item does not have the expected structure or types: ${manga.toString()}");
+        if (similarity > highestSimilarity) {
+          highestSimilarity = similarity;
+          mostSimilarManga = {
+            'id': id
+          };
         }
+      } else {
+        log("Error: Manga item does not have the expected structure or types: ${manga.toString()}");
+      }
     }
 
     log("Most similar manga found: ${mostSimilarManga.toString()}");
-    
-    return mostSimilarManga;
 
+    return mostSimilarManga?['id'];
   } catch (e, stackTrace) {
     log("Error in searchMostSimilarManga function: $e\n$stackTrace");
-    return null;
+    return '';
   }
 }
 
-Future<Map<String, dynamic>?> searchMostSimilarNovel(
+Future<String> searchMostSimilarNovel(
     String query, Future<dynamic> Function(String) scrapeFunction) async {
   try {
     final result = await scrapeFunction(query);
@@ -161,49 +144,40 @@ Future<Map<String, dynamic>?> searchMostSimilarNovel(
 
     if (novelList == null) {
       log('No novel data found.');
-      return null;
+      return '';
     }
 
     Map<String, dynamic>? mostSimilarNovel;
     double highestSimilarity = 0.0;
 
-   
     for (var novel in novelList) {
-      
+      if (novel is Map<String, dynamic> &&
+          novel.containsKey('title') &&
+          novel.containsKey('id') &&
+          novel['title'] is String &&
+          novel['id'] is String) {
+        final title = novel['title'] as String;
+        final id = novel['id'] as String;
 
-        // Check that `novel` is a Map with the expected keys and types
-        if (novel is Map<String, dynamic> &&
-            novel.containsKey('title') &&
-            novel.containsKey('id') &&
-            novel['title'] is String &&
-            novel['id'] is String) {
+        final similarity = jaroWinklerDistance(query, title);
 
-          final title = novel['title'] as String;
-          final id = novel['id'] as String;
-
-
-          final similarity = jaroWinklerDistance(query, title);
-
-          if (similarity > highestSimilarity) {
-            highestSimilarity = similarity;
-            mostSimilarNovel = {
-              'title': title,
-              'similarity': similarity,
-              'details': novel,
-              'id': id
-            };
-          }
-        } else {
-          log("Error: Novel item does not have the expected structure or types: ${novel.toString()}");
+        if (similarity > highestSimilarity) {
+          highestSimilarity = similarity;
+          mostSimilarNovel = {
+            'title': title,
+            'id': id
+          };
         }
+      } else {
+        log("Error: Novel item does not have the expected structure or types: ${novel.toString()}");
+      }
     }
 
     log("Most similar novel found: ${mostSimilarNovel.toString()}");
-    
-    return mostSimilarNovel;
 
+    return mostSimilarNovel!['id'];
   } catch (e, stackTrace) {
     log("Error in searchMostSimilarManga function: $e\n$stackTrace");
-    return null;
+    return '';
   }
 }
