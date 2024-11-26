@@ -16,24 +16,22 @@ class GridList extends StatelessWidget {
     if(data == null){
       return const SizedBox.shrink();
     }
-    return Padding(
+    return Container(
       padding: const EdgeInsets.only(left: 12),
-      child: Container(
-        color: Theme.of(context).colorScheme.surface,
-        child: GridView.builder(  
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3, 
-            crossAxisSpacing: 5.0, 
-            childAspectRatio:
-                0.56, 
-          ),
-          itemCount: data!.length,
-          itemBuilder: (context, index) {
-            final item = data![index];
-            final tagg = "${item['id']}List";
-            return ItemCard(id: item['id'].toString(), poster: item['poster'], type: item['type'], name: item['name'], rating: item['averageScore'], tagg: tagg, route: route,);
-          },
+      color: Theme.of(context).colorScheme.surface,
+      child: GridView.builder(  
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3, 
+          crossAxisSpacing: 5.0, 
+          childAspectRatio:
+              0.56, 
         ),
+        itemCount: data!.length,
+        itemBuilder: (context, index) {
+          final item = data![index];
+          final tagg = "${item['id']}List";
+          return ItemCard(id: item['id'].toString(), poster: item['poster'], type: item['type'], name: item['name'], rating: item['averageScore'], tagg: tagg, route: route,);
+        },
       ),
     );
   }

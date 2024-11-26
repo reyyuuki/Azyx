@@ -1,5 +1,6 @@
 import 'package:daizy_tv/components/Anime/genres.dart';
 import 'package:flutter/material.dart';
+import 'package:text_scroll/text_scroll.dart';
 
 class AnimeInfo extends StatelessWidget {
   final dynamic animeData;
@@ -65,12 +66,18 @@ class AnimeInfo extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    animeData['japanese'] != null &&
-                            animeData['japanese'].length > 20
-                        ? '${animeData['japanese'].substring(0, 18)}...'
-                        : animeData['japanese'] ?? "??",
-                    style: const TextStyle(fontFamily: "Poppins-Bold"),
+                  SizedBox(
+                    width: 250,
+                    child: TextScroll(
+                      animeData['japanese']  ?? "??",
+                      mode: TextScrollMode.bouncing,
+                      delayBefore: const Duration(milliseconds: 500),
+                      velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),   
+                      style: const TextStyle(fontFamily: "Poppins-Bold"),
+                      pauseBetween: const Duration(milliseconds: 1000),
+                      selectable: true,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                   const SizedBox(height: 5),
                   Text(

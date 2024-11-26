@@ -168,7 +168,6 @@ class _DetailsState extends State<Details> {
   }
 
   Future<void> fetchm3u8(int episodeNumber) async {
-    streamDataNotifier.value = [];
     setState(() {
       isWaiting = true;
       category = dub ? "dub" : "sub";
@@ -191,6 +190,7 @@ class _DetailsState extends State<Details> {
             : streamingLink['sources'][0]['url'];
 
         final extract = await extractStreams(link);
+        log(extract.toString());
         final baselink = makeBaseUrl(link);
 
         setState(() {
@@ -198,10 +198,10 @@ class _DetailsState extends State<Details> {
           streamData = extract;
           baseUrl = baselink;
           isWaiting = false;
-          tracks = trackResponse['tracks'];
+          tracks = trackResponse?['tracks'] ?? "";
         });
-        streamDataNotifier.value = extract;
-        log(episodeLink.toString());
+        Navigator.pop(context);
+        showDownloadquality(context, episodeNumber);
       }
     } catch (e) {
       log("When fetching Link: $e");
@@ -228,7 +228,6 @@ class _DetailsState extends State<Details> {
           episodeId = filteredEpisodes!.first['number'];
           title = filteredEpisodes!.first['title'];
         });
-        fetchm3u8(episodeId!);
         log('$episodeId /  $title');
       }
       log('$episodeId');
@@ -773,7 +772,7 @@ class _DetailsState extends State<Details> {
                   children: [
                     SizedBox(
                       width: 178,
-                      child: Text("Found: ${scrapeData?['name'] ?? "Unkonwn"}",style: TextStyle(fontFamily: "Poppins-Bold", color: Theme.of(context).colorScheme.primary), )),
+                      child: scrapeData == null ? const SizedBox.shrink() : Text("Found: ${scrapeData?['name']?.length > 20 ? '${scrapeData?['name']?.substring(0,20)}...' : scrapeData?['name'] ?? "Unkonwn"}",style: TextStyle(fontFamily: "Poppins-Bold", color: Theme.of(context).colorScheme.primary), )),
                     Text("Total Episodes: ${scrapeData?['totalEpisodes'] ?? "??"}",style: TextStyle(fontFamily: "Poppins-Bold", color: Theme.of(context).colorScheme.primary), ),
                   ],
                 ),
@@ -891,7 +890,7 @@ class _DetailsState extends State<Details> {
               !withPhoto
                   ? episodeList(context)
                   : Container(
-                      height: 400,
+                      height: 380,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                       ),
@@ -992,9 +991,8 @@ class _DetailsState extends State<Details> {
                                             right: 0,
                                             child: GestureDetector(
                                               onTap: () {
+                                                showloader();
                                                 fetchm3u8(episodeNumber);
-                                                showDownloadquality(
-                                                    context, episodeNumber);
                                               },
                                               child: Container(
                                                 height: 27,
@@ -1046,67 +1044,62 @@ class _DetailsState extends State<Details> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       barrierColor: Colors.black87.withOpacity(0.3),
       builder: (context) {
-        return ValueListenableBuilder<List<dynamic>>(
-          valueListenable: streamDataNotifier,
-          builder: (_, streamData, __) {
-            return SizedBox(
-              height: 250,
-              child: streamData.isEmpty
-                  ? const Center(child: CircularProgressIndicator())
-                  : Column(
-                      children: [
-                        const Text(
-                          "Select quality",
-                          style: TextStyle(
-                              fontFamily: "Poppins-Bold", fontSize: 25),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        ...streamData.map<Widget>((item) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 15, vertical: 8),
-                            child: GestureDetector(
-                              onTap: () {
-                                Downloader().download('$baseUrl/${item['url']}',
-                                    "Episode-$number", animeData['name']);
-                                Navigator.pop(context);
-                              },
-                              child: Container(
-                                height: 45,
-                                width: MediaQuery.of(context).size.width,
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    width: 1,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .inversePrimary,
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: Theme.of(context).colorScheme.surface,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      item['quality'],
-                                      style: const TextStyle(
-                                          fontFamily: "Poppins-Bold",
-                                          fontSize: 18),
-                                    ),
-                                    const SizedBox(width: 5),
-                                    const Icon(Icons.download),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
-                      ],
+        return SizedBox(
+              height: 300,
+          child: ListView(
+                  children: [
+                    const Center(
+                      child: Text(
+                        "Select quality",
+                        style: TextStyle(
+                            fontFamily: "Poppins-Bold", fontSize: 25),
+                      ),
                     ),
-            );
-          },
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    ...streamData!.map<Widget>((item) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 8),
+                        child: GestureDetector(
+                          onTap: () {
+                            Downloader().download('$baseUrl/${item['url']}',
+                                "Episode-$number", animeData['name']);
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                            height: 45,
+                            width: MediaQuery.of(context).size.width,
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                width: 1,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .inversePrimary,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                              color: Theme.of(context).colorScheme.surface,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  item['quality'],
+                                  style: const TextStyle(
+                                      fontFamily: "Poppins-Bold",
+                                      fontSize: 18),
+                                ),
+                                const SizedBox(width: 5),
+                                const Icon(Icons.download),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
+                ),
         );
       },
     );
@@ -1114,7 +1107,7 @@ class _DetailsState extends State<Details> {
 
   Container episodeList(BuildContext context) {
     return Container(
-      height: 440,
+      height: 340,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(20),
