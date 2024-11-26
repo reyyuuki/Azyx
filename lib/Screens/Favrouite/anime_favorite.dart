@@ -7,7 +7,7 @@ import 'package:daizy_tv/Hive_Data/appDatabase.dart';
 import 'package:daizy_tv/components/Anime/floater.dart';
 import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/coverImage.dart';
-import 'package:daizy_tv/utils/api/_anime_api.dart';
+import 'package:daizy_tv/utils/api/Anilist/Anime/_anime_api.dart';
 import 'package:daizy_tv/utils/downloader/downloader.dart';
 import 'package:daizy_tv/utils/helper/download.dart';
 import 'package:flutter/material.dart';

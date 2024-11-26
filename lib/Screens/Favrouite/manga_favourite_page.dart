@@ -8,7 +8,7 @@ import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/coverImage.dart';
 import 'package:daizy_tv/components/Manga/chapterList.dart';
 import 'package:daizy_tv/components/Manga/mangaFloater.dart';
-import 'package:daizy_tv/utils/scraper/Manga/Manga_Extenstions/extract_class.dart';
+import 'package:daizy_tv/utils/sources/Manga/Base/extract_class.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';

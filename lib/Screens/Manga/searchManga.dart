@@ -4,8 +4,8 @@
 import 'dart:developer';
 import 'package:daizy_tv/components/Anime/_gridlist.dart';
 import 'package:daizy_tv/components/Manga/_manga_list.dart';
-import 'package:daizy_tv/utils/api/Anilist/manga_search.dart';
-import 'package:daizy_tv/utils/scraper/Manga/Manga_Extenstions/mangakakalot_unofficial.dart';
+import 'package:daizy_tv/utils/api/Anilist/Manga/manga_search.dart';
+import 'package:daizy_tv/utils/sources/Manga/Extenstions/mangakakalot_unofficial.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:ionicons/ionicons.dart';
