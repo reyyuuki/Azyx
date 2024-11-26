@@ -3,16 +3,18 @@
 import 'dart:developer';
 
 import 'package:animated_segmented_tab_control/animated_segmented_tab_control.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
-import 'package:daizy_tv/Provider/manga_sources.dart';
+import 'package:daizy_tv/Provider/sources_provider.dart';
 import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/coverImage.dart';
 import 'package:daizy_tv/components/Novel/novel_alldetails.dart';
 import 'package:daizy_tv/components/Novel/novel_chapters.dart';
 import 'package:daizy_tv/components/Novel/novel_floater.dart';
 import 'package:daizy_tv/utils/helper/jaro_winkler.dart';
-import 'package:daizy_tv/utils/scraper/Novel/base/base_class.dart';
-import 'package:daizy_tv/utils/scraper/Novel/novel_buddy.dart';
+import 'package:daizy_tv/utils/sources/Novel/SourceHandler/novel_sourcehandler.dart';
+import 'package:daizy_tv/utils/sources/Novel/base/base_class.dart';
+import 'package:daizy_tv/utils/sources/Novel/Extensions/novel_buddy.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +34,6 @@ class Noveldetails extends StatefulWidget {
 
 class _DetailsState extends State<Noveldetails> {
   dynamic novelData;
-  dynamic wrongTitleSearchData;
   String? mappedId;
   List<Map<String, dynamic>>? chapterList;
   List<Map<String, dynamic>>? filteredChapterList;
@@ -46,12 +47,19 @@ class _DetailsState extends State<Noveldetails> {
   String? currentLink;
   String? currentChapterTitle;
   String? localSource;
+  late NovelSourcehandler sourcehandler;
+  String selectedSource = "NovelBuddy";
+  List<Map<String, String>> novelSources = [];
+  List<Map<String, String>> wrongTitleSearchData = [];
+  TextEditingController wrongTitle = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    sourcehandler =
+        Provider.of<SourcesProvider>(context, listen: false).getNovelInstance();
+    novelSources = sourcehandler.getAvailableSources();
     scrap();
-    log(widget.id);
   }
 
   @override
@@ -75,24 +83,36 @@ class _DetailsState extends State<Noveldetails> {
 
   Future<void> mappingData() async {
     try {
-      final searchData = await searchMostSimilarNovel(
-          novelData['title'], novelSource!.scrapeNovelSearchData);
-      if (searchData!.isNotEmpty) {
-        final chaptersData =
-            await novelSource!.scrapeNovelDetails(searchData['id']);
+      final chaptersData = await sourcehandler.mappingData(novelData['title']);
+      if (chaptersData!.isNotEmpty) {
         if (chaptersData != null) {
           setState(() {
-            mappedId = searchData['id'];
             filteredChapterList = chaptersData['chapterList'];
             chapterList = chaptersData['chapterList'];
           });
-          // wrongTittle.text = novelData['name'];
+          wrongTitle.text = novelData['name'];
           // wrongTitleSearch(wrongTittle.text);
         }
         continueReading();
       }
     } catch (e) {
       log("Errors: $e");
+    }
+  }
+
+  Future<void> wrongTitleSearch() async {
+    try {
+      final data = await sourcehandler.fetchSearchData(novelData['title']);
+      if (data != null) {
+        setState(() {
+          wrongTitleSearchData = data;
+          wrongTitle.text = novelData['title'];
+        });
+        Navigator.pop(context);
+        wrongTitleSheet(context);
+      }
+    } catch (e) {
+      log('Error in wrongTitle: $e');
     }
   }
 
@@ -118,9 +138,162 @@ class _DetailsState extends State<Noveldetails> {
     }
   }
 
+  void showloader() {
+    showModalBottomSheet(
+        context: context,
+        showDragHandle: true,
+        builder: (context) {
+          return SizedBox(
+            height: 100,
+            child: Column(
+              children: const [
+                Text(
+                  "Getting data",
+                  style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 20),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  void wrongTitleSheet(context) {
+    showModalBottomSheet(
+        context: context,
+        showDragHandle: true,
+        enableDrag: true,
+        builder: (context) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child:
+                StatefulBuilder(builder: (context, StateSetter setWrongState) {
+              return SizedBox(
+                height: 400,
+                child: Column(
+                  children: [
+                    Text(
+                      "WrongTitle Serach",
+                      style:
+                          TextStyle(fontFamily: "Poppins-Bold", fontSize: 20),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    TextField(
+                      onSubmitted: (value) async {
+                        log('Searching for: $value');
+                        setWrongState(() {
+                          wrongTitleSearchData = [];
+                        });
+                        final data = await sourcehandler.fetchSearchData(value);
+                        setWrongState(() {
+                          wrongTitleSearchData = data;
+                        });
+                      },
+                      controller: wrongTitle,
+                      decoration: InputDecoration(
+                        labelText: "Search here",
+                        prefixIcon: Icon(Iconsax.search_normal),
+                        isDense: true,
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Expanded(
+                      child: wrongTitleSearchData.isEmpty
+                          ? const Center(
+                              child: CircularProgressIndicator(),
+                            )
+                          : ListView(
+                              children: wrongTitleSearchData.map((item) {
+                              final title = item['title'];
+                              final image = item['image'];
+                              final id = item['id'];
+                              return Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    setState(() {
+                                      filteredChapterList = [];
+                                      chapterList = [];
+                                    });
+                                    Navigator.pop(context);
+                                    final data =
+                                        await sourcehandler.fetchChapters(id!);
+                                    setState(() {
+                                      chapterList = data['chapterList'];
+                                      filteredChapterList = data['chapterList'];
+                                    });
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5),
+                                      border: Border.all(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      ),
+                                    ),
+                                    height: 90,
+                                    child: Row(
+                                      children: [
+                                        SizedBox(
+                                          height: 90,
+                                          width: 140,
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                const BorderRadius.horizontal(
+                                              left: Radius.circular(5),
+                                            ),
+                                            child: CachedNetworkImage(
+                                              imageUrl: image!,
+                                              fit: BoxFit.cover,
+                                              alignment: Alignment.topCenter,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 15),
+                                        Text(title!.length > 15
+                                            ? '${title.substring(0, 15)}...'
+                                            : title),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList()),
+                    )
+                  ],
+                ),
+              );
+            }),
+          );
+        });
+  }
+
   void searchChapter(String number) {
-    final list =
-        filteredChapterList!.where((chapter) => chapter["title"].contains(number)).toList();
+    final list = filteredChapterList!
+        .where((chapter) => chapter["title"].contains(number))
+        .toList();
     setState(() {
       chapterList = list;
     });
@@ -251,7 +424,7 @@ class _DetailsState extends State<Noveldetails> {
   }
 
   SizedBox tabs(BuildContext context) {
-    final sourceProvider = Provider.of<MangaSourcesProvider>(context,listen: false);
+    final sourceProvider = Provider.of<SourcesProvider>(context, listen: false);
     return SizedBox(
       height: 600,
       child: TabBarView(
@@ -265,7 +438,7 @@ class _DetailsState extends State<Noveldetails> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                 child: DropdownButtonFormField<String>(
-                  value: sourceProvider.novelInstance.sourceName,
+                  value: selectedSource,
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: 'Choose Source',
@@ -289,23 +462,17 @@ class _DetailsState extends State<Noveldetails> {
                     ),
                   ),
                   isDense: true,
-                  items: sourceProvider.novelSource
-                          ?.map<DropdownMenuItem<String>>((source) {
-                        return DropdownMenuItem<String>(
-                          value: source.sourceName,
-                          child: Text(source.sourceName),
-                        );
-                      }).toList() ??
-                      [],
+                  items: novelSources.map<DropdownMenuItem<String>>((source) {
+                    return DropdownMenuItem<String>(
+                      value: source['name'],
+                      child: Text(source['name'].toString()),
+                    );
+                  }).toList(),
                   onChanged: (dynamic newValue) {
                     if (newValue.toString().isNotEmpty) {
                       setState(() {
-                        localSource = newValue;
-                        sourceProvider
-                            .setNovelInstance(sourceProvider.novelSource!.firstWhere(
-                          (source) => source.sourceName == newValue,
-                        ));
-                        novelSource = sourceProvider.novelInstance;
+                        selectedSource = newValue;
+                        sourcehandler.selectedSource = selectedSource;
                         chapterList = [];
                       });
                       mappingData();
@@ -325,27 +492,44 @@ class _DetailsState extends State<Noveldetails> {
                       style:
                           TextStyle(fontFamily: "Poppins-Bold", fontSize: 22),
                     ),
-                    IconButton(
-                        onPressed: () {
-                          setState(() {
-                            chapterList =
-                                chapterList?.reversed.toList();
-                          });
-                        },
-                        icon: const Icon(Iconsax.arrow_down)),
+                    Row(
+                      children: [
+                        IconButton(
+                            onPressed: () {
+                              setState(() {
+                                chapterList = chapterList?.reversed.toList();
+                              });
+                            },
+                            icon: const Icon(Iconsax.arrow_down)),
+                        GestureDetector(
+                          onTap: () {
+                            showloader();
+                            wrongTitleSearch();
+                          },
+                          child: Text(
+                            "Wrong Title?",
+                            style: TextStyle(
+                                fontFamily: "Poppins-Bold",
+                                fontSize: 18,
+                                color: Theme.of(context).colorScheme.primary),
+                          ),
+                        )
+                      ],
+                    ),
                   ],
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                 child: TextField(
-                  onChanged: (String value){
+                  onChanged: (String value) {
                     searchChapter(value);
                   },
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Iconsax.search_normal),
-                    filled: true,
-                    fillColor: Theme.of(context).colorScheme.surface,
+                      prefixIcon: Icon(Iconsax.search_normal),
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       labelText: "Search Chapters",
                       focusedBorder: OutlineInputBorder(
                           borderSide: BorderSide(
@@ -362,8 +546,7 @@ class _DetailsState extends State<Noveldetails> {
               ),
               SizedBox(
                 height: 350,
-                child: chapterList != null &&
-                        chapterList!.isNotEmpty
+                child: chapterList != null && chapterList!.isNotEmpty
                     ? ListView(
                         children: chapterList!.map<Widget>((chapter) {
                           return NovelChapters(
