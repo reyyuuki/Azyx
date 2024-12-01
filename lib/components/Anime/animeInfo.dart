@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:daizy_tv/components/Anime/genres.dart';
 import 'package:flutter/material.dart';
 import 'package:text_scroll/text_scroll.dart';
@@ -67,9 +69,9 @@ class AnimeInfo extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    width: 250,
+                    width: 200,
                     child: TextScroll(
-                      animeData['japanese']  ?? "??",
+                      animeData?['japanese']  ?? "??",
                       mode: TextScrollMode.bouncing,
                       delayBefore: const Duration(milliseconds: 500),
                       velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),   
@@ -81,35 +83,35 @@ class AnimeInfo extends StatelessWidget {
                   ),
                   const SizedBox(height: 5),
                   Text(
-                    animeData['aired'] != null && animeData['aired'].length > 20
+                    animeData?['aired'] != null && animeData?['aired'].length > 20
                         ? '${animeData['aired'].substring(0, 18)}...'
-                        : animeData['aired'] ?? "??",
+                        : animeData?['aired'] ?? "??",
                     style: const TextStyle(fontFamily: "Poppins-Bold"),
                   ),
                   const SizedBox(
                     height: 5,
                   ),
-                  Text(animeData['premiered'] ?? "??",
+                  Text(animeData?['premiered'] ?? "??",
                       style: const TextStyle(fontFamily: "Poppins-Bold")),
                   const SizedBox(
                     height: 5,
                   ),
-                  Text(animeData['duration'] ?? "??",
+                  Text(animeData?['duration'] ?? "??",
                       style: const TextStyle(fontFamily: "Poppins-Bold")),
                   const SizedBox(
                     height: 5,
                   ),
-                  Text(animeData['status'] ?? "??",
+                  Text(animeData?['status'] ?? "??",
                       style: const TextStyle(fontFamily: "Poppins-Bold")),
                   const SizedBox(
                     height: 5,
                   ),
-                  Text(animeData['rating'].toString(),
+                  Text(animeData?['rating'].toString() ?? "??",
                       style: const TextStyle(fontFamily: "Poppins-Bold")),
                   const SizedBox(
                     height: 5,
                   ),
-                  Text(animeData['quality'] ?? "??",
+                  Text(animeData?['quality'] ?? "??",
                       style: const TextStyle(fontFamily: "Poppins-Bold")),
                 ],
               ),
@@ -122,9 +124,10 @@ class AnimeInfo extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Text(
-              animeData['description'].length > 300
-                  ? animeData['description'].substring(0, 300) + '...'
-                  : animeData['description'],
+            !Platform.isAndroid ? animeData['description'] :
+              (animeData?['description'].length > 300
+                  ? animeData['description'].substring(0, 300)
+                  : animeData?['description']),
               style: const TextStyle(
                   fontStyle: FontStyle.italic,
                   color: Color.fromARGB(232, 165, 159, 159))),
