@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:azyx/Provider/sources_provider.dart';
 import 'package:azyx/Screens/Bottom_Menu/_profile.dart';
 import 'package:azyx/Screens/Bottom_Menu/_setting.dart';
@@ -44,7 +42,7 @@ void main() async {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(systemNavigationBarColor: Colors.transparent));
-
+  
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => Data()),
