@@ -14,12 +14,10 @@ class PlatformWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || Platform.isIOS) {
       return androidWidget; 
-    } else if (Platform.isWindows || Platform.isLinux) {
-      return windowsWidget; 
     } else {
-      return androidWidget;
+      return windowsWidget;
     }
   }
 }
