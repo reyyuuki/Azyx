@@ -5,8 +5,6 @@ import 'dart:developer';
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
 import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/coverImage.dart';
-import 'package:daizy_tv/components/Manga/chapterList.dart';
-import 'package:daizy_tv/components/Manga/mangaFloater.dart';
 import 'package:daizy_tv/components/Novel/novel_chapters.dart';
 import 'package:daizy_tv/components/Novel/novel_floater.dart';
 import 'package:daizy_tv/utils/sources/Manga/Base/extract_class.dart';
@@ -135,6 +133,7 @@ class _DetailsState extends State<NovelFavouritePage> {
       body: Stack(
         children: [
           ListView(
+            physics: const BouncingScrollPhysics(),
             children: [
               Stack(
                 children: [
@@ -160,7 +159,9 @@ class _DetailsState extends State<NovelFavouritePage> {
                                 color: Colors.grey.shade600,
                                 fontStyle: FontStyle.italic),
                           ),
-                          const SizedBox(height: 15,),
+                          const SizedBox(
+                            height: 15,
+                          ),
                           TextField(
                             onChanged: (String value) {
                               searchChapter(value);
@@ -195,6 +196,7 @@ class _DetailsState extends State<NovelFavouritePage> {
                 height: 485,
                 child: novelData!['chapterList'] != null
                     ? ListView(
+                        physics: const BouncingScrollPhysics(),
                         children: chapterList!.map<Widget>((chapter) {
                           return NovelChapters(
                             id: widget.id,
@@ -206,6 +208,7 @@ class _DetailsState extends State<NovelFavouritePage> {
                       )
                     : const Center(child: CircularProgressIndicator()),
               ),
+              const SizedBox(height: 60,)
             ],
           ),
           novelData != null

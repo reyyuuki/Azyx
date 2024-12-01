@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class NovelCarousale extends StatelessWidget {
-  dynamic animeData;
-  String route;
+  dynamic novelData;
 
-  NovelCarousale({super.key, this.animeData, required this.route});
+  NovelCarousale({super.key, this.novelData});
 
   @override
   Widget build(BuildContext context) {
-    if (animeData == null) {
+    if (novelData == null) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -29,14 +28,14 @@ class NovelCarousale extends StatelessWidget {
         enlargeFactor: 0.1,
         scrollDirection: Axis.horizontal,
       ),
-      items: animeData!.map<Widget>((novel) {
+      items: novelData!.map<Widget>((novel) {
         final title =
             novel['title'] ?? "N/A";
         return Builder(
           builder: (BuildContext context) {
             return GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, route, arguments: {
+                Navigator.pushNamed(context, '/novelDetail', arguments: {
                   "id": novel['id'].toString(),
                   "image": novel['image'] ?? '',
                   "tagg": "${novel['id']}MainCarousale"

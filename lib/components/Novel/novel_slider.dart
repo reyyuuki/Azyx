@@ -1,8 +1,4 @@
 // ignore_for_file: prefer_const_constructors
-
-import 'dart:developer';
-
-import 'package:daizy_tv/Provider/theme_provider.dart';
 import 'package:daizy_tv/components/Common/slider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,7 +11,6 @@ class NovelSlider extends StatefulWidget {
   final String? title;
   final String? chapter;
   final int totalImages;
-  final ScrollController scrollController;
   final ButtonTapCallback handleChapter;
   bool isNext;
   bool isPrev;
@@ -28,7 +23,6 @@ class NovelSlider extends StatefulWidget {
     required this.title,
     required this.chapter,
     required this.totalImages,
-    required this.scrollController,
     required this.handleChapter,
     required this.isNext,
     required this.isPrev,
@@ -43,8 +37,6 @@ class NovelSlider extends StatefulWidget {
 
 class _SlidebarState extends State<NovelSlider> {
   bool _areBarsVisible = false;
-  double _scrollProgress = 0.0;
-  int _currentPage = 1;
   double textSize = 18.0;
 
   void _toggleBarsVisibility() {
@@ -56,33 +48,11 @@ class _SlidebarState extends State<NovelSlider> {
   @override
   void initState() {
     super.initState();
-    widget.scrollController.addListener(_updateScrollProgress);
   }
 
-  void _updateScrollProgress() {
-    if (widget.scrollController.hasClients && widget.totalImages > 0) {
-      final maxScrollExtent = widget.scrollController.position.maxScrollExtent;
-      final currentScroll = widget.scrollController.position.pixels;
-      final progress = currentScroll / maxScrollExtent;
 
-      setState(() {
-        _scrollProgress = progress.clamp(0.0, 1.0);
-        _currentPage = ((progress * (widget.totalImages - 1)) + 1).round();
-      });
-    }
-  }
 
-  void _onProgressBarTap(double progress) {
-    if (widget.scrollController.hasClients) {
-      final targetPage = (progress * (widget.totalImages - 1)).round();
 
-      widget.scrollController.jumpTo(
-        targetPage *
-            (widget.scrollController.position.maxScrollExtent /
-                (widget.totalImages - 1)),
-      );
-    }
-  }
 
   String selectedFontFamily = "Roboto";
   Color selectedBackgroundColor = Colors.black;
@@ -229,6 +199,10 @@ class _SlidebarState extends State<NovelSlider> {
                                 if (isSelected) {
                                   setBottomState(() {
                                     selectedTextColor = entry.value;
+                                  });
+
+                                  setState(() {
+                                    selectedTextColor;
                                   });
                                 }
                               },
@@ -476,7 +450,6 @@ class _SlidebarState extends State<NovelSlider> {
 
   @override
   void dispose() {
-    widget.scrollController.removeListener(_updateScrollProgress);
     super.dispose();
   }
 }

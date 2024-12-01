@@ -11,7 +11,6 @@ import 'package:daizy_tv/components/Anime/coverImage.dart';
 import 'package:daizy_tv/components/Novel/novel_alldetails.dart';
 import 'package:daizy_tv/components/Novel/novel_chapters.dart';
 import 'package:daizy_tv/components/Novel/novel_floater.dart';
-import 'package:daizy_tv/utils/helper/jaro_winkler.dart';
 import 'package:daizy_tv/utils/sources/Novel/SourceHandler/novel_sourcehandler.dart';
 import 'package:daizy_tv/utils/sources/Novel/base/base_class.dart';
 import 'package:daizy_tv/utils/sources/Novel/Extensions/novel_buddy.dart';
@@ -70,7 +69,7 @@ class _DetailsState extends State<Noveldetails> {
 
   Future<void> scrap() async {
     final data = await NovelBuddy().scrapeNovelDetails(widget.id);
-    if (data != null && data.isNotEmpty) {
+    if (data.isNotEmpty) {
       setState(() {
         novelData = data;
         filteredChapterList = data['chapterList'];
@@ -121,7 +120,7 @@ class _DetailsState extends State<Noveldetails> {
       final provider = Provider.of<Data>(context, listen: false);
       final link = provider.getCurrentChapterForNovel(widget.id);
       log(link.toString());
-      if (link!.isNotEmpty && link != null) {
+      if (link!.isNotEmpty) {
         setState(() {
           currentLink = link['currentChapter'];
           currentChapterTitle = link['currentChapterTitle'];
@@ -329,6 +328,7 @@ class _DetailsState extends State<Noveldetails> {
       body: Stack(
         children: [
           ListView(
+            physics: const BouncingScrollPhysics(),
             children: [
               Stack(
                 children: [
@@ -376,6 +376,8 @@ class _DetailsState extends State<Noveldetails> {
                                       borderRadius: BorderRadius.circular(20)),
                                   tabs: [
                                     SegmentTab(
+                                      splashColor: Colors.transparent,
+                                      splashHighlightColor: Colors.transparent,
                                       label: 'Details',
                                       color: Theme.of(context)
                                           .colorScheme
@@ -385,6 +387,9 @@ class _DetailsState extends State<Noveldetails> {
                                           .surfaceContainer,
                                     ),
                                     SegmentTab(
+                                        splashColor: Colors.transparent,
+                                        splashHighlightColor:
+                                            Colors.transparent,
                                         label: 'Read',
                                         backgroundColor: Theme.of(context)
                                             .colorScheme
@@ -424,7 +429,6 @@ class _DetailsState extends State<Noveldetails> {
   }
 
   SizedBox tabs(BuildContext context) {
-    final sourceProvider = Provider.of<SourcesProvider>(context, listen: false);
     return SizedBox(
       height: 600,
       child: TabBarView(
@@ -548,6 +552,7 @@ class _DetailsState extends State<Noveldetails> {
                 height: 350,
                 child: chapterList != null && chapterList!.isNotEmpty
                     ? ListView(
+                        physics: const BouncingScrollPhysics(),
                         children: chapterList!.map<Widget>((chapter) {
                           return NovelChapters(
                             id: widget.id,

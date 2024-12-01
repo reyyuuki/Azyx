@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -109,7 +111,8 @@ class _NovelFloaterState extends State<NovelFloater> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      widget.currentChapterTitle.length > 15 ? widget.currentChapterTitle.substring(0,15) : widget.currentChapterTitle,
+                      Platform.isAndroid ?
+                      (widget.currentChapterTitle.length > 15 ? "${widget.currentChapterTitle.substring(0,15)}..." : widget.currentChapterTitle) : (widget.currentChapterTitle.length > 40 ? "${widget.currentChapterTitle.substring(0,40)}..." : widget.currentChapterTitle),
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontFamily: "Poppins-Bold" // Text color
