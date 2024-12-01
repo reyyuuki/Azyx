@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/Manga/all_manga_lists.dart';
 import 'package:daizy_tv/components/Manga/manga_user_data.dart';
@@ -29,8 +31,7 @@ return Consumer<AniListProvider>(
       {"name": "All", "view": AllMangaLists(data: provider['mangaList'])},
       {"name": "Completed", "view": MangaLists(data: provider['mangaList'], status: "COMPLETED")},
       {"name": "Planning", "view": MangaLists(data: provider['mangaList'], status: "PLANNING")},
-      {"name": "Releasing", "view": MangaLists(data: provider['mangaList'], status: "RELEASING")},
-      {"name": "Reading", "view": MangaLists(data: provider['mangaList'], status: "READING")},
+      {"name": "Reading", "view": MangaLists(data: provider['mangaList'], status: "CURRENT")},
       {"name": "Repeating", "view": MangaLists(data: provider['mangaList'], status: "REPEATING")},
       {"name": "Paused", "view": MangaLists(data: provider['mangaList'], status: "PAUSED")},
       {"name": "Dropped","view": MangaLists(data: provider['mangaList'], status: "DROPPED")},
@@ -48,6 +49,11 @@ return Consumer<AniListProvider>(
             _scaffoldKey.currentState?.openDrawer();
           },
         ),
+        actions: [
+          IconButton(onPressed: (){
+            Navigator.pop(context);
+          }, icon: const Icon(Icons.close))
+        ],
       ),
       drawer: Drawer(
         width: 200,

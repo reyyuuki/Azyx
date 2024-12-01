@@ -288,6 +288,7 @@ class _DetailsState extends State<Mangadetails> {
                             child: CircularProgressIndicator(),
                           )
                         : ListView.builder(
+                            physics: const BouncingScrollPhysics(),
                             itemCount: wrongTitleSearchData.length,
                             itemBuilder: (context, index) {
                               final title =
@@ -303,11 +304,7 @@ class _DetailsState extends State<Mangadetails> {
                                   child: Container(
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(5),
-                                      border: Border.all(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                      ),
+                                      color:Theme.of(context).colorScheme.surfaceContainerHigh
                                     ),
                                     height: 90,
                                     child: Row(
@@ -735,6 +732,7 @@ class _DetailsState extends State<Mangadetails> {
                 height: 400,
                 child: chapterList != null && chapterList!.isNotEmpty
                     ? ListView(
+                        physics: const BouncingScrollPhysics(),
                         children: chapterList!.map<Widget>((chapter) {
                           return Chapterlist(
                             id: widget.id,

@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -19,7 +21,8 @@ class About extends StatelessWidget {
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Column(
+      body: ListView(
+        physics: const BouncingScrollPhysics(),
         children: [
           Stack(
             children: [
@@ -79,7 +82,7 @@ class About extends StatelessWidget {
                 ),
               ),
               GestureDetector(
-                onTap: (){
+                onTap: () {
                   _launchURL("https://github.com/reyyuuki");
                 },
                 child: Container(
@@ -127,6 +130,15 @@ class About extends StatelessWidget {
                   ),
                 ),
               ),
+              Positioned(
+                  top: 10,
+                  left: 0,
+                  child: IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      iconSize: 35,
+                      icon: const Icon(Icons.arrow_back_ios)))
             ],
           ),
           const SizedBox(
@@ -136,23 +148,43 @@ class About extends StatelessWidget {
             padding: const EdgeInsets.all(15.0),
             child: Column(
               children: [
-                list_tile(width, context, const Icon(Ionicons.logo_github),
-                    "Github", "Explore and contribute to the code.", "https://github.com/reyyuuki/Azyx"),
+                list_tile(
+                    width,
+                    context,
+                    const Icon(Ionicons.logo_github),
+                    "Github",
+                    "Explore and contribute to the code.",
+                    "https://github.com/reyyuuki/Azyx"),
                 const SizedBox(
                   height: 10,
                 ),
-                list_tile(width, context, const Icon(Ionicons.logo_discord),
-                    "Discord", "Chat and collaborate with community.","https://discord.com/channels/@me"),
+                list_tile(
+                    width,
+                    context,
+                    const Icon(Ionicons.logo_discord),
+                    "Discord",
+                    "Chat and collaborate with community.",
+                    "https://discord.com/channels/@me"),
                 const SizedBox(
                   height: 10,
                 ),
-                list_tile(width, context, const Icon(Icons.telegram),
-                    "Telegram", "Stay updated and connect with others.","https://t.me/Azyxanime"),
+                list_tile(
+                    width,
+                    context,
+                    const Icon(Icons.telegram),
+                    "Telegram",
+                    "Stay updated and connect with others.",
+                    "https://t.me/Azyxanime"),
                 const SizedBox(
                   height: 10,
                 ),
-                list_tile(width, context, const Icon(Ionicons.logo_reddit),
-                    "Reddit", "Discuss features and share feedback.","https://www.reddit.com/?rdt=44738"),
+                list_tile(
+                    width,
+                    context,
+                    const Icon(Ionicons.logo_reddit),
+                    "Reddit",
+                    "Discuss features and share feedback.",
+                    "https://www.reddit.com/?rdt=44738"),
               ],
             ),
           )
@@ -164,7 +196,7 @@ class About extends StatelessWidget {
   GestureDetector list_tile(double width, BuildContext context, Icon icon,
       String name, String subTitle, String url) {
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         _launchURL(url);
       },
       child: Container(
