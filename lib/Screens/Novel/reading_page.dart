@@ -1,9 +1,7 @@
 import 'dart:developer';
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
 import 'package:daizy_tv/Provider/sources_provider.dart';
-import 'package:daizy_tv/components/Manga/sliderBar.dart';
 import 'package:daizy_tv/components/Novel/novel_slider.dart';
-import 'package:daizy_tv/utils/sources/Novel/Extensions/wuxia_novel.dart';
 import 'package:daizy_tv/utils/sources/Novel/SourceHandler/novel_sourcehandler.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -45,7 +43,6 @@ class _ReadState extends State<NovelRead> {
     fetchChapterData();
   }
 
-  final ScrollController _scrollController = ScrollController();
 
   Future<void> fetchChapterData() async {
     try {
@@ -185,7 +182,6 @@ Widget build(BuildContext context) {
     title: isLoading ? 'Unknown' : widget.title,
     chapter: isLoading ? 'Chapter ?' : currentChapter ?? "Unknown",
     totalImages: chapterWords?.length ?? 0,
-    scrollController: _scrollController,
     handleChapter: handleChapter,
     isNext: isNext,
     isPrev: isPrev,
