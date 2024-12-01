@@ -6,6 +6,8 @@ import 'package:daizy_tv/Hive_Data/appDatabase.dart';
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/Anime/poster.dart';
 import 'package:daizy_tv/components/Anime/coverImage.dart';
+import 'package:daizy_tv/components/Common/check_platform.dart';
+import 'package:daizy_tv/components/Desktop/Manga/desktop_chapter_list.dart';
 import 'package:daizy_tv/components/Manga/chapterList.dart';
 import 'package:daizy_tv/components/Manga/mangaFloater.dart';
 import 'package:daizy_tv/utils/sources/Manga/Base/extract_class.dart';
@@ -147,6 +149,7 @@ class _DetailsState extends State<MangaFavouritePage> {
       body: Stack(
         children: [
           ListView(
+          physics: const BouncingScrollPhysics(),
             children: [
               Stack(
                 children: [
@@ -208,17 +211,30 @@ class _DetailsState extends State<MangaFavouritePage> {
               SizedBox(
                 height: 485,
                 child: mangaData!['chapterList'] != null
-                    ? ListView(
-                        children: chapterList!.map<Widget>((chapter) {
-                          return Chapterlist(
-                            id: widget.id,
-                            chapter: chapter,
-                            image: widget.image,
-                          );
-                        }).toList(),
-                      )
+                    ? PlatformWidget(
+                        androidWidget: ListView(
+                          physics: const BouncingScrollPhysics(),
+                          children: chapterList!.map<Widget>((chapter) {
+                            return Chapterlist(
+                              id: widget.id,
+                              chapter: chapter,
+                              image: widget.image,
+                            );
+                          }).toList(),
+                        ),
+                        windowsWidget: ListView(
+                          physics: const BouncingScrollPhysics(),
+                          children: chapterList!.map<Widget>((chapter) {
+                            return DesktopChapterList(
+                              id: widget.id,
+                              chapter: chapter,
+                              image: widget.image,
+                            );
+                          }).toList(),
+                        ))
                     : const Center(child: CircularProgressIndicator()),
               ),
+              const SizedBox(height: 60,)
             ],
           ),
           mangaData != null
