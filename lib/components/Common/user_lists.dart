@@ -1,6 +1,6 @@
-import 'package:daizy_tv/Screens/Lists/animelist.dart';
-import 'package:daizy_tv/Screens/Lists/mangalist.dart';
-import 'package:daizy_tv/auth/auth_provider.dart';
+import 'package:azyx/Screens/Lists/animelist.dart';
+import 'package:azyx/Screens/Lists/mangalist.dart';
+import 'package:azyx/auth/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';

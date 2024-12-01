@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:daizy_tv/utils/sources/Novel/base/base_class.dart';
+import 'package:azyx/utils/sources/Novel/base/base_class.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
 

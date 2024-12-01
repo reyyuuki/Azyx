@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:daizy_tv/components/Anime/genres.dart';
-import 'package:daizy_tv/components/Manga/mangaInfo.dart';
+import 'package:azyx/components/Anime/genres.dart';
+import 'package:azyx/components/Manga/mangaInfo.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:text_scroll/text_scroll.dart';

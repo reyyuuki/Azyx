@@ -1,7 +1,7 @@
 
 import 'dart:io';
 
-import 'package:daizy_tv/components/Novel/novel_item.dart';
+import 'package:azyx/components/Novel/novel_item.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 

@@ -1,12 +1,12 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:daizy_tv/Provider/sources_provider.dart';
-import 'package:daizy_tv/auth/auth_provider.dart';
-import 'package:daizy_tv/components/Manga/sliderBar.dart';
-import 'package:daizy_tv/Hive_Data/appDatabase.dart';
-import 'package:daizy_tv/utils/sources/Manga/Base/extract_class.dart';
-import 'package:daizy_tv/utils/sources/Manga/SourceHandler/sourcehandler.dart';
+import 'package:azyx/Provider/sources_provider.dart';
+import 'package:azyx/auth/auth_provider.dart';
+import 'package:azyx/components/Manga/sliderBar.dart';
+import 'package:azyx/Hive_Data/appDatabase.dart';
+import 'package:azyx/utils/sources/Manga/Base/extract_class.dart';
+import 'package:azyx/utils/sources/Manga/SourceHandler/sourcehandler.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

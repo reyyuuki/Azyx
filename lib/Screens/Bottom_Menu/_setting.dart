@@ -1,13 +1,13 @@
 
 import 'dart:io';
 
-import 'package:daizy_tv/Screens/Bottom_Menu/_profile.dart';
-import 'package:daizy_tv/Screens/settings/_about.dart';
-import 'package:daizy_tv/Screens/settings/_languages.dart';
-import 'package:daizy_tv/Screens/settings/_theme_changer.dart';
-import 'package:daizy_tv/Screens/settings/download_settings.dart';
-import 'package:daizy_tv/auth/auth_provider.dart';
-import 'package:daizy_tv/components/Common/setting_tile.dart';
+import 'package:azyx/Screens/Bottom_Menu/_profile.dart';
+import 'package:azyx/Screens/settings/_about.dart';
+import 'package:azyx/Screens/settings/_languages.dart';
+import 'package:azyx/Screens/settings/_theme_changer.dart';
+import 'package:azyx/Screens/settings/download_settings.dart';
+import 'package:azyx/auth/auth_provider.dart';
+import 'package:azyx/components/Common/setting_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:ionicons/ionicons.dart';

@@ -2,9 +2,9 @@
 // ignore_for_file: file_names
 
 import 'dart:developer';
-import 'package:daizy_tv/components/Anime/_gridlist.dart';
-import 'package:daizy_tv/components/Anime/_search_list.dart';
-import 'package:daizy_tv/utils/api/Anilist/Anime/anilist_search.dart';
+import 'package:azyx/components/Anime/_gridlist.dart';
+import 'package:azyx/components/Anime/_search_list.dart';
+import 'package:azyx/utils/api/Anilist/Anime/anilist_search.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:ionicons/ionicons.dart';

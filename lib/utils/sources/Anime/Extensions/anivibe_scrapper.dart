@@ -1,5 +1,5 @@
-import 'package:daizy_tv/utils/helper/jaro_winkler.dart';
-import 'package:daizy_tv/utils/sources/Anime/Base/base_class.dart';
+import 'package:azyx/utils/helper/jaro_winkler.dart';
+import 'package:azyx/utils/sources/Anime/Base/base_class.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;

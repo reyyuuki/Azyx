@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:daizy_tv/components/Common/slider.dart';
+import 'package:azyx/components/Common/slider.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:iconsax/iconsax.dart';

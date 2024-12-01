@@ -1,18 +1,18 @@
 
-import 'package:daizy_tv/utils/sources/Anime/Base/base_class.dart';
-import 'package:daizy_tv/utils/sources/Anime/Extensions/hianime_api.dart';
-import 'package:daizy_tv/utils/sources/Anime/Extensions/hianime_scrapper.dart';
-import 'package:daizy_tv/utils/sources/Anime/SourceHandler/sourcehandler.dart';
-import 'package:daizy_tv/utils/sources/Manga/Base/extract_class.dart';
-import 'package:daizy_tv/utils/sources/Manga/Extenstions/mangaKakalot.dart';
-import 'package:daizy_tv/utils/sources/Manga/Extenstions/manga_bat.dart';
-import 'package:daizy_tv/utils/sources/Manga/Extenstions/manga_nato.dart';
-import 'package:daizy_tv/utils/sources/Manga/Extenstions/mangakakalot_unofficial.dart';
-import 'package:daizy_tv/utils/sources/Manga/SourceHandler/sourcehandler.dart';
-import 'package:daizy_tv/utils/sources/Novel/SourceHandler/novel_sourcehandler.dart';
-import 'package:daizy_tv/utils/sources/Novel/base/base_class.dart';
-import 'package:daizy_tv/utils/sources/Novel/Extensions/novel_buddy.dart';
-import 'package:daizy_tv/utils/sources/Novel/Extensions/wuxia_novel.dart';
+import 'package:azyx/utils/sources/Anime/Base/base_class.dart';
+import 'package:azyx/utils/sources/Anime/Extensions/hianime_api.dart';
+import 'package:azyx/utils/sources/Anime/Extensions/hianime_scrapper.dart';
+import 'package:azyx/utils/sources/Anime/SourceHandler/sourcehandler.dart';
+import 'package:azyx/utils/sources/Manga/Base/extract_class.dart';
+import 'package:azyx/utils/sources/Manga/Extenstions/mangaKakalot.dart';
+import 'package:azyx/utils/sources/Manga/Extenstions/manga_bat.dart';
+import 'package:azyx/utils/sources/Manga/Extenstions/manga_nato.dart';
+import 'package:azyx/utils/sources/Manga/Extenstions/mangakakalot_unofficial.dart';
+import 'package:azyx/utils/sources/Manga/SourceHandler/sourcehandler.dart';
+import 'package:azyx/utils/sources/Novel/SourceHandler/novel_sourcehandler.dart';
+import 'package:azyx/utils/sources/Novel/base/base_class.dart';
+import 'package:azyx/utils/sources/Novel/Extensions/novel_buddy.dart';
+import 'package:azyx/utils/sources/Novel/Extensions/wuxia_novel.dart';
 import 'package:flutter/material.dart';
 
  class SourcesProvider with ChangeNotifier {

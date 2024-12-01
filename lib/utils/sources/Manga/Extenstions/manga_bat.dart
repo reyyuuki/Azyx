@@ -1,5 +1,5 @@
 import 'dart:developer';
-import 'package:daizy_tv/utils/sources/Manga/Base/extract_class.dart';
+import 'package:azyx/utils/sources/Manga/Base/extract_class.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 

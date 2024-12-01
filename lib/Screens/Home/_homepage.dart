@@ -1,11 +1,11 @@
-import 'package:daizy_tv/auth/auth_provider.dart';
-import 'package:daizy_tv/backupData/anilist_anime.dart';
-import 'package:daizy_tv/backupData/anilist_manga.dart';
-import 'package:daizy_tv/components/Anime/reusableList.dart';
-import 'package:daizy_tv/components/Common/user_lists.dart';
-import 'package:daizy_tv/components/Common/Header.dart';
-import 'package:daizy_tv/components/Recently-added/animeCarousale.dart';
-import 'package:daizy_tv/components/Recently-added/mangaCarousale.dart';
+import 'package:azyx/auth/auth_provider.dart';
+import 'package:azyx/backupData/anilist_anime.dart';
+import 'package:azyx/backupData/anilist_manga.dart';
+import 'package:azyx/components/Anime/reusableList.dart';
+import 'package:azyx/components/Common/user_lists.dart';
+import 'package:azyx/components/Common/Header.dart';
+import 'package:azyx/components/Recently-added/animeCarousale.dart';
+import 'package:azyx/components/Recently-added/mangaCarousale.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

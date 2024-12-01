@@ -1,9 +1,9 @@
 import 'dart:developer';
 
-import 'package:daizy_tv/utils/helper/jaro_winkler.dart';
-import 'package:daizy_tv/utils/sources/Novel/Extensions/novel_buddy.dart';
-import 'package:daizy_tv/utils/sources/Novel/Extensions/wuxia_novel.dart';
-import 'package:daizy_tv/utils/sources/Novel/base/base_class.dart';
+import 'package:azyx/utils/helper/jaro_winkler.dart';
+import 'package:azyx/utils/sources/Novel/Extensions/novel_buddy.dart';
+import 'package:azyx/utils/sources/Novel/Extensions/wuxia_novel.dart';
+import 'package:azyx/utils/sources/Novel/base/base_class.dart';
 
 class NovelSourcehandler {
   final Map<String, NovelSourceBase> sources = {
