@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/backupData/anilist_anime.dart';
 import 'package:daizy_tv/backupData/anilist_manga.dart';
@@ -25,7 +23,9 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    data();
+    if (mounted) {
+      data();
+    }
   }
 
   void data() {
@@ -37,14 +37,12 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // var box = Hive.box("app-data");
-    // final provider = Provider.of<AniListProvider>(context, listen: false);
-
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListView(
+          physics: const BouncingScrollPhysics(),
           children: [
             const Header(
               name: "Fun",
@@ -64,12 +62,13 @@ class _HomePageState extends State<HomePage> {
             ),
             Consumer<AniListProvider>(
               builder: (context, provider, child) {
-                final data = provider.userData['animeList'] != null ? provider.userData['animeList']
-                    .where((anime) => anime['status'] == "CURRENT")
-                    .toList() : [];
+                final data = provider.userData['animeList'] != null
+                    ? provider.userData['animeList']
+                        .where((anime) => anime['status'] == "CURRENT")
+                        .toList()
+                    : [];
                 return data != null && provider.userData['animeList'] != null
-                    ? Animecarousale(
-                        carosaleData: data)
+                    ? Animecarousale(carosaleData: data)
                     : const SizedBox.shrink();
               },
             ),
@@ -78,12 +77,13 @@ class _HomePageState extends State<HomePage> {
             ),
             Consumer<AniListProvider>(
               builder: (context, provider, child) {
-                final data = provider.userData['mangaList'] != null ? provider.userData['mangaList']
-                    .where((anime) => anime['status'] == "CURRENT")
-                    .toList() : [];
+                final data = provider.userData['mangaList'] != null
+                    ? provider.userData['mangaList']
+                        .where((anime) => anime['status'] == "CURRENT")
+                        .toList()
+                    : [];
                 return data != null && provider.userData['mangaList'] != null
-                    ? Mangacarousale(
-                        carosaleData: data)
+                    ? Mangacarousale(carosaleData: data)
                     : const SizedBox.shrink();
               },
             ),

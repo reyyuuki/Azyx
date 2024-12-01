@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:daizy_tv/components/Novel/novel_item.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -28,7 +30,7 @@ class NovelList extends StatelessWidget {
               Text(
                 name!,
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: Platform.isAndroid ? 18 : 25,
                   fontFamily: "Poppins-Bold",
                   foreground: Paint()
                     ..shader = LinearGradient(
@@ -43,14 +45,16 @@ class NovelList extends StatelessWidget {
               ),
               Icon(
                 Iconsax.arrow_right_4,
+                size: Platform.isAndroid ? 25 : 35,
                 color: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),
           const SizedBox(height: 15),
           SizedBox(
-            height: 190,
+            height: Platform.isAndroid ? 190 : 300,
             child: ListView.builder(
+              physics: const BouncingScrollPhysics(),
               scrollDirection: Axis.horizontal,
               itemCount: data!.length,
               itemBuilder: (context, index) {

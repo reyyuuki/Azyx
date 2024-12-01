@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -13,10 +14,11 @@ class NovelSerachlist extends StatelessWidget {
     return Container(
       color: Theme.of(context).colorScheme.surface,
       child: ListView.builder(
+        physics: const BouncingScrollPhysics(),
         itemCount: data.length,
         itemBuilder: (context, index) {
           final item = data[index];
-          final title = item['title'];
+          final title = item['title'] ?? "Unknown Title";
           final image = item['image'];
           final id = item['id'].toString();
           final tagg = "${id}List";
@@ -137,7 +139,7 @@ class NovelSerachlist extends StatelessWidget {
                                                   MainAxisAlignment.end,
                                               children: [
                                                 Text(
-                                                  item['rating'],
+                                                  item?['rating'] ?? "??",
                                                   style: TextStyle(
                                                       fontSize: 12,
                                                       color: Theme.of(context)
@@ -165,21 +167,14 @@ class NovelSerachlist extends StatelessWidget {
                               width: 20,
                             ),
                             SizedBox(
-                                width: 150,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      title.length > 50
-                                          ? title.substring(0, 47) + "..."
-                                          : title,
-                                      style: const TextStyle(
-                                          fontFamily: "Poppins-Bold",
-                                          fontSize: 16),
-                                    ),
-                                    Text(
-                                        '${item['chapters']} | ${item['volumes']}')
-                                  ],
+                                width: Platform.isAndroid ? 150 : MediaQuery.of(context).size.width - 200,
+                                child: Text(
+                                 Platform.isAndroid ? (title.length > 50
+                                      ? title.substring(0, 47) + "..."
+                                      : title) : title,
+                                  style: const TextStyle(
+                                      fontFamily: "Poppins-Bold",
+                                      fontSize: 16),
                                 )),
                           ],
                         ),

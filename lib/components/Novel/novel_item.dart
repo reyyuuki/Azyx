@@ -1,6 +1,8 @@
 // anime_item.dart
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -34,8 +36,8 @@ class NovelItem extends StatelessWidget {
           Stack(
             children: [
               Container(
-                height: 150,
-                width: 103,
+                height: Platform.isAndroid ? 150 : 230,
+                width: Platform.isAndroid ? 103 : 160,
                 margin: const EdgeInsets.only(right: 10),
                 child: Hero(
                   tag: tagg,
