@@ -56,41 +56,40 @@ class _SearchpageState extends State<SearchAnime> {
     fetchdata();
   }
 
-  void changList(bool list) {
-    setState(() {
-      isGrid = list;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
-    if (data == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(height: 45),
-          Row(
-            children: [
-              IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: const Icon(
-                  Icons.arrow_back_ios,
-                  size: 30,
-                ),
+      body: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 30,),
+            IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              hoverColor: Colors.transparent,
+              alignment: Alignment.topLeft,
+              icon: const Icon(
+                Icons.arrow_back_ios,
+                size: 40,
               ),
-              SizedBox(
-                height: 55,
-                width: 280,
+            ),
+            const SizedBox(height: 30),
+            const Text("Serach Anime", style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 30),),
+            const SizedBox(height: 30,),
+            Row(
+              children: [
+                Expanded(
                 child: TextField(
                   controller: _controller,
                   onSubmitted: (value) {
+                    setState(() {
+                      data = null;
+                    });
                     handleSearch(value);
                   },
                   decoration: InputDecoration(
@@ -123,61 +122,34 @@ class _SearchpageState extends State<SearchAnime> {
                   ),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Search Results",
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontFamily: "Poppins-Bold",
-                      color: Theme.of(context).colorScheme.primary),
+              const SizedBox(width: 10,),
+                IconButton(
+                   onPressed: () {
+                  setState(() {
+                    isGrid = !isGrid;
+                  });
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.surfaceContainerHigh),
+                  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)))
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                          onTap: () {
-                            changList(true);
-                          },
-                          child: Icon(
-                            Iconsax.menu_15,
-                            color: isGrid
-                                ? Theme.of(context).colorScheme.primary
-                                : Colors.grey,
-                          )),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      GestureDetector(
-                          onTap: () {
-                            changList(false);
-                          },
-                          child: Icon(
-                            Ionicons.grid,
-                            color: !isGrid
-                                ? Theme.of(context).colorScheme.primary
-                                : Colors.grey,
-                          )),
-                    ],
+                  iconSize: 30,
+                  icon: Icon(
+                    isGrid ? Ionicons.grid :
+                    Iconsax.menu_15,
+                    color: Theme.of(context).colorScheme.primary
                   ),
-                )
+                ),
               ],
+            ), 
+            const SizedBox(height: 10,), 
+            Expanded(
+              child: data == null ? const Center(child: CircularProgressIndicator(),) : (isGrid
+                ? GridList(data: data,route: '/detailspage',)
+                : SearchList(data: data)),
             ),
-          ),
-          
-          Expanded(
-            child: isGrid
-              ? GridList(data: data,route: '/detailspage',)
-              : SearchList(data: data),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

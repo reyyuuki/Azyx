@@ -1,10 +1,6 @@
-import 'dart:developer';
-
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
-import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/Favrouite/favourite_list.dart';
 import 'package:daizy_tv/components/Favrouite/favrouite_List.dart';
-import 'package:daizy_tv/utils/helper/migrating_favortes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -60,6 +56,7 @@ class _FavrouitePageState extends State<FavrouitePage>
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
         child: TabBarView(
+          physics: const BouncingScrollPhysics(),
           controller: _tabController,
           children: [
             provider.favoriteManga!.isNotEmpty

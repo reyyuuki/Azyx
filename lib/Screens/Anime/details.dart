@@ -416,11 +416,7 @@ class _DetailsState extends State<Details> {
                                   child: Container(
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(5),
-                                      border: Border.all(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                      ),
+                                     color: Theme.of(context).colorScheme.surfaceContainerHigh
                                     ),
                                     height: 90,
                                     child: Row(
@@ -794,7 +790,6 @@ class _DetailsState extends State<Details> {
                     Container(
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surfaceBright,
-                        shape: BoxShape.rectangle,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: IconButton(
@@ -873,7 +868,7 @@ class _DetailsState extends State<Details> {
                       prefixIcon: const Icon(Iconsax.search_normal),
                       filled: true,
                       fillColor: Theme.of(context).colorScheme.surface,
-                      labelText: "Search Chapters",
+                      labelText: "Search Episodes",
                       focusedBorder: OutlineInputBorder(
                           borderSide: BorderSide(
                               color: Theme.of(context).colorScheme.primary),
@@ -1367,7 +1362,7 @@ class _DetailsState extends State<Details> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         title: TextScroll(
-          animeData == null ? "Loading..." : animeData['name'].toString(),
+          animeData?['name'] == null ? "Loading..." : animeData['name'].toString(),
           mode: TextScrollMode.bouncing,
           velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
           delayBefore: const Duration(milliseconds: 500),

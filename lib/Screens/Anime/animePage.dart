@@ -2,7 +2,7 @@ import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/backupData/anilist_anime.dart';
 import 'package:daizy_tv/components/Anime/anime_carousale.dart';
 import 'package:daizy_tv/components/Common/check_platform.dart';
-import 'package:daizy_tv/components/windows/anime/windows_carousale.dart';
+import 'package:daizy_tv/components/Desktop/anime/desktop_carousale.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:daizy_tv/components/Common/Header.dart';
@@ -28,7 +28,9 @@ class _HomepageState extends State<Animepage> {
   @override
   void initState() {
     super.initState();
+    if(mounted){
     backupData();
+    }
   }
 
   void backupData() {
@@ -49,13 +51,13 @@ class _HomepageState extends State<Animepage> {
         padding: const EdgeInsets.all(8.0),
         child: Consumer<AniListProvider>(
           builder: (context, provider, child) {
-           
             mostPopularAnimes = provider.anilistData['popular'] ?? mostPopularAnimes;
             trendingAnime = provider.anilistData['trending'] ?? trendingAnime;
             latestEpisodesAnime = latestEpisodesAnime;
             topUpComingAnime = trendingAnime;
 
           return ListView(
+            physics: const BouncingScrollPhysics(),
               children: [
                 const Header(
                   name: "Anime",
@@ -97,7 +99,7 @@ class _HomepageState extends State<Animepage> {
                   animeData: trendingAnime,
                   route: '/detailspage',
                   name: "Play",
-                ), windowsWidget: WindowsCarousale(route: '/detailspage', name: "Play", animeData: trendingAnime,)),
+                ), windowsWidget: DesktopCarousale(route: '/detailspage', name: "Play", animeData: trendingAnime,)),
                
                 const SizedBox(height: 30.0),
                 ReusableList(
@@ -108,19 +110,18 @@ class _HomepageState extends State<Animepage> {
                 ),
                 const SizedBox(height: 10),
                 ReusableList(
-                  name: 'Latest Episodes',
-                  data: latestEpisodesAnime,
-                  taggName: "Carousale2",
-                  route: '/detailspage',
-                ),
-                const SizedBox(height: 10),
-                ReusableList(
                   name: 'Top Upcoming',
                   data: topUpComingAnime,
                   taggName: "Carousale3",
                   route: '/detailspage',
                 ),
                 const SizedBox(height: 10),
+                ReusableList(
+                  name: 'Latest Episodes',
+                  data: latestEpisodesAnime,
+                  taggName: "Carousale2",
+                  route: '/detailspage',
+                ),
               ],
                               );
           }
