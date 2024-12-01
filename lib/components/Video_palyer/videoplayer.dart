@@ -501,7 +501,6 @@ class _VideoPlayerAltState extends State<VideoPlayerAlt>
                 itemBuilder: (context, index) {
                   final BetterPlayerAsmsTrack? track =
                       _betterPlayerController?.betterPlayerAsmsTracks[index];
-
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12.0),
                     child: ElevatedButton(

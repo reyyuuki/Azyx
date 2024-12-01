@@ -1,6 +1,7 @@
 // ignore_for_file: file_names, prefer_const_constructors
 
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
@@ -50,10 +51,10 @@ class _DetailsState extends State<AnimeFavouritePage> {
   @override
   void initState() {
     super.initState();
-   WidgetsBinding.instance.addPostFrameCallback((_) {
-    loadData();
-    continueWatching();
-  });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      loadData();
+      continueWatching();
+    });
   }
 
   @override
@@ -189,36 +190,33 @@ class _DetailsState extends State<AnimeFavouritePage> {
   }
 
   Future<void> continueWatching() async {
-  try {
-    final dataBase = Provider.of<Data>(context, listen: false);
-    final animestoredData = dataBase.getCurrentEpisodeForAnime(widget.id);
+    try {
+      final dataBase = Provider.of<Data>(context, listen: false);
+      final animestoredData = dataBase.getCurrentEpisodeForAnime(widget.id);
 
-     setState(() {
+      setState(() {
         episodeNumber = animestoredData?['currentEpisode'] ?? 1;
         episodeTitle = animestoredData?['episodeTitle'] ?? 'Episode 1';
         tracks = animestoredData?['tracks'] ?? [];
         episodeLink = animestoredData?['episodesrc'] ?? '';
       });
 
-    if (animestoredData == null &&
-        animestoredData!.isEmpty &&
-        animestoredData['episodesrc'] == null &&
-        animestoredData['episodesrc'].toString().isEmpty) {
-log('No valid stored data, defaulting to episode 1.');
-      contineEpisode(animestoredData['currentEpisode'] ?? 1);
-      
-    } 
-    log('Episode link after loading: $episodeLink');
-
-  } catch (e) {
-    log("Error: ${e.toString()}");
-    setState(() {
-      episodeNumber = filteredEpisodes?.first['number'] ?? 1;
-      episodeTitle = filteredEpisodes?.first['title'] ?? 'Episode 1';
-    });
+      if (animestoredData == null &&
+          animestoredData!.isEmpty &&
+          animestoredData['episodesrc'] == null &&
+          animestoredData['episodesrc'].toString().isEmpty) {
+        log('No valid stored data, defaulting to episode 1.');
+        contineEpisode(animestoredData['currentEpisode'] ?? 1);
+      }
+      log('Episode link after loading: $episodeLink');
+    } catch (e) {
+      log("Error: ${e.toString()}");
+      setState(() {
+        episodeNumber = filteredEpisodes?.first['number'] ?? 1;
+        episodeTitle = filteredEpisodes?.first['title'] ?? 'Episode 1';
+      });
+    }
   }
-}
-
 
   void showCenteredLoader() {
     showDialog(
@@ -352,6 +350,7 @@ log('No valid stored data, defaulting to episode 1.');
       body: Stack(
         children: [
           ListView(
+            physics: const BouncingScrollPhysics(),
             children: [
               Stack(
                 children: [
@@ -369,10 +368,11 @@ log('No valid stored data, defaulting to episode 1.');
                         Container(
                           margin: EdgeInsets.only(top: 370),
                           child: Text(
-                            animeData?['description'] != null ?
-                            (animeData?['description']?.length > 150
-                                ? '${animeData?['description'].substring(0, 150)}...'
-                                : animeData?['description']) : "N/A",
+                            animeData?['description'] != null
+                                ? (animeData?['description']?.length > 150
+                                    ? '${animeData?['description'].substring(0, 150)}...'
+                                    : animeData?['description'])
+                                : "N/A",
                             style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey.shade600,
@@ -443,21 +443,20 @@ log('No valid stored data, defaulting to episode 1.');
                   Poster(imageUrl: widget.image, id: widget.tagg),
                 ],
               ),
-              SizedBox(
-                height: 485,
-                child: Container(
-                  height: 450,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  width: MediaQuery.of(context).size.width,
-                  child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 5, vertical: 10),
-                      child: filteredEpisodes != null &&
-                              filteredEpisodes!.isNotEmpty
-                          ? ListView(
-                              children: filteredEpisodes!.map<Widget>((item) {
+              Container(
+                height: 450,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                width: MediaQuery.of(context).size.width,
+                child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 5, vertical: 10),
+                    child: filteredEpisodes != null &&
+                            filteredEpisodes!.isNotEmpty
+                        ? ListView(
+                            physics: const BouncingScrollPhysics(),
+                            children: filteredEpisodes!.map<Widget>((item) {
                               final title = item['title'];
                               final episodeNumber = item['number'];
                               return GestureDetector(
@@ -488,7 +487,8 @@ log('No valid stored data, defaulting to episode 1.');
                                           ClipRRect(
                                             borderRadius:
                                                 const BorderRadius.horizontal(
-                                                    left: Radius.circular(10)),
+                                                    left:
+                                                        Radius.circular(10)),
                                             child: SizedBox(
                                               height: 100,
                                               width: 150,
@@ -504,8 +504,10 @@ log('No valid stored data, defaulting to episode 1.');
                                                   const EdgeInsets.symmetric(
                                                       horizontal: 10),
                                               child: Text(
-                                                title.length > 25
-                                                    ? '${title.substring(0, 25)}...'
+                                                Platform.isAndroid
+                                                    ? (title.length > 25
+                                                        ? '${title.substring(0, 25)}...'
+                                                        : title)
                                                     : title,
                                                 style: TextStyle(
                                                   color: Theme.of(context)
@@ -573,14 +575,15 @@ log('No valid stored data, defaulting to episode 1.');
                                 ),
                               );
                             }).toList())
-                          : const Center(
-                              child: CircularProgressIndicator(),
-                            )),
-                ),
+                        : const Center(
+                            child: CircularProgressIndicator(),
+                          )),
               ),
+              const SizedBox(height: 60,)
             ],
           ),
-           AnimeFloater(      
+          animeData != null
+              ? AnimeFloater(
                   data: animeData!,
                   episodeLink: episodeLink,
                   episodeList: filteredEpisodes,
@@ -591,6 +594,7 @@ log('No valid stored data, defaulting to episode 1.');
                   id: widget.id,
                   tracks: tracks,
                 )
+              : const SizedBox.shrink()
         ],
       ),
     );

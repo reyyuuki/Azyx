@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/components/Anime/all_anime_lists.dart';
 import 'package:daizy_tv/components/Anime/anime_lists.dart';
@@ -31,6 +33,7 @@ class _AnimelistState extends State<Animelist> {
       {"name": "Completed", "view": AnimeLists(data: provider['animeList'], status: "COMPLETED")},
       {"name": "Planning", "view": AnimeLists(data: provider['animeList'], status: "PLANNING")},
       {"name": "Watching", "view": AnimeLists(data: provider['animeList'], status: "CURRENT")},
+      {"name": "Repeating", "view": AnimeLists(data: provider['animeList'], status: "REPEATING")},
       {"name": "Paused", "view": AnimeLists(data: provider['animeList'], status: "PAUSED")},
     ];
 
@@ -46,6 +49,11 @@ class _AnimelistState extends State<Animelist> {
             _scaffoldKey.currentState?.openDrawer();
           },
         ),
+        actions: [
+          IconButton(onPressed: (){
+            Navigator.pop(context);
+          }, icon: const Icon(Icons.close))
+        ],
       ),
       drawer: Drawer(
         width: 200,
@@ -91,6 +99,7 @@ class _AnimelistState extends State<Animelist> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: ListTile(
+                      titleAlignment: ListTileTitleAlignment.center,
                       leading: Icon(_selectedIndex == i ? Iconsax.main_component5 : Iconsax.main_component),
                       title: Text(categories[i]['name'], style: const TextStyle(fontSize: 14, fontFamily: "Poppins-Bold")),
                       selectedColor: Theme.of(context).colorScheme.surface,

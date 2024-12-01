@@ -1,6 +1,7 @@
-import 'dart:developer';
+// ignore_for_file: file_names
 
-import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:io';
+
 import 'package:daizy_tv/components/Anime/anime_item.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -46,28 +47,20 @@ class Mangacarousale extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           SizedBox(
-            height: 220,
-            child: InfiniteCarousel.builder(
+            height: Platform.isAndroid ? 220 : 300,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
               itemCount: carosaleData!.length,
-              itemExtent: MediaQuery.of(context).size.width / 2.9,
-              loop: false,
-              center: false,
-              itemBuilder: (context, itemIndex,realIndex) {
+              itemBuilder: (context, itemIndex) {
                 final manga = carosaleData![itemIndex];
                 final id = manga['media']['id'];
                 final poster = manga['media']['coverImage']['large'];
                 final title = manga['media']['title']['english'] ?? manga['media']['title']['romaji'] ?? "N/A";
-                final currentEpisode = manga['progress'] ?? "??";
                 final type = manga['media']['format'];
                 final rating = manga['media']['averageScore'];
                 final tagg = '${id.toString()}current';
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ItemCard(id: id.toString(), poster: poster, type: type, name: title, rating: rating, tagg: tagg, route: '/mangaDetail'),
-                    Center(child: Text('Chapter $currentEpisode')),
-                  ],
-                );
+                return ItemCard(id: id.toString(), poster: poster, type: type, name: title, rating: rating, tagg: tagg, route: '/mangaDetail');
               }
             )
           )
