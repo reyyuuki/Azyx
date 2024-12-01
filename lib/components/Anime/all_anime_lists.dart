@@ -46,8 +46,8 @@ class AllAnimeLists extends StatelessWidget {
                         });
                       },
                       child: Container(
-                        height: Platform.isAndroid ? 150 : 200,
-                        width: Platform.isAndroid ? 103 : 140,
+                        height: Platform.isAndroid || Platform.isIOS ? 150 : 200,
+                        width: Platform.isAndroid || Platform.isIOS ? 103 : 140,
                         margin: const EdgeInsets.only(right: 10),
                         child: Hero(
                           tag: tagg,

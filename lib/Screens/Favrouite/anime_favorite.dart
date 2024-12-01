@@ -504,7 +504,7 @@ class _DetailsState extends State<AnimeFavouritePage> {
                                                   const EdgeInsets.symmetric(
                                                       horizontal: 10),
                                               child: Text(
-                                                Platform.isAndroid
+                                                Platform.isAndroid || Platform.isIOS
                                                     ? (title.length > 25
                                                         ? '${title.substring(0, 25)}...'
                                                         : title)

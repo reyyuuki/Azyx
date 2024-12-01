@@ -41,7 +41,7 @@ class NovelChapters extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  Platform.isAndroid ?
+                  Platform.isAndroid || Platform.isIOS ?
                   (chapter['title'].length > 22
                       ? "${chapter['title'].substring(0, 20)}..."
                       : chapter['title']) : chapter['title'].length > 100

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:animated_segmented_tab_control/animated_segmented_tab_control.dart';
+import 'package:azyx/components/Common/snackbar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:azyx/Hive_Data/appDatabase.dart';
 import 'package:azyx/Provider/sources_provider.dart';
@@ -1463,28 +1464,7 @@ class _DetailsState extends State<Details> {
                                               listen: false)
                                           .userData['name'] ==
                                       null) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            "Whoa there! 🛑 You’re not logged in! Let’s fix that 😜",
-                                            style: TextStyle(
-                                              fontFamily: "Poppins-Bold",
-                                              fontSize: 16,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .inverseSurface,
-                                            )),
-                                        behavior: SnackBarBehavior.floating,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                        ),
-                                        backgroundColor: Theme.of(context)
-                                            .colorScheme
-                                            .surfaceContainer,
-                                        duration: const Duration(seconds: 2),
-                                      ),
-                                    );
+                                    showSnackBar("Whoa there! 🛑 You’re not logged in! Let’s fix that 😜",context);
                                   } else {
                                     if (filteredEpisodes == null) {
                                       ScaffoldMessenger.of(context)

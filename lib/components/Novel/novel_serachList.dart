@@ -167,9 +167,9 @@ class NovelSerachlist extends StatelessWidget {
                               width: 20,
                             ),
                             SizedBox(
-                                width: Platform.isAndroid ? 150 : MediaQuery.of(context).size.width - 200,
+                                width: Platform.isAndroid || Platform.isIOS ? 150 : MediaQuery.of(context).size.width - 200,
                                 child: Text(
-                                 Platform.isAndroid ? (title.length > 50
+                                 Platform.isAndroid || Platform.isIOS ? (title.length > 50
                                       ? title.substring(0, 47) + "..."
                                       : title) : title,
                                   style: const TextStyle(

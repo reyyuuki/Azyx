@@ -60,7 +60,7 @@ class _WatchPageState extends State<WatchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        body: Platform.isAndroid ? 
+        body: Platform.isAndroid || Platform.isIOS ? 
          VideoPlayerAlt(
           animeId: widget.animeId,
           episodeTitle: widget.episodeTitle,

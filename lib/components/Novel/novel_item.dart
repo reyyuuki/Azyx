@@ -36,8 +36,8 @@ class NovelItem extends StatelessWidget {
           Stack(
             children: [
               Container(
-                height: Platform.isAndroid ? 150 : 230,
-                width: Platform.isAndroid ? 103 : 160,
+                height: Platform.isAndroid || Platform.isIOS ? 150 : 230,
+                width: Platform.isAndroid || Platform.isIOS ? 103 : 160,
                 margin: const EdgeInsets.only(right: 10),
                 child: Hero(
                   tag: tagg,

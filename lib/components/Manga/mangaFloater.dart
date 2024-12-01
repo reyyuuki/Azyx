@@ -114,7 +114,7 @@ class _MangafloaterState extends State<Mangafloater> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      Platform.isAndroid ? 
+                      Platform.isAndroid || Platform.isIOS ? 
                       (widget.currentChapter.length > 15 ?  '${widget.currentChapter.substring(0,15)}...' : widget.currentChapter) : widget.currentChapter,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,

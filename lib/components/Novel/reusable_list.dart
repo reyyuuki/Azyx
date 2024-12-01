@@ -30,7 +30,7 @@ class NovelList extends StatelessWidget {
               Text(
                 name!,
                 style: TextStyle(
-                  fontSize: Platform.isAndroid ? 18 : 25,
+                  fontSize: Platform.isAndroid || Platform.isIOS ? 18 : 25,
                   fontFamily: "Poppins-Bold",
                   foreground: Paint()
                     ..shader = LinearGradient(
@@ -45,14 +45,14 @@ class NovelList extends StatelessWidget {
               ),
               Icon(
                 Iconsax.arrow_right_4,
-                size: Platform.isAndroid ? 25 : 35,
+                size: Platform.isAndroid || Platform.isIOS ? 25 : 35,
                 color: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),
           const SizedBox(height: 15),
           SizedBox(
-            height: Platform.isAndroid ? 190 : 300,
+            height: Platform.isAndroid || Platform.isIOS ? 190 : 300,
             child: ListView.builder(
               physics: const BouncingScrollPhysics(),
               scrollDirection: Axis.horizontal,
