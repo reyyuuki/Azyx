@@ -18,7 +18,7 @@ class Languages extends StatelessWidget {
             onPressed: () {
               Navigator.pop(context);
             },
-            iconSize: Platform.isAndroid ? 25 : 35,
+            iconSize: Platform.isAndroid || Platform.isIOS ? 25 : 35,
             icon: const Icon(Icons.arrow_back_ios)),
         centerTitle: true,
       ),

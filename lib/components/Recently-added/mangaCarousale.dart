@@ -47,7 +47,7 @@ class Mangacarousale extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           SizedBox(
-            height: Platform.isAndroid ? 220 : 300,
+            height: Platform.isAndroid || Platform.isIOS ? 220 : 300,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),

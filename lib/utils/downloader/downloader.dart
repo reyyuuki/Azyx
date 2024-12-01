@@ -40,6 +40,7 @@ class Downloader {
         }
       },
     );
+    LinuxFlutterLocalNotificationsPlugin;
   }
 
   Future<bool> checkPermission() async {

@@ -40,10 +40,10 @@ class ItemCard extends StatelessWidget {
           Stack(
             children: [
               Container(
-                height: Platform.isAndroid
+                height: Platform.isAndroid || Platform.isIOS
                     ? 150
                     : 230,
-                width: Platform.isAndroid
+                width: Platform.isAndroid || Platform.isIOS
                     ? 103
                     : 160,
                 margin: const EdgeInsets.only(right: 10),
@@ -124,7 +124,7 @@ class ItemCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            Platform.isAndroid ?
+            Platform.isAndroid || Platform.isIOS ?
             (name.length > 12 ? '${name.substring(0, 10)}...' : name) : (name.length > 20 ? '${name.substring(0, 17)}...' : name),
             style: const TextStyle(fontFamily: "Poppins-Bold"),
           ),

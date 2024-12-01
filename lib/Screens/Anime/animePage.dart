@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:azyx/auth/auth_provider.dart';
 import 'package:azyx/backupData/anilist_anime.dart';
 import 'package:azyx/components/Anime/anime_carousale.dart';

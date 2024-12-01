@@ -75,7 +75,7 @@ class NovelAlldetails extends StatelessWidget {
             height: 10,
           ),
           Text(
-            Platform.isAndroid ?
+            Platform.isAndroid || Platform.isIOS ?
             (novelData['description'].length > 380
                 ? '${novelData['description'].substring(0, 380)}...'
                 : novelData['description']) : novelData['description'],

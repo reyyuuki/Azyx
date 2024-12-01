@@ -187,7 +187,7 @@ class _ReadState extends State<Read> {
             ? const CircularProgressIndicator()
             : hasError
                 ? const Text('Failed to load data')
-                : (Platform.isAndroid
+                : (Platform.isAndroid || Platform.isIOS
                     ? ListView.builder(
                       physics: const BouncingScrollPhysics(),
                         controller: _scrollController,

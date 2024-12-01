@@ -124,7 +124,7 @@ class AnimeInfo extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Text(
-            !Platform.isAndroid ? animeData['description'] :
+            !Platform.isAndroid || Platform.isIOS ? animeData['description'] :
               (animeData?['description'].length > 300
                   ? animeData['description'].substring(0, 300)
                   : animeData?['description']),
