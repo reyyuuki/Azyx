@@ -1,25 +1,38 @@
+// ignore_for_file: must_be_immutable, file_names
+
+import 'dart:io';
+import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class FavrouiteList extends StatelessWidget {
   dynamic data;
   final String route;
-   FavrouiteList({super.key, required this.data, required this.route});
+  FavrouiteList({super.key, required this.data, required this.route});
 
   @override
   Widget build(BuildContext context) {
-    if(data == null){
+    if (data == null) {
       return const SizedBox.shrink();
     }
+
+    int itemCount = (MediaQuery.of(context).size.width ~/ 200).toInt();
+    int minCount = 3;
+    double gridWidth =
+        MediaQuery.of(context).size.width / max(itemCount, minCount);
+    double maxHeight = MediaQuery.of(context).size.height / 2.5;
+    double gridHeight = min(gridWidth * 1.7, maxHeight);
     return Padding(
       padding: const EdgeInsets.only(left: 5),
       child: Container(
         color: Theme.of(context).colorScheme.surface,
         child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
+            physics: const BouncingScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: max(itemCount, minCount),
                 crossAxisSpacing: 5,
-                childAspectRatio: 0.56),
+                childAspectRatio: gridWidth / gridHeight),
             itemCount: data!.length,
             itemBuilder: (context, index) {
               final tagg = '${data![index]['id']}new';
@@ -36,8 +49,8 @@ class FavrouiteList extends StatelessWidget {
                     Stack(
                       children: [
                         Container(
-                          height: 150,
-                          width: 103,
+                          height: Platform.isAndroid ? 150 : 200,
+                          width: Platform.isAndroid ? 103 : 140,
                           margin: const EdgeInsets.only(right: 10),
                           child: Hero(
                             tag: tagg,
@@ -47,8 +60,7 @@ class FavrouiteList extends StatelessWidget {
                                 imageUrl: data![index]['image'],
                                 fit: BoxFit.cover,
                                 progressIndicatorBuilder:
-                                    (context, url, downloadProgress) =>
-                                        Center(
+                                    (context, url, downloadProgress) => Center(
                                   child: CircularProgressIndicator(
                                       value: downloadProgress.progress),
                                 ),
