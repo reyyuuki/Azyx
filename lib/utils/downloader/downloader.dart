@@ -19,7 +19,7 @@ class Downloader {
     _initializeNotifications();
     parallelDownloads =
         Hive.box('app-data').get('parallelDownloads', defaultValue: 50);
-    retries = Hive.box('app-data').get('downloadRetries', defaultValue: 10);
+    retries = Hive.box('app-data').get('downloadRetries', defaultValue: 20);
   }
 
   Future<void> _initializeNotifications() async {

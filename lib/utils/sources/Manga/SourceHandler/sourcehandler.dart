@@ -10,11 +10,11 @@ import 'package:daizy_tv/utils/sources/Manga/Extenstions/mangakakalot_unofficial
 
 class MangaSourcehandler {
   final Map<String, ExtractClass> sources = {
-    "MangaKakalot Unofficial": MangakakalotUnofficial(),
+    "ComicK": Comick(),
+    "MangaKakalot": MangaKakalot(),
     "MangaNato": MangaNato(),
     "MangaBat": MangaBat(),
-    "MangaKakalot": MangaKakalot(),
-    "ComicK": Comick()
+    "MangaKakalot Unofficial": MangakakalotUnofficial(),
   };
 
   MangaSourcehandler() {
@@ -23,7 +23,7 @@ class MangaSourcehandler {
 
   String selectedSource = '';
 
-  List<Map<String,String>> getAvailableSources() {
+  List<Map<String, String>> getAvailableSources() {
     return sources.entries.map((entry) {
       return {"name": entry.value.sourceName};
     }).toList();
@@ -43,7 +43,7 @@ class MangaSourcehandler {
     return selectedSource;
   }
 
-  Future<dynamic> mappingData(String query,{int page = 1}) async {
+  Future<dynamic> mappingData(String query, {int page = 1}) async {
     try {
       String? id = await searchMostSimilarManga(query, fetchSearchData);
 
