@@ -220,6 +220,7 @@ jobs:
       - name: Replace auth provider 
         run: |
           mv lib/auth/auth_provider_macos.dart lib/auth/auth_provider.dart
+          mv pubspec_macos.yaml pubspec.yaml
 
       - name: Get Dependencies
         run: flutter pub get

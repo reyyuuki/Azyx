@@ -1,10 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class AniListProvider with ChangeNotifier {
-  final storage = const FlutterSecureStorage();
   dynamic _userData = {};
   dynamic _anilistData = {};
   dynamic _mangalistData = {};
