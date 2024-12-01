@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:daizy_tv/Provider/sources_provider.dart';
 import 'package:daizy_tv/auth/auth_provider.dart';
@@ -78,7 +79,8 @@ class _ReadState extends State<Read> {
         if (progress != null) {
           anilist.userData?['name'] != null
               ? anilist.addToAniList(
-                  mediaId: int.parse(widget.mangaId), progress:int.parse(progress))
+                  mediaId: int.parse(widget.mangaId),
+                  progress: int.parse(progress))
               : [];
         }
       } else {
@@ -120,13 +122,14 @@ class _ReadState extends State<Read> {
             currentChapter: url!,
             mangaImage: widget.image,
             currentChapterTitle: data['currentChapter']);
-            final progress = data['currentChapter'].split(" ").last;
+        final progress = data['currentChapter'].split(" ").last;
         log(progress);
         final anilist = Provider.of<AniListProvider>(context, listen: false);
         if (progress != null) {
           anilist.userData?['name'] != null
               ? anilist.addToAniList(
-                  mediaId: int.parse(widget.mangaId), progress:int.parse(progress))
+                  mediaId: int.parse(widget.mangaId),
+                  progress: int.parse(progress))
               : [];
         }
       } else {
@@ -184,30 +187,62 @@ class _ReadState extends State<Read> {
             ? const CircularProgressIndicator()
             : hasError
                 ? const Text('Failed to load data')
-                : ListView.builder(
-                    controller: _scrollController,
-                    itemCount: chapterImages!.length,
-                    itemBuilder: (context, index) {
-                      return CachedNetworkImage(
-                        httpHeaders: {'Referer': widget.chapterLink},
-                        imageUrl: chapterImages![index]['image'],
-                        fit: BoxFit.cover,
-                        placeholder: (context, progress) => SizedBox(
-                          height: MediaQuery.of(context).size.height,
-                          width: MediaQuery.of(context).size.width,
-                          child: const Center(
-                            child: SizedBox(
-                              height: 50,
-                              width: 50,
-                              child: CircularProgressIndicator(),
+                : (Platform.isAndroid
+                    ? ListView.builder(
+                      physics: const BouncingScrollPhysics(),
+                        controller: _scrollController,
+                        itemCount: chapterImages!.length,
+                        itemBuilder: (context, index) {
+                          return CachedNetworkImage(
+                            filterQuality: FilterQuality.high,
+                            httpHeaders: {'Referer': widget.chapterLink},
+                            imageUrl: chapterImages![index]['image'],
+                            fit: BoxFit.cover,
+                            placeholder: (context, progress) => SizedBox(
+                              height: MediaQuery.of(context).size.height,
+                              width: MediaQuery.of(context).size.width,
+                              child: const Center(
+                                child: SizedBox(
+                                  height: 50,
+                                  width: 50,
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
                             ),
-                          ),
+                            errorWidget: (context, url, error) =>
+                                const Icon(Icons.error),
+                          );
+                        },
+                      )
+                    : SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.6,
+                        child: ListView.builder(
+                          physics: const BouncingScrollPhysics(),
+                          controller: _scrollController,
+                          itemCount: chapterImages!.length,
+                          itemBuilder: (context, index) {
+                            return CachedNetworkImage(
+                            filterQuality: FilterQuality.high,
+                              httpHeaders: {'Referer': widget.chapterLink},
+                              imageUrl: chapterImages![index]['image'],
+                              fit: BoxFit.cover,
+                              placeholder: (context, progress) => SizedBox(
+                                height: MediaQuery.of(context).size.height,
+                                width: MediaQuery.of(context).size.width,
+                                child: const Center(
+                                  child: SizedBox(
+                                    height: 50,
+                                    width: 50,
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
+                            );
+                          },
                         ),
-                        errorWidget: (context, url, error) =>
-                            const Icon(Icons.error),
-                      );
-                    },
-                  ),
+                      )),
       ),
     );
   }
