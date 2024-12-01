@@ -39,7 +39,6 @@ dependencies:
   media_kit_video: ^1.2.4
   media_kit_libs_video: ^1.0.4
   wakelock_plus: ^1.2.8
-  flutter_web_auth_2: ^4.0.2
   
 
 dev_dependencies:
