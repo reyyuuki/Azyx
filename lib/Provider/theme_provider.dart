@@ -1,4 +1,4 @@
-import 'package:daizy_tv/Provider/themes.dart'; // Assuming this is where your lightmode and darkMode are defined
+import 'package:azyx/Provider/themes.dart'; // Assuming this is where your lightmode and darkMode are defined
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';

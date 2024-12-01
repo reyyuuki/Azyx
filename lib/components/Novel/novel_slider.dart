@@ -1,5 +1,5 @@
 // ignore_for_file: prefer_const_constructors
-import 'package:daizy_tv/components/Common/slider.dart';
+import 'package:azyx/components/Common/slider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconsax/iconsax.dart';

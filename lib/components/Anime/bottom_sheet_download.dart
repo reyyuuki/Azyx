@@ -1,5 +1,5 @@
-import 'package:daizy_tv/utils/downloader/downloader.dart';
-import 'package:daizy_tv/utils/helper/download.dart';
+import 'package:azyx/utils/downloader/downloader.dart';
+import 'package:azyx/utils/helper/download.dart';
 import 'package:flutter/material.dart';
 
 void showDownloadquality(BuildContext context, int number,String episodeLink,String name) async {

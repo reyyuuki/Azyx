@@ -2,12 +2,12 @@
 
 import 'dart:developer';
 
-import 'package:daizy_tv/Hive_Data/appDatabase.dart';
-import 'package:daizy_tv/components/Anime/poster.dart';
-import 'package:daizy_tv/components/Anime/coverImage.dart';
-import 'package:daizy_tv/components/Novel/novel_chapters.dart';
-import 'package:daizy_tv/components/Novel/novel_floater.dart';
-import 'package:daizy_tv/utils/sources/Manga/Base/extract_class.dart';
+import 'package:azyx/Hive_Data/appDatabase.dart';
+import 'package:azyx/components/Anime/poster.dart';
+import 'package:azyx/components/Anime/coverImage.dart';
+import 'package:azyx/components/Novel/novel_chapters.dart';
+import 'package:azyx/components/Novel/novel_floater.dart';
+import 'package:azyx/utils/sources/Manga/Base/extract_class.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';

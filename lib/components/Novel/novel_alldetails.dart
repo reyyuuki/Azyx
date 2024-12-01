@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:daizy_tv/components/Novel/naovel_info.dart';
+import 'package:azyx/components/Novel/naovel_info.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:text_scroll/text_scroll.dart';

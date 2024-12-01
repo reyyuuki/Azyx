@@ -1,9 +1,9 @@
 import 'dart:developer';
 
-import 'package:daizy_tv/Screens/Anime/episode_src.dart';
-import 'package:daizy_tv/utils/helper/jaro_winkler.dart';
-import 'package:daizy_tv/utils/scraper/Anime/aniwatch_search.dart';
-import 'package:daizy_tv/utils/sources/Anime/Base/base_class.dart';
+import 'package:azyx/Screens/Anime/episode_src.dart';
+import 'package:azyx/utils/helper/jaro_winkler.dart';
+import 'package:azyx/utils/scraper/Anime/aniwatch_search.dart';
+import 'package:azyx/utils/sources/Anime/Base/base_class.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
 import 'package:html/parser.dart' show parse;

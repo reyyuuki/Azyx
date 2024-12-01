@@ -1,5 +1,5 @@
 // ignore_for_file: file_names
-import 'package:daizy_tv/auth/auth_provider.dart';
+import 'package:azyx/auth/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iconsax/iconsax.dart';

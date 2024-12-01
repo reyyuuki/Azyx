@@ -2,7 +2,7 @@
 
 import 'dart:developer';
 
-import 'package:daizy_tv/Hive_Data/appDatabase.dart';
+import 'package:azyx/Hive_Data/appDatabase.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

@@ -1,12 +1,12 @@
 import 'dart:developer';
 
-import 'package:daizy_tv/utils/helper/jaro_winkler.dart';
-import 'package:daizy_tv/utils/scraper/Manga/Comick.dart';
-import 'package:daizy_tv/utils/sources/Manga/Base/extract_class.dart';
-import 'package:daizy_tv/utils/sources/Manga/Extenstions/mangaKakalot.dart';
-import 'package:daizy_tv/utils/sources/Manga/Extenstions/manga_bat.dart';
-import 'package:daizy_tv/utils/sources/Manga/Extenstions/manga_nato.dart';
-import 'package:daizy_tv/utils/sources/Manga/Extenstions/mangakakalot_unofficial.dart';
+import 'package:azyx/utils/helper/jaro_winkler.dart';
+import 'package:azyx/utils/scraper/Manga/Comick.dart';
+import 'package:azyx/utils/sources/Manga/Base/extract_class.dart';
+import 'package:azyx/utils/sources/Manga/Extenstions/mangaKakalot.dart';
+import 'package:azyx/utils/sources/Manga/Extenstions/manga_bat.dart';
+import 'package:azyx/utils/sources/Manga/Extenstions/manga_nato.dart';
+import 'package:azyx/utils/sources/Manga/Extenstions/mangakakalot_unofficial.dart';
 
 class MangaSourcehandler {
   final Map<String, ExtractClass> sources = {

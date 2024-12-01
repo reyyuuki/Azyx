@@ -1,7 +1,7 @@
 import 'dart:ui';
-import 'package:daizy_tv/auth/auth_provider.dart';
-import 'package:daizy_tv/components/Recently-added/animeCarousale.dart';
-import 'package:daizy_tv/components/Recently-added/mangaCarousale.dart';
+import 'package:azyx/auth/auth_provider.dart';
+import 'package:azyx/components/Recently-added/animeCarousale.dart';
+import 'package:azyx/components/Recently-added/mangaCarousale.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iconsax/iconsax.dart';

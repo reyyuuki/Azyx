@@ -1,8 +1,8 @@
 // ignore_for_file: library_private_types_in_public_api
 
-import 'package:daizy_tv/auth/auth_provider.dart';
-import 'package:daizy_tv/components/Anime/all_anime_lists.dart';
-import 'package:daizy_tv/components/Anime/anime_lists.dart';
+import 'package:azyx/auth/auth_provider.dart';
+import 'package:azyx/components/Anime/all_anime_lists.dart';
+import 'package:azyx/components/Anime/anime_lists.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';

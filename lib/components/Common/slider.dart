@@ -1,5 +1,5 @@
 
-import 'package:daizy_tv/Provider/theme_provider.dart';
+import 'package:azyx/Provider/theme_provider.dart';
 import 'package:flutter/material.dart';
 
 class CustomSlider extends StatefulWidget {

@@ -1,12 +1,12 @@
 import 'dart:developer';
 
-import 'package:daizy_tv/backupData/novel_buddy_fallback.dart';
-import 'package:daizy_tv/components/Common/Header.dart';
-import 'package:daizy_tv/components/Common/check_platform.dart';
-import 'package:daizy_tv/components/Desktop/Novel/desktop_carousale.dart';
-import 'package:daizy_tv/components/Novel/novel_carousale.dart';
-import 'package:daizy_tv/components/Novel/reusable_list.dart';
-import 'package:daizy_tv/utils/sources/Novel/Extensions/novel_buddy.dart';
+import 'package:azyx/backupData/novel_buddy_fallback.dart';
+import 'package:azyx/components/Common/Header.dart';
+import 'package:azyx/components/Common/check_platform.dart';
+import 'package:azyx/components/Desktop/Novel/desktop_carousale.dart';
+import 'package:azyx/components/Novel/novel_carousale.dart';
+import 'package:azyx/components/Novel/reusable_list.dart';
+import 'package:azyx/utils/sources/Novel/Extensions/novel_buddy.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 

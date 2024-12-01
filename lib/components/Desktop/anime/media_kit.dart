@@ -1,10 +1,10 @@
 import 'dart:developer';
 
-import 'package:daizy_tv/Hive_Data/appDatabase.dart';
-import 'package:daizy_tv/Provider/sources_provider.dart';
-import 'package:daizy_tv/auth/auth_provider.dart';
-import 'package:daizy_tv/components/Desktop/anime/desktop_controls.dart';
-import 'package:daizy_tv/utils/sources/Anime/SourceHandler/sourcehandler.dart';
+import 'package:azyx/Hive_Data/appDatabase.dart';
+import 'package:azyx/Provider/sources_provider.dart';
+import 'package:azyx/auth/auth_provider.dart';
+import 'package:azyx/components/Desktop/anime/desktop_controls.dart';
+import 'package:azyx/utils/sources/Anime/SourceHandler/sourcehandler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iconsax/iconsax.dart';

@@ -1,12 +1,12 @@
-import 'package:daizy_tv/auth/auth_provider.dart';
-import 'package:daizy_tv/backupData/anilist_anime.dart';
-import 'package:daizy_tv/components/Anime/anime_carousale.dart';
-import 'package:daizy_tv/components/Common/check_platform.dart';
-import 'package:daizy_tv/components/Desktop/anime/desktop_carousale.dart';
+import 'package:azyx/auth/auth_provider.dart';
+import 'package:azyx/backupData/anilist_anime.dart';
+import 'package:azyx/components/Anime/anime_carousale.dart';
+import 'package:azyx/components/Common/check_platform.dart';
+import 'package:azyx/components/Desktop/anime/desktop_carousale.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:daizy_tv/components/Common/Header.dart';
-import 'package:daizy_tv/components/Anime/reusableList.dart';
+import 'package:azyx/components/Common/Header.dart';
+import 'package:azyx/components/Anime/reusableList.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 

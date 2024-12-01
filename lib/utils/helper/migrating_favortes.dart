@@ -1,8 +1,8 @@
 
 // import 'dart:developer';
 
-// import 'package:daizy_tv/Hive_Data/appDatabase.dart';
-// import 'package:daizy_tv/auth/auth_provider.dart';
+// import 'package:azyx/Hive_Data/appDatabase.dart';
+// import 'package:azyx/auth/auth_provider.dart';
 // import 'package:flutter/material.dart';
 // import 'package:hive/hive.dart';
 // import 'package:provider/provider.dart';

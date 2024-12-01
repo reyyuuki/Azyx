@@ -1,4 +1,4 @@
-import 'package:daizy_tv/Provider/theme_provider.dart';
+import 'package:azyx/Provider/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';

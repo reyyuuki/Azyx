@@ -1,5 +1,5 @@
-import 'package:daizy_tv/components/Common/_colorball.dart';
-import 'package:daizy_tv/Screens/settings/mode.dart';
+import 'package:azyx/components/Common/_colorball.dart';
+import 'package:azyx/Screens/settings/mode.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';

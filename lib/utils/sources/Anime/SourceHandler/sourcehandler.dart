@@ -1,10 +1,10 @@
 import 'dart:developer';
 
-import 'package:daizy_tv/utils/sources/Anime/Extensions/anivibe_scrapper.dart';
-import 'package:daizy_tv/utils/sources/Anime/Extensions/gogoanime.dart';
-import 'package:daizy_tv/utils/sources/Anime/Base/base_class.dart';
-import 'package:daizy_tv/utils/sources/Anime/Extensions/hianime_api.dart';
-import 'package:daizy_tv/utils/sources/Anime/Extensions/hianime_scrapper.dart';
+import 'package:azyx/utils/sources/Anime/Extensions/anivibe_scrapper.dart';
+import 'package:azyx/utils/sources/Anime/Extensions/gogoanime.dart';
+import 'package:azyx/utils/sources/Anime/Base/base_class.dart';
+import 'package:azyx/utils/sources/Anime/Extensions/hianime_api.dart';
+import 'package:azyx/utils/sources/Anime/Extensions/hianime_scrapper.dart';
 
 class AnimeSourcehandler {
   final Map<String, EXtractAnimes> animeSources = {

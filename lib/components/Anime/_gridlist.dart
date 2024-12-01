@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:daizy_tv/components/Anime/anime_item.dart';
+import 'package:azyx/components/Anime/anime_item.dart';
 import 'package:flutter/material.dart';
 
 class GridList extends StatelessWidget {

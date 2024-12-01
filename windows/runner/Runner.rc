@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "daizy_tv" "\0"
+            VALUE "FileDescription", "azyx" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "daizy_tv" "\0"
+            VALUE "InternalName", "azyx" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "daizy_tv.exe" "\0"
-            VALUE "ProductName", "daizy_tv" "\0"
+            VALUE "OriginalFilename", "azyx.exe" "\0"
+            VALUE "ProductName", "azyx" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
