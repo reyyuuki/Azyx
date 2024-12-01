@@ -1,0 +1,241 @@
+name: Build and Release Azyx
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  generate-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Generate Changelog
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          #!/bin/bash
+          PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -vE '(-alpha|-beta|-rc)' | head -n 2 | tail -n 1)
+          CURRENT_TAG=${GITHUB_REF#refs/tags/}
+          if [ -z "$PREVIOUS_TAG" ]; then
+            PREVIOUS_TAG=$(git rev-list --max-parents=0 HEAD)
+          fi
+
+          # Initialize changelog with the current tag as the version
+          echo "# Changelog" > CHANGELOG.md
+          echo "## $CURRENT_TAG" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+
+          # Function to add section if commits exist
+          add_section() {
+            local section_title="$1"
+            local grep_pattern="$2"
+            local commits=$(git log $PREVIOUS_TAG..$CURRENT_TAG --grep="$grep_pattern" --pretty=format:'* [`%h`](https://github.com/RyanYuuki/Azyx/commit/%h): %s')
+            
+            if [ ! -z "$commits" ]; then
+              echo "## $section_title" >> CHANGELOG.md
+              echo "$commits" >> CHANGELOG.md
+              echo "" >> CHANGELOG.md
+            fi
+          }
+
+          # Add sections dynamically
+          add_section "🎉 New Features" "^feat:"
+          add_section "🛠️ Bug Fixes & Improvements" "^fix:"
+          add_section "🔧 Refactors" "^refactor:"
+          add_section "🎨 Style Changes" "^style:"
+          add_section "🚀 Performance Improvements" "^perf:"
+          add_section "🧹 Chores & Documentation" "^(chore|docs):"
+
+          # Output the generated changelog
+          cat CHANGELOG.md
+      - name: Update Release with Changelog
+        uses: ncipollo/release-action@v1
+        with:
+          bodyFile: "CHANGELOG.md"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+
+  build-android:
+    runs-on: ubuntu-latest
+    needs: generate-changelog
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "adopt"
+          java-version: "17"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.4"
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: Build Android with Split ABI
+        run: flutter build apk --split-per-abi
+
+      - name: Rename APKs
+        run: |
+          mv build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk build/app/outputs/flutter-apk/Azyx-Android-armeabi-v7a.apk
+          mv build/app/outputs/flutter-apk/app-arm64-v8a-release.apk build/app/outputs/flutter-apk/Azyx-Android-arm64.apk
+          mv build/app/outputs/flutter-apk/app-x86_64-release.apk build/app/outputs/flutter-apk/Azyx-Android-x86_64.apk
+
+      - name: Build Universal APK
+        run: flutter build apk --release
+
+      - name: Rename Universal APK
+        run: mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/Azyx-Android-universal.apk
+
+      - name: Release Android APKs
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/app/outputs/flutter-apk/Azyx-Android-*.apk"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          tag: ${{ github.ref_name }}
+
+  build-ios:
+    runs-on: macos-latest
+    needs: generate-changelog
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.4"
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: Build iOS
+        run: |
+          flutter build ios --release --no-codesign
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cd Payload
+          ln -s ../Runner.app
+          cd ..
+          zip -r Azyx-iOS-${{ github.ref_name }}.ipa Payload
+          mv Azyx-iOS-${{ github.ref_name }}.ipa ../../../
+
+      - name: Release iOS IPA
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "Azyx-iOS-*.ipa"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          tag: ${{ github.ref_name }}
+
+  build-linux:
+    runs-on: ubuntu-latest
+    needs: generate-changelog
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build cmake g++ libgtk-3-dev libblkid-dev liblzma-dev pkg-config libmpv-dev libwebkit2gtk-4.1-dev
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.4"
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: Build Linux
+        run: flutter build linux --release
+
+      - name: Zip Linux Artifacts
+        run: |
+          cd build/linux/x64/release/bundle
+          zip -r ../../../../../Azyx-Linux.zip .
+
+      - name: Release Linux Build
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "Azyx-Linux.zip"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          tag: ${{ github.ref_name }}
+
+  build-windows:
+    runs-on: windows-latest
+    needs: generate-changelog
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.4"
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: Build Windows
+        run: flutter build windows --release
+
+      - name: Create ZIP file for Windows Build
+        run: |
+          cd build/windows/x64/runner/Release
+          Compress-Archive -Path * -DestinationPath Azyx-Windows.zip
+
+      - name: Release Windows Builds
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/windows/x64/runner/Release/Azyx-Windows.zip"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          tag: ${{ github.ref_name }}
+
+  build-macos:
+    runs-on: macos-latest
+    needs: generate-changelog
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.24.4"
+
+      - name: Replace auth provider 
+        run: |
+          mv lib/auth/auth_provider_macos.dart lib/auth/auth_provider.dart
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: Build macOS
+        run: flutter build macos --release
+
+      - name: Create DMG file for macOS Build
+        run: |
+          mkdir -p build/macos/Release
+          hdiutil create -volname "Azyx" -srcfolder build/macos/Build/Products/Release/Azyx.app -ov -format UDZO build/macos/Release/Azyx.dmg
+
+      - name: Release macOS Builds
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/macos/Release/Azyx.dmg"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          tag: ${{ github.ref_name }}
