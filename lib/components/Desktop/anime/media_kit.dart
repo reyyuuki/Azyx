@@ -253,24 +253,6 @@ class _VideoPlayerAltState extends State<DesktopPlayer>
           children: [
             IconButton(
               onPressed: () {
-                setState(() {
-                  isLandScapeRight = !isLandScapeRight;
-                  if (isLandScapeRight) {
-                    SystemChrome.setPreferredOrientations(
-                        [DeviceOrientation.landscapeRight]);
-                  } else {
-                    SystemChrome.setPreferredOrientations(
-                        [DeviceOrientation.landscapeLeft]);
-                  }
-                });
-              },
-              icon: const Icon(
-                Icons.screen_rotation_rounded,
-                color: Colors.white,
-              ),
-            ),
-            IconButton(
-              onPressed: () {
                 showPlaybackSpeedDialog(context, _updateSpeed);
               },
               icon: const Icon(
