@@ -5,6 +5,8 @@ import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:daizy_tv/backupData/anilist_manga.dart';
 import 'package:daizy_tv/components/Anime/anime_carousale.dart';
 import 'package:daizy_tv/components/Anime/reusableList.dart';
+import 'package:daizy_tv/components/Common/check_platform.dart';
+import 'package:daizy_tv/components/Desktop/anime/desktop_carousale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -82,6 +84,7 @@ class _MangapageState extends State<Mangapage> {
             topOngoing =  topOngoing;
 
            return  ListView(
+              physics: const BouncingScrollPhysics(),
               children: [
                 const Header(name: "Manga"),
                 const SizedBox(height: 20),
@@ -118,7 +121,9 @@ class _MangapageState extends State<Mangapage> {
                   ),
                 ),
                 const SizedBox(height: 30.0),
-                AnimeCarousale(animeData: trendingManga, route: '/mangaDetail',name: "Read",),
+                PlatformWidget(androidWidget: AnimeCarousale(animeData: trendingManga, route: '/mangaDetail',name: "Read",),
+                 windowsWidget: DesktopCarousale(animeData: trendingManga, route: '/mangaDetail',name: "Read",),
+                ),
                 const SizedBox(height: 30.0),
                 ReusableList(
                   name: 'Popular',
