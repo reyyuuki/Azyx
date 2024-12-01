@@ -60,17 +60,20 @@ class _ProfileState extends State<Profile> {
       // {'title': 'Volumes Read', 'value': 0},
       // {'title': 'Manga Mean Score', 'value': 0.0},
     ];
-    final animeData = provider.userData['animeList']?.where((anime) => anime['status'] == "CURRENT")
-            .toList();
+    final animeData = provider.userData['animeList']
+        ?.where((anime) => anime['status'] == "CURRENT")
+        .toList();
 
-    final mangaData = provider.userData['mangaList']?.where((manga) => manga['status'] == "CURRENT")
-            .toList();
+    final mangaData = provider.userData['mangaList']
+        ?.where((manga) => manga['status'] == "CURRENT")
+        .toList();
 
     String name = provider.userData['name'] ?? "Guest";
     String image = provider.userData['avatar']['large'] ?? "";
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: ListView(
+        physics: const BouncingScrollPhysics(),
         children: [
           Stack(
             alignment: Alignment.center,
@@ -90,6 +93,7 @@ class _ProfileState extends State<Profile> {
                         ),
                 ),
               ),
+              
               Positioned(
                 bottom: -20,
                 width: MediaQuery.of(context).size.width,
@@ -108,6 +112,7 @@ class _ProfileState extends State<Profile> {
                   ),
                 ),
               ),
+              
               Center(
                 child: Column(
                   children: [
@@ -141,7 +146,18 @@ class _ProfileState extends State<Profile> {
                     ),
                   ],
                 ),
-              )
+              ),
+              Positioned(
+                top: 10,
+                left: 0,
+                child: IconButton(
+                  alignment: Alignment.topLeft,
+                    iconSize: 40,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(Icons.arrow_back_ios)),
+              ),
             ],
           ),
           const SizedBox(height: 10),
