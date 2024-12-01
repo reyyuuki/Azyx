@@ -1,14 +1,14 @@
 import 'dart:developer';
 
-import 'package:daizy_tv/Provider/sources_provider.dart';
 import 'package:daizy_tv/backupData/novel_buddy_fallback.dart';
 import 'package:daizy_tv/components/Common/Header.dart';
+import 'package:daizy_tv/components/Common/check_platform.dart';
+import 'package:daizy_tv/components/Desktop/Novel/desktop_carousale.dart';
 import 'package:daizy_tv/components/Novel/novel_carousale.dart';
 import 'package:daizy_tv/components/Novel/reusable_list.dart';
 import 'package:daizy_tv/utils/sources/Novel/Extensions/novel_buddy.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:provider/provider.dart';
 
 class NovelPage extends StatefulWidget {
   const NovelPage({super.key});
@@ -52,9 +52,11 @@ void backupdata(){
       return const Center(child: CircularProgressIndicator(),);
     }
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListView(
+          physics: const BouncingScrollPhysics(),
           children: [
            const Header(),
            const SizedBox(height: 10,),
@@ -90,13 +92,13 @@ void backupdata(){
                     ),
                   ),
                   const SizedBox(height: 30.0),
-                 NovelCarousale(route: '/novelDetail', animeData: data,),
+                 PlatformWidget(androidWidget: NovelCarousale( novelData: data,), windowsWidget: NovelDesktopCarousale( novelData: data,)),
                  const SizedBox(height: 20,),
                  NovelList(name: "Popular Novel", taggName: "Popular", route: '', data: data?.sublist(0,10),),
                   const SizedBox(height: 20,),
                  NovelList(name: "Trending Novel", taggName: "Popular", route: '', data: data?.sublist(11,20),),
                   const SizedBox(height: 20,),
-                 NovelList(name: "Latest Novel", taggName: "Popular", route: '', data: data?.sublist(21,28),)
+                 NovelList(name: "Latest Novel", taggName: "Popular", route: '', data: data?.sublist(21,28),),
           ],
         ),
       ),
