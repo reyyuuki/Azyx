@@ -3,7 +3,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_web_auth/flutter_web_auth.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
 class AniListProvider with ChangeNotifier {
@@ -23,7 +24,7 @@ class AniListProvider with ChangeNotifier {
   Future<void> tryAutoLogin() async {
     _anilistData = await fetchAnilistAnimes();
     _mangalistData = await fetchAnilistManga();
-    final token = await storage.read(key: 'auth_token');
+    final token = await Hive.box("app-data").get("auth_token");
     if (token != null) {
       await fetchUserProfile();
       await fetchUserAnimeList();
@@ -43,7 +44,7 @@ class AniListProvider with ChangeNotifier {
         'https://anilist.co/api/v2/oauth/authorize?client_id=$clientId&redirect_uri=$redirectUri&response_type=code';
 
     try {
-      final result = await FlutterWebAuth.authenticate(
+      final result = await FlutterWebAuth2.authenticate(
         url: url,
         callbackUrlScheme: 'azyx',
       );
@@ -77,7 +78,7 @@ class AniListProvider with ChangeNotifier {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final token = data['access_token'];
-      await storage.write(key: 'auth_token', value: token);
+      Hive.box('app-data').put("auth_token",token);
       log(token);
       await fetchUserProfile();
     } else {
@@ -89,7 +90,7 @@ class AniListProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final token = await storage.read(key: 'auth_token');
+    final token = await Hive.box("app-data").get("auth_token");
     if (token == null) {
       _isLoading = false;
       notifyListeners();
@@ -144,7 +145,7 @@ class AniListProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final token = await storage.read(key: 'auth_token');
+    final token = await Hive.box("app-data").get("auth_token");
     if (token == null) {
       _isLoading = false;
       notifyListeners();
@@ -234,7 +235,7 @@ class AniListProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final token = await storage.read(key: 'auth_token');
+    final token = await Hive.box("app-data").get("auth_token");
     if (token == null) {
       _isLoading = false;
       notifyListeners();
@@ -322,6 +323,7 @@ class AniListProvider with ChangeNotifier {
 
   Future<void> logout(BuildContext context) async {
     await storage.delete(key: 'auth_token');
+    await Hive.box("app-data").put("auth_token",'');
     _userData = {};
     notifyListeners();
   }
@@ -332,9 +334,7 @@ class AniListProvider with ChangeNotifier {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
-
-    // Define the GraphQL query to fetch all sections with rating, type, and status
-    String query = r'''
+   String query = r'''
   query {
     trending: Page {
       media(type: ANIME, sort: TRENDING_DESC) {
@@ -384,8 +384,8 @@ class AniListProvider with ChangeNotifier {
         status
       }
     }
-    latest: Page {
-      media(type: ANIME, status: RELEASING, sort: START_DATE_DESC) {
+    latestReleasing: Page {
+      media(type: ANIME, status: RELEASING, sort: START_DATE_DESC, isAdult: false) {
         id
         title {
           english
@@ -407,8 +407,8 @@ class AniListProvider with ChangeNotifier {
         status
       }
     }
-    completed: Page {
-      media(type: ANIME, status: FINISHED, sort: END_DATE_DESC) {
+    recentlyCompleted: Page {
+      media(type: ANIME, status: FINISHED, sort: END_DATE_DESC, isAdult: false) {
         id
         title {
           english
@@ -432,6 +432,7 @@ class AniListProvider with ChangeNotifier {
     }
   }
   ''';
+
 
     // Send the POST request to the AniList GraphQL API
     final response = await http.post(
@@ -488,7 +489,7 @@ class AniListProvider with ChangeNotifier {
                   'status': anime['status'] ?? 'Unknown status',
                 })
             .toList(),
-        'latest': (data['data']['latest']['media'] as List)
+        'latest': (data['data']['latestReleasing']['media'] as List)
             .map((anime) => {
                   'id': anime['id'].toString(),
                   'title': {
@@ -508,7 +509,7 @@ class AniListProvider with ChangeNotifier {
                   'status': anime['status'] ?? 'Unknown status',
                 })
             .toList(),
-        'completed': (data['data']['completed']['media'] as List)
+        'completed': (data['data']['recentlyCompleted']['media'] as List)
             .map((anime) => {
                   'id': anime['id'].toString(),
                   'title': {
@@ -756,8 +757,7 @@ class AniListProvider with ChangeNotifier {
     int? progress,
   }) async {
     const String url = 'https://graphql.anilist.co';
-    const storage = FlutterSecureStorage();
-    final accessToken = await storage.read(key: 'auth_token');
+    final accessToken = await Hive.box("app-data").get("auth_token");
     final Map<String, String> headers = {
       'Authorization': 'Bearer $accessToken',
       'Content-Type': 'application/json',
