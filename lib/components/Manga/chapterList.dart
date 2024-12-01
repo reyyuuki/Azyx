@@ -55,47 +55,31 @@ class Chapterlist extends StatelessWidget {
                     Text(chapter['date'], style: const TextStyle(fontSize: 12, color: Color.fromARGB(230, 155, 154, 154), fontStyle: FontStyle.italic),)
                   ],
                 ),
-                Row(
-                  children: [
-                    const Icon(
-                      Ionicons.eye,
-                      size: 16,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Center(
+                      child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/read', arguments: {
+                        "mangaId": id,
+                        "chapterLink": chapter['link'],
+                        "image": image,
+                      });
+                    },
+                    style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(
+                            Theme.of(context).colorScheme.onPrimaryContainer),
+                        shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5))),
+                        elevation: MaterialStateProperty.all(20)),
+                    child: Text(
+                      'Read',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.surface,
+                          fontFamily: "Poppins-Bold"),
                     ),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    Text(
-                      chapter['views'],style: const TextStyle( fontFamily: "Poppins-Bold"),
-                    ),
-                  ],
+                  )),
                 ),
-                Container(
-                    decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.inverseSurface,
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Center(
-                          child: Row(
-                        children: [
-                          Icon(
-                            Ionicons.book,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.inversePrimary,
-                          ),
-                          const SizedBox(
-                            width: 2,
-                          ),
-                          Text(
-                            'Read',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.surface,
-                               fontFamily: "Poppins-Bold"
-                            ),
-                          ),
-                        ],
-                      )),
-                    )),
               ],
             ),
           ),

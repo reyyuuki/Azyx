@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:daizy_tv/components/Anime/genres.dart';
 import 'package:daizy_tv/components/Manga/mangaInfo.dart';
 import 'package:flutter/material.dart';
@@ -72,7 +74,7 @@ class Mangaalldetails extends StatelessWidget {
           const SizedBox(
             height: 10,
           ),
-          Text(mangaData['description'].length > 380 ? '${mangaData['description'].substring(0,380)}...' : mangaData['description'], style: const TextStyle(fontStyle: FontStyle.italic, color: Color.fromARGB(232, 165, 159, 159)),),
+          Text(!Platform.isAndroid ? mangaData['description'] : (mangaData['description'].length > 380 ? '${mangaData['description'].substring(0,380)}...' : mangaData['description']), style: const TextStyle(fontStyle: FontStyle.italic, color: Color.fromARGB(232, 165, 159, 159)),),
         ],
       ),
     );

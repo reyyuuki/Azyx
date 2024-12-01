@@ -12,6 +12,7 @@ class SearchList extends StatelessWidget {
     return Container(
       color: Theme.of(context).colorScheme.surface,
       child: ListView.builder(
+        physics: const BouncingScrollPhysics(),
         itemCount: data.length,
         itemBuilder: (context, index) {
           final item = data[index];

@@ -1,9 +1,4 @@
-// ignore_for_file: prefer_const_constructors
-
-import 'dart:developer';
-
-import 'package:daizy_tv/Provider/theme_provider.dart';
-import 'package:daizy_tv/components/Common/slider.dart';
+// ignore_for_file: prefer_const_constructors, file_names
 import 'package:flutter/material.dart';
 
 typedef ButtonTapCallback = void Function(String? index);

@@ -1,6 +1,4 @@
-
-// ignore_for_file: use_build_context_synchronously
-
+// ignore_for_file: file_names
 import 'package:daizy_tv/auth/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -179,29 +177,6 @@ class _HeaderState extends State<Header> {
                       const SizedBox(width: 20),
                       const Text(
                         "Setting",
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pop();
-                  Future.delayed(const Duration(milliseconds: 200), () {
-                    Navigator.pushNamed(context, './settings');
-                  });
-                },
-                child: Container(
-                  color: Colors.transparent,
-                  height: 40,
-                  width: MediaQuery.of(context).size.width,
-                  child:  Row(
-                    children: [
-                      coloredIcon(context, const Icon(Icons.home_repair_service)),
-                      SizedBox(width: 20),
-                      Text(
-                        "Backup Portal",
                         style: TextStyle(fontSize: 18),
                       ),
                     ],

@@ -1,7 +1,8 @@
 // ignore_for_file: file_names
 
+import 'dart:io';
+
 import 'package:daizy_tv/Hive_Data/appDatabase.dart';
-import 'package:daizy_tv/utils/sources/Manga/Base/extract_class.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
@@ -41,7 +42,7 @@ class _MangafloaterState extends State<Mangafloater> {
               onTap: () {
                 if (!isFavrouite) {
                  provider.addFavrouiteManga(
-                          title: widget.data['name'],
+                          title: widget.data['name'] ?? "Unknown",
                           id: widget.data['id'],
                           image: widget.data['poster'],
                           chapterList: widget.chapterList,
@@ -79,7 +80,7 @@ class _MangafloaterState extends State<Mangafloater> {
                     ),
                     !isFavrouite
                         ? const Text(
-                            "Favrouite",
+                            "Favorite",
                             style: TextStyle(fontFamily: "Poppins-Bold"),
                           )
                         : const SizedBox.shrink()
@@ -113,7 +114,8 @@ class _MangafloaterState extends State<Mangafloater> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      widget.currentChapter.length > 15 ?  '${widget.currentChapter.substring(0,15)}...' : widget.currentChapter,
+                      Platform.isAndroid ? 
+                      (widget.currentChapter.length > 15 ?  '${widget.currentChapter.substring(0,15)}...' : widget.currentChapter) : widget.currentChapter,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                         fontFamily: "Poppins-Bold",
