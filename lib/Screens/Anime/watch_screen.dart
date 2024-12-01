@@ -1,6 +1,8 @@
 
 import 'dart:developer';
+import 'dart:io';
 
+import 'package:daizy_tv/components/Desktop/anime/media_kit.dart';
 import 'package:daizy_tv/components/Video_palyer/videoplayer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -58,7 +60,20 @@ class _WatchPageState extends State<WatchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        body: VideoPlayerAlt(
+        body: Platform.isAndroid ? 
+         VideoPlayerAlt(
+          animeId: widget.animeId,
+          episodeTitle: widget.episodeTitle,
+          episodeSrc: widget.episodeSrc,
+          tracks: widget.subtitleTracks,
+          provider: Theme.of(context),
+          animeTitle: widget.animeTitle,
+          currentEpisode: widget.currentEpisode,
+          episodeData: widget.episodeData,
+          activeServer: widget.activeServer,
+          isDub: widget.isDub,
+        ) : 
+         DesktopPlayer(
           animeId: widget.animeId,
           episodeTitle: widget.episodeTitle,
           episodeSrc: widget.episodeSrc,
