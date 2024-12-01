@@ -164,6 +164,7 @@ jobs:
       - name: Zip Linux Artifacts
         run: |
           cd build/linux/x64/release
+          cp ../../../../linux-fix/* bundle/lib/
           zip -r ../../../../Azyx-Linux.zip .
 
       - name: Release Linux Build
