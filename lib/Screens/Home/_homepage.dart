@@ -6,6 +6,7 @@ import 'package:azyx/components/Common/user_lists.dart';
 import 'package:azyx/components/Common/Header.dart';
 import 'package:azyx/components/Recently-added/animeCarousale.dart';
 import 'package:azyx/components/Recently-added/mangaCarousale.dart';
+import 'package:azyx/utils/update_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -25,6 +26,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     if (mounted) {
       data();
+      autoCheckUpdate(context);
     }
   }
 

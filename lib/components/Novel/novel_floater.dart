@@ -111,7 +111,7 @@ class _NovelFloaterState extends State<NovelFloater> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      Platform.isAndroid ?
+                      Platform.isAndroid || Platform.isIOS ?
                       (widget.currentChapterTitle.length > 15 ? "${widget.currentChapterTitle.substring(0,15)}..." : widget.currentChapterTitle) : (widget.currentChapterTitle.length > 40 ? "${widget.currentChapterTitle.substring(0,40)}..." : widget.currentChapterTitle),
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
