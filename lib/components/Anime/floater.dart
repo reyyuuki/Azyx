@@ -38,15 +38,6 @@ class _AnimefloaterState extends State<AnimeFloater> {
 
   @override
   Widget build(BuildContext context) {
-    log("Episode Details:");
-    log("episodeSrc: ${widget.episodeLink}");
-    log("currentEpisode: ${widget.currentEpisode}");
-    log("episodeTitle: ${widget.episodeTitle}");
-    log("subtitleTracks: ${widget.tracks}");
-    log("animeTitle: ${widget.data['name']}");
-    log("activeServer: ${widget.selectedServer}");
-    log("isDub: ${widget.isDub}");
-    log("animeId: ${widget.id}");
 
     void showSnackBar(BuildContext context) {
   ScaffoldMessenger.of(context).showSnackBar(
@@ -115,7 +106,7 @@ class _AnimefloaterState extends State<AnimeFloater> {
                     ),
                     !isFavrouite
                         ? const Text(
-                            "Favrouite",
+                            "Favorite",
                             style: TextStyle(fontFamily: "Poppins-Bold"),
                           )
                         : const SizedBox.shrink()

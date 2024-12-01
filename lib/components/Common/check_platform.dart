@@ -16,7 +16,7 @@ class PlatformWidget extends StatelessWidget {
     
     if (Platform.isAndroid) {
       return androidWidget; 
-    } else if (Platform.isWindows) {
+    } else if (Platform.isWindows || Platform.isLinux) {
       return windowsWidget; 
     } else {
       return androidWidget;

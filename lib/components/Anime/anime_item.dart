@@ -1,6 +1,8 @@
 // anime_item.dart
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -38,8 +40,12 @@ class ItemCard extends StatelessWidget {
           Stack(
             children: [
               Container(
-                height: 150,
-                width: 103,
+                height: Platform.isAndroid
+                    ? 150
+                    : 230,
+                width: Platform.isAndroid
+                    ? 103
+                    : 160,
                 margin: const EdgeInsets.only(right: 10),
                 child: Hero(
                   tag: tagg,
@@ -59,42 +65,47 @@ class ItemCard extends StatelessWidget {
                   ),
                 ),
               ),
-              rating != null ?
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  height: 22,
-                  margin: const EdgeInsets.only(right: 10),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.only(
-                        bottomRight: Radius.circular(10),
-                        topLeft: Radius.circular(25)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          rating != null ? (rating! / 10).toString() : "N/A",
-                          style:  TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(context).colorScheme.primary,
-                              fontFamily: "Poppins-Bold"),
+              rating != null
+                  ? Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        height: 22,
+                        margin: const EdgeInsets.only(right: 10),
+                        decoration: BoxDecoration(
+                          color:
+                              Theme.of(context).colorScheme.secondaryContainer,
+                          borderRadius: BorderRadius.only(
+                              bottomRight: Radius.circular(10),
+                              topLeft: Radius.circular(25)),
                         ),
-                         Icon(
-                          Iconsax.star1,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.primary,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                rating != null
+                                    ? (rating! / 10).toString()
+                                    : "N/A",
+                                style: TextStyle(
+                                    fontSize: 12,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    fontFamily: "Poppins-Bold"),
+                              ),
+                              Icon(
+                                Iconsax.star1,
+                                size: 16,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              ) : const SizedBox.shrink(),
-             status != null && (status == "RELEASING" || status == "Ongoing")
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+              status != null && (status == "RELEASING" || status == "Ongoing")
                   ? Positioned(
                       bottom: 0,
                       left: 0,
@@ -113,7 +124,8 @@ class ItemCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            name.length > 12 ? '${name.substring(0, 10)}...' : name,
+            Platform.isAndroid ?
+            (name.length > 12 ? '${name.substring(0, 10)}...' : name) : (name.length > 20 ? '${name.substring(0, 17)}...' : name),
             style: const TextStyle(fontFamily: "Poppins-Bold"),
           ),
         ],
