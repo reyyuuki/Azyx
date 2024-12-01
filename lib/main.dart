@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:daizy_tv/Provider/sources_provider.dart';
 import 'package:daizy_tv/Screens/Bottom_Menu/_profile.dart';
 import 'package:daizy_tv/Screens/Bottom_Menu/_setting.dart';
@@ -17,6 +19,9 @@ import 'package:daizy_tv/Screens/Manga/mangaDetails.dart';
 import 'package:daizy_tv/Screens/Manga/read.dart';
 import 'package:daizy_tv/Screens/Anime/searchAnime.dart';
 import 'package:daizy_tv/Screens/Manga/searchManga.dart';
+import 'package:daizy_tv/components/Common/check_platform.dart';
+import 'package:daizy_tv/components/Desktop/Manga/desktop_manga_detail.dart';
+import 'package:daizy_tv/components/Desktop/anime/desktop_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:daizy_tv/Screens/Anime/details.dart';
 import 'package:daizy_tv/Screens/Home/_homepage.dart';
@@ -26,10 +31,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MediaKit.ensureInitialized();
   await Hive.initFlutter();
   await Hive.openBox('app-data');
   await Hive.openBox('mybox');
@@ -73,7 +80,10 @@ class _MainAppState extends State<MainApp> {
             final image = args?['image'] ?? '';
             final tagg = args?['tagg'] ?? '';
             return MaterialPageRoute(
-              builder: (context) => Details(id: id, image: image, tagg: tagg),
+              builder: (context) => PlatformWidget(
+                  androidWidget: Details(id: id, image: image, tagg: tagg),
+                  windowsWidget:
+                      DesktopDetailsPage(id: id, image: image, tagg: tagg)),
             );
 
           case '/stream':
@@ -103,9 +113,11 @@ class _MainAppState extends State<MainApp> {
             final image = args?['image'] ?? '';
             final tagg = args?['tagg'] ?? '';
             return MaterialPageRoute(
-              builder: (context) =>
-                  Mangadetails(id: id, image: image, tagg: tagg),
-            );
+                builder: (context) => PlatformWidget(
+                    androidWidget:
+                        Mangadetails(id: id, image: image, tagg: tagg),
+                    windowsWidget:
+                        DesktopMangaDetail(id: id, image: image, tagg: tagg)));
 
           case '/mangaFavorite':
             final id = args?['id'] ?? '';
