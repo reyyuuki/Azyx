@@ -2,13 +2,11 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
 class AniListProvider with ChangeNotifier {
-  final storage = const FlutterSecureStorage();
   dynamic _userData = {};
   dynamic _anilistData = {};
   dynamic _mangalistData = {};
@@ -322,7 +320,6 @@ class AniListProvider with ChangeNotifier {
   }
 
   Future<void> logout(BuildContext context) async {
-    await storage.delete(key: 'auth_token');
     await Hive.box("app-data").put("auth_token",'');
     _userData = {};
     notifyListeners();
