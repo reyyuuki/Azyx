@@ -1,4 +1,5 @@
 // ignore_for_file: file_names
+import 'package:azyx/Extensions/ExtensionScreen.dart';
 import 'package:azyx/auth/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -20,7 +21,6 @@ class _HeaderState extends State<Header> {
     var box = Hive.box("mybox");
     final provider = Provider.of<AniListProvider>(context);
 
-
     final userData = provider.userData;
     final bool isLoggedIn = userData != null;
     final String image = isLoggedIn ? userData?['avatar']?['large'] ?? "" : "";
@@ -39,7 +39,8 @@ class _HeaderState extends State<Header> {
                 children: [
                   Text(
                     userName,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.w600),
                   ),
                   Text(
                     "Enjoy unlimited ${widget.name ?? 'content'}!",
@@ -56,7 +57,8 @@ class _HeaderState extends State<Header> {
                   height: 50,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(50),
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                   ),
                   child: image.isNotEmpty
                       ? ClipRRect(
@@ -98,7 +100,9 @@ class _HeaderState extends State<Header> {
         child: SizedBox(
           height: 250,
           child: Column(
-            mainAxisAlignment: userData['name'] != null ? MainAxisAlignment.spaceBetween : MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: userData['name'] != null
+                ? MainAxisAlignment.spaceBetween
+                : MainAxisAlignment.spaceEvenly,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -112,7 +116,8 @@ class _HeaderState extends State<Header> {
                     height: 50,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(50),
-                      color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
+                      color:
+                          Theme.of(context).colorScheme.onPrimaryFixedVariant,
                     ),
                     child: isLoggedIn
                         ? ClipRRect(
@@ -137,28 +142,32 @@ class _HeaderState extends State<Header> {
                   ),
                 ],
               ),
-                GestureDetector(
+              GestureDetector(
                 onTap: () {
                   Navigator.of(context).pop();
                   Future.delayed(const Duration(milliseconds: 200), () {
-                   userData?['name'] != null ? Navigator.pushNamed(context, './profile') : Navigator.pushNamed(context, "/login-page");
+                    userData?['name'] != null
+                        ? Navigator.pushNamed(context, './profile')
+                        : Navigator.pushNamed(context, "/login-page");
                   });
                 },
-                child: userData?['name'] != null ? Container(
-                  color: Colors.transparent,
-                  width: MediaQuery.of(context).size.width,
-                  height: 40,
-                  child:  Row(
-                    children: [
-                      coloredIcon(context, const Icon(Ionicons.people)),
-                      const SizedBox(width: 20),
-                      const Text(
-                        "Profile",
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ],
-                  ),
-                ) : const SizedBox.shrink(),
+                child: userData?['name'] != null
+                    ? Container(
+                        color: Colors.transparent,
+                        width: MediaQuery.of(context).size.width,
+                        height: 40,
+                        child: Row(
+                          children: [
+                            coloredIcon(context, const Icon(Ionicons.people)),
+                            const SizedBox(width: 20),
+                            const Text(
+                              "Profile",
+                              style: TextStyle(fontSize: 18),
+                            ),
+                          ],
+                        ),
+                      )
+                    : const SizedBox.shrink(),
               ),
               GestureDetector(
                 onTap: () {
@@ -171,9 +180,9 @@ class _HeaderState extends State<Header> {
                   color: Colors.transparent,
                   height: 40,
                   width: MediaQuery.of(context).size.width,
-                  child:  Row(
+                  child: Row(
                     children: [
-                     coloredIcon(context, const Icon(Icons.settings)),
+                      coloredIcon(context, const Icon(Icons.settings)),
                       const SizedBox(width: 20),
                       const Text(
                         "Setting",
@@ -187,19 +196,43 @@ class _HeaderState extends State<Header> {
                 onTap: () {
                   Navigator.of(context).pop();
                   Future.delayed(const Duration(milliseconds: 200), () {
-                   provider.userData?['name'] != null ? provider.logout(context) : provider.login(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ExtensionScreen()));
+                  });
+                },
+                child: Container(
+                  color: Colors.transparent,
+                  height: 40,
+                  width: MediaQuery.of(context).size.width,
+                  child: Row(
+                    children: [
+                      coloredIcon(context, const Icon(Icons.extension)),
+                      const SizedBox(width: 20),
+                      const Text(
+                        "Extensions",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Future.delayed(const Duration(milliseconds: 200), () {
+                    provider.userData?['name'] != null
+                        ? provider.logout(context)
+                        : provider.login(context);
                   });
                 },
                 child: Container(
                   color: Colors.transparent,
                   width: MediaQuery.of(context).size.width,
                   height: 40,
-                  child:  Row(
+                  child: Row(
                     children: [
-                      box.get("userName") != null ?
-                      coloredIcon(context, const Icon(Iconsax.login))
-                      : 
-                      coloredIcon(context, const Icon(Iconsax.logout)),
+                      box.get("userName") != null
+                          ? coloredIcon(context, const Icon(Iconsax.login))
+                          : coloredIcon(context, const Icon(Iconsax.logout)),
                       const SizedBox(width: 20),
                       Text(
                         userData['name'] != null ? "LogOut" : "LogIn",
@@ -218,10 +251,11 @@ class _HeaderState extends State<Header> {
 
   Container coloredIcon(BuildContext context, Icon icon) {
     return Container(
-                      height: 40,
-                      width: 40,
-                      decoration: BoxDecoration(color: Theme.of(context).colorScheme.inversePrimary, borderRadius: BorderRadius.circular(50)),
-                      child: icon
-                    );
+        height: 40,
+        width: 40,
+        decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.inversePrimary,
+            borderRadius: BorderRadius.circular(50)),
+        child: icon);
   }
 }
