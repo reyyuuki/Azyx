@@ -1,10 +1,10 @@
-import 'dart:developer';
-import 'dart:io';
+// ignore_for_file: file_names
 
+import 'dart:io';
+import 'package:azyx/Screens/Anime/details.dart';
 import 'package:azyx/components/Anime/anime_item.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:infinite_carousel/infinite_carousel.dart';
 
 class Animecarousale extends StatelessWidget {
   final List<dynamic>? carosaleData;
@@ -61,14 +61,26 @@ class Animecarousale extends StatelessWidget {
                     final type = anime['media']['format'];
                     final rating = anime['media']['averageScore'];
                     final tagg = '${id.toString()}current';
-                    return ItemCard(
-                        id: id.toString(),
-                        poster: poster,
-                        type: type,
-                        name: title,
-                        rating: rating,
-                        tagg: tagg,
-                        route: '/detailspage');
+                    return GestureDetector(
+                      onTap: (){
+                         Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Details(
+                          id: id.toString(),
+                          image: poster,
+                          tagg: tagg,
+                          title: title)));
+                      },
+                      child: ItemCard(
+                          id: id.toString(),
+                          poster: poster,
+                          type: type,
+                          name: title,
+                          rating: rating,
+                          tagg: tagg,
+                          ),
+                    );
                   }))
         ]));
   }

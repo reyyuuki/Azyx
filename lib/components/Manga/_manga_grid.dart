@@ -1,3 +1,4 @@
+import 'package:azyx/Screens/Manga/mangaDetails.dart';
 import 'package:azyx/components/Anime/anime_item.dart';
 import 'package:flutter/material.dart';
 
@@ -28,7 +29,11 @@ class MangaGrid extends StatelessWidget {
         itemBuilder: (context, index) {
           final item = data![index];
           final tagg = "${item['id']}List";
-          return ItemCard(id: item['id'].toString(), poster: item['poster'], type: item['type'], name: item['name'], rating: item['averageScore'], tagg: tagg, route: '/detailspage',);
+          return GestureDetector(
+            onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder: (context) => Mangadetails(id: item['id'], image: item['image'], tagg: tagg)));
+            },
+            child: ItemCard(id: item['id'].toString(), poster: item['poster'], type: item['type'], name: item['name'], rating: item['averageScore'], tagg: tagg,));
         }
       )
     );

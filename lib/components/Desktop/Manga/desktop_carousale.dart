@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ionicons/ionicons.dart';
 
-class DesktopCarousale extends StatelessWidget {
+class MangaDesktopCarousale extends StatelessWidget {
   dynamic animeData;
   String name;
 
-  DesktopCarousale({super.key, this.animeData, required this.name});
+  MangaDesktopCarousale({super.key, this.animeData,required this.name});
 
 
   @override
@@ -40,11 +40,10 @@ class DesktopCarousale extends StatelessWidget {
           builder: (BuildContext context) {
             return GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, '/detailspage', arguments: {
+                Navigator.pushNamed(context, '/mangaDetail', arguments: {
                   "id": anime['id'].toString(),
                   "image": anime['coverImage']['large'] ?? '',
-                  "tagg": "${anime['id']}MainCarousale",
-                  "title": title
+                  "tagg": "${anime['id']}MainCarousale"
                 });
               },
               child: Container(

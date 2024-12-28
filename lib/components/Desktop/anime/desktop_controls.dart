@@ -1,12 +1,9 @@
-import 'dart:developer';
-
+import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 class DesktopControls extends StatefulWidget {
-  final VideoController controller;
   final Player player;
   final Widget bottomControls;
   final Widget topControls;
@@ -16,7 +13,6 @@ class DesktopControls extends StatefulWidget {
 
   const DesktopControls(
       {super.key,
-      required this.controller,
       required this.bottomControls,
       required this.topControls,
       required this.hideControlsOnTimeout,
@@ -64,10 +60,8 @@ class _ControlsState extends State<DesktopControls> {
       });
       widget.player.streams.playing.listen((isPlaying) {
         if (mounted) {
-          log(isPlaying.toString());
           setState(() {
-            playPause =
-                isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded;
+            playPause = isPlaying ? Broken.pause : Broken.play;
             handleWakelock(isPlaying);
           });
         }
@@ -78,26 +72,25 @@ class _ControlsState extends State<DesktopControls> {
   }
 
   void updatePlayerState() {
-  if (mounted) {
+    if (mounted) {
     setState(() {
       currentTime = getFormattedTime(widget.player.state.position.inSeconds);
       maxTime = getFormattedTime(widget.player.state.duration?.inSeconds ?? 0);
     });
   }
-  if (widget.isControlsVisible) {
-    widget.hideControlsOnTimeout();
+    if (widget.isControlsVisible) {
+      widget.hideControlsOnTimeout();
+    }
+    if (widget.player.state.playing) {
+      setState(() {
+        playPause = Broken.pause;
+      });
+    } else {
+      setState(() {
+        playPause = Broken.play;
+      });
+    }
   }
-  if (widget.player.state.playing) {
-    setState(() {
-      playPause = Icons.pause_rounded;
-    });
-  } else {
-    setState(() {
-      playPause = Icons.play_arrow_rounded;
-    });
-  }
-}
-
 
   void handleWakelock(bool isPlaying) {
     if (isPlaying && !wakelockEnabled) {
@@ -151,61 +144,94 @@ class _ControlsState extends State<DesktopControls> {
     super.dispose();
   }
 
+  int timeStringToSeconds(String time) {
+    List<String> parts = time.split(':');
+    if (parts.length == 2) {
+      return int.parse(parts[0]) * 60 + int.parse(parts[1]);
+    } else if (parts.length == 3) {
+      return int.parse(parts[0]) * 3600 +
+          int.parse(parts[1]) * 60 +
+          int.parse(parts[2]);
+    }
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Duration currentPosition =
-        widget.controller.player.state.position ?? Duration.zero;
-    final Duration totalDuration =
-        widget.controller.player.state.duration ?? Duration.zero;
-    return Positioned.fill(
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            widget.topControls,
-            Expanded(
-              child: widget.isControlsLocked()
-                  ? lockedCenterControls()
-                  : Padding(
+     Duration currentPosition =
+        widget.player.state.position ?? Duration.zero;
+    Duration totalDuration =
+        widget.player.state.duration ?? Duration.zero;
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          widget.topControls,
+          Expanded(
+            child: widget.isControlsLocked()
+                ? lockedCenterControls()
+                : Padding(
                     padding: const EdgeInsets.only(top: 80),
                     child: centerControls(context),
                   ),
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Text(currentTime),
-                        const Text(" / "),
-                        Text(maxTime),
-                      ],
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Text(currentTime),
+                      const Text(" / "),
+                      Text(maxTime),
+                    ],
+                  ),
+                  if (megaSkipDuration != null &&
+                      !widget.isControlsLocked() &&
+                      !alreadySkipped)
+                    megaSkipButton(),
+                ],
+              ),
+              Container(
+                alignment: Alignment.bottomCenter,
+                child: SizedBox(
+                  height: 20,
+                  child: SliderTheme(
+                    data: SliderThemeData(
+                      trackHeight: 1.3,
+                      thumbColor: Theme.of(context).colorScheme.primary,
+                      activeTrackColor: Theme.of(context).colorScheme.primary,
+                      inactiveTrackColor:
+                          const Color.fromARGB(255, 121, 121, 121),
+                      secondaryActiveTrackColor:
+                          const Color.fromARGB(255, 167, 167, 167),
+                      thumbShape:
+                          const RoundSliderThumbShape(enabledThumbRadius: 6),
+                      overlayShape: SliderComponentShape.noThumb,
                     ),
-                    if (megaSkipDuration != null &&
-                        !widget.isControlsLocked() &&
-                        !alreadySkipped)
-                      megaSkipButton(),
-                  ],
+                    child: Slider(
+                      value: currentPosition.inMilliseconds.toDouble(),
+                      max: totalDuration.inMilliseconds.toDouble(),
+                      min: 0.0,
+                      onChanged: (value) {
+                        widget.player
+                            .seek(Duration(milliseconds: value.toInt()));
+                            // setState(() {
+                            //   currentPosition = Duration(milliseconds: value.toInt());
+                            // });          
+                      },
+                    ),
+                  ),
                 ),
-                Slider(
-                  value: currentPosition.inMilliseconds.toDouble(),
-                  max: totalDuration.inMilliseconds.toDouble(),
-                  min: 0.0,
-                  onChanged: (value) {
-                    widget.controller.player
-                        .seek(Duration(milliseconds: value.toInt()));
-                  },
-                ),
-                widget.bottomControls,
-              ],
-            ),
-          ],
-        ),
+              ),
+              widget.bottomControls,
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -253,20 +279,20 @@ class _ControlsState extends State<DesktopControls> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         buildControlButton(
-          icon: Icons.fast_rewind_rounded,
+          icon: Broken.previous,
           onTap: () {
             fastForward(skipDuration != null ? -skipDuration! : -10);
           },
         ),
         buildControlButton(
-          icon: playPause ?? Icons.play_arrow_rounded,
+          icon: playPause ?? Broken.play,
           size: 45,
           onTap: () {
             widget.player.playOrPause();
           },
         ),
         buildControlButton(
-          icon: Icons.fast_forward_rounded,
+          icon: Broken.next,
           onTap: () {
             fastForward(skipDuration ?? 10);
           },

@@ -215,11 +215,12 @@ class _DetailsState extends State<MangaFavouritePage> {
                         androidWidget: ListView(
                           physics: const BouncingScrollPhysics(),
                           children: chapterList!.map<Widget>((chapter) {
-                            return Chapterlist(
-                              id: widget.id,
-                              chapter: chapter,
-                              image: widget.image,
-                            );
+                            // return Chapterlist(
+                            //   id: widget.id,
+                            //   chapter: chapter,
+                            //   image: widget.image,
+                            // );
+                            return SizedBox();
                           }).toList(),
                         ),
                         windowsWidget: ListView(
