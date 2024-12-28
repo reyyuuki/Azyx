@@ -99,9 +99,8 @@ class _HomepageState extends State<Animepage> {
                 const SizedBox(height: 30.0),
                 PlatformWidget(androidWidget: AnimeCarousale(
                   animeData: trendingAnime,
-                  route: '/detailspage',
                   name: "Play",
-                ), windowsWidget: DesktopCarousale(route: '/detailspage', name: "Play", animeData: trendingAnime,)),
+                ), windowsWidget: DesktopCarousale(name: "Play", animeData: trendingAnime,)),
                
                 const SizedBox(height: 30.0),
                 ReusableList(

@@ -1,7 +1,20 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:developer';
 
 import 'package:animated_segmented_tab_control/animated_segmented_tab_control.dart';
+import 'package:azyx/Extensions/ExtensionScreen.dart';
+import 'package:azyx/Screens/Anime/watch_screen.dart';
+import 'package:azyx/api/Mangayomi/Eval/dart/model/video.dart';
+import 'package:azyx/api/Mangayomi/Extensions/extensions_provider.dart';
+import 'package:azyx/api/Mangayomi/Extensions/fetch_anime_sources.dart';
+import 'package:azyx/api/Mangayomi/Model/Source.dart';
+import 'package:azyx/api/Mangayomi/Search/getVideo.dart';
+import 'package:azyx/api/Mangayomi/Search/get_detail.dart';
+import 'package:azyx/api/Mangayomi/Search/search.dart';
+import 'package:azyx/components/Common/_palceholder.dart';
 import 'package:azyx/components/Common/snackbar.dart';
+import 'package:azyx/utils/helper/jaro_winkler.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:azyx/Hive_Data/appDatabase.dart';
 import 'package:azyx/Provider/sources_provider.dart';
@@ -16,25 +29,32 @@ import 'package:azyx/utils/helper/download.dart';
 import 'package:azyx/utils/api/Anilist/Anime/anilist_anime_details.dart';
 import 'package:azyx/utils/sources/Anime/SourceHandler/sourcehandler.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' hide Provider;
 import 'package:iconsax/iconsax.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:lite_rolling_switch/lite_rolling_switch.dart';
 import 'package:provider/provider.dart';
 import 'package:text_scroll/text_scroll.dart';
 
-class Details extends StatefulWidget {
+class Details extends ConsumerStatefulWidget {
   final String id;
   final String image;
   final String tagg;
+  final String title;
   const Details(
-      {super.key, required this.id, required this.image, required this.tagg});
+      {super.key,
+      required this.id,
+      required this.image,
+      required this.tagg,
+      required this.title});
 
   @override
-  State<Details> createState() => _DetailsState();
+  ConsumerState<Details> createState() => _DetailsState();
 }
 
-class _DetailsState extends State<Details> {
+class _DetailsState extends ConsumerState<Details> {
   dynamic animeData;
+  Map<String, dynamic>? extraData;
   String? cover;
   String? description;
   List<dynamic>? streamData;
@@ -57,15 +77,14 @@ class _DetailsState extends State<Details> {
   dynamic scrapeData;
   String localSelectedValue = "CURRENT";
   late AnimeSourcehandler sourcehandler;
-  List<Map<String, String>> animeSources = [];
-  String selectedSource = '';
+  List<Source> animeSources = [];
   String defaultScore = "1.0";
   final TextEditingController _episodeController =
       TextEditingController(text: '1');
-  ValueNotifier<List<dynamic>> streamDataNotifier =
-      ValueNotifier<List<dynamic>>([]);
   List<Map<String, dynamic>> wrongTitleSearchData = [];
   TextEditingController wrongTitle = TextEditingController();
+  List<Video> episodeUrls = [];
+  Source? selectedSource;
 
   final List<String> _items = [
     "CURRENT",
@@ -102,25 +121,71 @@ class _DetailsState extends State<Details> {
     super.initState();
     final sourceProvider = Provider.of<SourcesProvider>(context, listen: false);
     sourcehandler = sourceProvider.getAnimeInstace();
-    animeSources = sourcehandler.getAvailableSources();
-    selectedSource = sourcehandler.selectedSource;
+    if (animeSources.isNotEmpty) {
+      selectedSource = animeSources.first;
+    }
+    getExtension();
     scrapedData();
   }
 
-  @override
-  void dispose() {
-    streamDataNotifier.dispose();
-    super.dispose();
+  Future<void> getExtension() async {
+    await ref
+        .read(fetchAnimeSourcesListProvider(id: null, reFresh: false).future);
+  }
+
+  Future<void> loadData(Source source) async {
+    if (animeSources.isNotEmpty) {
+      try {
+        final itemList = await search(
+          source: source,
+          query: widget.title,
+          page: 1,
+          filterList: [],
+        );
+
+        final mappedData = await mappingHelper(
+          widget.title,
+          itemList!.toJson()['list'],
+        );
+
+        if (mappedData != null && mappedData.isNotEmpty) {
+          final episodesList = await getDetail(
+            url: mappedData['link'],
+            source: source,
+          );
+          log('Scrapping data for episodes: ${episodesList.toJson()}');
+          if (episodeData != episodesList.toJson()['chapters'] && mounted) {
+            setState(() {
+              episodeData =
+                  episodesList.toJson()['chapters'].reversed.toList() ?? [];
+              filteredEpisodes = episodeData ?? [];
+              extraData = episodesList.toJson();
+            });
+          }
+        } else {
+          log("No data found in mapping helper.");
+        }
+      } catch (e) {
+        log("Error loading data: $e");
+      }
+    } else {
+      log("No extensions available.");
+    }
+  }
+
+  List<Source> _getInstalledEntries(List<Source> data) {
+    return data
+        .where((element) => element.version == element.versionLast!)
+        .where((element) => element.isAdded!)
+        .toList();
   }
 
   Future<void> scrapedData() async {
     try {
       final data = await fetchAnilistAnimeDetails(widget.id);
-
-      if (data.isNotEmpty && mounted) {
+      if (data.isNotEmpty) {
         setState(() {
           animeData = data;
-          log(animeData['episodes']);
         });
       } else {
         log("Error: Unexpected data type from scrapDetail");
@@ -128,7 +193,7 @@ class _DetailsState extends State<Details> {
     } catch (error) {
       log("Error in scrapedData: $error");
     }
-    fetchEpisodeList();
+    // fetchEpisodeList();
   }
 
   void route() {
@@ -148,17 +213,32 @@ class _DetailsState extends State<Details> {
           'animeId': widget.id,
         },
       );
-      log(tracks.toString());
     }
   }
 
-  Future<void> wrongTitleSearch() async {
+  Future<void> getEpisodeUrls(String url, int number, String setTitle) async {
     try {
-      final data = await sourcehandler.fetchSearchResults(animeData['name']);
+      final urls = await getVideo(source: selectedSource!, url: url);
+      if (urls.isNotEmpty) {
+        setState(() {
+          episodeUrls = urls.toList();
+        });
+        Navigator.pop(context);
+        displayBottomSheet(context, number, setTitle);
+      }
+    } catch (e) {
+      log("Error in fetching urls: $e");
+    }
+  }
+
+  Future<void> wrongTitleSearch(source) async {
+    try {
+      final data = await search(
+          source: source, query: widget.title, page: 1, filterList: []);
       if (data != null) {
         setState(() {
-          wrongTitleSearchData = data;
-          wrongTitle.text = animeData['name'];
+          wrongTitleSearchData = data.toJson()['list'] ?? [];
+          wrongTitle.text = widget.title;
         });
         Navigator.pop(context);
         wrongTitleSheet(context);
@@ -219,25 +299,19 @@ class _DetailsState extends State<Details> {
       final link = dataBase.getCurrentEpisodeForAnime(widget.id);
       log("database: ${link.toString()}");
       if (link != null && link['title'] != null) {
-        setState(() {
-          episodeId = link['currentEpisode'];
-          title = link['episodeTitle'];
-          episodeLink = link['episodesrc'];
-        });
+        episodeId = link['currentEpisode'];
+        title = link['episodeTitle'];
+        episodeLink = link['episodesrc'];
       } else {
-        setState(() {
-          episodeId = filteredEpisodes!.first['number'];
-          title = filteredEpisodes!.first['title'];
-        });
+        episodeId = filteredEpisodes!.first['number'];
+        title = filteredEpisodes!.first['title'];
         log('$episodeId /  $title');
       }
       log('$episodeId');
     } catch (e) {
       log("Error: ${e.toString()}");
-      setState(() {
-        episodeId = filteredEpisodes?.first['number'];
-        title = filteredEpisodes?.first['title'];
-      });
+      episodeId = filteredEpisodes?.first['number'];
+      title = filteredEpisodes?.first['title'];
     }
   }
 
@@ -249,15 +323,13 @@ class _DetailsState extends State<Details> {
           await sourcehandler.mappedSourceId(animeData['name']);
 
       if (scrapeEpisodes != null) {
-        setState(() {
-          episodeData = scrapeEpisodes['episodes'] ?? [];
-          filteredEpisodes = scrapeEpisodes['episodes'] ?? [];
-          scrapeData = scrapeEpisodes;
-          final anime = dataProvider
-              .getCurrentEpisodeForAnime(animeData['id']?.toString() ?? '1');
-          episodeId = anime?['currentEpisode'] ?? 1;
-          category = dub ? "dub" : "sub";
-        });
+        episodeData = scrapeEpisodes['episodes'] ?? [];
+        filteredEpisodes = scrapeEpisodes['episodes'] ?? [];
+        scrapeData = scrapeEpisodes;
+        final anime = dataProvider
+            .getCurrentEpisodeForAnime(animeData['id']?.toString() ?? '1');
+        episodeId = anime?['currentEpisode'] ?? 1;
+        category = dub ? "dub" : "sub";
         continueWatching();
       } else {
         log('No mapping found for anime search.');
@@ -281,13 +353,14 @@ class _DetailsState extends State<Details> {
 
       final scraprLink = await sourcehandler.fetchEpisodesSrcs(
           episodeIdValue, server, dub ? "dub" : "sub");
-  log("anivibe: ${scraprLink.toString()}");
+      log("anivibe: ${scraprLink.toString()}");
       if (scraprLink != null) {
         setState(() {
           episodeLink = sourcehandler.selectedSource == "Hianime (Scrapper)"
               ? scraprLink.sources[0]['url']
               : scraprLink['sources'][0]['url'];
-          tracks = trackResponse?['tracks'] != null ? trackResponse['tracks'] : [];
+          tracks =
+              trackResponse?['tracks'] != null ? trackResponse['tracks'] : [];
           isloading = false;
         });
       } else {
@@ -359,10 +432,13 @@ class _DetailsState extends State<Details> {
                         setWrongState(() {
                           wrongTitleSearchData = [];
                         });
-                        final data =
-                            await sourcehandler.fetchSearchResults(value);
+                        final data = await search(
+                            source: selectedSource!,
+                            query: value,
+                            page: 1,
+                            filterList: []);
                         setWrongState(() {
-                          wrongTitleSearchData = data;
+                          wrongTitleSearchData = data!.toJson()['list'];
                         });
                       },
                       controller: wrongTitle,
@@ -395,30 +471,37 @@ class _DetailsState extends State<Details> {
                           : ListView(
                               children: wrongTitleSearchData.map((item) {
                               final title = item['name'];
-                              final image = item['poster'];
-                              final id = item['id'];
+                              final image = item['imageUrl'];
+                              final url = item['link'];
                               return Padding(
                                 padding: const EdgeInsets.all(5),
                                 child: GestureDetector(
                                   onTap: () async {
                                     setState(() {
-                                      filteredEpisodes = [];
-                                      episodeData = [];
+                                      filteredEpisodes = null;
+                                      episodeData = null;
                                     });
                                     Navigator.pop(context);
-                                    final data =
-                                        await sourcehandler.fetchEpisodes(id!);
+                                    final data = await getDetail(
+                                        url: url, source: selectedSource!);
                                     setState(() {
-                                      filteredEpisodes = data['episodes'];
-                                      episodeData = data['episodes'];
-                                      scrapeData = data;
+                                      filteredEpisodes = data
+                                          .toJson()['chapters']
+                                          .reversed
+                                          .toList();
+                                      episodeData = data
+                                          .toJson()['chapters']
+                                          .reversed
+                                          .toList();
+                                      extraData = data.toJson();
                                     });
                                   },
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5),
-                                     color: Theme.of(context).colorScheme.surfaceContainerHigh
-                                    ),
+                                        borderRadius: BorderRadius.circular(5),
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .surfaceContainerHigh),
                                     height: 90,
                                     child: Row(
                                       children: [
@@ -439,8 +522,7 @@ class _DetailsState extends State<Details> {
                                         ),
                                         const SizedBox(width: 15),
                                         SizedBox(
-                                          width: 150,
-                                          child: Text(title)),
+                                            width: 150, child: Text(title)),
                                       ],
                                     ),
                                   ),
@@ -456,12 +538,11 @@ class _DetailsState extends State<Details> {
         });
   }
 
-  void handleEpisode(int? episode, String selectedServer, String getTitle) {
-    if (episode != null && selectedServer.isNotEmpty) {
+  void handleEpisode(int? episode, String getTitle) {
+    if (episode != null) {
       setState(() {
         episodeId = episode;
         episodeLink = "";
-        server = selectedServer;
         title = getTitle;
         isloading = true;
       });
@@ -481,7 +562,7 @@ class _DetailsState extends State<Details> {
 
   void searchEpisode(String number) {
     final list = filteredEpisodes!
-        .where((episode) => episode["number"].toString().contains(number))
+        .where((episode) => episode["title"].toString().contains(number))
         .toList();
     setState(() {
       episodeData = list;
@@ -554,9 +635,9 @@ class _DetailsState extends State<Details> {
                             bottom: 55,
                             left: 130,
                             child: Text(
-                              animeData['name'].length > 20
-                                  ? '${animeData['name'].substring(0, 20)}...'
-                                  : animeData['name'],
+                              widget.title.length > 20
+                                  ? '${widget.title.substring(0, 20)}...'
+                                  : widget.title,
                               style: const TextStyle(
                                 fontFamily: "Poppins-Bold",
                                 fontSize: 16,
@@ -706,330 +787,6 @@ class _DetailsState extends State<Details> {
     );
   }
 
-  SizedBox tabs(BuildContext context) {
-    return SizedBox(
-      height: 750,
-      child: TabBarView(
-        physics: const BouncingScrollPhysics(),
-        children: [
-          AnimeInfo(animeData: animeData),
-          Column(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                child: DropdownButtonFormField<String>(
-                  value: sourcehandler.selectedSource,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: 'Choose Source',
-                    filled: true,
-                    fillColor: Theme.of(context).colorScheme.surface,
-                    labelStyle:
-                        TextStyle(color: Theme.of(context).colorScheme.primary),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.primary),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onPrimaryFixedVariant),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.primary),
-                    ),
-                  ),
-                  isDense: true,
-                  items: animeSources.map<DropdownMenuItem<String>>((source) {
-                    return DropdownMenuItem<String>(
-                      value: source['name'],
-                      child: Text(source['name'].toString()),
-                    );
-                  }).toList(),
-                  onChanged: (dynamic newValue) {
-                    if (newValue.toString().isNotEmpty) {
-                      setState(() {
-                        selectedSource = newValue;
-                        sourcehandler.selectedSource = selectedSource;
-                        filteredEpisodes = [];
-                        fetchEpisodeList();
-                      });
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    SizedBox(
-                      width: 178,
-                      child: scrapeData == null ? const SizedBox.shrink() : Text("Found: ${scrapeData?['name']?.length > 20 ? '${scrapeData?['name']?.substring(0,20)}...' : scrapeData?['name'] ?? "Unkonwn"}",style: TextStyle(fontFamily: "Poppins-Bold", color: Theme.of(context).colorScheme.primary), )),
-                    Text("Total Episodes: ${scrapeData?['totalEpisodes'] ?? "??"}",style: TextStyle(fontFamily: "Poppins-Bold", color: Theme.of(context).colorScheme.primary), ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Episodes",
-                      style:
-                          TextStyle(fontFamily: "Poppins-Bold", fontSize: 22),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceBright,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: IconButton(
-                        icon: Icon(
-                          withPhoto ? Iconsax.image : Iconsax.menu_board,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            withPhoto = !withPhoto;
-                          });
-                        },
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    SizedBox(
-                      height: 40,
-                      child: LiteRollingSwitch(
-                        value: !dub,
-                        width: 100,
-                        textOn: "Sub",
-                        textOff: "Dub",
-                        textOnColor: Colors.white,
-                        colorOn:
-                            Theme.of(context).colorScheme.tertiaryContainer,
-                        colorOff: Theme.of(context).colorScheme.inversePrimary,
-                        iconOn: Icons.closed_caption,
-                        iconOff: Icons.mic,
-                        animationDuration: const Duration(milliseconds: 300),
-                        onChanged: (bool state) {
-                          setState(() {
-                            dub = !dub;
-                          });
-                          log(dub.toString());
-                        },
-                        onDoubleTap: () => {},
-                        onSwipe: () => {},
-                        onTap: () => {},
-                      ),
-                    ),
-                    GestureDetector(
-                        onTap: () {
-                          showloader();
-                          wrongTitleSearch();
-                        },
-                        child: Text(
-                          "Wrong Title?",
-                          style: TextStyle(
-                              fontFamily: "Poppins-Bold",
-                              fontSize: 18,
-                              color: Theme.of(context).colorScheme.primary),
-                        ))
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: TextField(
-                  onChanged: (String value) {
-                    searchEpisode(value);
-                  },
-                  decoration: InputDecoration(
-                      prefixIcon: const Icon(Iconsax.search_normal),
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surface,
-                      labelText: "Search Episodes",
-                      focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Theme.of(context).colorScheme.primary),
-                          borderRadius: BorderRadius.circular(20)),
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(
-                              color: Theme.of(context).colorScheme.primary))),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              !withPhoto
-                  ? episodeList(context)
-                  : Container(
-                      height: 380,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      width: MediaQuery.of(context).size.width,
-                      child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 5, vertical: 10),
-                          child: filteredEpisodes != null &&
-                                  filteredEpisodes!.isNotEmpty
-                              ? ListView(
-                                  children: episodeData!.map<Widget>((item) {
-                                  final title = item['title'];
-                                  final episodeNumber = item['number'];
-                                  return GestureDetector(
-                                    onTap: () {
-                                      displayBottomSheet(
-                                          context, episodeNumber, title);
-                                    },
-                                    child: Container(
-                                      height: 100,
-                                      margin: const EdgeInsets.only(top: 10),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: episodeNumber == episodeId
-                                            ? Theme.of(context)
-                                                .colorScheme
-                                                .inversePrimary
-                                            : Theme.of(context)
-                                                .colorScheme
-                                                .surfaceContainerHighest,
-                                      ),
-                                      child: Stack(
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              ClipRRect(
-                                                borderRadius: const BorderRadius
-                                                    .horizontal(
-                                                    left: Radius.circular(10)),
-                                                child: SizedBox(
-                                                  height: 100,
-                                                  width: 150,
-                                                  child: CachedNetworkImage(
-                                                    imageUrl: widget.image,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                child: Padding(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 10),
-                                                  child: Text(
-                                                    title.length > 25
-                                                        ? '${title.substring(0, 25)}...'
-                                                        : title,
-                                                    style: TextStyle(
-                                                      color: Theme.of(context)
-                                                          .colorScheme
-                                                          .inverseSurface,
-                                                      fontFamily:
-                                                          "Poppins-Bold",
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                              if (episodeNumber == episodeId)
-                                                Icon(
-                                                  Ionicons.play,
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .inverseSurface,
-                                                )
-                                              else
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          right: 8.0),
-                                                  child: Text(
-                                                    'Ep- $episodeNumber',
-                                                    style: TextStyle(
-                                                      fontSize: 14,
-                                                      color: Theme.of(context)
-                                                          .colorScheme
-                                                          .inverseSurface,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                    ),
-                                                  ),
-                                                ),
-                                            ],
-                                          ),
-                                          Positioned(
-                                            bottom: 0,
-                                            right: 0,
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                showloader();
-                                                fetchm3u8(episodeNumber);
-                                              },
-                                              child: Container(
-                                                height: 27,
-                                                width: 45,
-                                                decoration: BoxDecoration(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .secondary,
-                                                  borderRadius:
-                                                      const BorderRadius.only(
-                                                    topLeft:
-                                                        Radius.circular(20),
-                                                    bottomRight:
-                                                        Radius.circular(10),
-                                                  ),
-                                                ),
-                                                child: Icon(
-                                                    Icons.download_for_offline,
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .inversePrimary),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                }).toList())
-                              : const Center(
-                                  child: CircularProgressIndicator(),
-                                )),
-                    ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   void showDownloadquality(BuildContext context, int number) async {
     showModalBottomSheet(
       context: context,
@@ -1041,61 +798,57 @@ class _DetailsState extends State<Details> {
       barrierColor: Colors.black87.withOpacity(0.3),
       builder: (context) {
         return SizedBox(
-              height: 300,
+          height: 300,
           child: ListView(
-                  children: [
-                    const Center(
-                      child: Text(
-                        "Select quality",
-                        style: TextStyle(
-                            fontFamily: "Poppins-Bold", fontSize: 25),
+            children: [
+              const Center(
+                child: Text(
+                  "Select quality",
+                  style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 25),
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              ...streamData!.map<Widget>((item) {
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                  child: GestureDetector(
+                    onTap: () {
+                      Downloader().download('$baseUrl/${item['url']}',
+                          "Episode-$number", animeData['name']);
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      height: 45,
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          width: 1,
+                          color: Theme.of(context).colorScheme.inversePrimary,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                        color: Theme.of(context).colorScheme.surface,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            item['quality'],
+                            style: const TextStyle(
+                                fontFamily: "Poppins-Bold", fontSize: 18),
+                          ),
+                          const SizedBox(width: 5),
+                          const Icon(Icons.download),
+                        ],
                       ),
                     ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    ...streamData!.map<Widget>((item) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 15, vertical: 8),
-                        child: GestureDetector(
-                          onTap: () {
-                            Downloader().download('$baseUrl/${item['url']}',
-                                "Episode-$number", animeData['name']);
-                            Navigator.pop(context);
-                          },
-                          child: Container(
-                            height: 45,
-                            width: MediaQuery.of(context).size.width,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                width: 1,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .inversePrimary,
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                              color: Theme.of(context).colorScheme.surface,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  item['quality'],
-                                  style: const TextStyle(
-                                      fontFamily: "Poppins-Bold",
-                                      fontSize: 18),
-                                ),
-                                const SizedBox(width: 5),
-                                const Icon(Icons.download),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-                  ],
-                ),
+                  ),
+                );
+              }),
+            ],
+          ),
         );
       },
     );
@@ -1120,11 +873,13 @@ class _DetailsState extends State<Details> {
                 itemCount: episodeData?.length ?? 0,
                 itemBuilder: (context, index) {
                   final item = episodeData[index];
-                  final title = item['title'];
-                  final episodeNumber = item['number'];
+                  final title = item['name'];
+                  final episodeNumber = index + 1;
+                  final episodeUrl = item['url'];
                   return GestureDetector(
                     onTap: () {
-                      displayBottomSheet(context, episodeNumber, title);
+                      showloader();
+                      getEpisodeUrls(episodeUrl, episodeNumber, title);
                     },
                     child: Container(
                       margin: const EdgeInsets.only(top: 10),
@@ -1264,23 +1019,28 @@ class _DetailsState extends State<Details> {
         padding: const EdgeInsets.symmetric(horizontal: 15),
         child: SizedBox(
           height: 320,
-          child: Column(
-            children: [
-              const Text(
-                "Select Server",
-                style: TextStyle(fontSize: 25, fontFamily: "Poppins-Bold"),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              serverContainer(
-                  context, "HD - 1", number, "vidstreaming", setTitle),
-              const SizedBox(height: 10),
-              serverContainer(context, "HD - 2", number, "megacloud", setTitle),
-              const SizedBox(height: 10),
-              serverContainer(
-                  context, "Vidstream", number, "streamsb", setTitle),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                const Text(
+                  "Select Server",
+                  style: TextStyle(fontSize: 25, fontFamily: "Poppins-Bold"),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                ...episodeUrls.map<Widget>((item) {
+                  return serverContainer(
+                    context,
+                    item.quality,
+                    number,
+                    setTitle,
+                    item.url,
+                    item.subtitles ?? [],
+                  );
+                })
+              ],
+            ),
           ),
         ),
       ),
@@ -1302,16 +1062,35 @@ class _DetailsState extends State<Details> {
     );
   }
 
-  GestureDetector serverContainer(BuildContext context, String name, int number,
-      String serverType, String setTitle) {
+  GestureDetector serverContainer(
+    BuildContext context,
+    String name,
+    int number,
+    String setTitle,
+    String url,
+    List<Track>? subTitles,
+  ) {
     return GestureDetector(
       onTap: () async {
-        handleEpisode(number, serverType, setTitle);
-        Navigator.pop(context);
-        showCenteredLoader();
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => WatchPage(
+                episodeSrc: url,
+                episodeData: filteredEpisodes,
+                currentEpisode: number,
+                episodeTitle: setTitle,
+                subtitleTracks: subTitles,
+                animeTitle: widget.title,
+                animeId: int.parse(widget.id),
+                source: selectedSource ?? animeSources.first,
+                episodeUrls: episodeUrls,
+              ),
+            ));
       },
       child: Container(
-        height: 50,
+        margin: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(10),
@@ -1357,13 +1136,21 @@ class _DetailsState extends State<Details> {
       }
     }
 
+    ref.listen(getExtensionsStreamProvider(false), (previous, next) {
+      animeSources = _getInstalledEntries(next.value!);
+      log("Avail: ${animeSources.first.name}");
+      selectedSource = animeSources.first;
+      loadData(animeSources.first);
+    });
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         title: TextScroll(
-          animeData?['name'] == null ? "Loading..." : animeData['name'].toString(),
+          animeData?['name'] == null
+              ? "Loading..."
+              : animeData['name'].toString(),
           mode: TextScrollMode.bouncing,
           velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
           delayBefore: const Duration(milliseconds: 500),
@@ -1464,7 +1251,9 @@ class _DetailsState extends State<Details> {
                                               listen: false)
                                           .userData['name'] ==
                                       null) {
-                                    showSnackBar("Whoa there! 🛑 You’re not logged in! Let’s fix that 😜",context);
+                                    showSnackBar(
+                                        "Whoa there! 🛑 You’re not logged in! Let’s fix that 😜",
+                                        context);
                                   } else {
                                     if (filteredEpisodes == null) {
                                       ScaffoldMessenger.of(context)
@@ -1606,7 +1395,547 @@ class _DetailsState extends State<Details> {
                                       ),
                                     ),
                                     const SizedBox(height: 10),
-                                    tabs(context),
+                                    SizedBox(
+                                      height: 750,
+                                      child: TabBarView(
+                                        physics: const BouncingScrollPhysics(),
+                                        children: [
+                                          AnimeInfo(animeData: animeData),
+
+                                          // data = _getInstalledEntries(data);
+                                          // animeSources = data;
+                                          // loadData(data.first);
+                                         animeSources.isEmpty ? const PlaceholderExtensions() :
+                                          Column(
+                                            children: [
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10,
+                                                        vertical: 15),
+                                                child: animeSources.isNotEmpty
+                                                    ? DropdownButtonFormField<
+                                                        Source>(
+                                                        value: selectedSource,
+                                                        isExpanded: true,
+                                                        decoration:
+                                                            InputDecoration(
+                                                          labelText:
+                                                              'Choose Source',
+                                                          filled: true,
+                                                          fillColor:
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .surface,
+                                                          labelStyle: TextStyle(
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .colorScheme
+                                                                .primary,
+                                                          ),
+                                                          border:
+                                                              OutlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .colorScheme
+                                                                  .primary,
+                                                            ),
+                                                          ),
+                                                          enabledBorder:
+                                                              OutlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .colorScheme
+                                                                  .onPrimaryFixedVariant,
+                                                            ),
+                                                          ),
+                                                          focusedBorder:
+                                                              OutlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .colorScheme
+                                                                  .primary,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        isDense: true,
+                                                        items: animeSources.map<
+                                                                DropdownMenuItem<
+                                                                    Source>>(
+                                                            (source) {
+                                                          return DropdownMenuItem<
+                                                              Source>(
+                                                            value: source,
+                                                            child: Text(
+                                                                source.name!),
+                                                          );
+                                                        }).toList(),
+                                                        onChanged: (Source?
+                                                            newValue) async {
+                                                          if (newValue !=
+                                                              null) {
+                                                            setState(() {
+                                                              selectedSource =
+                                                                  newValue;
+                                                              filteredEpisodes =
+                                                                  null;
+                                                              episodeData =
+                                                                  null;
+                                                            });
+                                                            await loadData(
+                                                                newValue);
+                                                          }
+                                                        },
+                                                      )
+                                                    : DropdownButtonFormField<
+                                                        String>(
+                                                        value:
+                                                            "No Source Available",
+                                                        isExpanded: true,
+                                                        decoration:
+                                                            InputDecoration(
+                                                          labelText:
+                                                              'No Source',
+                                                          filled: true,
+                                                          fillColor:
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .surface,
+                                                          labelStyle: TextStyle(
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .colorScheme
+                                                                .primary,
+                                                          ),
+                                                          border:
+                                                              OutlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .colorScheme
+                                                                  .primary,
+                                                            ),
+                                                          ),
+                                                          enabledBorder:
+                                                              OutlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .colorScheme
+                                                                  .onPrimaryFixedVariant,
+                                                            ),
+                                                          ),
+                                                          focusedBorder:
+                                                              OutlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .colorScheme
+                                                                  .primary,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        isDense: true,
+                                                        items: const [
+                                                          DropdownMenuItem<
+                                                              String>(
+                                                            value:
+                                                                "No Source Available",
+                                                            child: Text(
+                                                                "No Source Available"),
+                                                          ),
+                                                        ],
+                                                        onChanged:
+                                                            (String? value) {
+                                                          log("No sources available to select.");
+                                                        },
+                                                      ),
+                                              ),
+                                              const SizedBox(height: 10),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    SizedBox(
+                                                        width: 178,
+                                                        child: extraData?[
+                                                                    'name'] ==
+                                                                null
+                                                            ? const SizedBox
+                                                                .shrink()
+                                                            : Text(
+                                                                "Found: ${extraData?['name']?.length > 20 ? '${extraData?['name']?.substring(0, 20)}...' : extraData?['name'] ?? "Unkonwn"}",
+                                                                style: TextStyle(
+                                                                    fontFamily:
+                                                                        "Poppins-Bold",
+                                                                    color: Theme.of(
+                                                                            context)
+                                                                        .colorScheme
+                                                                        .primary),
+                                                              )),
+                                                    Text(
+                                                      "Total Episodes: ${episodeData?.length ?? "??"}",
+                                                      style: TextStyle(
+                                                          fontFamily:
+                                                              "Poppins-Bold",
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .primary),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10,
+                                                        vertical: 5),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    const Text(
+                                                      "Episodes",
+                                                      style: TextStyle(
+                                                          fontFamily:
+                                                              "Poppins-Bold",
+                                                          fontSize: 22),
+                                                    ),
+                                                    const SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Container(
+                                                      decoration: BoxDecoration(
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .surfaceBright,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(12),
+                                                      ),
+                                                      child: IconButton(
+                                                        icon: Icon(
+                                                          withPhoto
+                                                              ? Iconsax.image
+                                                              : Iconsax
+                                                                  .menu_board,
+                                                        ),
+                                                        onPressed: () {
+                                                          setState(() {
+                                                            withPhoto =
+                                                                !withPhoto;
+                                                          });
+                                                        },
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 5),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    SizedBox(
+                                                      height: 40,
+                                                      child: LiteRollingSwitch(
+                                                        value: !dub,
+                                                        width: 100,
+                                                        textOn: "Sub",
+                                                        textOff: "Dub",
+                                                        textOnColor:
+                                                            Colors.white,
+                                                        colorOn: Theme.of(
+                                                                context)
+                                                            .colorScheme
+                                                            .tertiaryContainer,
+                                                        colorOff:
+                                                            Theme.of(context)
+                                                                .colorScheme
+                                                                .inversePrimary,
+                                                        iconOn: Icons
+                                                            .closed_caption,
+                                                        iconOff: Icons.mic,
+                                                        animationDuration:
+                                                            const Duration(
+                                                                milliseconds:
+                                                                    300),
+                                                        onChanged:
+                                                            (bool state) {
+                                                          setState(() {
+                                                            dub = !dub;
+                                                          });
+                                                          log(dub.toString());
+                                                        },
+                                                        onDoubleTap: () => {},
+                                                        onSwipe: () => {},
+                                                        onTap: () => {},
+                                                      ),
+                                                    ),
+                                                    GestureDetector(
+                                                        onTap: () {
+                                                          if (animeSources
+                                                              .isNotEmpty) {
+                                                            showloader();
+                                                            wrongTitleSearch(
+                                                                selectedSource);
+                                                          } else {
+                                                            showDialog(
+                                                                context:
+                                                                    context,
+                                                                builder:
+                                                                    (context) =>
+                                                                        AlertDialog(
+                                                                          title:
+                                                                              const Text(
+                                                                            "Please Install Entensions ???",
+                                                                            style:
+                                                                                TextStyle(fontSize: 16, fontFamily: "Poppins"),
+                                                                          ),
+                                                                          actions: [
+                                                                            ElevatedButton(
+                                                                              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ExtensionScreen())),
+                                                                              child: const Text('Install Etenstion'),
+                                                                            ),
+                                                                          ],
+                                                                        ));
+                                                          }
+                                                        },
+                                                        child: Text(
+                                                          "Wrong Title?",
+                                                          style: TextStyle(
+                                                              fontFamily:
+                                                                  "Poppins-Bold",
+                                                              fontSize: 18,
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .colorScheme
+                                                                  .primary),
+                                                        ))
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10,
+                                                        vertical: 5),
+                                                child: TextField(
+                                                  onChanged: (String value) {
+                                                    searchEpisode(value);
+                                                  },
+                                                  decoration: InputDecoration(
+                                                      prefixIcon: const Icon(
+                                                          Iconsax
+                                                              .search_normal),
+                                                      filled: true,
+                                                      fillColor: Theme.of(context)
+                                                          .colorScheme
+                                                          .surface,
+                                                      labelText:
+                                                          "Search Episodes",
+                                                      focusedBorder: OutlineInputBorder(
+                                                          borderSide: BorderSide(
+                                                              color: Theme.of(context)
+                                                                  .colorScheme
+                                                                  .primary),
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                  20)),
+                                                      enabledBorder: OutlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                  20),
+                                                          borderSide:
+                                                              BorderSide(color: Theme.of(context).colorScheme.primary))),
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                              !withPhoto
+                                                  ? episodeList(context)
+                                                  : Container(
+                                                      height: 380,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20),
+                                                      ),
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                              .size
+                                                              .width,
+                                                      child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal: 5,
+                                                                  vertical: 10),
+                                                          child: episodeData !=
+                                                                      null &&
+                                                                  filteredEpisodes !=
+                                                                      null
+                                                              ? ListView(
+                                                                  children: episodeData
+                                                                      .asMap()
+                                                                      .entries
+                                                                      .map<Widget>(
+                                                                          (entry) {
+                                                                  final item =
+                                                                      entry
+                                                                          .value;
+                                                                  final epTitle =
+                                                                      item['name'] ??
+                                                                          "";
+                                                                  final url =
+                                                                      item[
+                                                                          'url'];
+                                                                  final episodeNumber =
+                                                                      entry.key +
+                                                                          1;
+                                                                  return GestureDetector(
+                                                                    onTap:
+                                                                        () async {
+                                                                      showloader();
+                                                                      getEpisodeUrls(
+                                                                          url,
+                                                                          episodeNumber,
+                                                                          epTitle);
+                                                                    },
+                                                                    child:
+                                                                        Container(
+                                                                      height:
+                                                                          100,
+                                                                      margin: const EdgeInsets
+                                                                          .only(
+                                                                          top:
+                                                                              10),
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(10),
+                                                                        color: episodeNumber ==
+                                                                                episodeId
+                                                                            ? Theme.of(context).colorScheme.inversePrimary
+                                                                            : Theme.of(context).colorScheme.surfaceContainerHighest,
+                                                                      ),
+                                                                      child:
+                                                                          Stack(
+                                                                        children: [
+                                                                          Row(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.start,
+                                                                            children: [
+                                                                              ClipRRect(
+                                                                                borderRadius: const BorderRadius.horizontal(left: Radius.circular(10)),
+                                                                                child: SizedBox(
+                                                                                  height: 100,
+                                                                                  width: 150,
+                                                                                  child: CachedNetworkImage(
+                                                                                    imageUrl: widget.image,
+                                                                                    fit: BoxFit.cover,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                              Expanded(
+                                                                                child: Padding(
+                                                                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                                                  child: Text(
+                                                                                    epTitle.length > 25 ? '${epTitle.substring(0, 25)}...' : epTitle,
+                                                                                    style: TextStyle(
+                                                                                      color: Theme.of(context).colorScheme.inverseSurface,
+                                                                                      fontFamily: "Poppins-Bold",
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                              if (episodeNumber == episodeId)
+                                                                                Icon(
+                                                                                  Ionicons.play,
+                                                                                  color: Theme.of(context).colorScheme.inverseSurface,
+                                                                                )
+                                                                              else
+                                                                                Padding(
+                                                                                  padding: const EdgeInsets.only(right: 8.0),
+                                                                                  child: Text(
+                                                                                    'Ep- $episodeNumber',
+                                                                                    style: TextStyle(
+                                                                                      fontSize: 14,
+                                                                                      color: Theme.of(context).colorScheme.inverseSurface,
+                                                                                      fontWeight: FontWeight.w500,
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                            ],
+                                                                          ),
+                                                                          // Positioned(
+                                                                          //   bottom:
+                                                                          //       0,
+                                                                          //   right:
+                                                                          //       0,
+                                                                          //   child:
+                                                                          //       GestureDetector(
+                                                                          //     onTap: () {
+                                                                          //       showloader();
+                                                                          //       fetchm3u8(episodeNumber);
+                                                                          //     },
+                                                                          //     child: Container(
+                                                                          //       height: 27,
+                                                                          //       width: 45,
+                                                                          //       decoration: BoxDecoration(
+                                                                          //         color: Theme.of(context).colorScheme.secondary,
+                                                                          //         borderRadius: const BorderRadius.only(
+                                                                          //           topLeft: Radius.circular(20),
+                                                                          //           bottomRight: Radius.circular(10),
+                                                                          //         ),
+                                                                          //       ),
+                                                                          //       child: Icon(Icons.download_for_offline, color: Theme.of(context).colorScheme.inversePrimary),
+                                                                          //     ),
+                                                                          //   ),
+                                                                          // ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                }).toList())
+                                                              : const Center(
+                                                                  child:
+                                                                      CircularProgressIndicator(),
+                                                                )),
+                                                    ),
+                                              const SizedBox(height: 20),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                    )
                                   ],
                                 ),
                               ),
@@ -1617,19 +1946,19 @@ class _DetailsState extends State<Details> {
               ],
             ),
           ]),
-          filteredEpisodes != null
-              ? AnimeFloater(
-                  id: widget.id,
-                  data: animeData,
-                  episodeList: filteredEpisodes!,
-                  isDub: dub,
-                  episodeLink: episodeLink.isNotEmpty ? episodeLink : "",
-                  episodeTitle: title ?? "Unkown title",
-                  currentEpisode: episodeId ?? 1,
-                  tracks: tracks,
-                  selectedServer: server.isEmpty ? "megacloud" : server,
-                )
-              : const SizedBox.shrink(),
+          // filteredEpisodes != null
+          //     ? AnimeFloater(
+          //         id: widget.id,
+          //         data: animeData ?? [],
+          //         episodeList: filteredEpisodes!,
+          //         isDub: dub,
+          //         episodeLink: episodeLink.isNotEmpty ? episodeLink : "",
+          //         episodeTitle: title ?? "Unkown title",
+          //         currentEpisode: episodeId ?? 1,
+          //         tracks: tracks,
+          //         selectedServer: server.isEmpty ? "megacloud" : server,
+          //       )
+          //     : const SizedBox.shrink(),
         ],
       ),
     );
