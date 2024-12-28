@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -25,7 +27,7 @@ class SearchList extends StatelessWidget {
           return GestureDetector(
             onTap: () {
               Navigator.pushNamed(context, "/detailspage",
-                  arguments: {"id": id.toString(), "image": image, "tagg": tagg});
+                  arguments: {"id": id.toString(), "image": image, "tagg": tagg, "title": title});
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
