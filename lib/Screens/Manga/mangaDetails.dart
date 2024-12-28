@@ -3,6 +3,13 @@
 import 'dart:developer';
 
 import 'package:animated_segmented_tab_control/animated_segmented_tab_control.dart';
+import 'package:azyx/api/Mangayomi/Extensions/extensions_provider.dart';
+import 'package:azyx/api/Mangayomi/Model/Source.dart';
+import 'package:azyx/api/Mangayomi/Search/get_detail.dart';
+import 'package:azyx/api/Mangayomi/Search/get_pages_list.dart';
+import 'package:azyx/api/Mangayomi/Search/search.dart';
+import 'package:azyx/components/Common/_palceholder.dart';
+import 'package:azyx/utils/helper/jaro_winkler.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:azyx/Hive_Data/appDatabase.dart';
 import 'package:azyx/Provider/sources_provider.dart';
@@ -11,16 +18,16 @@ import 'package:azyx/components/Anime/poster.dart';
 import 'package:azyx/components/Anime/coverImage.dart';
 import 'package:azyx/components/Manga/mangaAllDetails.dart';
 import 'package:azyx/components/Manga/chapterList.dart';
-import 'package:azyx/components/Manga/mangaFloater.dart';
 import 'package:azyx/utils/api/Anilist/Manga/manga_details_anilist.dart';
 import 'package:azyx/utils/sources/Manga/Base/extract_class.dart';
 import 'package:azyx/utils/sources/Manga/SourceHandler/sourcehandler.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' as r;
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:text_scroll/text_scroll.dart';
 
-class Mangadetails extends StatefulWidget {
+class Mangadetails extends r.ConsumerStatefulWidget {
   final String id;
   final String image;
   final String tagg;
@@ -29,15 +36,16 @@ class Mangadetails extends StatefulWidget {
       {super.key, required this.id, required this.image, required this.tagg});
 
   @override
-  State<Mangadetails> createState() => _DetailsState();
+  r.ConsumerState<Mangadetails> createState() => _DetailsState();
 }
 
-class _DetailsState extends State<Mangadetails> {
+class _DetailsState extends r.ConsumerState<Mangadetails> {
   dynamic mangaData;
   dynamic wrongTitleSearchData;
   String? mappedId;
   List<Map<String, dynamic>>? chapterList;
   List<Map<String, dynamic>>? filteredChapterList;
+  dynamic mangaAllDetails;
   String? value;
   String? cover;
   bool loading = true;
@@ -57,6 +65,8 @@ class _DetailsState extends State<Mangadetails> {
   final TextEditingController _chapterController =
       TextEditingController(text: '1');
   TextEditingController wrongTittle = TextEditingController();
+  List<Source>? installedExtensions;
+  Source? currentSource;
 
   final List<String> _items = [
     "CURRENT",
@@ -97,6 +107,7 @@ class _DetailsState extends State<Mangadetails> {
     mangaSources = sourcehandler.getAvailableSources();
     selectedSource = sourcehandler.selectedSource;
     scrap();
+    _initExtenstions();
   }
 
   @override
@@ -105,29 +116,59 @@ class _DetailsState extends State<Mangadetails> {
     super.dispose();
   }
 
-  Future<void> mappingData() async {
+  Future<void> mappingData(Source? source) async {
+    final activeSource = source ?? currentSource;
     try {
-      final chaptersData = await sourcehandler.mappingData(mangaData['name']);
+      final chaptersData = await search(
+          source: activeSource!,
+          query: mangaData['name'],
+          page: 1,
+          filterList: []);
       if (chaptersData != null) {
-        setState(() {
-          filteredChapterList = chaptersData['chapterList'];
-          chapterList = chaptersData['chapterList'];
-        });
+        final mappedData = await mappingHelper(
+          mangaData['name'],
+          chaptersData.toJson()['list'],
+        );
+        if (mappedData != null && mappedData.isNotEmpty) {
+          final episodesList = await getDetail(
+            url: mappedData['link'],
+            source: activeSource,
+          );
+          setState(() {
+            filteredChapterList = episodesList.toJson()['chapters'];
+            chapterList = filteredChapterList;
+            mangaAllDetails = episodesList.toJson();
+          });
+          log("List: ${episodesList.toJson()}");
+        }
         wrongTittle.text = mangaData['name'];
       }
-      continueReading();
+      // continueReading();
     } catch (e) {
       log("Errors: $e");
     }
   }
 
-  Future<void> wrongTitleSearch(String name) async {
+  Future<void> _initExtenstions() async {
+    final container = r.ProviderContainer();
+    final extensions =
+        await container.read(getExtensionsStreamProvider(true).future);
+
+    installedExtensions =
+        extensions.where((source) => source.isAdded!).toList();
+    if (installedExtensions!.isNotEmpty) {
+      currentSource = installedExtensions?.first ?? Source();
+    }
+  }
+
+  Future<void> wrongTitleSearch(String name, context) async {
     try {
       wrongTittle.text = name;
-      final response = await sourcehandler.fetchSearchData(name);
+      final response = await search(
+          source: currentSource!, query: name, page: 1, filterList: []);
       if (response.toString().isNotEmpty) {
         setState(() {
-          wrongTitleSearchData = response['mangaList'];
+          wrongTitleSearchData = response!.toJson()['list'];
         });
         Navigator.pop(context);
         wrongTitle(context);
@@ -138,13 +179,13 @@ class _DetailsState extends State<Mangadetails> {
     }
   }
 
-  Future<void> changeChapterData(id) async {
+  Future<void> changeChapterData(String url) async {
     chapterList = [];
-    final response = await sourcehandler.fetchChapters(id);
+    final response = await getDetail(url: url, source: currentSource!);
     if (response != null) {
       setState(() {
-        filteredChapterList = response['chapterList'];
-        chapterList = response['chapterList'];
+        filteredChapterList = response.toJson()['chapters'];
+        chapterList = filteredChapterList;
       });
     } else {
       log('not scrapped');
@@ -167,7 +208,9 @@ class _DetailsState extends State<Mangadetails> {
         mangaData = data;
         loading = false;
       });
-      mappingData();
+      if (installedExtensions != null && installedExtensions!.isNotEmpty) {
+        mappingData(installedExtensions!.first);
+      }
     }
   }
 
@@ -256,9 +299,13 @@ class _DetailsState extends State<Mangadetails> {
                         wrongTitleSearchData = null;
                       });
 
-                      final data = await sourcehandler.fetchSearchData(value);
+                      final data = await search(
+                          source: currentSource!,
+                          query: value,
+                          page: 1,
+                          filterList: []);
                       setWrongState(() {
-                        wrongTitleSearchData = data['mangaList'];
+                        wrongTitleSearchData = data!.toJson()['list'];
                       });
                     },
                     controller: wrongTittle,
@@ -291,21 +338,25 @@ class _DetailsState extends State<Mangadetails> {
                             physics: const BouncingScrollPhysics(),
                             itemCount: wrongTitleSearchData.length,
                             itemBuilder: (context, index) {
-                              final title =
-                                  wrongTitleSearchData[index]['title'];
+                              final title = wrongTitleSearchData[index]['name'];
                               return Padding(
                                 padding: const EdgeInsets.all(5),
                                 child: GestureDetector(
                                   onTap: () {
+                                    setState(() {
+                                      chapterList = null;
+                                      filteredChapterList = null;
+                                    });
                                     changeChapterData(
-                                        wrongTitleSearchData[index]['id']);
+                                        wrongTitleSearchData[index]['link']);
                                     Navigator.pop(context);
                                   },
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(5),
-                                      color:Theme.of(context).colorScheme.surfaceContainerHigh
-                                    ),
+                                        borderRadius: BorderRadius.circular(5),
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .surfaceContainerHigh),
                                     height: 90,
                                     child: Row(
                                       children: [
@@ -320,7 +371,7 @@ class _DetailsState extends State<Mangadetails> {
                                             child: CachedNetworkImage(
                                               imageUrl:
                                                   wrongTitleSearchData[index]
-                                                      ['image'],
+                                                      ['imageUrl'],
                                               fit: BoxFit.cover,
                                               alignment: Alignment.topCenter,
                                             ),
@@ -593,14 +644,14 @@ class _DetailsState extends State<Mangadetails> {
               ),
             ],
           ),
-          mangaData != null && currentLink != null && currentChapter.isNotEmpty
-              ? Mangafloater(
-                  data: mangaData,
-                  currentLink: currentLink!,
-                  chapterList: filteredChapterList!,
-                  currentChapter: currentChapter,
-                )
-              : const SizedBox.shrink(),
+          // mangaData != null && currentLink != null && currentChapter.isNotEmpty
+          //     ? Mangafloater(
+          //         data: mangaData,
+          //         currentLink: currentLink!,
+          //         chapterList: filteredChapterList!,
+          //         currentChapter: currentChapter,
+          //       )
+          //     : const SizedBox.shrink(),
         ],
       ),
     );
@@ -613,138 +664,147 @@ class _DetailsState extends State<Mangadetails> {
         physics: const BouncingScrollPhysics(),
         children: [
           Mangaalldetails(mangaData: mangaData),
-          Column(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                child: DropdownButtonFormField<String>(
-                  value: sourcehandler.selectedSource,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: 'Choose Source',
-                    filled: true,
-                    fillColor: Theme.of(context).colorScheme.surface,
-                    labelStyle:
-                        TextStyle(color: Theme.of(context).colorScheme.primary),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.primary),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onPrimaryFixedVariant),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.primary),
-                    ),
-                  ),
-                  isDense: true,
-                  items: mangaSources.map<DropdownMenuItem<String>>((source) {
-                    return DropdownMenuItem<String>(
-                      value: source['name'],
-                      child: Text(source['name'].toString()),
-                    );
-                  }).toList(),
-                  onChanged: (dynamic newValue) {
-                    if (newValue.toString().isNotEmpty) {
-                      setState(() {
-                        selectedSource = newValue;
-                        sourcehandler.selectedSource = selectedSource;
-                        chapterList = [];
-                        mappingData();
-                        log(sourcehandler.selectedSource);
-                      });
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 15,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          installedExtensions != null && installedExtensions!.isNotEmpty
+              ? Column(
                   children: [
-                    const Text(
-                      "Chapters",
-                      style:
-                          TextStyle(fontFamily: "Poppins-Bold", fontSize: 22),
-                    ),
-                    Row(
-                      children: [
-                        IconButton(
-                            onPressed: () {
-                              setState(() {
-                                chapterList = chapterList?.reversed.toList();
-                              });
-                            },
-                            icon: const Icon(Iconsax.arrow_down)),
-                        GestureDetector(
-                          onTap: () {
-                            wrongTitleSearch(mangaData['name']);
-                            showBottomLoader();
-                          },
-                          child: Text(
-                            "Wrong title?",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontFamily: "Poppins-Bold",
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                child: TextField(
-                  onChanged: (String value) {
-                    searchChapter(value);
-                  },
-                  decoration: InputDecoration(
-                      prefixIcon: Icon(Iconsax.search_normal),
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surface,
-                      labelText: "Search Chapters",
-                      focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 15),
+                      child: DropdownButtonFormField<Source>(
+                        value: currentSource,
+                        isExpanded: true,
+                        decoration: InputDecoration(
+                          labelText: 'Choose Source',
+                          filled: true,
+                          fillColor: Theme.of(context).colorScheme.surface,
+                          labelStyle: TextStyle(
                               color: Theme.of(context).colorScheme.primary),
-                          borderRadius: BorderRadius.circular(20)),
-                      enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: BorderSide(
-                              color: Theme.of(context).colorScheme.primary))),
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              SizedBox(
-                height: 400,
-                child: chapterList != null && chapterList!.isNotEmpty
-                    ? ListView(
-                        physics: const BouncingScrollPhysics(),
-                        children: chapterList!.map<Widget>((chapter) {
-                          return Chapterlist(
-                            id: widget.id,
-                            chapter: chapter,
-                            image: widget.image,
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.primary),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryFixedVariant),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.primary),
+                          ),
+                        ),
+                        isDense: true,
+                        items: installedExtensions!
+                            .map<DropdownMenuItem<Source>>((source) {
+                          return DropdownMenuItem<Source>(
+                            value: source,
+                            child: Text(source.name!),
                           );
                         }).toList(),
-                      )
-                    : const Center(child: CircularProgressIndicator()),
-              ),
-            ],
-          ),
+                        onChanged: (dynamic newValue) {
+                          if (newValue.toString().isNotEmpty) {
+                            setState(() {
+                              chapterList = [];
+                              currentSource = newValue;
+                              mappingData(newValue);
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 15,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Chapters",
+                            style: TextStyle(
+                                fontFamily: "Poppins-Bold", fontSize: 22),
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      chapterList =
+                                          chapterList?.reversed.toList();
+                                    });
+                                  },
+                                  icon: const Icon(Iconsax.arrow_down)),
+                              GestureDetector(
+                                onTap: () {
+                                  wrongTitleSearch(mangaData['name'], context);
+                                  showBottomLoader();
+                                },
+                                child: Text(
+                                  "Wrong title?",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontFamily: "Poppins-Bold",
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 5),
+                      child: TextField(
+                        onChanged: (String value) {
+                          searchChapter(value);
+                        },
+                        decoration: InputDecoration(
+                            prefixIcon: Icon(Iconsax.search_normal),
+                            filled: true,
+                            fillColor: Theme.of(context).colorScheme.surface,
+                            labelText: "Search Chapters",
+                            focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
+                                borderRadius: BorderRadius.circular(20)),
+                            enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                borderSide: BorderSide(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary))),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    SizedBox(
+                      height: 460,
+                      child: chapterList != null && chapterList!.isNotEmpty
+                          ? ListView(
+                              physics: const BouncingScrollPhysics(),
+                              children: chapterList!.map<Widget>((chapter) {
+                                return Chapterlist(
+                                  id: widget.id,
+                                  chapter: chapter,
+                                  image: widget.image,
+                                  source: currentSource!,
+                                  chapterList: chapterList,
+                                  title: mangaData['name'],
+                                );
+                              }).toList(),
+                            )
+                          : const Center(child: CircularProgressIndicator()),
+                    ),
+                  ],
+                )
+              : PlaceholderExtensions()
         ],
       ),
     );
