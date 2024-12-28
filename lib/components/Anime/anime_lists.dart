@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 import 'dart:math';
 
@@ -47,11 +46,13 @@ class AnimeLists extends StatelessWidget {
                               "id": tagg,
                               "image": filteredData[index]['media']
                                   ['coverImage']['large'],
-                              "tagg": tagg
+                              "tagg": tagg,
+                              "title": filteredData[index]['media']['title']['romaji']
                             });
                       },
                       child: Container(
-                        height: Platform.isAndroid || Platform.isIOS ? 150 : 200,
+                        height:
+                            Platform.isAndroid || Platform.isIOS ? 150 : 200,
                         width: Platform.isAndroid || Platform.isIOS ? 103 : 140,
                         margin: const EdgeInsets.only(right: 10),
                         child: Hero(

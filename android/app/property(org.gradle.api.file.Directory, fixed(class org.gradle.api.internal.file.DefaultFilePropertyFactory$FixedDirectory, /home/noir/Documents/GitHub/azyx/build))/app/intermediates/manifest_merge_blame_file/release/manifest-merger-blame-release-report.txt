@@ -1,0 +1,309 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.android.azyx"
+4    android:versionCode="4001"
+5    android:versionName="2.6.1" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+8-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml
+9        android:targetSdkVersion="34" />
+9-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:2:2-64
+11-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:2:19-61
+12    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+12-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:3:2-76
+12-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:3:19-73
+13    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+13-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:4:2-77
+13-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:4:19-74
+14    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+14-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:5:2-78
+14-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:5:19-75
+15    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+15-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:6:2-79
+15-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:6:19-76
+16    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+16-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:7:2-72
+16-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:7:19-69
+17    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+17-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:8:5-75
+17-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:8:22-72
+18    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+18-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:9:2-69
+18-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:9:19-67
+19    <uses-permission android:name="android.permission.WAKE_LOCK" />
+19-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:10:2-65
+19-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:10:19-62
+20    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+20-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:11:2-73
+20-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:11:19-71
+21
+22    <queries>
+22-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:31:2-40:12
+23        <intent>
+23-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:32:3-35:12
+24            <action android:name="android.intent.action.VIEW" />
+24-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:33:4-56
+24-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:33:12-53
+25
+26            <data android:scheme="https" />
+26-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:34:4-35
+26-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:34:10-32
+27        </intent>
+28        <intent>
+28-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:36:3-39:12
+29            <action android:name="android.intent.action.PROCESS_TEXT" />
+29-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:37:4-64
+29-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:37:12-61
+30
+31            <data android:mimeType="text/plain" />
+31-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:34:4-35
+31-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:38:10-39
+32        </intent>
+33        <intent>
+33-->[:flutter_web_auth_2] /home/noir/.pub-cache/hosted/pub.dev/flutter_web_auth_2-4.1.0/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/flutter_web_auth_2/intermediates/merged_manifest/release/AndroidManifest.xml:10:9-12:18
+34            <action android:name="android.support.customtabs.action.CustomTabsService" />
+34-->[:flutter_web_auth_2] /home/noir/.pub-cache/hosted/pub.dev/flutter_web_auth_2-4.1.0/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/flutter_web_auth_2/intermediates/merged_manifest/release/AndroidManifest.xml:11:13-90
+34-->[:flutter_web_auth_2] /home/noir/.pub-cache/hosted/pub.dev/flutter_web_auth_2-4.1.0/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/flutter_web_auth_2/intermediates/merged_manifest/release/AndroidManifest.xml:11:21-87
+35        </intent>
+36    </queries>
+37
+38    <uses-permission android:name="android.permission.VIBRATE" />
+38-->[:flutter_local_notifications] /home/noir/.pub-cache/hosted/pub.dev/flutter_local_notifications-18.0.1/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/flutter_local_notifications/intermediates/merged_manifest/release/AndroidManifest.xml:9:5-66
+38-->[:flutter_local_notifications] /home/noir/.pub-cache/hosted/pub.dev/flutter_local_notifications-18.0.1/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/flutter_local_notifications/intermediates/merged_manifest/release/AndroidManifest.xml:9:22-63
+39
+40    <permission
+40-->[androidx.core:core:1.13.1] /home/noir/.gradle/caches/transforms-3/1cb709fe24edee237188b10c2328abfd/transformed/core-1.13.1/AndroidManifest.xml:22:5-24:47
+41        android:name="com.android.azyx.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+41-->[androidx.core:core:1.13.1] /home/noir/.gradle/caches/transforms-3/1cb709fe24edee237188b10c2328abfd/transformed/core-1.13.1/AndroidManifest.xml:23:9-81
+42        android:protectionLevel="signature" />
+42-->[androidx.core:core:1.13.1] /home/noir/.gradle/caches/transforms-3/1cb709fe24edee237188b10c2328abfd/transformed/core-1.13.1/AndroidManifest.xml:24:9-44
+43
+44    <uses-permission android:name="com.android.azyx.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+44-->[androidx.core:core:1.13.1] /home/noir/.gradle/caches/transforms-3/1cb709fe24edee237188b10c2328abfd/transformed/core-1.13.1/AndroidManifest.xml:26:5-97
+44-->[androidx.core:core:1.13.1] /home/noir/.gradle/caches/transforms-3/1cb709fe24edee237188b10c2328abfd/transformed/core-1.13.1/AndroidManifest.xml:26:22-94
+45
+46    <application
+47        android:name="android.app.Application"
+47-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:12:36-69
+48        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+48-->[androidx.core:core:1.13.1] /home/noir/.gradle/caches/transforms-3/1cb709fe24edee237188b10c2328abfd/transformed/core-1.13.1/AndroidManifest.xml:28:18-86
+49        android:enableOnBackInvokedCallback="true"
+49-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:12:155-197
+50        android:extractNativeLibs="true"
+50-->[:media_kit_libs_android_video] /home/noir/.pub-cache/hosted/pub.dev/media_kit_libs_android_video-1.3.6/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/media_kit_libs_android_video/intermediates/merged_manifest/release/AndroidManifest.xml:9:18-50
+51        android:icon="@mipmap/launcher_icon"
+51-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:12:70-106
+52        android:label="Azyx"
+52-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:12:15-35
+53        android:roundIcon="@mipmap/ic_rounded_launcher" >
+53-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:12:107-154
+54        <activity
+54-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:13:3-19:14
+55            android:name="com.android.azyx.MainActivity"
+55-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:13:13-41
+56            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+56-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:13:156-306
+57            android:exported="true"
+57-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:13:42-65
+58            android:hardwareAccelerated="true"
+58-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:13:307-341
+59            android:launchMode="singleTop"
+59-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:13:66-96
+60            android:taskAffinity=""
+60-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:13:97-120
+61            android:theme="@style/LaunchTheme"
+61-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:13:121-155
+62            android:windowSoftInputMode="adjustResize" >
+62-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:13:342-384
+63            <meta-data
+63-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:14:4-111
+64                android:name="io.flutter.embedding.android.NormalTheme"
+64-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:14:15-70
+65                android:resource="@style/NormalTheme" />
+65-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:14:71-108
+66
+67            <intent-filter>
+67-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:15:4-18:20
+68                <action android:name="android.intent.action.MAIN" />
+68-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:16:5-57
+68-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:16:13-54
+69
+70                <category android:name="android.intent.category.LAUNCHER" />
+70-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:17:5-65
+70-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:17:15-62
+71            </intent-filter>
+72        </activity>
+73        <activity
+73-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:20:3-27:14
+74            android:name="com.linusu.flutter_web_auth_2.CallbackActivity"
+74-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:20:13-74
+75            android:exported="true" >
+75-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:20:75-98
+76            <intent-filter android:label="flutter_web_auth_2" >
+76-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:21:4-26:20
+76-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:21:19-53
+77                <action android:name="android.intent.action.VIEW" />
+77-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:33:4-56
+77-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:33:12-53
+78
+79                <category android:name="android.intent.category.DEFAULT" />
+79-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:23:5-64
+79-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:23:15-61
+80                <category android:name="android.intent.category.BROWSABLE" />
+80-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:24:5-66
+80-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:24:15-63
+81
+82                <data
+82-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:34:4-35
+83                    android:host="callback"
+83-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:25:33-56
+84                    android:scheme="azyx" />
+84-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:34:10-32
+85            </intent-filter>
+86        </activity>
+87
+88        <meta-data
+88-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:28:3-66
+89            android:name="flutterEmbedding"
+89-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:28:14-45
+90            android:value="2" />
+90-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:28:46-63
+91        <meta-data
+91-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:29:9-86
+92            android:name="flutter.deeplinking.enabled"
+92-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:29:20-62
+93            android:value="true" />
+93-->/home/noir/Documents/GitHub/azyx/android/app/src/main/AndroidManifest.xml:29:63-83
+94        <!--
+95           Declares a provider which allows us to store files to share in
+96           '.../caches/share_plus' and grant the receiving action access
+97        -->
+98        <provider
+98-->[:share_plus] /home/noir/.pub-cache/hosted/pub.dev/share_plus-10.1.3/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/share_plus/intermediates/merged_manifest/release/AndroidManifest.xml:15:9-23:20
+99            android:name="dev.fluttercommunity.plus.share.ShareFileProvider"
+99-->[:share_plus] /home/noir/.pub-cache/hosted/pub.dev/share_plus-10.1.3/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/share_plus/intermediates/merged_manifest/release/AndroidManifest.xml:16:13-77
+100            android:authorities="com.android.azyx.flutter.share_provider"
+100-->[:share_plus] /home/noir/.pub-cache/hosted/pub.dev/share_plus-10.1.3/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/share_plus/intermediates/merged_manifest/release/AndroidManifest.xml:17:13-74
+101            android:exported="false"
+101-->[:share_plus] /home/noir/.pub-cache/hosted/pub.dev/share_plus-10.1.3/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/share_plus/intermediates/merged_manifest/release/AndroidManifest.xml:18:13-37
+102            android:grantUriPermissions="true" >
+102-->[:share_plus] /home/noir/.pub-cache/hosted/pub.dev/share_plus-10.1.3/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/share_plus/intermediates/merged_manifest/release/AndroidManifest.xml:19:13-47
+103            <meta-data
+103-->[:share_plus] /home/noir/.pub-cache/hosted/pub.dev/share_plus-10.1.3/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/share_plus/intermediates/merged_manifest/release/AndroidManifest.xml:20:13-22:68
+104                android:name="android.support.FILE_PROVIDER_PATHS"
+104-->[:share_plus] /home/noir/.pub-cache/hosted/pub.dev/share_plus-10.1.3/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/share_plus/intermediates/merged_manifest/release/AndroidManifest.xml:21:17-67
+105                android:resource="@xml/flutter_share_file_paths" />
+105-->[:share_plus] /home/noir/.pub-cache/hosted/pub.dev/share_plus-10.1.3/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/share_plus/intermediates/merged_manifest/release/AndroidManifest.xml:22:17-65
+106        </provider>
+107        <!--
+108           This manifest declared broadcast receiver allows us to use an explicit
+109           Intent when creating a PendingItent to be informed of the user's choice
+110        -->
+111        <receiver
+111-->[:share_plus] /home/noir/.pub-cache/hosted/pub.dev/share_plus-10.1.3/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/share_plus/intermediates/merged_manifest/release/AndroidManifest.xml:28:9-34:20
+112            android:name="dev.fluttercommunity.plus.share.SharePlusPendingIntent"
+112-->[:share_plus] /home/noir/.pub-cache/hosted/pub.dev/share_plus-10.1.3/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/share_plus/intermediates/merged_manifest/release/AndroidManifest.xml:29:13-82
+113            android:exported="false" >
+113-->[:share_plus] /home/noir/.pub-cache/hosted/pub.dev/share_plus-10.1.3/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/share_plus/intermediates/merged_manifest/release/AndroidManifest.xml:30:13-37
+114            <intent-filter>
+114-->[:share_plus] /home/noir/.pub-cache/hosted/pub.dev/share_plus-10.1.3/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/share_plus/intermediates/merged_manifest/release/AndroidManifest.xml:31:13-33:29
+115                <action android:name="EXTRA_CHOSEN_COMPONENT" />
+115-->[:share_plus] /home/noir/.pub-cache/hosted/pub.dev/share_plus-10.1.3/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/share_plus/intermediates/merged_manifest/release/AndroidManifest.xml:32:17-65
+115-->[:share_plus] /home/noir/.pub-cache/hosted/pub.dev/share_plus-10.1.3/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/share_plus/intermediates/merged_manifest/release/AndroidManifest.xml:32:25-62
+116            </intent-filter>
+117        </receiver>
+118
+119        <activity
+119-->[:url_launcher_android] /home/noir/.pub-cache/hosted/pub.dev/url_launcher_android-6.3.9/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/url_launcher_android/intermediates/merged_manifest/release/AndroidManifest.xml:10:9-13:74
+120            android:name="io.flutter.plugins.urllauncher.WebViewActivity"
+120-->[:url_launcher_android] /home/noir/.pub-cache/hosted/pub.dev/url_launcher_android-6.3.9/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/url_launcher_android/intermediates/merged_manifest/release/AndroidManifest.xml:11:13-74
+121            android:exported="false"
+121-->[:url_launcher_android] /home/noir/.pub-cache/hosted/pub.dev/url_launcher_android-6.3.9/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/url_launcher_android/intermediates/merged_manifest/release/AndroidManifest.xml:12:13-37
+122            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+122-->[:url_launcher_android] /home/noir/.pub-cache/hosted/pub.dev/url_launcher_android-6.3.9/android/property(org.gradle.api.file.Directory, fixed(class org.gradle.api.internal.file.DefaultFilePropertyFactory$FixedDirectory, /home/noir/Documents/GitHub/azyx/build))/url_launcher_android/intermediates/merged_manifest/release/AndroidManifest.xml:13:13-71
+123
+124        <uses-library
+124-->[androidx.window:window:1.2.0] /home/noir/.gradle/caches/transforms-3/9cce2c68d57f7eee7313fcffc4fc6b2a/transformed/jetified-window-1.2.0/AndroidManifest.xml:23:9-25:40
+125            android:name="androidx.window.extensions"
+125-->[androidx.window:window:1.2.0] /home/noir/.gradle/caches/transforms-3/9cce2c68d57f7eee7313fcffc4fc6b2a/transformed/jetified-window-1.2.0/AndroidManifest.xml:24:13-54
+126            android:required="false" />
+126-->[androidx.window:window:1.2.0] /home/noir/.gradle/caches/transforms-3/9cce2c68d57f7eee7313fcffc4fc6b2a/transformed/jetified-window-1.2.0/AndroidManifest.xml:25:13-37
+127        <uses-library
+127-->[androidx.window:window:1.2.0] /home/noir/.gradle/caches/transforms-3/9cce2c68d57f7eee7313fcffc4fc6b2a/transformed/jetified-window-1.2.0/AndroidManifest.xml:26:9-28:40
+128            android:name="androidx.window.sidecar"
+128-->[androidx.window:window:1.2.0] /home/noir/.gradle/caches/transforms-3/9cce2c68d57f7eee7313fcffc4fc6b2a/transformed/jetified-window-1.2.0/AndroidManifest.xml:27:13-51
+129            android:required="false" />
+129-->[androidx.window:window:1.2.0] /home/noir/.gradle/caches/transforms-3/9cce2c68d57f7eee7313fcffc4fc6b2a/transformed/jetified-window-1.2.0/AndroidManifest.xml:28:13-37
+130
+131        <provider
+131-->[androidx.emoji2:emoji2:1.2.0] /home/noir/.gradle/caches/transforms-3/67676ccbf74476e5fd3119dab1bc2418/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+132            android:name="androidx.startup.InitializationProvider"
+132-->[androidx.emoji2:emoji2:1.2.0] /home/noir/.gradle/caches/transforms-3/67676ccbf74476e5fd3119dab1bc2418/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:25:13-67
+133            android:authorities="com.android.azyx.androidx-startup"
+133-->[androidx.emoji2:emoji2:1.2.0] /home/noir/.gradle/caches/transforms-3/67676ccbf74476e5fd3119dab1bc2418/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:26:13-68
+134            android:exported="false" >
+134-->[androidx.emoji2:emoji2:1.2.0] /home/noir/.gradle/caches/transforms-3/67676ccbf74476e5fd3119dab1bc2418/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:27:13-37
+135            <meta-data
+135-->[androidx.emoji2:emoji2:1.2.0] /home/noir/.gradle/caches/transforms-3/67676ccbf74476e5fd3119dab1bc2418/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+136                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+136-->[androidx.emoji2:emoji2:1.2.0] /home/noir/.gradle/caches/transforms-3/67676ccbf74476e5fd3119dab1bc2418/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:30:17-75
+137                android:value="androidx.startup" />
+137-->[androidx.emoji2:emoji2:1.2.0] /home/noir/.gradle/caches/transforms-3/67676ccbf74476e5fd3119dab1bc2418/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:31:17-49
+138            <meta-data
+138-->[androidx.lifecycle:lifecycle-process:2.7.0] /home/noir/.gradle/caches/transforms-3/04a243649e0e8da37ed9c2f6da5d13e1/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:29:13-31:52
+139                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+139-->[androidx.lifecycle:lifecycle-process:2.7.0] /home/noir/.gradle/caches/transforms-3/04a243649e0e8da37ed9c2f6da5d13e1/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:30:17-78
+140                android:value="androidx.startup" />
+140-->[androidx.lifecycle:lifecycle-process:2.7.0] /home/noir/.gradle/caches/transforms-3/04a243649e0e8da37ed9c2f6da5d13e1/transformed/jetified-lifecycle-process-2.7.0/AndroidManifest.xml:31:17-49
+141            <meta-data
+141-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+142                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+142-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+143                android:value="androidx.startup" />
+143-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+144        </provider>
+145
+146        <receiver
+146-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+147            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+147-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+148            android:directBootAware="false"
+148-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+149            android:enabled="true"
+149-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+150            android:exported="true"
+150-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+151            android:permission="android.permission.DUMP" >
+151-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+152            <intent-filter>
+152-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+153                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+153-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+153-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+154            </intent-filter>
+155            <intent-filter>
+155-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+156                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+156-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+156-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+157            </intent-filter>
+158            <intent-filter>
+158-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+159                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+159-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+159-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+160            </intent-filter>
+161            <intent-filter>
+161-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+162                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+162-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+162-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/noir/.gradle/caches/transforms-3/1c2cf9cf33be886a47ae4760e7c177dd/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:25-92
+163            </intent-filter>
+164        </receiver>
+165    </application>
+166
+167</manifest>

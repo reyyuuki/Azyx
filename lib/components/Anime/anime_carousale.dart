@@ -7,10 +7,9 @@ import 'package:ionicons/ionicons.dart';
 
 class AnimeCarousale extends StatelessWidget {
   dynamic animeData;
-  String route;
   String name;
 
-  AnimeCarousale({super.key, this.animeData, required this.route, required this.name});
+  AnimeCarousale({super.key, this.animeData,required this.name});
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +39,11 @@ class AnimeCarousale extends StatelessWidget {
           builder: (BuildContext context) {
             return GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, route, arguments: {
+                Navigator.pushNamed(context, "/detailspage", arguments: {
                   "id": anime['id'].toString(),
                   "image": anime['coverImage']['large'] ?? '',
-                  "tagg": "${anime['id']}MainCarousale"
+                  "tagg": "${anime['id']}MainCarousale",
+                  "title": title
                 });
               },
               child: Container(

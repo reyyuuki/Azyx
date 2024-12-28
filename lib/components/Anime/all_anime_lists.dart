@@ -42,7 +42,8 @@ class AllAnimeLists extends StatelessWidget {
                             context, "/detailspage", arguments: {
                           "id": tagg,
                           "image": data[index]['media']['coverImage']['large'],
-                          "tagg": tagg
+                          "tagg": tagg,
+                          "title": data[index]['media']['title']['romaji']
                         });
                       },
                       child: Container(

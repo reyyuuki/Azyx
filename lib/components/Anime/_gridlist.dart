@@ -13,13 +13,12 @@ class GridList extends StatelessWidget {
     if (data == null) {
       return const SizedBox.shrink();
     }
-
+    final isManga = route == "/detailspage";
     int itemCount = (MediaQuery.of(context).size.width ~/ 200).toInt();
     int minCount = 3;
     double gridWidth =
         MediaQuery.of(context).size.width / max(itemCount, minCount);
-    double maxHeight = MediaQuery.of(context).size.height /
-        2.5; 
+    double maxHeight = MediaQuery.of(context).size.height / 2.5;
     double gridHeight = min(gridWidth * 1.9, maxHeight);
     return Container(
       padding: const EdgeInsets.only(left: 12),
@@ -35,14 +34,29 @@ class GridList extends StatelessWidget {
         itemBuilder: (context, index) {
           final item = data![index];
           final tagg = "${item['id']}List";
-          return ItemCard(
-            id: item['id'].toString(),
-            poster: item['poster'],
-            type: item['type'],
-            name: item['name'],
-            rating: item['averageScore'],
-            tagg: tagg,
-            route: route,
+          return GestureDetector(
+            onTap: () {
+              isManga
+                  ? Navigator.pushNamed(context, route, arguments: {
+                      "id": item['id'].toString(),
+                      "image": item['poster'],
+                      "tagg": tagg,
+                      "title": item['name']
+                    })
+                  : Navigator.pushNamed(context, route, arguments: {
+                      "id": item['id'].toString(),
+                      "image": item['poster'],
+                      "tagg": tagg,
+                    });
+            },
+            child: ItemCard(
+              id: item['id'].toString(),
+              poster: item['poster'],
+              type: item['type'],
+              name: item['name'],
+              rating: item['averageScore'],
+              tagg: tagg,
+            ),
           );
         },
       ),
