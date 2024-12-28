@@ -1,5 +1,5 @@
 
-// ignore_for_file: file_names
+// ignore_for_file: file_names, must_be_immutable
 
 import 'dart:developer';
 import 'package:azyx/components/Anime/_gridlist.dart';
