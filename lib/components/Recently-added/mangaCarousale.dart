@@ -2,10 +2,10 @@
 
 import 'dart:io';
 
+import 'package:azyx/Screens/Manga/mangaDetails.dart';
 import 'package:azyx/components/Anime/anime_item.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:infinite_carousel/infinite_carousel.dart';
 
 class Mangacarousale extends StatelessWidget {
   final List<dynamic>? carosaleData;
@@ -60,7 +60,17 @@ class Mangacarousale extends StatelessWidget {
                 final type = manga['media']['format'];
                 final rating = manga['media']['averageScore'];
                 final tagg = '${id.toString()}current';
-                return ItemCard(id: id.toString(), poster: poster, type: type, name: title, rating: rating, tagg: tagg, route: '/mangaDetail');
+                return GestureDetector(
+                  onTap: (){
+                     Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Mangadetails(
+                          id: id.toString(),
+                          image: poster,
+                          tagg: tagg,)));
+                  },
+                  child: ItemCard(id: id.toString(), poster: poster, type: type, name: title, rating: rating, tagg: tagg));
               }
             )
           )

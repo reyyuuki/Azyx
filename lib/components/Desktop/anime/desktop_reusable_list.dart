@@ -1,4 +1,4 @@
-
+import 'package:azyx/Screens/Anime/details.dart';
 import 'package:azyx/components/Anime/anime_item.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -11,7 +11,11 @@ class DesktopReusableList extends StatelessWidget {
   final String route;
 
   DesktopReusableList(
-      {super.key, this.data, required this.name, required this.taggName,required this.route});
+      {super.key,
+      this.data,
+      required this.name,
+      required this.taggName,
+      required this.route});
 
   final ScrollController scrollController = ScrollController();
   @override
@@ -58,8 +62,31 @@ class DesktopReusableList extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 itemCount: data!.length,
                 itemBuilder: (context, index) {
-                  final tagg = data[index]['id'].toString() + taggName! + index.toString();
-                  return ItemCard(id: data[index]['id'].toString(), poster: data[index]['coverImage']['large'], type: data[index]['type'] ?? '', name: data[index]['title']['english'] ?? data[index]['title']['native'] ?? data[index]['title']['romaji'] ?? "Unknown", rating: data[index]['averageScore'] ?? 0, tagg: tagg, status: data[index]['status'], route: route,);
+                  final tagg = data[index]['id'].toString() +
+                      taggName! +
+                      index.toString();
+                  return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Details(
+                                    id: data[index]['id'].toString(),
+                                    image: data[index]['poster'],
+                                    tagg: tagg,
+                                    title: data[index]['name'])));
+                      },
+                      child: ItemCard(
+                          id: data[index]['id'].toString(),
+                          poster: data[index]['coverImage']['large'],
+                          type: data[index]['type'] ?? '',
+                          name: data[index]['title']['english'] ??
+                              data[index]['title']['native'] ??
+                              data[index]['title']['romaji'] ??
+                              "Unknown",
+                          rating: data[index]['averageScore'] ?? 0,
+                          tagg: tagg,
+                          status: data[index]['status']));
                 },
               ),
             ),

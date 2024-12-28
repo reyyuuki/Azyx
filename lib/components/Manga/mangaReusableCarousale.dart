@@ -1,26 +1,29 @@
-import 'package:cached_network_image/cached_network_image.dart';
+
+import 'dart:io';
+
+import 'package:azyx/Screens/Anime/details.dart';
+import 'package:azyx/Screens/Manga/mangaDetails.dart';
+import 'package:azyx/components/Anime/anime_item.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
 // ignore: must_be_immutable
-class Mangareusablecarousale extends StatelessWidget {
-  final dynamic data;
+class MangaReusableList extends StatelessWidget {
+  dynamic data;
   final String? name;
   final String? taggName;
 
-  const Mangareusablecarousale(
+  MangaReusableList(
       {super.key, this.data, required this.name, required this.taggName});
 
   @override
   Widget build(BuildContext context) {
-    if (data == null || data!.isEmpty) {
-      return const SizedBox();
+    if (data == null) {
+      return const Center(child: CircularProgressIndicator());
     }
-
     return Padding(
       padding: const EdgeInsets.only(left: 15),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -28,7 +31,7 @@ class Mangareusablecarousale extends StatelessWidget {
               Text(
                 name!,
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: Platform.isAndroid || Platform.isIOS ? 18 : 25,
                   fontFamily: "Poppins-Bold",
                   foreground: Paint()
                     ..shader = LinearGradient(
@@ -43,103 +46,31 @@ class Mangareusablecarousale extends StatelessWidget {
               ),
               Icon(
                 Iconsax.arrow_right_4,
+                size: Platform.isAndroid || Platform.isIOS ? 25 : 35,
                 color: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),
-          const SizedBox(
-            height: 15,
-          ),
+          const SizedBox(height: 15),
           SizedBox(
-            height: 190,
+            height: Platform.isAndroid || Platform.isIOS ? 190 : 300,
             child: ListView.builder(
+              physics: const BouncingScrollPhysics(),
               scrollDirection: Axis.horizontal,
               itemCount: data!.length,
               itemBuilder: (context, index) {
-                final item = data![index];
-                final imageUrl = item['coverImage'] ?? '';
-                final title = item['name'] ?? '';
-                final id = item['id'] ?? '';
-                final tagg = id + taggName;
-
+                final tagg = data[index]['id'].toString() + taggName! + index.toString();
                 return GestureDetector(
-                  onTap: () {
-                    if (id.isNotEmpty && imageUrl.isNotEmpty) {
-                      Navigator.pushNamed(
-                        context,
-                        '/mangaDetail',
-                        arguments: {"id": id, "image": imageUrl, "tagg": tagg},
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Error: Missing data')),
-                      );
-                    }
+                  onTap: (){
+                    Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Mangadetails(
+                          id: data[index]['id'].toString(),
+                          image: data[index]['coverImage']['large'],
+                          tagg: tagg,)));
                   },
-                  child: Column(
-                    children: [
-                      Stack(
-                        children: [
-                          Container(
-                            height: 150,
-                            width: 103,
-                            margin: const EdgeInsets.only(right: 10),
-                            child: Hero(
-                              tag: tagg,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(15),
-                                child: CachedNetworkImage(
-                                  imageUrl: imageUrl,
-                                  fit: BoxFit.cover,
-                                  progressIndicatorBuilder:
-                                      (context, url, downloadProgress) =>
-                                          Center(
-                                    child: CircularProgressIndicator(
-                                      value: downloadProgress.progress,
-                                    ),
-                                  ),
-                                  errorWidget: (context, url, error) =>
-                                      const Icon(Icons.error),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            top: 0,
-                            child: Container(
-                              height: 28,
-                              width: 33,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest
-                                    .withOpacity(0.8),
-                                borderRadius: const BorderRadius.only(
-                                    bottomRight: Radius.circular(10),
-                                    topLeft: Radius.circular(10)),
-                              ),
-                              child: Center(
-                                  child: Text(
-                                '# ${1 + index}',
-                                style:
-                                    const TextStyle(fontFamily: "Poppins-Bold"),
-                              )),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                        title.length > 12
-                            ? '${title.substring(0, 10)}...'
-                            : title,
-                        style: const TextStyle(fontFamily: "Poppins-Bold"),
-                      ),
-                    ],
-                  ),
-                );
+                  child: ItemCard(id: data[index]['id'].toString(), poster: data[index]['coverImage']['large'], type: data[index]['type'] ?? '', name: data[index]['title']['english'] ?? data[index]['title']['native'] ?? data[index]['title']['romaji'] ?? "Unknown", rating: data[index]['averageScore'] ?? 0, tagg: tagg, status: data[index]['status'],));
               },
             ),
           ),

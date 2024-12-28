@@ -4,6 +4,7 @@ import 'package:azyx/backupData/anilist_manga.dart';
 import 'package:azyx/components/Anime/reusableList.dart';
 import 'package:azyx/components/Common/user_lists.dart';
 import 'package:azyx/components/Common/Header.dart';
+import 'package:azyx/components/Manga/mangaReusableCarousale.dart';
 import 'package:azyx/components/Recently-added/animeCarousale.dart';
 import 'package:azyx/components/Recently-added/mangaCarousale.dart';
 import 'package:azyx/utils/update_notifier.dart';
@@ -40,7 +41,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListView(
@@ -97,10 +97,9 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(
               height: 20,
             ),
-            ReusableList(
+              MangaReusableList(
                 name: "Recommend Mangas",
                 taggName: "recommended",
-                route: '/mangaDetail',
                 data: recomendManga),
           ],
         ),

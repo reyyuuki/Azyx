@@ -5,12 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ionicons/ionicons.dart';
 
-class DesktopCarousale extends StatelessWidget {
+class MangaMainCarosale extends StatelessWidget {
   dynamic animeData;
   String name;
 
-  DesktopCarousale({super.key, this.animeData, required this.name});
-
+  MangaMainCarosale({super.key, this.animeData,required this.name});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +19,7 @@ class DesktopCarousale extends StatelessWidget {
 
     return CarouselSlider(
       options: CarouselOptions(
-        height: 380,
+        height: 230,
         viewportFraction: 1,
         initialPage: 0,
         enableInfiniteScroll: true,
@@ -40,11 +39,10 @@ class DesktopCarousale extends StatelessWidget {
           builder: (BuildContext context) {
             return GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, '/detailspage', arguments: {
+                Navigator.pushNamed(context, "/mangaDetail", arguments: {
                   "id": anime['id'].toString(),
                   "image": anime['coverImage']['large'] ?? '',
                   "tagg": "${anime['id']}MainCarousale",
-                  "title": title
                 });
               },
               child: Container(
@@ -55,7 +53,7 @@ class DesktopCarousale extends StatelessWidget {
                 child: Stack(
                   children: [
                     SizedBox(
-                      height: 380,
+                      height: 230,
                       width: double.infinity,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
@@ -82,8 +80,8 @@ class DesktopCarousale extends StatelessWidget {
                       child: Row(
                         children: [
                           SizedBox(
-                            height: 300,
-                            width: 200,
+                            height: 150,
+                            width: 100,
                             child: Hero(
                               tag: "${anime['id']}MainCarousale",
                               child: ClipRRect(
@@ -98,13 +96,16 @@ class DesktopCarousale extends StatelessWidget {
                           const SizedBox(
                             width: 20,
                           ),
-                          Expanded(
+                          SizedBox(
+                            width: 190,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                 title,
+                                  title.length > 30
+                                      ? '${title.substring(0, 30)}...'
+                                      : title,
                                   style: const TextStyle(
                                       fontSize: 20, fontFamily: "Poppins-Bold"),
                                 ),
@@ -112,46 +113,48 @@ class DesktopCarousale extends StatelessWidget {
                                   height: 5,
                                 ),
                                 Text(
-                                (anime['description'] as String?)?.length !=
+                                  (anime['description'] as String?)?.length !=
                                               null &&
                                           (anime['description'] as String)
                                                   .length >
-                                              505
-                                      ? '${(anime['description'].replaceAll(RegExp(r'[<>]'), '') as String).substring(0, 505)}...'
-                                      : anime['description'].replaceAll(RegExp(r'[<>]'), '') ?? "N/A",
-                                  style: const TextStyle(fontSize: 18),
+                                              85
+                                      ? '${(anime['description'] as String).substring(0, 85)}...'
+                                      : anime['description'] ?? "N/A",
+                                  style: const TextStyle(fontSize: 12),
                                 ),
                                 const SizedBox(
                                   height: 5,
                                 ),
                                 Container(
-                                  width: 140,
-                                  padding: const EdgeInsets.all(10),
+                                  width: 115,
                                   decoration: BoxDecoration(
                                       color:
                                           Theme.of(context).colorScheme.secondaryContainer,
                                       borderRadius: BorderRadius.circular(20)),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        name == "Play" ?
-                                        Icons.play_circle_fill : Ionicons.book,
-                                        size: 20,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                      ),
-                                      const SizedBox(
-                                        width: 5,
-                                      ),
-                                      Text(
-                                        "$name now",
-                                        style: TextStyle(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary, fontFamily: "Poppins-Bold", fontSize: 16),
-                                      )
-                                    ],
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(5),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          name == "Play" ?
+                                          Icons.play_circle_fill : Ionicons.book,
+                                          size: 15,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        ),
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(
+                                          "$name now",
+                                          style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary),
+                                        )
+                                      ],
+                                    ),
                                   ),
                                 )
                               ],

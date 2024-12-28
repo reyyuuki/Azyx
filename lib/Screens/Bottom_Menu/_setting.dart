@@ -1,28 +1,31 @@
 // ignore_for_file: prefer_const_constructors
-
+import 'dart:developer';
 import 'dart:io';
-
-import 'package:azyx/Screens/Bottom_Menu/_profile.dart';
+import 'package:azyx/Extensions/ExtensionScreen.dart';
 import 'package:azyx/Screens/settings/_about.dart';
 import 'package:azyx/Screens/settings/_languages.dart';
 import 'package:azyx/Screens/settings/_theme_changer.dart';
 import 'package:azyx/Screens/settings/download_settings.dart';
-import 'package:azyx/auth/auth_provider.dart';
+import 'package:azyx/api/Mangayomi/Extensions/extensions_provider.dart';
+import 'package:azyx/api/Mangayomi/Extensions/fetch_anime_sources.dart';
+import 'package:azyx/api/Mangayomi/Model/Source.dart';
 import 'package:azyx/components/Common/setting_tile.dart';
+import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/update_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Setting extends StatefulWidget {
+class Setting extends ConsumerStatefulWidget {
   const Setting({super.key});
 
   @override
-  State<Setting> createState() => _SettingState();
+  ConsumerState<Setting> createState() => _SettingState();
 }
 
-class _SettingState extends State<Setting> {
+class _SettingState extends ConsumerState<Setting> {
+  late List<Source>? extensionsList;
   @override
   void initState() {
     super.initState();
@@ -30,120 +33,93 @@ class _SettingState extends State<Setting> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<AniListProvider>(context, listen: false);
-
-    String userName = provider.userData['name'] ?? "Guest";
-    String image = provider.userData?['avatar']?['large'] ?? "";
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        appBar: AppBar(
-          title: const Text("Settings",
-              style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 20)),
-          leading: IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              iconSize: Platform.isAndroid || Platform.isIOS ? 25 : 35,
-              icon: const Icon(Icons.arrow_back_ios)),
-          centerTitle: true,
-        ),
-        body: ListView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.all(10),
-          children: [
-            Column(
-              children: [
-                SizedBox(
-                    width: 200,
-                    height: 200,
-                    child: image != "" && image.isNotEmpty
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(100),
-                            child: Image.network(
-                              image,
-                              fit: BoxFit.cover,
-                            ))
-                        : const Icon(
-                            Iconsax.user,
-                            size: 150,
-                          )),
-                const SizedBox(
-                  height: 5,
-                ),
-                Text(
-                  userName,
-                  style:
-                      const TextStyle(fontFamily: "Poppins-Bold", fontSize: 20),
-                )
-              ],
-            ),
-            const SizedBox(
-              height: 40,
-            ),
-            const SettingTile(
-              icon: Icon(Icons.palette),
-              name: "Themes",
-              routeName: ThemeChange(),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            const SettingTile(
-              icon: Icon(Icons.language),
-              name: "Languages",
-              routeName: Languages(),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            provider.userData['name'] != null
-                ? const SettingTile(
-                    icon: Icon(Iconsax.user_tag),
-                    name: "Profile",
-                    routeName: Profile(),
-                  )
-                : const SizedBox.shrink(),
-            provider.userData['name'] != null
-                ? const SizedBox(
-                    height: 10,
-                  )
-                : const SizedBox.shrink(),
-            const SettingTile(
-              icon: Icon(Ionicons.cloud_download_sharp),
-              name: "Download settings",
-              routeName: DownloadSettings(),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            const SettingTile(
-              icon: Icon(Iconsax.info_circle),
-              name: "About",
-              routeName: About(),
-            ),
-            const SizedBox(height: 10,),
-            Container(
-              decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(10)),
-              child: ListTile(
-                title: Text(
-                  "Check for updates",
-                  style: const TextStyle(
-                    fontFamily: "Poppins-Bold",
-                  ),
-                ),
-                leading: Icon(Icons.update),
-                trailing: Transform.rotate(
-                  angle: 3.14,
-                  child: const Icon(Icons.arrow_back_ios),
-                ),
-                onTap: () {
-                  checkUpdate(context);
-                },
+        body: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [
+            Theme.of(context).colorScheme.surface,
+            Theme.of(context).colorScheme.primary
+          ], begin: Alignment.topLeft, end: Alignment.bottomRight)),
+          child: ListView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.all(10),
+            children: [
+              const SizedBox(
+                height: 40,
               ),
-            )
-          ],
+              Row(
+                children: [
+                  IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      iconSize: Platform.isAndroid || Platform.isIOS ? 25 : 35,
+                      icon: const Icon(Broken.arrow_left_2)),
+                  const Text("Settings",
+                      style:
+                          TextStyle(fontFamily: "Poppins-Bold", fontSize: 20),textAlign: TextAlign.center,),
+                ],
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              const SettingTile(
+                icon: Icon(Icons.palette),
+                name: "Themes",
+                routeName: ThemeChange(),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              const SettingTile(
+                icon: Icon(Broken.language_circle),
+                name: "Languages",
+                routeName: Languages(),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              const SettingTile(
+                icon: Icon(Ionicons.cloud_download_sharp),
+                name: "Download settings",
+                routeName: DownloadSettings(),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              const SettingTile(
+                icon: Icon(Iconsax.info_circle),
+                name: "About",
+                routeName: About(),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Container(
+                decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    borderRadius: BorderRadius.circular(10)),
+                child: ListTile(
+                  title: Text(
+                    "Check for updates",
+                    style: const TextStyle(
+                      fontFamily: "Poppins-Bold",
+                    ),
+                  ),
+                  leading: Icon(Icons.update),
+                  trailing: Transform.rotate(
+                    angle: 3.14,
+                    child: const Icon(Icons.arrow_back_ios),
+                  ),
+                  onTap: () {
+                    checkUpdate(context);
+                  },
+                ),
+              ),
+              //
+            ],
+          ),
         ));
   }
 }
