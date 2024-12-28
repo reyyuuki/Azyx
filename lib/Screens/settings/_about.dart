@@ -19,6 +19,7 @@ class About extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: ListView(
@@ -71,7 +72,7 @@ class About extends StatelessWidget {
                             TextStyle(fontFamily: "Poppins-Bold", fontSize: 20),
                       ),
                       Text(
-                        "v2.6.0",
+                        "v2.6.2",
                         style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey.shade500,
@@ -164,7 +165,7 @@ class About extends StatelessWidget {
                     const Icon(Ionicons.logo_discord),
                     "Discord",
                     "Chat and collaborate with community.",
-                    "https://discord.com/channels/@me"),
+                    "https://discord.gg/SNpy9Acz"),
                 const SizedBox(
                   height: 10,
                 ),

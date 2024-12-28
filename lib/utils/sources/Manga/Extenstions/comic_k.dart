@@ -7,15 +7,13 @@ Future<dynamic> fetchChapters(String mangaId) async {
     final chapters = <Map<String, String>>[];
     const url = "https://comick.io/comic/03-nano-machine?page=1#chapter-header";
     final response = await http.get(Uri.parse(url));
-    log("start");
     if (response.statusCode == 200) {
-      log("enter");
       final document = parser.parse(response.body);
-      // Update selector
+      
       final chaptersElements = document.querySelectorAll("table tr");
       if (chaptersElements.isNotEmpty) {
         for (var chapter in chaptersElements) {
-          // Adjust selectors for title, link, date
+         
           final title = chapter.querySelector(".truncate span.font-semibold")?.text.trim() ?? "Unknown Title";
           final link = chapter.querySelector(".sticky a")?.attributes['href'] ?? "";
           final date = chapter.querySelector('.text-gray-600 span')?.text.trim() ?? "??";
