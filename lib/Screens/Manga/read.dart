@@ -1,5 +1,9 @@
+// ignore_for_file: must_be_immutable
 import 'dart:developer';
 import 'dart:io';
+import 'package:azyx/api/Mangayomi/Eval/dart/model/page.dart';
+import 'package:azyx/api/Mangayomi/Model/Source.dart';
+import 'package:azyx/api/Mangayomi/Search/get_pages_list.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:azyx/Provider/sources_provider.dart';
 import 'package:azyx/auth/auth_provider.dart';
@@ -14,13 +18,18 @@ class Read extends StatefulWidget {
   final String mangaId;
   String chapterLink;
   String image;
+  final Source source;
+  final dynamic chapterList;
+  final String mangatitle;
 
-  Read({
-    super.key,
-    required this.mangaId,
-    required this.chapterLink,
-    required this.image,
-  });
+  Read(
+      {super.key,
+      required this.mangaId,
+      required this.chapterLink,
+      required this.image,
+      required this.source,
+      required this.mangatitle,
+      required this.chapterList});
 
   @override
   State<Read> createState() => _ReadState();
@@ -28,7 +37,7 @@ class Read extends StatefulWidget {
 
 class _ReadState extends State<Read> {
   dynamic chapterData;
-  List<dynamic>? chapterImages;
+  List<PageUrl>? chapterImages;
   String? currentChapter;
   String? mangaTitle;
   String? url;
@@ -43,7 +52,6 @@ class _ReadState extends State<Read> {
   @override
   void initState() {
     super.initState();
-    log(widget.chapterLink);
     sourcehandler =
         Provider.of<SourcesProvider>(context, listen: false).getMangaInstance();
     fetchChapterData();
@@ -53,36 +61,37 @@ class _ReadState extends State<Read> {
 
   Future<void> fetchChapterData() async {
     try {
-      final resp = await sourcehandler.fetchPages(widget.chapterLink);
+      log(widget.chapterLink.split('/').take(3).join('/'));
+      final resp = await getPagesList(
+          mangaId: widget.chapterLink, source: widget.source);
       final dataProvider = Provider.of<Data>(context, listen: false);
       if (resp != null && resp.toString().isNotEmpty) {
+        log("data: $resp");
         setState(() {
-          chapterImages = resp['images'];
-          currentChapter = resp['currentChapter'];
-          mangaTitle = resp['title'];
-          chapterData = resp;
+          chapterImages = resp;
+          currentChapter = widget.chapterList
+              .firstWhere((i) => i['url'] == widget.chapterLink)['name'];
+          mangaTitle = widget.mangatitle;
           isLoading = false;
-          isNext = resp['nextChapter'] != null;
-          isPrev = resp['previousChapter'] != null;
         });
 
-        // log(currentChapter.toString());
+        log(currentChapter.toString());
         dataProvider.addReadsManga(
             mangaId: widget.mangaId,
-            mangaTitle: resp['title'],
+            mangaTitle: widget.mangatitle,
             currentChapter: widget.chapterLink,
             mangaImage: widget.image,
-            currentChapterTitle: resp['currentChapter']);
-        final progress = resp['currentChapter'].split(" ").last;
-        log(progress);
-        final anilist = Provider.of<AniListProvider>(context, listen: false);
-        if (progress != null) {
-          anilist.userData?['name'] != null
-              ? anilist.addToAniList(
-                  mediaId: int.parse(widget.mangaId),
-                  progress: int.parse(progress))
-              : [];
-        }
+            currentChapterTitle: currentChapter!);
+        // final progress = resp['currentChapter'].split(" ").last;
+        // log(progress);
+        // final anilist = Provider.of<AniListProvider>(context, listen: false);
+        // if (progress != null) {
+        //   anilist.userData?['name'] != null
+        //       ? anilist.addToAniList(
+        //           mediaId: int.parse(widget.mangaId),
+        //           progress: int.parse(progress))
+        //       : [];
+        // }
       } else {
         setState(() {
           hasError = true;
@@ -105,14 +114,15 @@ class _ReadState extends State<Read> {
     });
     try {
       final dataProvider = Provider.of<Data>(context, listen: false);
-      final data = await sourcehandler.fetchPages(url!);
-      if (data != null && data.toString().isNotEmpty) {
+      final data = await getPagesList(source: widget.source, mangaId: url!);
+      if (data != null && data.isNotEmpty) {
+        final index = widget.chapterList.indexWhere((i) => i['url'] == url);
+        log("chapter: index $index");
         setState(() {
-          chapterImages = data['images'];
-          currentChapter = data['currentChapter'];
-          isNext = data['nextChapter'] != null;
-          isPrev = data['previousChapter'] != null;
-          chapterData = data;
+          chapterImages = data;
+          // isNext = widget.chapterList[index - 1]?['url'] != null;
+          // isPrev = widget.chapterList[index + 1]?['url'] != null;
+          // chapterData = data;
           isLoading = false;
         });
 
@@ -121,17 +131,17 @@ class _ReadState extends State<Read> {
             mangaTitle: mangaTitle!,
             currentChapter: url!,
             mangaImage: widget.image,
-            currentChapterTitle: data['currentChapter']);
-        final progress = data['currentChapter'].split(" ").last;
-        log(progress);
-        final anilist = Provider.of<AniListProvider>(context, listen: false);
-        if (progress != null) {
-          anilist.userData?['name'] != null
-              ? anilist.addToAniList(
-                  mediaId: int.parse(widget.mangaId),
-                  progress: int.parse(progress))
-              : [];
-        }
+            currentChapterTitle: currentChapter!);
+        // final progress = data['currentChapter'].split(" ").last;
+        // log(progress);
+        // final anilist = Provider.of<AniListProvider>(context, listen: false);
+        // if (progress != null) {
+        //   anilist.userData?['name'] != null
+        //       ? anilist.addToAniList(
+        //           mediaId: int.parse(widget.mangaId),
+        //           progress: int.parse(progress))
+        //       : [];
+        // }
       } else {
         setState(() {
           hasError = true;
@@ -148,29 +158,35 @@ class _ReadState extends State<Read> {
   }
 
   void handleChapter(String? direction) async {
-    if ((direction == 'right' && chapterData['nextChapter'] != null) ||
-        (direction == 'left' && chapterData['previousChapter'] != null)) {
-      log(direction == 'right ' ? 'isright' : 'isleft');
-      setState(() {
-        url = direction == 'right'
-            ? chapterData['nextChapter']
-            : chapterData['previousChapter'];
-      });
+  if (direction == 'right' || direction == 'left') {
+    int index = widget.chapterList.indexWhere((i) => i['name'] == currentChapter);
 
-      setState(() {
-        isNext = false;
-        isPrev = false;
-        isLoading = true;
-      });
-
-      await fetchChapterImages();
-
-      setState(() {
-        isNext = chapterData['nextChapter'] != null;
-        isPrev = chapterData['previousChapter'] != null;
-      });
+    // Boundary checks
+    if ((direction == 'right' && index <= 0) || 
+        (direction == 'left' && index >= widget.chapterList.length - 1)) {
+      log("No more chapters in the $direction direction");
+      return;
     }
+
+    int newIndex = direction == 'right' ? index - 1 : index + 1;
+    log("$index / $newIndex");
+
+    setState(() {
+      url = widget.chapterList[newIndex]['url'] ?? '';
+      currentChapter = widget.chapterList[newIndex]['name'];
+      isLoading = true;
+    });
+
+    await fetchChapterImages();
+
+    setState(() {
+      isNext = newIndex > 0; 
+      isPrev = newIndex < widget.chapterList.length - 1;
+      isLoading = false;
+    });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -189,14 +205,19 @@ class _ReadState extends State<Read> {
                 ? const Text('Failed to load data')
                 : (Platform.isAndroid || Platform.isIOS
                     ? ListView.builder(
-                      physics: const BouncingScrollPhysics(),
+                        physics: const BouncingScrollPhysics(),
                         controller: _scrollController,
                         itemCount: chapterImages!.length,
                         itemBuilder: (context, index) {
                           return CachedNetworkImage(
                             filterQuality: FilterQuality.high,
-                            httpHeaders: {'Referer': widget.chapterLink},
-                            imageUrl: chapterImages![index]['image'],
+                            httpHeaders: {
+                              'Referer': widget.chapterLink
+                                  .split('/')
+                                  .take(3)
+                                  .join('/')
+                            },
+                            imageUrl: chapterImages![index].url,
                             fit: BoxFit.cover,
                             placeholder: (context, progress) => SizedBox(
                               height: MediaQuery.of(context).size.height,
@@ -222,9 +243,9 @@ class _ReadState extends State<Read> {
                           itemCount: chapterImages!.length,
                           itemBuilder: (context, index) {
                             return CachedNetworkImage(
-                            filterQuality: FilterQuality.high,
+                              filterQuality: FilterQuality.high,
                               httpHeaders: {'Referer': widget.chapterLink},
-                              imageUrl: chapterImages![index]['image'],
+                              imageUrl: chapterImages![index].url,
                               fit: BoxFit.cover,
                               placeholder: (context, progress) => SizedBox(
                                 height: MediaQuery.of(context).size.height,

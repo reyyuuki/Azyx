@@ -3,10 +3,10 @@ import 'dart:developer';
 
 import 'package:azyx/auth/auth_provider.dart';
 import 'package:azyx/backupData/anilist_manga.dart';
-import 'package:azyx/components/Anime/anime_carousale.dart';
-import 'package:azyx/components/Anime/reusableList.dart';
 import 'package:azyx/components/Common/check_platform.dart';
-import 'package:azyx/components/Desktop/anime/desktop_carousale.dart';
+import 'package:azyx/components/Desktop/Manga/desktop_carousale.dart';
+import 'package:azyx/components/Manga/mangaReusableCarousale.dart';
+import 'package:azyx/components/Manga/manga_main_carosale.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -121,29 +121,26 @@ class _MangapageState extends State<Mangapage> {
                   ),
                 ),
                 const SizedBox(height: 30.0),
-                PlatformWidget(androidWidget: AnimeCarousale(animeData: trendingManga, route: '/mangaDetail',name: "Read",),
-                 windowsWidget: DesktopCarousale(animeData: trendingManga, route: '/mangaDetail',name: "Read",),
+                PlatformWidget(androidWidget: MangaMainCarosale(animeData: trendingManga,name: "Read",),
+                 windowsWidget: MangaDesktopCarousale(animeData: trendingManga,name: "Read",),
                 ),
                 const SizedBox(height: 30.0),
-                ReusableList(
+                MangaReusableList(
                   name: 'Popular',
                   data: mangaData,
                   taggName: "Carosale1",
-                  route: '/mangaDetail',
                 ),
                 const SizedBox(height: 10),
-                ReusableList(
+                MangaReusableList(
                   name: 'Latest Manga',
                   data: latestManga,
                   taggName: "Carosale2",
-                  route: '/mangaDetail',
                 ),
                 const SizedBox(height: 10),
-                ReusableList(
+                MangaReusableList(
                   name: 'Trending Manga',
                   data: topOngoing,
                   taggName: "Carosale3",
-                  route: '/mangaDetail',
                 ),
               ],
             );
