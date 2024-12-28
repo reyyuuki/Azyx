@@ -1,14 +1,13 @@
 name: azyx
 description: "A new Flutter project."
 publish_to: 'none'
-version: 2.6.1
+version: 2.6.2
 
 environment:
   sdk: '>=3.4.4 <4.0.0'
 
 dependencies:
   carousel_slider: ^5.0.0
-  better_player: ^0.0.84
   flutter:
     sdk: flutter
   http: ^1.2.2
@@ -38,8 +37,33 @@ dependencies:
   media_kit_libs_video: ^1.0.4
   wakelock_plus: ^1.2.8
   flutter_web_auth_2: ^4.0.2
-  package_info_plus: ^8.1.1
-  
+  sidebarx: ^0.17.1
+  dart_eval: ^0.7.10
+  isar: 3.1.0+1
+  isar_flutter_libs: 3.1.0+1
+  http_interceptor: ^2.0.0
+  share_plus: ^10.1.3
+  js_packer: ^0.0.5
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+  flutter_gen: ^5.8.0
+  go_router: ^14.6.2
+  json_path: ^0.7.4
+  bot_toast: ^4.1.3
+  freezed_annotation: ^2.0.0
+  flutter_rust_bridge: ^2.3.0
+  xpath_selector_html_parser: ^3.0.1
+  flutter_qjs:
+    git:
+      url: https://github.com/kodjodevf/flutter_qjs.git
+      ref: main
+  pseudom: ^1.0.1
+  intl: ^0.18.1
+  icons_plus: ^5.0.0
+  grouped_list: ^6.0.0
+  volume_controller: ^2.0.8
+  screen_brightness: ^0.2.2+1
+
 
 dev_dependencies:
   flutter_test:
@@ -59,6 +83,12 @@ flutter:
   - .env
   - assets/icon/icon.png
   fonts:
+    - family: broken
+      fonts:
+        - asset: assets/fonts/broken.ttf
+    - family: broken_filled
+      fonts:
+        - asset: assets/fonts/broken_filled.ttf
     - family: Poppins
       fonts:
         - asset: assets/fonts/Poppins/Poppins-Regular.ttf

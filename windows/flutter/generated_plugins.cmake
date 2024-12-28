@@ -5,10 +5,13 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_window
   dynamic_color
+  flutter_qjs
+  isar_flutter_libs
   media_kit_libs_windows_video
   media_kit_video
   permission_handler_windows
   screen_brightness_windows
+  share_plus
   url_launcher_windows
   window_to_front
 )
