@@ -12,7 +12,7 @@
   </a>
 </div>
 <div align="center">
-   <a href="https://discord.gg/72YnN4bK">
+   <a href="https://discord.gg/633Jfvzn">
       <img src="https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&color=white&labelColor=purple&logoColor=white" alt="Discord"/></a>
    
    <a href="https://t.me/Azyxanime">
