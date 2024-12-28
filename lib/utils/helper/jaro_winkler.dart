@@ -91,6 +91,49 @@ Future<Map<String, dynamic>?> searchMostSimilarAnime(
   }
 }
 
+Future<Map<String, dynamic>?> mappingHelper(
+    String query, List<dynamic> result) async {
+  try {
+    final animeList = result as List<dynamic>?;
+
+    if (animeList == null) {
+      log('No anime data found.');
+      return null;
+    }
+
+    Map<String, dynamic>? mostSimiliarAnime;
+    double highestSimilarity = 0.0;
+
+    for (var anime in animeList) {
+      if (anime is Map<String, dynamic> &&
+          anime.containsKey('name') &&
+          anime['name'] is String) {
+        final name = anime['name'] as String;
+        final link = anime['link'];
+
+        final similarity = jaroWinklerDistance(query, name);
+
+        if (similarity > highestSimilarity) {
+          highestSimilarity = similarity;
+          mostSimiliarAnime = {
+            'name': name,
+            'link': link
+          };
+        }
+      } else {
+        log("Error: Manga item does not have the expected structure or types: ${anime.toString()}");
+      }
+    }
+
+    log("Most similar anime found: ${mostSimiliarAnime.toString()}");
+
+    return mostSimiliarAnime;
+  } catch (e, stackTrace) {
+    log("Error in searchMostSimilarManga function: $e\n$stackTrace");
+    return null;
+  }
+}
+
 Future<String> searchMostSimilarManga(
     String query, Future<dynamic> Function(String) scrapeFunction) async {
   try {
