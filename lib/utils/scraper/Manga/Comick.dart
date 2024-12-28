@@ -114,7 +114,6 @@ class Comick implements ExtractClass {
         'chapterList': chapterList,
         'groups': filteredGroups,
       };
-      // log(chapterList.toString());
       return manga;
     } else {
       throw Exception("Failed to load manga details");
