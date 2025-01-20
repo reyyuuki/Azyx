@@ -165,7 +165,7 @@ class About extends StatelessWidget {
                     const Icon(Ionicons.logo_discord),
                     "Discord",
                     "Chat and collaborate with community.",
-                    "https://discord.gg/SNpy9Acz"),
+                    "https://discord.gg/rDwNf4BYfz"),
                 const SizedBox(
                   height: 10,
                 ),
