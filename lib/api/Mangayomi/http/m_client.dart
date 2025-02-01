@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-
-import 'package:azyx/Functions/Function.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart'
+    as flutter_inappwebview;
 import 'package:azyx/api/Mangayomi/Model/settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/io_client.dart';
@@ -62,7 +62,9 @@ class MClient {
     return {HttpHeaders.cookieHeader: cookies};
   }
 
-  static Future<void> setCookie(String url, String ua, {String? cookie}) async {
+  static Future<void> setCookie(String url, String ua,
+      flutter_inappwebview.InAppWebViewController? webViewController,
+      {String? cookie}) async {
     List<String> cookies = [];
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       cookies = cookie
@@ -71,10 +73,13 @@ class MClient {
               .toList() ??
           [];
     } else {
-      /*cookies = (await flutter_inappwebview.CookieManager.instance()
-              .getCookies(url: flutter_inappwebview.WebUri(url)))
+      cookies = (await flutter_inappwebview.CookieManager.instance(
+                  webViewEnvironment: webViewEnvironment)
+              .getCookies(
+                  url: flutter_inappwebview.WebUri(url),
+                  webViewController: webViewController))
           .map((e) => "${e.name}=${e.value}")
-          .toList();*/
+          .toList();
     }
 
     if (cookies.isNotEmpty) {
@@ -176,7 +181,8 @@ class LoggerInterceptor extends InterceptorContract {
         ["cloudflare-nginx", "cloudflare"].contains(response.headers["server"]);
     Logger.add(LoggerLevel.info,
         "----- Response -----\n${response.request?.method}: ${response.request?.url}, statusCode: ${response.statusCode} ${cloudflare ? "Failed to bypass Cloudflare" : ""}");
-    debugPrint("----- Response -----\n${response.request?.method}: ${response.request?.url}, statusCode: ${response.statusCode} ${cloudflare ? "Failed to bypass Cloudflare" : ""}");
+    debugPrint(
+        "----- Response -----\n${response.request?.method}: ${response.request?.url}, statusCode: ${response.statusCode} ${cloudflare ? "Failed to bypass Cloudflare" : ""}");
     if (cloudflare) {
       // snackString("${response.statusCode} Failed to bypass Cloudflare");
     }

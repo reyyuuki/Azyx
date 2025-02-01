@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:azyx/Functions/string_extensions.dart';
 import 'package:azyx/api/Mangayomi/Eval/dart/model/video.dart';
 import 'package:azyx/api/Mangayomi/Eval/javascript/http.dart';
+import 'package:azyx/main.dart';
 import 'package:dart_eval/dart_eval_bridge.dart';
 import 'package:dart_eval/stdlib/core.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:html/dom.dart' hide Text;
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
@@ -80,7 +82,7 @@ class MBridge {
       //Return one attr
       else if (query.nodes.length == 1) {
         String attr =
-        query.attr != null ? query.attr!.trim().trimLeft().trimRight() : "";
+            query.attr != null ? query.attr!.trim().trimLeft().trimRight() : "";
         if (attr.isNotEmpty) {
           attrs = [attr];
         }
@@ -285,7 +287,7 @@ class MBridge {
             date,
             dateFormat,
             dateFormatLocale,
-                (val) {
+            (val) {
               dateFormat = val.$1;
               dateFormatLocale = val.$2;
               error = val.$3;
@@ -434,7 +436,7 @@ class MBridge {
       ]).anyWordIn(date)) {
         return cal.subtract(Duration(hours: number)).millisecondsSinceEpoch;
       } else if (WordSet(
-          ["menit", "dakika", "min", "minute", "minuto", "นาที", "دقائق"])
+              ["menit", "dakika", "min", "minute", "minuto", "นาที", "دقائق"])
           .anyWordIn(date)) {
         return cal.subtract(Duration(minutes: number)).millisecondsSinceEpoch;
       } else if (WordSet(["detik", "segundo", "second", "วินาที", "sec"])
@@ -474,8 +476,8 @@ class MBridge {
         final cleanedDate = date
             .split(" ")
             .map((it) => it.contains(RegExp(r"\d\D\D"))
-            ? it.replaceAll(RegExp(r"\D"), "")
-            : it)
+                ? it.replaceAll(RegExp(r"\D"), "")
+                : it)
             .join(" ");
         return DateFormat(dateFormat, dateFormatLocale)
             .parse(cleanedDate)
@@ -516,8 +518,8 @@ class MBridge {
               final cleanedDate = date
                   .split(" ")
                   .map((it) => it.contains(RegExp(r"\d\D\D"))
-                  ? it.replaceAll(RegExp(r"\D"), "")
-                  : it)
+                      ? it.replaceAll(RegExp(r"\D"), "")
+                      : it)
                   .join(" ");
               return DateFormat(dateFormat, locale)
                   .parse(cleanedDate)
@@ -621,6 +623,48 @@ class MBridge {
     } catch (_) {
       return text;
     }
+  }
+
+  static Future<String> evaluateJavascriptViaWebview(
+      String url, Map<String, String> headers, List<String> scripts,
+      {int time = 30}) async {
+    int t = 0;
+    bool timeOut = false;
+    bool isOk = false;
+    String response = "";
+    HeadlessInAppWebView? headlessWebView;
+    headlessWebView = HeadlessInAppWebView(
+      webViewEnvironment: webViewEnvironment,
+      onWebViewCreated: (controller) {
+        controller.addJavaScriptHandler(
+          handlerName: 'setResponse',
+          callback: (args) {
+            response = args[0] as String;
+            isOk = true;
+          },
+        );
+      },
+      initialUrlRequest: URLRequest(url: WebUri(url), headers: headers),
+      onLoadStop: (controller, url) async {
+        for (var script in scripts) {
+          await controller.platform.evaluateJavascript(source: script);
+        }
+      },
+    );
+    headlessWebView.run();
+    await Future.doWhile(() async {
+      timeOut = time == t;
+      if (timeOut || isOk) {
+        return false;
+      }
+      await Future.delayed(const Duration(seconds: 1));
+      t++;
+      return true;
+    });
+    try {
+      headlessWebView.dispose();
+    } catch (_) {}
+    return response;
   }
 }
 

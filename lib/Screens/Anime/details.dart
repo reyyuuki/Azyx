@@ -20,7 +20,6 @@ import 'package:azyx/Hive_Data/appDatabase.dart';
 import 'package:azyx/Provider/sources_provider.dart';
 import 'package:azyx/auth/auth_provider.dart';
 import 'package:azyx/components/Anime/animeInfo.dart';
-import 'package:azyx/components/Anime/floater.dart';
 import 'package:azyx/components/Anime/poster.dart';
 import 'package:azyx/components/Anime/coverImage.dart';
 import 'package:azyx/utils/api/Anilist/Anime/_anime_api.dart';
