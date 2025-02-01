@@ -1,12 +1,10 @@
 // ignore_for_file: file_names
 
 import 'package:azyx/Preferences/PrefManager.dart';
-import 'package:azyx/Provider/sources_provider.dart';
 import 'package:azyx/components/Common/language.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grouped_list/sliver_grouped_list.dart';
-import 'package:provider/provider.dart';
 
 import '../../Preferences/Preferences.dart';
 import '../../api/Mangayomi/Extensions/GetSourceList.dart';
