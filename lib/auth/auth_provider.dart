@@ -20,9 +20,10 @@ class AniListProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> tryAutoLogin() async {
+    final box = Hive.box('app-data');
     _anilistData = await fetchAnilistAnimes();
     _mangalistData = await fetchAnilistManga();
-    final token = await Hive.box("app-data").get("auth_token");
+    final token = await box.get("auth_token");
     if (token != null) {
       await fetchUserProfile();
       await fetchUserAnimeList();
@@ -32,6 +33,8 @@ class AniListProvider with ChangeNotifier {
 
     return log('Auth token not available!');
   }
+
+ 
 
   Future<void> login(BuildContext context) async {
     String clientId = dotenv.get('CLIENT_ID');
@@ -76,7 +79,7 @@ class AniListProvider with ChangeNotifier {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final token = data['access_token'];
-      Hive.box('app-data').put("auth_token",token);
+      Hive.box('app-data').put("auth_token", token);
       log(token);
       await fetchUserProfile();
     } else {
@@ -320,7 +323,7 @@ class AniListProvider with ChangeNotifier {
   }
 
   Future<void> logout(BuildContext context) async {
-    await Hive.box("app-data").put("auth_token",'');
+    await Hive.box("app-data").put("auth_token", '');
     _userData = {};
     notifyListeners();
   }
@@ -331,7 +334,7 @@ class AniListProvider with ChangeNotifier {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
-   String query = r'''
+    String query = r'''
   query {
     trending: Page {
       media(type: ANIME, sort: TRENDING_DESC) {
@@ -429,7 +432,6 @@ class AniListProvider with ChangeNotifier {
     }
   }
   ''';
-
 
     // Send the POST request to the AniList GraphQL API
     final response = await http.post(
@@ -879,39 +881,39 @@ class AniListProvider with ChangeNotifier {
     notifyListeners();
   }
 
-Future<bool> addFavorite(int mediaId, String type) async {
-  const String url = 'https://api.anilist.co/v2/user/6611206/favorites';
+  Future<bool> addFavorite(int mediaId, String type) async {
+    const String url = 'https://api.anilist.co/v2/user/6611206/favorites';
 
-  log('Adding to favorites: $url');  // Debug log
-  log('Media ID: $mediaId, Type: $type');  // Log details
+    log('Adding to favorites: $url'); // Debug log
+    log('Media ID: $mediaId, Type: $type'); // Log details
 
-  try {
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json',
-        // Add any additional headers (e.g., authentication token) if needed
-      },
-      body: jsonEncode({
-        'mediaId': mediaId,
-        'type': type == 'anime' ? 'anime' : 'manga',
-      }),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any additional headers (e.g., authentication token) if needed
+        },
+        body: jsonEncode({
+          'mediaId': mediaId,
+          'type': type == 'anime' ? 'anime' : 'manga',
+        }),
+      );
 
-    log('Response status: ${response.statusCode}');
-    log('Response body: ${response.body}');
+      log('Response status: ${response.statusCode}');
+      log('Response body: ${response.body}');
 
-    if (response.statusCode == 200) {
-      return true;
-    } else {
-      throw Exception('Failed to add to favorites. Status: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Exception(
+            'Failed to add to favorites. Status: ${response.statusCode}');
+      }
+    } catch (e) {
+      log('Error: $e');
+      throw Exception('Network request failed');
     }
-  } catch (e) {
-    log('Error: $e');
-    throw Exception('Network request failed');
   }
-}
-
 
   // void migratefavoritesdata(BuildContext context) {
   //   final dataProvider = Provider.of<Data>(context, listen: false);
@@ -923,5 +925,4 @@ Future<bool> addFavorite(int mediaId, String type) async {
   //   log(dataProvider.favoriteManga.toString());
   //   notifyListeners();
   // }
-
 }

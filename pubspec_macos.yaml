@@ -1,7 +1,7 @@
 name: azyx
 description: "A new Flutter project."
 publish_to: 'none'
-version: 2.6.0
+version: 2.6.3
 
 environment:
   sdk: '>=3.4.4 <4.0.0'
@@ -22,7 +22,6 @@ dependencies:
   hive_flutter: ^1.1.0
   hive: ^2.2.3
   dynamic_color: ^1.7.0
-  flutter_launcher_icons: ^0.13.1
   html: ^0.15.0
   url_launcher: ^6.3.0
   flutter_dotenv: ^5.1.0
@@ -46,17 +45,30 @@ dev_dependencies:
   flutter_lints: ^3.0.0
   hive_generator: ^2.0.1
   build_runner: ^2.4.11
-flutter_icons:
-  android: true
-  image_path: "assets/icon/icon.png"
-  
+  flutter_launcher_icons: ^0.14.0
+
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "assets/icon/icon.jpg"
+  min_sdk_android: 21
+  windows:
+    generate: true
+    image_path: "assets/icon/icon.jpg"
+    icon_size: 48
+  macos:
+    generate: true
+    image_path: "assets/icon/icon.jpg"
+  linux:
+    generate: true
+    image_path: "assets/icon/icon.jpg"
 
 flutter:
   uses-material-design: true
 
   assets:
   - .env
-  - assets/icon/icon.png
+  - assets/icon/icon.jpg
   fonts:
     - family: Poppins
       fonts:

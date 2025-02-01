@@ -12,7 +12,7 @@ Future<void> checkUpdate(context) async {
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      String latestVersion = data['tag_name'].toString().replaceFirst("v", "");
+      String latestVersion = data['tag_name'].toString().replaceFirst("v", "").split('-').first;
       String changelog = data['body'];
       String releaseTitle = data['name'];
 
@@ -23,7 +23,7 @@ Future<void> checkUpdate(context) async {
         _showUpdateBottomSheet(context, changelog, releaseTitle);
       }
       else{
-        showSnackBar("U are on latest", context);
+        showSnackBar("You are on latest update", context);
       }
     }
   } catch (e) {

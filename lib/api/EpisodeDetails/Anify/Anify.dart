@@ -79,5 +79,7 @@
 
 //   factory Datum.fromJson(Map<String, dynamic> json) => _$DatumFromJson(json);
 
+// ignore_for_file: file_names
+
 //   Map<String, dynamic> toJson() => _$DatumToJson(this);
 // }

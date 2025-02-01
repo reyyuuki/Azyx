@@ -5,7 +5,6 @@ import 'package:azyx/Screens/Bottom_Menu/_profile.dart';
 import 'package:azyx/Screens/Bottom_Menu/_setting.dart';
 import 'package:azyx/Provider/theme_provider.dart';
 import 'package:azyx/Screens/Favrouite/anime_favorite.dart';
-import 'package:azyx/Screens/Favrouite/favrouite_page.dart';
 import 'package:azyx/Screens/Favrouite/manga_favourite_page.dart';
 import 'package:azyx/Screens/Favrouite/novel_favourite.dart';
 import 'package:azyx/Screens/Novel/novel_detailspage.dart';
@@ -16,14 +15,11 @@ import 'package:azyx/StorageProvider.dart';
 import 'package:azyx/api/EpisodeDetails/GetMediaIDs/GetMediaIDs.dart';
 import 'package:azyx/auth/auth_provider.dart';
 import 'package:azyx/Hive_Data/appDatabase.dart';
-import 'package:azyx/Screens/Anime/watch_screen.dart';
 import 'package:azyx/Screens/Manga/mangaDetails.dart';
-import 'package:azyx/Screens/Manga/read.dart';
 import 'package:azyx/Screens/Anime/searchAnime.dart';
 import 'package:azyx/Screens/Manga/searchManga.dart';
 import 'package:azyx/components/Common/check_platform.dart';
 import 'package:azyx/components/Desktop/Manga/desktop_manga_detail.dart';
-import 'package:azyx/components/Desktop/anime/desktop_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:azyx/Screens/Anime/details.dart';
 import 'package:azyx/Screens/Home/_homepage.dart';
@@ -31,7 +27,9 @@ import 'package:azyx/Screens/Manga/mangaPage.dart';
 import 'package:azyx/Screens/Anime/animePage.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
+import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
@@ -41,6 +39,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:provider/provider.dart';
 
 late Isar isar;
+WebViewEnvironment? webViewEnvironment;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,8 +68,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(
             create: (_) => AniListProvider()..tryAutoLogin()),
-        ChangeNotifierProvider(
-            create: (_) => SourcesProvider())
+        ChangeNotifierProvider(create: (_) => SourcesProvider())
       ],
       child: const MainApp(),
     ),
@@ -88,7 +86,7 @@ class _MainAppState extends State<MainApp> {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       navigatorKey: navigatorKey,
       theme: Provider.of<ThemeProvider>(context).themeData,
       color: Theme.of(context).colorScheme.surface,
@@ -103,7 +101,12 @@ class _MainAppState extends State<MainApp> {
             final tagg = args?['tagg'] ?? '';
             final title = args?['title'] ?? '';
             return MaterialPageRoute(
-              builder: (context) => Details(id: id, image: image, tagg: tagg,title: title,),
+              builder: (context) => Details(
+                id: id,
+                image: image,
+                tagg: tagg,
+                title: title,
+              ),
             );
 
           case '/searchAnime':
@@ -279,11 +282,11 @@ class _HomeScreenState extends State<HomeScreen> {
       // ),
       body: Container(
         decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [
-            Theme.of(context).colorScheme.surface,
-            Theme.of(context).colorScheme.primary
-          ], begin: Alignment.topLeft, end: Alignment.bottomRight)),
-          child: _pages[_selectedIndex],
+            gradient: LinearGradient(colors: [
+          Theme.of(context).colorScheme.surface,
+          Theme.of(context).colorScheme.primary
+        ], begin: Alignment.topLeft, end: Alignment.bottomRight)),
+        child: _pages[_selectedIndex],
       ),
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: (int index) {
