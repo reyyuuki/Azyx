@@ -20,9 +20,9 @@
 </div>
 
 
-# 🎉 Azyx - Your Ultimate Anime & Manga Hub 🎉
+# 🎉 Azyx - An Anilist client 🎉
 
-Welcome to **Azyx**, your one-stop solution for watching anime and reading manga! Packed with powerful features, a sleek UI, and tons of customization options, Azyx brings your favorite entertainment straight to your device in style. 🌟✨
+Welcome to Azyx – a modern, feature-rich platform designed for seamless content browsing. With a sleek UI, extensive customization options, and a smooth user experience, Azyx makes discovering and organizing your favorite media effortless. 🚀📚
 
 ## 🚀 Features That Set Azyx Apart
 
@@ -64,17 +64,13 @@ Getting started with Azyx is super simple:
 
 > **Note**: Ensure that you have Flutter installed. For help, check the [Flutter Docs](https://docs.flutter.dev/get-started).
 
-## 🖼️ Screenshots
-
-Dive into the world of Azyx! Here are a few snapshots of what you can expect:
-
-<div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
-  <img src="https://github.com/user-attachments/assets/3d4a99da-b53b-43f7-aeb1-f1df3dae378e" alt="Screenshot 2" style="width: 49%; margin-bottom: 10px;" />
-  <img src="https://github.com/user-attachments/assets/52a3b2be-292f-4cf0-b5a8-4f5c7ab427b7" alt="Screenshot 3" style="width: 49%; margin-bottom: 10px;" />
-  <img src="https://github.com/user-attachments/assets/7e0b1e99-d58d-4b4d-8a97-5fb2a1974fcc" alt="Screenshot 4" style="width: 49%; margin-bottom: 10px;" />
- <img src="https://github.com/user-attachments/assets/432b7c2b-f290-4ed2-b4b2-ad22ba70055c" alt="Screenshot 1" style="width: 49%; margin-bottom: 10px;" />
-  <img src="https://github.com/user-attachments/assets/acb8a7a0-7ace-4097-8220-11880ce8fbf0" alt="Screenshot 5" style="width: 49%; margin-bottom: 10px;" />
-</div>
+<!-- <div style="display: flex; flex-wrap: wrap; justify-content: space-between;">
+<!--   <img src="https://github.com/user-attachments/assets/3d4a99da-b53b-43f7-aeb1-f1df3dae378e" alt="Screenshot 2" style="width: 49%; margin-bottom: 10px;" /> -->
+<!--   <img src="https://github.com/user-attachments/assets/52a3b2be-292f-4cf0-b5a8-4f5c7ab427b7" alt="Screenshot 3" style="width: 49%; margin-bottom: 10px;" /> -->
+<!--   <img src="https://github.com/user-attachments/assets/7e0b1e99-d58d-4b4d-8a97-5fb2a1974fcc" alt="Screenshot 4" style="width: 49%; margin-bottom: 10px;" /> -->
+<!--  <img src="https://github.com/user-attachments/assets/432b7c2b-f290-4ed2-b4b2-ad22ba70055c" alt="Screenshot 1" style="width: 49%; margin-bottom: 10px;" /> -->
+<!--   <img src="https://github.com/user-attachments/assets/acb8a7a0-7ace-4097-8220-11880ce8fbf0" alt="Screenshot 5" style="width: 49%; margin-bottom: 10px;" /> -->
+<!-- </div> -->
 
 ## 💡 Why Azyx?
 
