@@ -1,5 +1,5 @@
 <div align="center">
-    <img src='assets/icon/icon.png' alt='AzyX Icon' style="border-radius: 50px; height: 300px; width: 300px;"/>
+    <img src='assets/icon/icon.jpg' alt='AzyX Icon' style="border-radius: 50px; height: 300px; width: 300px;"/>
     <h1 style="font-size:2rem; font-weight:bold;">AzyX</h1>
   <a href="https://github.com/reyyuuki/Azyx/releases"/>
     <img src="https://img.shields.io/github/downloads/reyyuuki/azyx/total.svg?color=white&labelColor=purple&style=for-the-badge" alt="Total Downloads"/>
