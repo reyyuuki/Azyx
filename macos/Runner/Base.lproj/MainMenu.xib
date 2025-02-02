@@ -229,7 +229,7 @@
                                                 <action selector="toggleAutomaticDataDetection:" target="-1" id="R1I-Nq-Kbl"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Text Replacement" id="HFQ-gK-NFA">
+                                        <menuItem title="AzyXText Replacement" id="HFQ-gK-NFA">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="toggleAutomaticTextReplacement:" target="-1" id="DvP-Fe-Py6"/>

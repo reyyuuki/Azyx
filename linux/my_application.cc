@@ -55,7 +55,7 @@ static void my_application_activate(GApplication* application) {
 
   FlView* view = fl_view_new(project);
   gtk_widget_show(GTK_WIDGET(view));
-  gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));
+  gtk_AzyXContainer_add(GTK_AzyXContainer(window), GTK_WIDGET(view));
 
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));
 

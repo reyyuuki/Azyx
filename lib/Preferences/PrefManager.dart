@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names, depend_on_referenced_packages, file_names, constant_identifier_names
+
 import 'dart:io';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';

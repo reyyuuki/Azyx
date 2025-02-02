@@ -1,7 +1,7 @@
 // ignore_for_file: file_names
 
 import 'package:azyx/Preferences/PrefManager.dart';
-import 'package:azyx/components/Common/language.dart';
+import 'package:azyx/Widgets/language.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:grouped_list/sliver_grouped_list.dart';

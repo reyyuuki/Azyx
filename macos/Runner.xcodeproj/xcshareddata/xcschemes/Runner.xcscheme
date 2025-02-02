@@ -17,7 +17,7 @@
                BlueprintIdentifier = "33CC10EC2044A3C60003C045"
                BuildableName = "azyx.app"
                BlueprintName = "Runner"
-               ReferencedContainer = "container:Runner.xcodeproj">
+               ReferencedAzyXContainer = "AzyXContainer:Runner.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,7 +33,7 @@
             BlueprintIdentifier = "33CC10EC2044A3C60003C045"
             BuildableName = "azyx.app"
             BlueprintName = "Runner"
-            ReferencedContainer = "container:Runner.xcodeproj">
+            ReferencedAzyXContainer = "AzyXContainer:Runner.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
@@ -45,7 +45,7 @@
                BlueprintIdentifier = "331C80D4294CF70F00263BE5"
                BuildableName = "RunnerTests.xctest"
                BlueprintName = "RunnerTests"
-               ReferencedContainer = "container:Runner.xcodeproj">
+               ReferencedAzyXContainer = "AzyXContainer:Runner.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -67,7 +67,7 @@
             BlueprintIdentifier = "33CC10EC2044A3C60003C045"
             BuildableName = "azyx.app"
             BlueprintName = "Runner"
-            ReferencedContainer = "container:Runner.xcodeproj">
+            ReferencedAzyXContainer = "AzyXContainer:Runner.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -84,7 +84,7 @@
             BlueprintIdentifier = "33CC10EC2044A3C60003C045"
             BuildableName = "azyx.app"
             BlueprintName = "Runner"
-            ReferencedContainer = "container:Runner.xcodeproj">
+            ReferencedAzyXContainer = "AzyXContainer:Runner.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
