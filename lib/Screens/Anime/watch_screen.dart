@@ -537,7 +537,7 @@ class _WatchPageState extends State<WatchPage> with TickerProviderStateMixin {
     );
   }
 
-  int selectedSub = 0;
+int selectedSub = -1;
 
   void subtitleDialog() {
     showModalBottomSheet(
@@ -565,7 +565,6 @@ class _WatchPageState extends State<WatchPage> with TickerProviderStateMixin {
                           1, // +1 for "None" option
                       itemBuilder: (context, index) {
                         if (index == 0) {
-                          // "None" option at the top
                           return Container(
                             margin: const EdgeInsets.only(bottom: 12.0),
                             child: ElevatedButton(
@@ -865,7 +864,7 @@ class _WatchPageState extends State<WatchPage> with TickerProviderStateMixin {
               subtitleViewConfiguration:  v.SubtitleViewConfiguration(
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 45,
+                  fontSize: 50,
                   height: 2,
                   fontFamily: "Poppins-Bold",
                   backgroundColor: Colors.black.withOpacity(0.5)
