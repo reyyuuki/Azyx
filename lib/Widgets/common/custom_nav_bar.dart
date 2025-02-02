@@ -1,0 +1,97 @@
+// ignore_for_file: must_be_immutable
+
+import 'package:azyx/Controllers/ui_setting_controller.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
+import 'package:azyx/core/icons/icons_broken.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+class CustomNavBar extends StatelessWidget {
+  final List<Widget> screens;
+  int index;
+  final Function(int) onChanged;
+
+  CustomNavBar({
+    super.key,
+    required this.screens,
+    required this.index,
+    required this.onChanged,
+  });
+
+  final UiSettingController settings = Get.put(UiSettingController());
+  final List<IconData> _icons = [
+    Broken.home_1,
+    Broken.heart,
+    Icons.movie_filter,
+    Broken.book,
+    Icons.book,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return AzyXContainer(
+      margin: const EdgeInsets.fromLTRB(30, 0, 30, 30),
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+                color: Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.7),
+                blurRadius: 10,
+                spreadRadius: 2)
+          ]),
+      clipBehavior: Clip.antiAlias,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: screens.asMap().entries.map((item) {
+          final isActive = index == item.key;
+          return GestureDetector(
+            onTap: () => onChanged(item.key),
+            child: Obx(() =>
+               AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.fastOutSlowIn,
+                decoration: BoxDecoration(
+                    color: isActive
+                        ? Theme.of(context).colorScheme.primary.withOpacity(0.6)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(50),
+                    boxShadow: [
+                      BoxShadow(
+                          color:isActive
+                        ? Theme.of(context).colorScheme.primary.withOpacity(settings.glowMultiplier)
+                        : Colors.transparent,
+                          blurRadius: 10 * settings.blurMultiplier,
+                          spreadRadius: 2 * settings.spreadMultiplier)
+                    ]),
+                padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween<double>(begin: 0.0, end: isActive ? 1.2 : 0.9),
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  builder: (context, scale, child) {
+                    return Transform.scale(
+                      scale: scale,
+                      child: Icon(
+                        _icons[item.key],
+                        size: 25,
+                        shadows: [
+                          BoxShadow(
+                            color: Theme.of(context).colorScheme.inverseSurface.withOpacity(settings.glowMultiplier),
+                            blurRadius: 5 * settings.blurMultiplier
+                          )
+                        ],
+                        color: Theme.of(context).colorScheme.inverseSurface,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}

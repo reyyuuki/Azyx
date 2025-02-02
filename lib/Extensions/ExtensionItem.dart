@@ -1,9 +1,8 @@
-// ignore_for_file: non_constant_identifier_names, use_build_context_synchronously
+// ignore_for_file: non_constant_identifier_names, use_build_context_synchronously, file_names
 
-import 'package:azyx/Provider/sources_provider.dart';
+import 'package:azyx/Widgets/AlertDialogBuilder.dart';
 import 'package:azyx/api/Mangayomi/Eval/dart/model/source_preference.dart';
 import 'package:azyx/api/Mangayomi/Model/Source.dart';
-import 'package:azyx/components/Common/AlertDialogBuilder.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
