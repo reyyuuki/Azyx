@@ -1405,499 +1405,503 @@ class _DetailsState extends ConsumerState<Details> {
                                           // data = _getInstalledEntries(data);
                                           // animeSources = data;
                                           // loadData(data.first);
-                                         animeSources.isEmpty ? const PlaceholderExtensions() :
-                                          Column(
-                                            children: [
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 10,
-                                                        vertical: 15),
-                                                child: animeSources.isNotEmpty
-                                                    ? DropdownButtonFormField<
-                                                        Source>(
-                                                        value: selectedSource,
-                                                        isExpanded: true,
-                                                        decoration:
-                                                            InputDecoration(
-                                                          labelText:
-                                                              'Choose Source',
-                                                          filled: true,
-                                                          fillColor:
-                                                              Theme.of(context)
-                                                                  .colorScheme
-                                                                  .surface,
-                                                          labelStyle: TextStyle(
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .colorScheme
-                                                                .primary,
-                                                          ),
-                                                          border:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Theme.of(
-                                                                      context)
-                                                                  .colorScheme
-                                                                  .primary,
-                                                            ),
-                                                          ),
-                                                          enabledBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Theme.of(
-                                                                      context)
-                                                                  .colorScheme
-                                                                  .onPrimaryFixedVariant,
-                                                            ),
-                                                          ),
-                                                          focusedBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Theme.of(
-                                                                      context)
-                                                                  .colorScheme
-                                                                  .primary,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        isDense: true,
-                                                        items: animeSources.map<
-                                                                DropdownMenuItem<
-                                                                    Source>>(
-                                                            (source) {
-                                                          return DropdownMenuItem<
+                                          animeSources.isEmpty
+                                              ? const PlaceholderExtensions()
+                                              : Column(
+                                                  children: [
+                                                    Padding(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 10,
+                                                          vertical: 15),
+                                                      child: animeSources
+                                                              .isNotEmpty
+                                                          ? DropdownButtonFormField<
                                                               Source>(
-                                                            value: source,
-                                                            child: Text(
-                                                                source.name!),
-                                                          );
-                                                        }).toList(),
-                                                        onChanged: (Source?
-                                                            newValue) async {
-                                                          if (newValue !=
-                                                              null) {
-                                                            setState(() {
-                                                              selectedSource =
-                                                                  newValue;
-                                                              filteredEpisodes =
-                                                                  null;
-                                                              episodeData =
-                                                                  null;
-                                                            });
-                                                            await loadData(
-                                                                newValue);
-                                                          }
-                                                        },
-                                                      )
-                                                    : DropdownButtonFormField<
-                                                        String>(
-                                                        value:
-                                                            "No Source Available",
-                                                        isExpanded: true,
-                                                        decoration:
-                                                            InputDecoration(
-                                                          labelText:
-                                                              'No Source',
-                                                          filled: true,
-                                                          fillColor:
-                                                              Theme.of(context)
-                                                                  .colorScheme
-                                                                  .surface,
-                                                          labelStyle: TextStyle(
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .colorScheme
-                                                                .primary,
-                                                          ),
-                                                          border:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Theme.of(
-                                                                      context)
-                                                                  .colorScheme
-                                                                  .primary,
-                                                            ),
-                                                          ),
-                                                          enabledBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Theme.of(
-                                                                      context)
-                                                                  .colorScheme
-                                                                  .onPrimaryFixedVariant,
-                                                            ),
-                                                          ),
-                                                          focusedBorder:
-                                                              OutlineInputBorder(
-                                                            borderSide:
-                                                                BorderSide(
-                                                              color: Theme.of(
-                                                                      context)
-                                                                  .colorScheme
-                                                                  .primary,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        isDense: true,
-                                                        items: const [
-                                                          DropdownMenuItem<
+                                                              value:
+                                                                  selectedSource,
+                                                              isExpanded: true,
+                                                              decoration:
+                                                                  InputDecoration(
+                                                                labelText:
+                                                                    'Choose Source',
+                                                                filled: true,
+                                                                fillColor: Theme.of(
+                                                                        context)
+                                                                    .colorScheme
+                                                                    .surface,
+                                                                labelStyle:
+                                                                    TextStyle(
+                                                                  color: Theme.of(
+                                                                          context)
+                                                                      .colorScheme
+                                                                      .primary,
+                                                                ),
+                                                                border:
+                                                                    OutlineInputBorder(
+                                                                  borderSide:
+                                                                      BorderSide(
+                                                                    color: Theme.of(
+                                                                            context)
+                                                                        .colorScheme
+                                                                        .primary,
+                                                                  ),
+                                                                ),
+                                                                enabledBorder:
+                                                                    OutlineInputBorder(
+                                                                  borderSide:
+                                                                      BorderSide(
+                                                                    color: Theme.of(
+                                                                            context)
+                                                                        .colorScheme
+                                                                        .onPrimaryFixedVariant,
+                                                                  ),
+                                                                ),
+                                                                focusedBorder:
+                                                                    OutlineInputBorder(
+                                                                  borderSide:
+                                                                      BorderSide(
+                                                                    color: Theme.of(
+                                                                            context)
+                                                                        .colorScheme
+                                                                        .primary,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              isDense: true,
+                                                              items: animeSources.map<
+                                                                      DropdownMenuItem<
+                                                                          Source>>(
+                                                                  (source) {
+                                                                return DropdownMenuItem<
+                                                                    Source>(
+                                                                  value: source,
+                                                                  child: Text(
+                                                                      source
+                                                                          .name!),
+                                                                );
+                                                              }).toList(),
+                                                              onChanged: (Source?
+                                                                  newValue) async {
+                                                                if (newValue !=
+                                                                    null) {
+                                                                  setState(() {
+                                                                    selectedSource =
+                                                                        newValue;
+                                                                    filteredEpisodes =
+                                                                        null;
+                                                                    episodeData =
+                                                                        null;
+                                                                  });
+                                                                  await loadData(
+                                                                      newValue);
+                                                                }
+                                                              },
+                                                            )
+                                                          : DropdownButtonFormField<
                                                               String>(
-                                                            value:
-                                                                "No Source Available",
-                                                            child: Text(
-                                                                "No Source Available"),
+                                                              value:
+                                                                  "No Source Available",
+                                                              isExpanded: true,
+                                                              decoration:
+                                                                  InputDecoration(
+                                                                labelText:
+                                                                    'No Source',
+                                                                filled: true,
+                                                                fillColor: Theme.of(
+                                                                        context)
+                                                                    .colorScheme
+                                                                    .surface,
+                                                                labelStyle:
+                                                                    TextStyle(
+                                                                  color: Theme.of(
+                                                                          context)
+                                                                      .colorScheme
+                                                                      .primary,
+                                                                ),
+                                                                border:
+                                                                    OutlineInputBorder(
+                                                                  borderSide:
+                                                                      BorderSide(
+                                                                    color: Theme.of(
+                                                                            context)
+                                                                        .colorScheme
+                                                                        .primary,
+                                                                  ),
+                                                                ),
+                                                                enabledBorder:
+                                                                    OutlineInputBorder(
+                                                                  borderSide:
+                                                                      BorderSide(
+                                                                    color: Theme.of(
+                                                                            context)
+                                                                        .colorScheme
+                                                                        .onPrimaryFixedVariant,
+                                                                  ),
+                                                                ),
+                                                                focusedBorder:
+                                                                    OutlineInputBorder(
+                                                                  borderSide:
+                                                                      BorderSide(
+                                                                    color: Theme.of(
+                                                                            context)
+                                                                        .colorScheme
+                                                                        .primary,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              isDense: true,
+                                                              items: const [
+                                                                DropdownMenuItem<
+                                                                    String>(
+                                                                  value:
+                                                                      "No Source Available",
+                                                                  child: Text(
+                                                                      "No Source Available"),
+                                                                ),
+                                                              ],
+                                                              onChanged:
+                                                                  (String?
+                                                                      value) {
+                                                                log("No sources available to select.");
+                                                              },
+                                                            ),
+                                                    ),
+                                                    const SizedBox(height: 10),
+                                                    Padding(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 10),
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          SizedBox(
+                                                              width: 178,
+                                                              child: extraData?[
+                                                                          'name'] ==
+                                                                      null
+                                                                  ? const SizedBox
+                                                                      .shrink()
+                                                                  : Text(
+                                                                      "Found: ${extraData?['name']?.length > 20 ? '${extraData?['name']?.substring(0, 20)}...' : extraData?['name'] ?? "Unkonwn"}",
+                                                                      style: TextStyle(
+                                                                          fontFamily:
+                                                                              "Poppins-Bold",
+                                                                          color: Theme.of(context)
+                                                                              .colorScheme
+                                                                              .primary),
+                                                                    )),
+                                                          Text(
+                                                            "Total Episodes: ${episodeData?.length ?? "??"}",
+                                                            style: TextStyle(
+                                                                fontFamily:
+                                                                    "Poppins-Bold",
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .colorScheme
+                                                                    .primary),
                                                           ),
                                                         ],
-                                                        onChanged:
-                                                            (String? value) {
-                                                          log("No sources available to select.");
-                                                        },
                                                       ),
-                                              ),
-                                              const SizedBox(height: 10),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 10),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    SizedBox(
-                                                        width: 178,
-                                                        child: extraData?[
-                                                                    'name'] ==
-                                                                null
-                                                            ? const SizedBox
-                                                                .shrink()
-                                                            : Text(
-                                                                "Found: ${extraData?['name']?.length > 20 ? '${extraData?['name']?.substring(0, 20)}...' : extraData?['name'] ?? "Unkonwn"}",
+                                                    ),
+                                                    Padding(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 10,
+                                                          vertical: 5),
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          const Text(
+                                                            "Episodes",
+                                                            style: TextStyle(
+                                                                fontFamily:
+                                                                    "Poppins-Bold",
+                                                                fontSize: 22),
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 10,
+                                                          ),
+                                                          Container(
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .colorScheme
+                                                                  .surfaceBright,
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          12),
+                                                            ),
+                                                            child: IconButton(
+                                                              icon: Icon(
+                                                                withPhoto
+                                                                    ? Iconsax
+                                                                        .image
+                                                                    : Iconsax
+                                                                        .menu_board,
+                                                              ),
+                                                              onPressed: () {
+                                                                setState(() {
+                                                                  withPhoto =
+                                                                      !withPhoto;
+                                                                });
+                                                              },
+                                                            ),
+                                                          )
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    Padding(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 5),
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .end,
+                                                        children: [
+                                                          GestureDetector(
+                                                              onTap: () {
+                                                                if (animeSources
+                                                                    .isNotEmpty) {
+                                                                  showloader();
+                                                                  wrongTitleSearch(
+                                                                      selectedSource);
+                                                                } else {
+                                                                  showDialog(
+                                                                      context:
+                                                                          context,
+                                                                      builder:
+                                                                          (context) =>
+                                                                              AlertDialog(
+                                                                                title: const Text(
+                                                                                  "Please Install Entensions ???",
+                                                                                  style: TextStyle(fontSize: 16, fontFamily: "Poppins"),
+                                                                                ),
+                                                                                actions: [
+                                                                                  ElevatedButton(
+                                                                                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ExtensionScreen())),
+                                                                                    child: const Text('Install Etenstion'),
+                                                                                  ),
+                                                                                ],
+                                                                              ));
+                                                                }
+                                                              },
+                                                              child: Text(
+                                                                "Wrong Title?",
                                                                 style: TextStyle(
                                                                     fontFamily:
                                                                         "Poppins-Bold",
+                                                                    fontSize:
+                                                                        18,
                                                                     color: Theme.of(
                                                                             context)
                                                                         .colorScheme
                                                                         .primary),
-                                                              )),
-                                                    Text(
-                                                      "Total Episodes: ${episodeData?.length ?? "??"}",
-                                                      style: TextStyle(
-                                                          fontFamily:
-                                                              "Poppins-Bold",
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .colorScheme
-                                                                  .primary),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 10,
-                                                        vertical: 5),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    const Text(
-                                                      "Episodes",
-                                                      style: TextStyle(
-                                                          fontFamily:
-                                                              "Poppins-Bold",
-                                                          fontSize: 22),
+                                                              ))
+                                                        ],
+                                                      ),
                                                     ),
                                                     const SizedBox(
-                                                      width: 10,
+                                                      height: 10,
                                                     ),
-                                                    Container(
-                                                      decoration: BoxDecoration(
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .surfaceBright,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(12),
-                                                      ),
-                                                      child: IconButton(
-                                                        icon: Icon(
-                                                          withPhoto
-                                                              ? Iconsax.image
-                                                              : Iconsax
-                                                                  .menu_board,
-                                                        ),
-                                                        onPressed: () {
-                                                          setState(() {
-                                                            withPhoto =
-                                                                !withPhoto;
-                                                          });
+                                                    Padding(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 10,
+                                                          vertical: 5),
+                                                      child: TextField(
+                                                        onChanged:
+                                                            (String value) {
+                                                          searchEpisode(value);
                                                         },
+                                                        decoration: InputDecoration(
+                                                            prefixIcon:
+                                                                const Icon(Iconsax
+                                                                    .search_normal),
+                                                            filled: true,
+                                                            fillColor:
+                                                                Theme.of(context)
+                                                                    .colorScheme
+                                                                    .surface,
+                                                            labelText:
+                                                                "Search Episodes",
+                                                            focusedBorder: OutlineInputBorder(
+                                                                borderSide: BorderSide(
+                                                                    color: Theme.of(context)
+                                                                        .colorScheme
+                                                                        .primary),
+                                                                borderRadius:
+                                                                    BorderRadius.circular(
+                                                                        20)),
+                                                            enabledBorder: OutlineInputBorder(
+                                                                borderRadius:
+                                                                    BorderRadius.circular(
+                                                                        20),
+                                                                borderSide:
+                                                                    BorderSide(color: Theme.of(context).colorScheme.primary))),
                                                       ),
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                height: 10,
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 5),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .end,
-                                                  children: [
-                                                    
-                                                    GestureDetector(
-                                                        onTap: () {
-                                                          if (animeSources
-                                                              .isNotEmpty) {
-                                                            showloader();
-                                                            wrongTitleSearch(
-                                                                selectedSource);
-                                                          } else {
-                                                            showDialog(
-                                                                context:
-                                                                    context,
-                                                                builder:
-                                                                    (context) =>
-                                                                        AlertDialog(
-                                                                          title:
-                                                                              const Text(
-                                                                            "Please Install Entensions ???",
-                                                                            style:
-                                                                                TextStyle(fontSize: 16, fontFamily: "Poppins"),
-                                                                          ),
-                                                                          actions: [
-                                                                            ElevatedButton(
-                                                                              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ExtensionScreen())),
-                                                                              child: const Text('Install Etenstion'),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    !withPhoto
+                                                        ? episodeList(context)
+                                                        : Container(
+                                                            height: 380,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          20),
+                                                            ),
+                                                            width:
+                                                                MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width,
+                                                            child: Padding(
+                                                                padding: const EdgeInsets
+                                                                    .symmetric(
+                                                                    horizontal:
+                                                                        5,
+                                                                    vertical:
+                                                                        10),
+                                                                child: episodeData !=
+                                                                            null &&
+                                                                        filteredEpisodes !=
+                                                                            null
+                                                                    ? ListView(
+                                                                        children: episodeData
+                                                                            .asMap()
+                                                                            .entries
+                                                                            .map<Widget>((entry) {
+                                                                        final item =
+                                                                            entry.value;
+                                                                        final epTitle =
+                                                                            item['name'] ??
+                                                                                "";
+                                                                        final url =
+                                                                            item['url'];
+                                                                        final episodeNumber =
+                                                                            entry.key +
+                                                                                1;
+                                                                        return GestureDetector(
+                                                                          onTap:
+                                                                              () async {
+                                                                            showloader();
+                                                                            getEpisodeUrls(
+                                                                                url,
+                                                                                episodeNumber,
+                                                                                epTitle);
+                                                                          },
+                                                                          child:
+                                                                              Container(
+                                                                            height:
+                                                                                100,
+                                                                            margin:
+                                                                                const EdgeInsets.only(top: 10),
+                                                                            decoration:
+                                                                                BoxDecoration(
+                                                                              borderRadius: BorderRadius.circular(10),
+                                                                              color: episodeNumber == episodeId ? Theme.of(context).colorScheme.inversePrimary : Theme.of(context).colorScheme.surfaceContainerHighest,
                                                                             ),
-                                                                          ],
-                                                                        ));
-                                                          }
-                                                        },
-                                                        child: Text(
-                                                          "Wrong Title?",
-                                                          style: TextStyle(
-                                                              fontFamily:
-                                                                  "Poppins-Bold",
-                                                              fontSize: 18,
-                                                              color: Theme.of(
-                                                                      context)
-                                                                  .colorScheme
-                                                                  .primary),
-                                                        ))
-                                                  ],
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                height: 10,
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 10,
-                                                        vertical: 5),
-                                                child: TextField(
-                                                  onChanged: (String value) {
-                                                    searchEpisode(value);
-                                                  },
-                                                  decoration: InputDecoration(
-                                                      prefixIcon: const Icon(
-                                                          Iconsax
-                                                              .search_normal),
-                                                      filled: true,
-                                                      fillColor: Theme.of(context)
-                                                          .colorScheme
-                                                          .surface,
-                                                      labelText:
-                                                          "Search Episodes",
-                                                      focusedBorder: OutlineInputBorder(
-                                                          borderSide: BorderSide(
-                                                              color: Theme.of(context)
-                                                                  .colorScheme
-                                                                  .primary),
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                  20)),
-                                                      enabledBorder: OutlineInputBorder(
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                  20),
-                                                          borderSide:
-                                                              BorderSide(color: Theme.of(context).colorScheme.primary))),
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                height: 10,
-                                              ),
-                                              !withPhoto
-                                                  ? episodeList(context)
-                                                  : Container(
-                                                      height: 380,
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(20),
-                                                      ),
-                                                      width:
-                                                          MediaQuery.of(context)
-                                                              .size
-                                                              .width,
-                                                      child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .symmetric(
-                                                                  horizontal: 5,
-                                                                  vertical: 10),
-                                                          child: episodeData !=
-                                                                      null &&
-                                                                  filteredEpisodes !=
-                                                                      null
-                                                              ? ListView(
-                                                                  children: episodeData
-                                                                      .asMap()
-                                                                      .entries
-                                                                      .map<Widget>(
-                                                                          (entry) {
-                                                                  final item =
-                                                                      entry
-                                                                          .value;
-                                                                  final epTitle =
-                                                                      item['name'] ??
-                                                                          "";
-                                                                  final url =
-                                                                      item[
-                                                                          'url'];
-                                                                  final episodeNumber =
-                                                                      entry.key +
-                                                                          1;
-                                                                  return GestureDetector(
-                                                                    onTap:
-                                                                        () async {
-                                                                      showloader();
-                                                                      getEpisodeUrls(
-                                                                          url,
-                                                                          episodeNumber,
-                                                                          epTitle);
-                                                                    },
-                                                                    child:
-                                                                        Container(
-                                                                      height:
-                                                                          100,
-                                                                      margin: const EdgeInsets
-                                                                          .only(
-                                                                          top:
-                                                                              10),
-                                                                      decoration:
-                                                                          BoxDecoration(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(10),
-                                                                        color: episodeNumber ==
-                                                                                episodeId
-                                                                            ? Theme.of(context).colorScheme.inversePrimary
-                                                                            : Theme.of(context).colorScheme.surfaceContainerHighest,
-                                                                      ),
-                                                                      child:
-                                                                          Stack(
-                                                                        children: [
-                                                                          Row(
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.start,
-                                                                            children: [
-                                                                              ClipRRect(
-                                                                                borderRadius: const BorderRadius.horizontal(left: Radius.circular(10)),
-                                                                                child: SizedBox(
-                                                                                  height: 100,
-                                                                                  width: 150,
-                                                                                  child: CachedNetworkImage(
-                                                                                    imageUrl: widget.image,
-                                                                                    fit: BoxFit.cover,
-                                                                                  ),
-                                                                                ),
-                                                                              ),
-                                                                              Expanded(
-                                                                                child: Padding(
-                                                                                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                                                                                  child: Text(
-                                                                                    epTitle.length > 25 ? '${epTitle.substring(0, 25)}...' : epTitle,
-                                                                                    style: TextStyle(
-                                                                                      color: Theme.of(context).colorScheme.inverseSurface,
-                                                                                      fontFamily: "Poppins-Bold",
+                                                                            child:
+                                                                                Stack(
+                                                                              children: [
+                                                                                Row(
+                                                                                  mainAxisAlignment: MainAxisAlignment.start,
+                                                                                  children: [
+                                                                                    ClipRRect(
+                                                                                      borderRadius: const BorderRadius.horizontal(left: Radius.circular(10)),
+                                                                                      child: SizedBox(
+                                                                                        height: 100,
+                                                                                        width: 150,
+                                                                                        child: CachedNetworkImage(
+                                                                                          imageUrl: widget.image,
+                                                                                          fit: BoxFit.cover,
+                                                                                        ),
+                                                                                      ),
                                                                                     ),
-                                                                                  ),
-                                                                                ),
-                                                                              ),
-                                                                              if (episodeNumber == episodeId)
-                                                                                Icon(
-                                                                                  Ionicons.play,
-                                                                                  color: Theme.of(context).colorScheme.inverseSurface,
-                                                                                )
-                                                                              else
-                                                                                Padding(
-                                                                                  padding: const EdgeInsets.only(right: 8.0),
-                                                                                  child: Text(
-                                                                                    'Ep- $episodeNumber',
-                                                                                    style: TextStyle(
-                                                                                      fontSize: 14,
-                                                                                      color: Theme.of(context).colorScheme.inverseSurface,
-                                                                                      fontWeight: FontWeight.w500,
+                                                                                    Expanded(
+                                                                                      child: Padding(
+                                                                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                                                        child: Text(
+                                                                                          epTitle.length > 25 ? '${epTitle.substring(0, 25)}...' : epTitle,
+                                                                                          style: TextStyle(
+                                                                                            color: Theme.of(context).colorScheme.inverseSurface,
+                                                                                            fontFamily: "Poppins-Bold",
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
                                                                                     ),
-                                                                                  ),
+                                                                                    if (episodeNumber == episodeId)
+                                                                                      Icon(
+                                                                                        Ionicons.play,
+                                                                                        color: Theme.of(context).colorScheme.inverseSurface,
+                                                                                      )
+                                                                                    else
+                                                                                      Padding(
+                                                                                        padding: const EdgeInsets.only(right: 8.0),
+                                                                                        child: Text(
+                                                                                          'Ep- $episodeNumber',
+                                                                                          style: TextStyle(
+                                                                                            fontSize: 14,
+                                                                                            color: Theme.of(context).colorScheme.inverseSurface,
+                                                                                            fontWeight: FontWeight.w500,
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                  ],
                                                                                 ),
-                                                                            ],
+                                                                                // Positioned(
+                                                                                //   bottom:
+                                                                                //       0,
+                                                                                //   right:
+                                                                                //       0,
+                                                                                //   child:
+                                                                                //       GestureDetector(
+                                                                                //     onTap: () {
+                                                                                //       showloader();
+                                                                                //       fetchm3u8(episodeNumber);
+                                                                                //     },
+                                                                                //     child: Container(
+                                                                                //       height: 27,
+                                                                                //       width: 45,
+                                                                                //       decoration: BoxDecoration(
+                                                                                //         color: Theme.of(context).colorScheme.secondary,
+                                                                                //         borderRadius: const BorderRadius.only(
+                                                                                //           topLeft: Radius.circular(20),
+                                                                                //           bottomRight: Radius.circular(10),
+                                                                                //         ),
+                                                                                //       ),
+                                                                                //       child: Icon(Icons.download_for_offline, color: Theme.of(context).colorScheme.inversePrimary),
+                                                                                //     ),
+                                                                                //   ),
+                                                                                // ),
+                                                                              ],
+                                                                            ),
                                                                           ),
-                                                                          // Positioned(
-                                                                          //   bottom:
-                                                                          //       0,
-                                                                          //   right:
-                                                                          //       0,
-                                                                          //   child:
-                                                                          //       GestureDetector(
-                                                                          //     onTap: () {
-                                                                          //       showloader();
-                                                                          //       fetchm3u8(episodeNumber);
-                                                                          //     },
-                                                                          //     child: Container(
-                                                                          //       height: 27,
-                                                                          //       width: 45,
-                                                                          //       decoration: BoxDecoration(
-                                                                          //         color: Theme.of(context).colorScheme.secondary,
-                                                                          //         borderRadius: const BorderRadius.only(
-                                                                          //           topLeft: Radius.circular(20),
-                                                                          //           bottomRight: Radius.circular(10),
-                                                                          //         ),
-                                                                          //       ),
-                                                                          //       child: Icon(Icons.download_for_offline, color: Theme.of(context).colorScheme.inversePrimary),
-                                                                          //     ),
-                                                                          //   ),
-                                                                          // ),
-                                                                        ],
-                                                                      ),
-                                                                    ),
-                                                                  );
-                                                                }).toList())
-                                                              : const Center(
-                                                                  child:
-                                                                      CircularProgressIndicator(),
-                                                                )),
-                                                    ),
-                                              const SizedBox(height: 20),
-                                            ],
-                                          )
+                                                                        );
+                                                                      }).toList())
+                                                                    : const Center(
+                                                                        child:
+                                                                            CircularProgressIndicator(),
+                                                                      )),
+                                                          ),
+                                                    const SizedBox(height: 20),
+                                                  ],
+                                                )
                                         ],
                                       ),
                                     )
