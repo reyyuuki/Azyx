@@ -1,3 +1,5 @@
+// ignore_for_file: depend_on_referenced_packages
+
 import 'dart:convert';
 import 'dart:developer';
 import 'package:azyx/components/Common/snackbar.dart';
@@ -12,7 +14,7 @@ Future<void> checkUpdate(context) async {
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      String latestVersion = data['tag_name'].toString().replaceFirst("v", "").split('-').first;
+      String latestVersion = data['tag_name'].replaceFirst("v", "").split('-').first;
       String changelog = data['body'];
       String releaseTitle = data['name'];
 
@@ -37,7 +39,7 @@ Future<void> autoCheckUpdate(context) async {
     final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      String latestVersion = data['tag_name'].toString().replaceFirst("v", "");
+      String latestVersion = data['tag_name'].toString().replaceFirst("v", "").split('-').first;
       String changelog = data['body'];
       String releaseTitle = data['name'];
 
