@@ -176,6 +176,7 @@ jobs:
           tag: ${{ github.ref_name }}
 
   build-windows:
+    if: false  # This will skip the Windows build
     runs-on: windows-latest
     needs: generate-changelog
     steps:
@@ -207,6 +208,7 @@ jobs:
           tag: ${{ github.ref_name }}
 
   build-macos:
+    if: false  # This will skip the Macos build
     runs-on: macos-latest
     needs: generate-changelog
     steps:
