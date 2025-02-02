@@ -210,6 +210,7 @@ class _DetailsState extends ConsumerState<Details> {
           'activeServer': server,
           'isDub': dub,
           'animeId': widget.id,
+          'episodeUrls': episodeUrls
         },
       );
     }
@@ -1656,44 +1657,9 @@ class _DetailsState extends ConsumerState<Details> {
                                                 child: Row(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment
-                                                          .spaceBetween,
+                                                          .end,
                                                   children: [
-                                                    SizedBox(
-                                                      height: 40,
-                                                      child: LiteRollingSwitch(
-                                                        value: !dub,
-                                                        width: 100,
-                                                        textOn: "Sub",
-                                                        textOff: "Dub",
-                                                        textOnColor:
-                                                            Colors.white,
-                                                        colorOn: Theme.of(
-                                                                context)
-                                                            .colorScheme
-                                                            .tertiaryContainer,
-                                                        colorOff:
-                                                            Theme.of(context)
-                                                                .colorScheme
-                                                                .inversePrimary,
-                                                        iconOn: Icons
-                                                            .closed_caption,
-                                                        iconOff: Icons.mic,
-                                                        animationDuration:
-                                                            const Duration(
-                                                                milliseconds:
-                                                                    300),
-                                                        onChanged:
-                                                            (bool state) {
-                                                          setState(() {
-                                                            dub = !dub;
-                                                          });
-                                                          log(dub.toString());
-                                                        },
-                                                        onDoubleTap: () => {},
-                                                        onSwipe: () => {},
-                                                        onTap: () => {},
-                                                      ),
-                                                    ),
+                                                    
                                                     GestureDetector(
                                                         onTap: () {
                                                           if (animeSources

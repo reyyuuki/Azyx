@@ -539,67 +539,117 @@ class _WatchPageState extends State<WatchPage> with TickerProviderStateMixin {
 
   int selectedSub = 0;
 
-  subtitleDialog() {
+  void subtitleDialog() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
-        return Container(
-          width: 400,
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Subtitles",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                height: 220,
-                child: ListView.builder(
-                  itemCount: tracks.length ?? 0,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12.0),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              width: 400,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    "Subtitles",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 220,
+                    child: ListView.builder(
+                      itemCount: episodeUrls.first.subtitles!.length +
+                          1, // +1 for "None" option
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          // "None" option at the top
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 12.0),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16.0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                backgroundColor: selectedSub == -1
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainerHighest,
+                                minimumSize: const Size(double.infinity, 0),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  selectedSub = -1;
+                                  player.setSubtitleTrack(const SubtitleTrack(
+                                      '', '', '')); // Disable subtitles
+                                });
+                                Navigator.pop(context);
+                              },
+                              child: Text(
+                                "None",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: selectedSub == -1
+                                      ? Colors.black
+                                      : Colors.white,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+
+                        final item = episodeUrls
+                            .first.subtitles![index - 1]; // Adjust index
+                        final isSelected = selectedSub == index - 1;
+                        final subtitleLabel = item.label ?? "Unknown";
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12.0),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 16.0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              backgroundColor: isSelected
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
+                              minimumSize: const Size(double.infinity, 0),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                selectedSub = index - 1;
+                                
+                                player.setSubtitleTrack(
+                                  SubtitleTrack.uri(item.file!),
+                                );
+                              });
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              subtitleLabel,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: isSelected ? Colors.black : Colors.white,
+                              ),
+                            ),
                           ),
-                          backgroundColor: selectedSub == index
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest,
-                          minimumSize: const Size(double.infinity, 0),
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            selectedSub = index;
-                            player.setSubtitleTrack(SubtitleTrack.uri(
-                                tracks?[selectedSub]?['file']));
-                          });
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          (tracks?[index]?['label'] == 'Default subtitles'
-                              ? 'None'
-                              : tracks?[index]?['label'] ?? "Unkown"),
-                          style: TextStyle(
-                              fontSize: 16,
-                              color: selectedSub == index
-                                  ? Colors.black
-                                  : Colors.white),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -812,6 +862,15 @@ class _WatchPageState extends State<WatchPage> with TickerProviderStateMixin {
             v.Video(
               controller: controller!,
               fit: resizeModes[index],
+              subtitleViewConfiguration:  v.SubtitleViewConfiguration(
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 45,
+                  height: 2,
+                  fontFamily: "Poppins-Bold",
+                  backgroundColor: Colors.black.withOpacity(0.5)
+                )
+              ),
             ),
             Positioned.fill(child: overlay()),
             Positioned.fill(
