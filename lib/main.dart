@@ -15,6 +15,7 @@ import 'package:azyx/Widgets/common/custom_nav_bar.dart';
 import 'package:azyx/Widgets/common/gradient_background.dart';
 import 'package:azyx/Widgets/header.dart';
 import 'package:azyx/api/EpisodeDetails/GetMediaIDs/GetMediaIDs.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -30,6 +31,16 @@ import 'package:provider/provider.dart';
 late Isar isar;
 
 WebViewEnvironment? webViewEnvironment;
+
+class MyCustomScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus
+      };
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,6 +76,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<ThemeProvider>(context);
     return GetMaterialApp(
+      scrollBehavior: MyCustomScrollBehavior(),
       debugShowCheckedModeBanner: false,
       theme: provider.themeData,
       home: const HomePage(),

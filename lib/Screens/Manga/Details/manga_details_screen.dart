@@ -77,7 +77,7 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
 
   Future<void> getChapters(String link, Source source) async {
     final episodeResult = await getDetail(url: link, source: source);
-    log(episodeResult.chapters!.length.toString());
+    log(episodeResult.chapters!.first.dateUpload.toString());
     totalChapters.value = chaptersList.length.toString();
     //Step:4 - Mapping Chapters
     chaptersList.value =
