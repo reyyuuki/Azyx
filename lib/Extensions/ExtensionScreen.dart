@@ -1,7 +1,6 @@
 // ignore_for_file: file_names
 
 import 'package:azyx/Extensions/ExtensionList.dart';
-import 'package:azyx/Screens/Home/home_screen.dart';
 import 'package:azyx/Widgets/ScrollConfig.dart';
 import 'package:azyx/api/Mangayomi/Model/Source.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
@@ -83,7 +82,7 @@ class _BrowseScreenState extends ConsumerState<ExtensionScreen>
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const HomeScreen()));
+                          builder: (context) => const HomePage()));
                 },
                 icon: const Icon(Broken.arrow_left_2)),
             iconTheme: IconThemeData(color: theme.primary),
