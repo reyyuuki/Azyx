@@ -4,15 +4,19 @@ import 'dart:developer';
 import 'package:azyx/Classes/episode_class.dart';
 import 'package:azyx/Classes/wrong_title_search.dart';
 import 'package:azyx/Controllers/ui_setting_controller.dart';
+import 'package:azyx/Screens/Manga/Details/tabs/widgets/chapter_item.dart';
+import 'package:azyx/Screens/Manga/Read/read.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/anime/mapped_title.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_normal_card.dart';
+import 'package:azyx/Widgets/common/back_button.dart';
 import 'package:azyx/api/Mangayomi/Model/Source.dart';
 import 'package:azyx/api/Mangayomi/Search/get_detail.dart';
 import 'package:azyx/api/Mangayomi/Search/search.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
+import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -161,8 +165,8 @@ class _WatchSectionState extends State<ReadSection> {
                   shadows: [
                     BoxShadow(
                         color: Theme.of(context).colorScheme.inversePrimary,
-                        blurRadius: 10 * widget.settings.blurMultiplier,
-                        spreadRadius: 2 * widget.settings.spreadMultiplier)
+                        blurRadius: 10.blurMultiplier(),
+                        spreadRadius: 2.spreadMultiplier())
                   ],
                 ))
           ],
@@ -230,7 +234,21 @@ class _WatchSectionState extends State<ReadSection> {
             ? const Center(child: CircularProgressIndicator())
             : Column(
                 children: widget.chaptersList.map((ch) {
-                  return Text(ch.title!);
+                  return GestureDetector(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return ReadPage(
+                              source: widget.selectedSource.value,
+                              chapterList: widget.chaptersList,
+                              link: ch.link!,
+                              mangaTitle: widget.animeTitle.value);
+                        }));
+                      },
+                      child: ChapterItem(
+                        chapter: ch,
+                        setting: widget.settings,
+                      ));
                 }).toList(),
               ))
       ],
