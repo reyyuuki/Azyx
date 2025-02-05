@@ -81,9 +81,9 @@ class CustomSliderState extends State<CustomSlider> {
       child: Slider(
         min: widget.min,
         max: widget.max,
-        onChanged: widget.isLocked! ? null : widget.onChanged,
-        onChangeStart: widget.isLocked! ? null : widget.onDragStart,
-        onChangeEnd: widget.isLocked! ? null : widget.onDragEnd,
+        onChanged: widget.isLocked == true ? null : widget.onChanged,
+        onChangeStart: widget.isLocked == true ? null : widget.onDragStart,
+        onChangeEnd: widget.isLocked == true ? null : widget.onDragEnd,
         divisions: widget.divisions,
         value: widget.value,
         secondaryTrackValue: widget.secondaryTrackValue,
