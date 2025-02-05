@@ -246,7 +246,7 @@ class _WatchSectionState extends State<ReadSection> {
             borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
         builder: (context) {
           return AzyXGradientContainer(
-            height: Get.height * 0.7,
+            height: Get.height * 0.9,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
             padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
             child: Column(

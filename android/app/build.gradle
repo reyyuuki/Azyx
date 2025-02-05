@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.azyx"
-    compileSdk = 34
+    compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
