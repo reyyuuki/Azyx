@@ -69,7 +69,7 @@ class MangaDetailsSection extends StatelessWidget {
             const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AzyXText("Japanese: ",
+                AzyXText("Romaji: ",
                     style: TextStyle(fontFamily: "Poppins-Bold")),
                 SizedBox(
                   height: 5,
