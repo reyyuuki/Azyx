@@ -30,6 +30,7 @@ class _ReadPageState extends State<ReadPage> {
   final Rx<int> totalImages = 0.obs;
   final Rx<String> chapterTitle = ''.obs;
   final Rx<String> chapterUrl = ''.obs;
+  final Rx<bool> isShowed = false.obs;
 
   @override
   void initState() {
@@ -54,13 +55,20 @@ class _ReadPageState extends State<ReadPage> {
       body: Stack(
         children: [
           Obx(
-            () => SingleChildScrollView(
-              child: Column(
-                children: [
-                  ...pagesList.map((p) {
-                    return CachedNetworkImage(imageUrl: p.url, fit: BoxFit.cover);
-                  })
-                ],
+            () => GestureDetector(
+              onTap: () {
+                isShowed.value = !isShowed.value;
+                log("tapped");
+              },
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    ...pagesList.map((p) {
+                      return CachedNetworkImage(
+                          imageUrl: p.url, fit: BoxFit.cover);
+                    })
+                  ],
+                ),
               ),
             ),
           ),
@@ -68,6 +76,7 @@ class _ReadPageState extends State<ReadPage> {
             totalImages: totalImages,
             mangaTitle: widget.mangaTitle,
             chapterTitle: chapterTitle,
+            isShowed: isShowed,
           )
         ],
       ),

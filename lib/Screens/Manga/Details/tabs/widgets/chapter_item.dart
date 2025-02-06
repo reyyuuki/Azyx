@@ -2,6 +2,7 @@ import 'package:azyx/Classes/episode_class.dart';
 import 'package:azyx/Controllers/ui_setting_controller.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
+import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
 
 class ChapterItem extends StatelessWidget {
@@ -54,10 +55,17 @@ class ChapterItem extends StatelessWidget {
               ],
             ),
           ),
-          Container(
+          AzyXContainer(
               padding: const EdgeInsets.all(10),
               margin: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).colorScheme.primary,
+                      blurRadius: 10.blurMultiplier(),
+                      spreadRadius: 2.spreadMultiplier()
+                    )
+                  ],
                   color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(10)),
               child: AzyXText(chapter.number!.toString(),style: TextStyle(fontFamily: "Poppins-Bold",color: Theme.of(context).colorScheme.inversePrimary),)),
