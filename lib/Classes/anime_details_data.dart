@@ -1,6 +1,9 @@
-import 'package:azyx/Classes/anime_class.dart';
+import 'dart:developer';
 
-class DetailsData {
+import 'package:azyx/Classes/anime_class.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
+
+class AnilistMediaData {
   int? id;
   String? title;
   String? japaneseTitle;
@@ -10,20 +13,16 @@ class DetailsData {
   String? rating;
   String? premiered;
   String? type;
-  String? season;
-  String? duration;
   String? quality;
   String? status;
-  String? aired;
   int? popularity;
   int? timeUntilAiring;
-  List<String>? studios;
   List<String>? genres;
   List<Anime>? relations;
   List<Anime>? recommendations;
   List<Character>? characters;
 
-  DetailsData({
+  AnilistMediaData({
     this.id,
     this.title,
     this.japaneseTitle,
@@ -33,14 +32,10 @@ class DetailsData {
     this.rating,
     this.premiered,
     this.type,
-    this.season,
-    this.duration,
     this.quality,
     this.status,
-    this.aired,
     this.popularity,
     this.timeUntilAiring,
-    this.studios,
     this.genres,
     this.relations,
     this.recommendations,
@@ -49,22 +44,28 @@ class DetailsData {
 
   static String formatAiredDates(
       Map<String, dynamic>? startDate, Map<String, dynamic>? endDate) {
-    String format(Map<String, dynamic>? date) {
-      if (date == null || date['year'] == null) return '';
-      return '${date['year']}-${date['month']?.toString().padLeft(2, '0') ?? '??'}-${date['day']?.toString().padLeft(2, '0') ?? '??'}';
+    try {
+      String format(Map<String, dynamic>? date) {
+        if (date == null || date['year'] == null) return '';
+        return '${date['year']}-${date['month']?.toString().padLeft(2, '0') ?? '??'}-${date['day']?.toString().padLeft(2, '0') ?? '??'}';
+      }
+
+      final start = format(startDate);
+      final end = format(endDate);
+
+      if (start.isEmpty) return '';
+      return end.isEmpty ? start : '$start to $end';
+    } catch (e) {
+      log('Error: $e');
+      azyxSnackBar(e.toString());
+      return "";
     }
-
-    final start = format(startDate);
-    final end = format(endDate);
-
-    if (start.isEmpty) return '';
-    return end.isEmpty ? start : '$start to $end';
   }
 
-  factory DetailsData.fromJson(Map<String, dynamic> json, isManga) {
-    return DetailsData(
-      id: json['id'],
-      title: json['title']['english'] ?? json['title']['romaji'],
+  factory AnilistMediaData.fromJson(Map<dynamic, dynamic> json, bool isManga) {
+    return AnilistMediaData(
+      id: json['id'] ?? 1,
+      title: json['title']['english'] ?? json['title']['romaji'] ?? "Unknown",
       japaneseTitle: json['title']['native'] ?? "",
       description: json['description'],
       image: json['coverImage']['large'],
@@ -76,34 +77,64 @@ class DetailsData {
           ? '${json['season']} ${json['seasonYear']}'
           : 'N/A',
       type: json['type'],
-      season: json['season'],
-      duration: !isManga ? ("${json['duration']}m").toString() : "",
       quality: json['format'] ?? "",
-      status: json['status'],
-      aired:
-          !isManga ? formatAiredDates(json['startDate'], json['endDate']) : "",
-      popularity: json['popularity'],
-      timeUntilAiring: !isManga
-          ? json['nextAiringEpisode'] != null &&
-                  json['nextAiringEpisode']['timeUntilAiring'] != null
-              ? json['nextAiringEpisode']['timeUntilAiring']
-              : 0
-          : 0,
-      studios: (json['studios']['nodes'] as List<dynamic>?)
-          ?.map((e) => e['name'] as String)
-          .toList(),
-      genres:
-          (json['genres'] as List<dynamic>?)?.map((e) => e as String).toList(),
-      relations: (json['relations']['edges'] as List<dynamic>?)
-          ?.map((e) => Anime.fromJson(e['node']))
-          .toList(),
-      recommendations: (json['recommendations']['edges'] as List<dynamic>?)
-          ?.map((e) => Anime.fromJson(e['node']['mediaRecommendation']))
-          .toList(),
-      characters: (json['characters']['edges'] as List<dynamic>?)
-          ?.map((e) => Character.fromJson(e['node']))
-          .toList(),
+      status: json['status'] ?? '',
+      popularity: json['popularity'] ?? "",
+      timeUntilAiring:
+          !isManga ? (json['nextAiringEpisode']?['timeUntilAiring']) : 0,
+      genres: (json['genres'] as List?)?.map((e) => e as String).toList() ?? [],
+      relations: (json['relations']['edges'] as List?)
+              ?.map((e) => Anime.fromJson(e['node']))
+              .toList() ??
+          [],
+      recommendations: (json['recommendations']['edges'] as List?)
+              ?.map((e) => Anime.fromJson(e['node']['mediaRecommendation']))
+              .toList() ??
+          [],
+      characters: (json['characters']['edges'] as List?)
+              ?.map((e) => Character.fromJson(e['node']))
+              .toList() ??
+          [],
     );
+  }
+
+  dynamic toJson(bool isManga) {
+    return {
+      'id': id,
+      'title': {
+        'english': title,
+        'romaji': title,
+        'native': japaneseTitle,
+      },
+      'description': description,
+      'coverImage': {
+        'large': image,
+      },
+      'bannerImage': coverImage != image ? coverImage : null,
+      'averageScore':
+          (double.parse(rating!) * 10).toInt(),
+      'type': type,
+      'format': quality,
+      'status': status,
+      'popularity': popularity,
+      'nextAiringEpisode':
+          timeUntilAiring != 0 ? {'timeUntilAiring': timeUntilAiring} : null,
+      'genres': genres != null ? (genres as List).map((e) => e).toList() : null,
+      'relations': {
+        'edges': relations?.map((e) => {'node': e.toJson()}).toList() ?? [],
+      },
+      'recommendations': {
+        'edges': recommendations
+                ?.map((e) => {
+                      'node': {'mediaRecommendation': e.toJson()}
+                    })
+                .toList() ??
+            []
+      },
+      'characters': {
+        'edges': characters?.map((e) => {'node': e.toJson()}).toList() ?? []
+      },
+    };
   }
 }
 
@@ -114,11 +145,23 @@ class Character {
 
   Character({this.name, this.image, this.popularity});
 
-  factory Character.fromJson(Map<String, dynamic> json) {
+  factory Character.fromJson(dynamic json) {
     return Character(
       name: json['name']['full'] ?? '',
       image: json['image']['large'] ?? "",
-      popularity: json['favourites'] ?? "",
+      popularity: json['favourites'] ?? 0,
     );
+  }
+
+  dynamic toJson() {
+    return {
+      'name': {
+        'full': name,
+      },
+      'image': {
+        'large': image,
+      },
+      'favourites': popularity,
+    };
   }
 }

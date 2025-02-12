@@ -9,7 +9,7 @@ class Episode {
   String? date;
   String number;
   String? thumbnail;
-  String? desc;
+  String desc;
   bool? filler;
 
   Episode(
@@ -18,17 +18,29 @@ class Episode {
       this.url,
       required this.number,
       this.thumbnail,
-      this.desc,
+     required this.desc,
       this.filler});
 
-  factory Episode.fromJson(Map<String, dynamic> data, number) {
+  factory Episode.fromJson(Map<dynamic, dynamic> data, String? number) {
     return Episode(
         title: data['name'] ?? "",
         url: data['url'] ?? "",
-        number: number,
+        number: number ?? data['number'],
+        desc: data['desc'] ?? '',
         date: data['dateUpload'] != null
-            ? formatDate(int.parse(data['dateUpload']))
-            : "??");
+            ? formatDate(int.tryParse(data['dateUpload'] ?? 12) ?? 1)
+            : data['dateUpload'] ?? "??");
+  }
+  Map<dynamic, dynamic> toJson() {
+    return {
+      'name': title ?? '',
+      'url': url ?? '',
+      'dateUpload': date ?? '',
+      'number': number,
+      'thumbnail': thumbnail ?? '',
+      'desc': desc ?? "",
+      'filler': filler
+    };
   }
 }
 

@@ -2,10 +2,11 @@
 
 import 'dart:developer';
 
+import 'package:azyx/Classes/anime_class.dart';
 import 'package:azyx/Classes/anime_details_data.dart';
 import 'package:azyx/Classes/episode_class.dart';
+import 'package:azyx/Classes/offline_item.dart';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
-import 'package:azyx/Controllers/ui_setting_controller.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/details_section.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/watch_section.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
@@ -23,16 +24,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 class AnimeDetailsScreen extends ConsumerStatefulWidget {
-  final int id;
-  final String title;
   final String tagg;
-  final String image;
+  final Anime? smallMedia;
+  final OfflineItem? allData;
+  final bool isOffline;
   const AnimeDetailsScreen(
       {super.key,
-      required this.id,
       required this.tagg,
-      required this.title,
-      required this.image});
+      this.isOffline = false,
+      this.smallMedia,
+      this.allData});
 
   @override
   ConsumerState<AnimeDetailsScreen> createState() => _DetailsScreenState();
@@ -40,9 +41,11 @@ class AnimeDetailsScreen extends ConsumerStatefulWidget {
 
 class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
     with SingleTickerProviderStateMixin {
-  final AnilistDataController _controller = Get.put(AnilistDataController());
-  final UiSettingController _settings = Get.put(UiSettingController());
-  final Rx<DetailsData> mediaData = DetailsData().obs;
+  final Rx<String> title = ''.obs;
+  final Rx<String> image = ''.obs;
+  final Rx<String> coverImage = ''.obs;
+  final Rx<int> id = 0.obs;
+  final Rx<AnilistMediaData> mediaData = AnilistMediaData().obs;
   final Rx<bool> isLoading = true.obs;
   final RxList<Source> installedExtensions = RxList<Source>();
   final Rx<Source> selectedSource = Source().obs;
@@ -52,15 +55,19 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
   late TabController _tabBarController;
   final Rx<String> _anilistError = ''.obs;
   final Rx<bool> _extenstionError = false.obs;
+
   Future<void> loadData() async {
     try {
-      final response = await _controller.fetchAnilistAnimeDetails(widget.id);
+      final response =
+          await anilistDataController.fetchAnilistAnimeDetails(id.value);
       mediaData.value = response;
       isLoading.value = false;
+      coverImage.value = mediaData.value.coverImage ?? image.value;
     } catch (e) {
       _anilistError.value = e.toString();
       log("Error while getting data for details: $e");
     }
+    loadDetails(selectedSource.value);
   }
 
   Future<void> _initExtensions() async {
@@ -71,7 +78,26 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
         extensions.where((source) => source.isAdded!).toList();
     if (installedExtensions.isNotEmpty) {
       selectedSource.value = installedExtensions.first;
-      loadDetails(installedExtensions.first);
+    }
+  }
+
+  void convertData() {
+    _initExtensions();
+    if (widget.isOffline) {
+      image.value = widget.allData!.mediaData.image!;
+      title.value = widget.allData!.mediaData.title!;
+      id.value = widget.allData!.mediaData.id!;
+      episodesList.value = widget.allData!.episodesList;
+      animeTitle.value = widget.allData!.animeTitle ?? '';
+      mediaData.value = widget.allData!.mediaData;
+      coverImage.value = widget.allData?.mediaData.coverImage! ?? image.value;
+      totalEpisodes.value = episodesList.length.toString();
+      isLoading.value = false;
+    } else {
+      image.value = widget.smallMedia!.image!;
+      title.value = widget.smallMedia!.title!;
+      id.value = widget.smallMedia!.id!;
+      loadData();
     }
   }
 
@@ -86,7 +112,7 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
     episodesList.value = mappedList;
     totalEpisodes.value = episodesList.length.toString();
     //Step:2 - Fetching AnifyEpisodes
-    final temp = await fetchAnifyEpisodes(widget.id, mappedList);
+    final temp = await fetchAnifyEpisodes(widget.smallMedia!.id!, mappedList);
     episodesList.value = temp;
     setState(() {});
   }
@@ -95,12 +121,15 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
     try {
       //Step:1 - Searching Anime
       final response = await search(
-          source: source, query: widget.title, page: 1, filterList: []);
+          source: source,
+          query: widget.smallMedia!.title!,
+          page: 1,
+          filterList: []);
 
       //Step:2 - Mapping Anime by title
       if (response != null) {
         final result =
-            await mappingHelper(widget.title, response.toJson()['list']);
+            await mappingHelper(title.value, response.toJson()['list']);
 
         //Step:3 - Fetchting details
         if (result != null) {
@@ -120,8 +149,7 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
   void initState() {
     super.initState();
     _tabBarController = TabController(length: 2, vsync: this);
-    loadData();
-    _initExtensions();
+    convertData();
   }
 
   @override
@@ -131,9 +159,8 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
       body: CustomScrollView(
         slivers: [
           ScrollableAppBar(
-            settings: _settings,
             mediaData: mediaData,
-            image: widget.image,
+            image: image.value,
             tagg: widget.tagg,
           ),
           SliverPersistentHeader(
@@ -206,7 +233,11 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
                             : const CircularProgressIndicator(),
                       )
                     : DetailsSection(
-                        mediaData: mediaData, settings: _settings)),
+                        animeTitle: animeTitle.value,
+                        episodesList: episodesList,
+                        mediaData: mediaData,
+                        index: _tabBarController.index,
+                      )),
                 Obx(
                   () => installedExtensions.isEmpty
                       ? const Placeholder()
@@ -226,10 +257,10 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
                             _extenstionError.value = false;
                             loadDetails(value);
                           },
+                          mediaData: mediaData.value,
                           hasError: _extenstionError,
-                          id: widget.id,
-                          image: mediaData.value.coverImage ?? widget.image,
-                          settings: _settings,
+                          id: id.value,
+                          image: coverImage.value,
                           animeTitle: animeTitle,
                           installedExtensions: installedExtensions,
                           selectedSource: selectedSource,
