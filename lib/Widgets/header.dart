@@ -1,4 +1,4 @@
-import 'dart:developer';
+
 
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Extensions/ExtensionScreen.dart';
@@ -12,21 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-class Header extends StatefulWidget {
+class Header extends StatelessWidget {
   const Header({super.key});
-
-  @override
-  State<Header> createState() => _HeaderState();
-}
-
-class _HeaderState extends State<Header> {
-  final AnilistAuth controller = Get.put(AnilistAuth());
-
-  @override
-  void initState() {
-    super.initState();
-    log("User: ${controller.userData.value.avatar}");
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,8 +28,8 @@ class _HeaderState extends State<Header> {
             children: [
               Obx(
                 () => AzyXText(
-                  controller.userData.value.name != null
-                      ? controller.userData.value.name!
+                  anilistAuthController.userData.value.name != null
+                      ? anilistAuthController.userData.value.name!
                       : "Guest",
                   style:
                       const TextStyle(fontFamily: "Poppins-Bold", fontSize: 18),
@@ -66,11 +53,11 @@ class _HeaderState extends State<Header> {
                   decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surfaceContainer,
                       borderRadius: BorderRadius.circular(50)),
-                  child: controller.userData.value.avatar != null
+                  child: anilistAuthController.userData.value.avatar != null
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(50),
                           child: CachedNetworkImage(
-                            imageUrl: controller.userData.value.avatar!,
+                            imageUrl: anilistAuthController.userData.value.avatar!,
                             fit: BoxFit.cover,
                           ),
                         )
@@ -116,8 +103,8 @@ class _HeaderState extends State<Header> {
                     children: [
                       Obx(
                         () => AzyXText(
-                          controller.userData.value.name != null
-                              ? controller.userData.value.name!
+                          anilistAuthController.userData.value.name != null
+                              ? anilistAuthController.userData.value.name!
                               : "Guest",
                           style: const TextStyle(
                               fontFamily: "Poppins-Bold", fontSize: 18),
@@ -132,11 +119,11 @@ class _HeaderState extends State<Header> {
                                   .colorScheme
                                   .surfaceContainer,
                               borderRadius: BorderRadius.circular(50)),
-                          child: controller.userData.value.avatar != null
+                          child: anilistAuthController.userData.value.avatar != null
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(50),
                                   child: CachedNetworkImage(
-                                    imageUrl: controller.userData.value.avatar!,
+                                    imageUrl: anilistAuthController.userData.value.avatar!,
                                     fit: BoxFit.cover,
                                   ),
                                 )
@@ -200,16 +187,16 @@ class _HeaderState extends State<Header> {
                       );
                     },
                     child: tile("Settings", Icons.settings)),
-                controller.userData.value.name != null
+                anilistAuthController.userData.value.name != null
                     ? GestureDetector(
                         onTap: () {
-                          controller.logout();
+                          anilistAuthController.logout();
                           Get.back();
                         },
                         child: tile("LogOut", Icons.logout))
                     : GestureDetector(
                         onTap: () {
-                          controller.login();
+                          anilistAuthController.login();
                           Get.back();
                         },
                         child: tile("Login", Icons.login))

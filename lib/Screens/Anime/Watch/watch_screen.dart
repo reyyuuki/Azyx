@@ -2,9 +2,8 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:math' as max;
 import 'package:azyx/Classes/episode_class.dart';
-import 'package:azyx/Classes/player_class.dart';
+import 'package:azyx/Classes/anime_all_data.dart';
 import 'package:azyx/Constants/constants.dart';
-import 'package:azyx/Controllers/ui_setting_controller.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/bottom_sheets.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/custom_controls.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/episode_list_drawer.dart';
@@ -24,7 +23,7 @@ import 'package:screen_brightness/screen_brightness.dart';
 import 'package:volume_controller/volume_controller.dart';
 
 class WatchScreen extends StatefulWidget {
-  final PlayerData playerData;
+  final AnimeAllData playerData;
   const WatchScreen({super.key, required this.playerData});
 
   @override
@@ -44,14 +43,13 @@ class _WatchScreenState extends State<WatchScreen> {
   final Rx<bool> isControlsLocked = false.obs;
   final Rx<bool> showEpisodesBox = false.obs;
   final RxList<Episode> filteredEpisodes = RxList();
-  final Rx<PlayerData> animeData = PlayerData().obs;
+  final Rx<AnimeAllData> animeData = AnimeAllData().obs;
   final Rx<String> episodeNumber = '1'.obs;
   final Rx<String> episodeTitle = ''.obs;
   final Rx<Duration> position = Duration.zero.obs;
   final Rx<Duration> totalDuration = Duration.zero.obs;
   final Rx<double> selectedSpeed = 1.0.obs;
   final Rx<ResizeModes> currentMode = ResizeModes.contain.obs;
-  final UiSettingController settingController = Get.put(UiSettingController());
   final Rx<bool> isSeeking = false.obs;
   final Rx<bool> _volumeInterceptEventStream = false.obs;
   final Rx<double> _volumeValue = 0.0.obs;
@@ -333,7 +331,7 @@ class _WatchScreenState extends State<WatchScreen> {
               : IconButton(
                   onPressed: () {
                     changeResizeMode();
-                    azyxSnackBar("Resize Mode", currentMode.value.name);
+                    azyxSnackBar(currentMode.value.name);
                   },
                   icon: Obx(
                     () => Icon(
@@ -676,7 +674,6 @@ class _WatchScreenState extends State<WatchScreen> {
               () => IgnorePointer(
                 ignoring: !showControls.value,
                 child: CustomControls(
-                  settingController: settingController,
                   position: position,
                   duration: totalDuration,
                   player: player,
@@ -690,12 +687,12 @@ class _WatchScreenState extends State<WatchScreen> {
                     if (isNext && filteredEpisodes.length > index) {
                       player.open(Media(""));
                       episodeTitle.value = filteredEpisodes[index + 1].title!;
-                      episodeNumber.value = filteredEpisodes[index + 1].number!;
+                      episodeNumber.value = filteredEpisodes[index + 1].number;
                       loadEpisodeurl(filteredEpisodes[index + 1].url!);
                     } else if (index > 0) {
                       player.open(Media(""));
                       episodeTitle.value = filteredEpisodes[index - 1].title!;
-                      episodeNumber.value = filteredEpisodes[index - 1].number!;
+                      episodeNumber.value = filteredEpisodes[index - 1].number;
                       loadEpisodeurl(filteredEpisodes[index - 1].url!);
                     } else {
                       log("No episode");
@@ -719,7 +716,6 @@ class _WatchScreenState extends State<WatchScreen> {
               showEpisodesBox: showEpisodesBox,
               animeData: animeData,
               episodeNumber: episodeNumber,
-              settingController: settingController,
               filteredEpisodes: filteredEpisodes,
             ),
             Positioned.fill(

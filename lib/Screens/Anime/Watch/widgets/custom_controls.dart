@@ -1,8 +1,8 @@
-import 'package:azyx/Controllers/ui_setting_controller.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/slider_bar.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
+import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionicons/ionicons.dart';
@@ -18,7 +18,6 @@ class CustomControls extends StatefulWidget {
   final Rx<Duration> position;
   final Rx<bool> isPotraitOrientation;
   final Rx<Duration> duration;
-  final UiSettingController settingController;
   const CustomControls(
       {super.key,
       required this.player,
@@ -28,7 +27,6 @@ class CustomControls extends StatefulWidget {
       required this.position,
       required this.duration,
       required this.isPotraitOrientation,
-      required this.settingController,
       required this.changeEpisode,
       required this.isControlsLocked});
 
@@ -110,12 +108,9 @@ class _CustomControlsState extends State<CustomControls> {
                             color: Theme.of(context)
                                 .colorScheme
                                 .primary
-                                .withOpacity(
-                                    widget.settingController.glowMultiplier),
-                            blurRadius:
-                                10 * widget.settingController.blurMultiplier,
-                            spreadRadius:
-                                3 * widget.settingController.spreadMultiplier)
+                                .withOpacity(1.glowMultiplier()),
+                            blurRadius: 10.blurMultiplier(),
+                            spreadRadius: 3.spreadMultiplier())
                       ],
                       borderRadius: BorderRadius.circular(50)),
                   child: Icon(
@@ -185,11 +180,9 @@ class _CustomControlsState extends State<CustomControls> {
                   child: widget.topBar)),
           Obx(
             () => Expanded(
-                child: AnimatedContainer(
-              transform: Matrix4.translationValues(
-                  widget.showControls.value ? 0 : -Get.width, 0, 0),
+                child: AnimatedOpacity(
+              opacity: widget.showControls.value ? 1 : 0,
               duration: const Duration(milliseconds: 1000),
-              curve: Curves.easeInOutCubicEmphasized,
               child: widget.isControlsLocked()
                   ? lockedCenterControls()
                   : centerControls(),

@@ -5,10 +5,13 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
 
+final AnilistDataController anilistDataController = Get.find();
+
 class AnilistDataController extends GetxController {
   final String graphqlEndpoint = 'https://graphql.anilist.co';
 
-  Future<DetailsData> fetchAnilistAnimeDetails(int animeId) async {
+  Future<AnilistMediaData> fetchAnilistAnimeDetails(int animeId,
+      {dynamic offlineData}) async {
     const String query = '''
     query (\$id: Int) {
       Media(id: \$id) {
@@ -123,7 +126,8 @@ class AnilistDataController extends GetxController {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final media = data['data']['Media'];
-        return DetailsData.fromJson(media, false);
+        offlineData = data;
+        return AnilistMediaData.fromJson(media, false);
       } else {
         log('Error response: ${response.body}');
         throw Exception('Failed to load anime details: ${response.body}');
@@ -134,7 +138,7 @@ class AnilistDataController extends GetxController {
     }
   }
 
-  Future<DetailsData> fetchAnilistMangaDetails(int mangaId) async {
+  Future<AnilistMediaData> fetchAnilistMangaDetails(int mangaId) async {
     const String graphqlEndpoint = 'https://graphql.anilist.co';
     const String query = '''
   query (\$id: Int) {
@@ -240,7 +244,7 @@ class AnilistDataController extends GetxController {
         final data = json.decode(response.body);
         final media = data['data']['Media'];
 
-        return DetailsData.fromJson(media, true);
+        return AnilistMediaData.fromJson(media, true);
       } else {
         log('Error response: ${response.body}');
         throw Exception('Failed to load manga details: ${response.body}');

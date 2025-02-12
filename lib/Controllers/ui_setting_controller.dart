@@ -2,6 +2,8 @@ import 'package:azyx/HiveClass/ui_setting_class.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+final UiSettingController uiSettingController = Get.find();
+
 class UiSettingController extends GetxController {
   Rx<UiSettingClass> uiSettings = UiSettingClass().obs;
   @override

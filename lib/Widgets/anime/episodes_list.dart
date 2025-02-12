@@ -3,8 +3,7 @@
 import 'dart:developer';
 
 import 'package:azyx/Classes/episode_class.dart';
-import 'package:azyx/Classes/player_class.dart';
-import 'package:azyx/Controllers/ui_setting_controller.dart';
+import 'package:azyx/Classes/anime_all_data.dart';
 import 'package:azyx/Screens/Anime/Watch/watch_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
@@ -20,7 +19,6 @@ import 'package:get/get.dart';
 class EpisodesList extends StatelessWidget {
   final List<Episode> episodeList;
   final String image;
-  final UiSettingController settings;
   final Source selectedSource;
   final String title;
   final int id;
@@ -29,13 +27,12 @@ class EpisodesList extends StatelessWidget {
       required this.episodeList,
       required this.image,
       required this.selectedSource,
-      required this.settings,
       required this.title,
       required this.id});
 
   final RxList<Video> epiosdeUrls = RxList();
   final Rx<String> episodeTitle = ''.obs;
-  PlayerData playerData = PlayerData();
+  AnimeAllData playerData = AnimeAllData();
 
   Future<void> fetchEpisodeLink(
       String url, String number, String setTitle, context) async {
@@ -51,7 +48,6 @@ class EpisodesList extends StatelessWidget {
       log("Error while fetching episode url: $e");
     }
   }
-
 
   void displayBottomSheet(BuildContext context, String number) {
     showModalBottomSheet(
@@ -103,7 +99,7 @@ class EpisodesList extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (context) => WatchScreen(
-                playerData: PlayerData(
+                playerData: AnimeAllData(
                     url: url,
                     episodeTitle: episodeTitle.value,
                     title: title,
@@ -138,12 +134,12 @@ class EpisodesList extends StatelessWidget {
     return Column(
         children: episodeList.map((episode) {
       return GestureDetector(
-         onTap: () {
+        onTap: () {
           if (episodeTitle.value == episode.title) {
-            displayBottomSheet(context, episode.number!);
+            displayBottomSheet(context, episode.number);
           } else {
             showloader(context);
-            fetchEpisodeLink(episode.url!, episode.number!, title, context);
+            fetchEpisodeLink(episode.url!, episode.number, title, context);
           }
         },
         child: AzyXContainer(

@@ -6,6 +6,7 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/slider_bar.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
+import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionicons/ionicons.dart';
@@ -14,9 +15,8 @@ import 'package:provider/provider.dart';
 import '../../../Widgets/common/custom_app_bar.dart';
 
 class UiSettings extends StatelessWidget {
-  UiSettings({super.key});
+  const UiSettings({super.key});
 
-  final UiSettingController settings = Get.put(UiSettingController());
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ThemeProvider>(context, listen: false);
@@ -92,7 +92,7 @@ class UiSettings extends StatelessWidget {
                     children: [
                       Obx(
                         () => AzyXText(
-                          settings.blurMultiplier.toStringAsFixed(1),
+                          uiSettingController.blurMultiplier.toStringAsFixed(1),
                           style: const TextStyle(fontFamily: "Poppins-Bold"),
                         ),
                       ),
@@ -107,17 +107,18 @@ class UiSettings extends StatelessWidget {
                                   color: Theme.of(context)
                                       .colorScheme
                                       .primary
-                                      .withOpacity(settings.glowMultiplier),
-                                  blurRadius: 5 * settings.blurMultiplier)
+                                      .withOpacity(1.glowMultiplier()),
+                                  blurRadius: 5..blurMultiplier())
                             ]),
                             child: CustomSlider(
                                 onChanged: (double newValue) {
-                                  settings.blurMultiplier = newValue;
+                                  uiSettingController.blurMultiplier = newValue;
                                 },
                                 divisions: 10,
                                 max: 5.0,
                                 min: 1.0,
-                                value: double.parse(settings.blurMultiplier
+                                value: double.parse(uiSettingController
+                                    .blurMultiplier
                                     .toStringAsFixed(2))),
                           ),
                         ),
@@ -184,7 +185,7 @@ class UiSettings extends StatelessWidget {
                     children: [
                       Obx(
                         () => AzyXText(
-                          settings.glowMultiplier.toStringAsFixed(1),
+                          uiSettingController.glowMultiplier.toStringAsFixed(1),
                           style: const TextStyle(fontFamily: "Poppins-Bold"),
                         ),
                       ),
@@ -199,17 +200,18 @@ class UiSettings extends StatelessWidget {
                                   color: Theme.of(context)
                                       .colorScheme
                                       .primary
-                                      .withOpacity(settings.glowMultiplier),
-                                  blurRadius: 5 * settings.blurMultiplier)
+                                      .withOpacity(1.glowMultiplier()),
+                                  blurRadius: 5.blurMultiplier())
                             ]),
                             child: CustomSlider(
                                 onChanged: (double newValue) {
-                                  settings.glowMultiplier = newValue;
+                                  uiSettingController.glowMultiplier = newValue;
                                 },
                                 divisions: 10,
                                 max: 1.0,
                                 min: 0.0,
-                                value: double.parse(settings.glowMultiplier
+                                value: double.parse(uiSettingController
+                                    .glowMultiplier
                                     .toStringAsFixed(2))),
                           ),
                         ),

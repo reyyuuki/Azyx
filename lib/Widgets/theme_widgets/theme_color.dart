@@ -188,7 +188,6 @@ class _ThemeModesState extends State<ThemeColor> {
                             itemBuilder: (context, index) {
                               bool isSelected =
                                   paletteList[index] == selectedPalette;
-
                               return GestureDetector(
                                 onTap: () {
                                   dialogState(() {

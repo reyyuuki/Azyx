@@ -2,9 +2,9 @@
 
 import 'dart:developer';
 
+import 'package:azyx/Classes/anime_details_data.dart';
 import 'package:azyx/Classes/episode_class.dart';
-import 'package:azyx/Classes/player_class.dart';
-import 'package:azyx/Controllers/ui_setting_controller.dart';
+import 'package:azyx/Classes/anime_all_data.dart';
 import 'package:azyx/Screens/Anime/Watch/watch_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
@@ -13,29 +13,30 @@ import 'package:azyx/Widgets/common/shimmer_effect.dart';
 import 'package:azyx/api/Mangayomi/Eval/dart/model/video.dart';
 import 'package:azyx/api/Mangayomi/Model/Source.dart';
 import 'package:azyx/api/Mangayomi/Search/getVideo.dart';
+import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AnifyEpisodesWidget extends StatelessWidget {
   final RxList<Episode> anifyEpisodes;
-  final UiSettingController settings;
   final Source selectedSource;
   final String title;
   final int id;
   final String image;
+  final AnilistMediaData data;
   AnifyEpisodesWidget(
       {super.key,
       required this.title,
       required this.id,
       required this.anifyEpisodes,
-      required this.settings,
       required this.image,
+      required this.data,
       required this.selectedSource});
 
   final RxList<Video> episodeUrls = RxList();
   final Rx<String> episodeTitle = ''.obs;
-  PlayerData playerData = PlayerData();
+  AnimeAllData playerData = AnimeAllData();
   final Rx<bool> hasError = false.obs;
 
   Future<void> fetchEpisodeLink(
@@ -117,7 +118,7 @@ class AnifyEpisodesWidget extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (context) => WatchScreen(
-                playerData: PlayerData(
+                playerData: AnimeAllData(
                     url: url,
                     episodeTitle: episodeTitle.value,
                     title: title,
@@ -208,9 +209,9 @@ class AnifyEpisodesWidget extends StatelessWidget {
                                   color: Theme.of(context)
                                       .colorScheme
                                       .primary
-                                      .withOpacity(settings.glowMultiplier),
-                                  blurRadius: 10 * settings.blurMultiplier,
-                                  spreadRadius: 2 * settings.spreadMultiplier)
+                                      .withOpacity(1.glowMultiplier()),
+                                  blurRadius: 10.blurMultiplier(),
+                                  spreadRadius: 2.spreadMultiplier())
                             ],
                           ),
                           child: AzyXText(

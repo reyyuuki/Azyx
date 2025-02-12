@@ -2,9 +2,10 @@
 
 import 'dart:developer';
 
+import 'package:azyx/Classes/anime_details_data.dart';
 import 'package:azyx/Classes/episode_class.dart';
 import 'package:azyx/Classes/wrong_title_search.dart';
-import 'package:azyx/Controllers/ui_setting_controller.dart';
+import 'package:azyx/Screens/Anime/Details/tabs/floater.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
@@ -12,19 +13,20 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/anime/anify_episodes_list.dart';
 import 'package:azyx/Widgets/anime/episodes_list.dart';
 import 'package:azyx/Widgets/anime/mapped_title.dart';
-import 'package:azyx/Widgets/common/_placeholder.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_normal_card.dart';
+import 'package:azyx/Widgets/common/search_widget.dart';
 import 'package:azyx/api/Mangayomi/Model/Source.dart';
 import 'package:azyx/api/Mangayomi/Search/search.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
+import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class WatchSection extends StatefulWidget {
-  final UiSettingController settings;
   final String image;
   final int id;
   final Rx<Source> selectedSource;
+  final AnilistMediaData mediaData;
   final RxList<Source> installedExtensions;
   final Rx<String> animeTitle;
   final Rx<String> totalEpisodes;
@@ -38,7 +40,6 @@ class WatchSection extends StatefulWidget {
       {super.key,
       required this.id,
       required this.image,
-      required this.settings,
       required this.installedExtensions,
       required this.totalEpisodes,
       required this.selectedSource,
@@ -47,6 +48,7 @@ class WatchSection extends StatefulWidget {
       required this.onChanged,
       required this.onTitleChanged,
       required this.onSourceChanged,
+      required this.mediaData,
       required this.animeTitle});
 
   @override
@@ -80,11 +82,11 @@ class _WatchSectionState extends State<WatchSection> {
         }
       } else {
         searchError.value = true;
-        azyxSnackBar('', "Something went wrong");
+        azyxSnackBar("Something went wrong");
       }
     } catch (e) {
       searchError.value = true;
-      azyxSnackBar('', "Something went wrong");
+      azyxSnackBar("Something went wrong");
       log("Error while searching for wrong title: $e");
     }
   }
@@ -100,172 +102,154 @@ class _WatchSectionState extends State<WatchSection> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(15),
-      shrinkWrap: true,
-      physics: const BouncingScrollPhysics(),
+    return Stack(
       children: [
-        DropdownButtonFormField(
-            value: widget.selectedSource.value,
-            isExpanded: true,
-            decoration: InputDecoration(
-              labelText: 'Choose Source',
-              filled: true,
-              fillColor: Theme.of(context).colorScheme.surface,
-              labelStyle:
-                  TextStyle(color: Theme.of(context).colorScheme.primary),
-              border: OutlineInputBorder(
-                borderSide: BorderSide(
-                    color: Theme.of(context).colorScheme.primary),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onPrimaryFixedVariant),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                    color: Theme.of(context).colorScheme.primary),
-              ),
-            ),
-            items: widget.installedExtensions.map((item) {
-              return DropdownMenuItem<Source>(
-                  value: item, child: AzyXText(item.name!));
-            }).toList(),
-            onChanged: (value) {
-              widget.onSourceChanged(value!);
-            }),
-        const SizedBox(
-          height: 20,
-        ),
-        MappedTitle(
-            name: "Total Episodes",
-            animeTitle: widget.animeTitle,
-            totalEpisodes: widget.totalEpisodes),
-        const SizedBox(
-          height: 20,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        ListView(
+          padding: const EdgeInsets.all(15),
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(),
           children: [
-            const AzyXText(
-              "Episodes",
-              style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 25),
+            DropdownButtonFormField(
+                value: widget.selectedSource.value,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: 'Choose Source',
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surface,
+                  labelStyle:
+                      TextStyle(color: Theme.of(context).colorScheme.primary),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onPrimaryFixedVariant),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary),
+                  ),
+                ),
+                items: widget.installedExtensions.map((item) {
+                  return DropdownMenuItem<Source>(
+                      value: item, child: AzyXText(item.name!));
+                }).toList(),
+                onChanged: (value) {
+                  widget.onSourceChanged(value!);
+                }),
+            const SizedBox(
+              height: 20,
             ),
-            AzyXContainer(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Theme.of(context).colorScheme.primary,
-                    boxShadow: [
-                      BoxShadow(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withOpacity(widget.settings.glowMultiplier),
-                          blurRadius: 10 * widget.settings.blurMultiplier,
-                          spreadRadius:
-                              2 * widget.settings.spreadMultiplier)
-                    ]),
-                child: Icon(
-                  Broken.image,
-                  color: Theme.of(context).colorScheme.inversePrimary,
-                  shadows: [
-                    BoxShadow(
-                        color: Theme.of(context).colorScheme.inversePrimary,
-                        blurRadius: 10 * widget.settings.blurMultiplier,
-                        spreadRadius: 2 * widget.settings.spreadMultiplier)
-                  ],
-                ))
+            MappedTitle(
+                name: "Total Episodes",
+                animeTitle: widget.animeTitle,
+                totalEpisodes: widget.totalEpisodes),
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const AzyXText(
+                  "Episodes",
+                  style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 25),
+                ),
+                AzyXContainer(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Theme.of(context).colorScheme.primary,
+                        boxShadow: [
+                          BoxShadow(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(1.glowMultiplier()),
+                              blurRadius: 10.blurMultiplier(),
+                              spreadRadius: 2.spreadMultiplier())
+                        ]),
+                    child: Icon(
+                      Broken.image,
+                      color: Theme.of(context).colorScheme.inversePrimary,
+                      shadows: [
+                        BoxShadow(
+                            color: Theme.of(context).colorScheme.inversePrimary,
+                            blurRadius: 10.blurMultiplier(),
+                            spreadRadius: 2.spreadMultiplier())
+                      ],
+                    ))
+              ],
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            GestureDetector(
+                onTap: () {
+                  wrongTitleSearchData.value = [];
+                  wrongTitle.text = widget.animeTitle.value;
+                  wrongTitleSearch(wrongTitle.text, context);
+                  wrongTitleSheet(context);
+                },
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: AzyXText(
+                    "Wrong Title?",
+                    style: TextStyle(
+                        fontFamily: "Poppins-Bold",
+                        fontSize: 16,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Theme.of(context).colorScheme.primary,
+                        decorationThickness: 2,
+                        color: Theme.of(context).colorScheme.primary),
+                    textAlign: TextAlign.right,
+                  ),
+                )),
+            const SizedBox(
+              height: 10,
+            ),
+            SearchBox(
+              ontap: (value) {
+                handleEpisodes(value);
+              },
+              name: "Search Episodes",
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Obx(() => widget.hasError.value
+                ? Image.asset('assets/images/sticker.png', fit: BoxFit.contain)
+                : widget.episodelist.isEmpty
+                    ? AzyXContainer(
+                        height: Get.height * 0.5,
+                        alignment: Alignment.center,
+                        child: const CircularProgressIndicator(),
+                      )
+                    : widget.episodelist.first.desc.isEmpty
+                        ? EpisodesList(
+                            episodeList: widget.episodelist,
+                            image: widget.image,
+                            selectedSource: widget.selectedSource.value,
+                            title: widget.animeTitle.value,
+                            id: widget.id,
+                          )
+                        : AnifyEpisodesWidget(
+                            data: widget.mediaData,
+                            id: widget.id,
+                            title: widget.animeTitle.value,
+                            anifyEpisodes: widget.episodelist,
+                            selectedSource: widget.selectedSource.value,
+                            image: widget.image,
+                          )),
           ],
         ),
-        const SizedBox(
-          height: 10,
-        ),
-        GestureDetector(
-            onTap: () {
-              wrongTitleSearchData.value = [];
-              wrongTitle.text = widget.animeTitle.value;
-              wrongTitleSearch(wrongTitle.text, context);
-              wrongTitleSheet(context);
-            },
-            child: Align(
-              alignment: Alignment.bottomRight,
-              child: AzyXText(
-                "Wrong Title?",
-                style: TextStyle(
-                    fontFamily: "Poppins-Bold",
-                    fontSize: 16,
-                    decoration: TextDecoration.underline,
-                    decorationColor: Theme.of(context).colorScheme.primary,
-                    decorationThickness: 2,
-                    color: Theme.of(context).colorScheme.primary),
-                textAlign: TextAlign.right,
-              ),
-            )),
-        const SizedBox(
-          height: 10,
-        ),
-        AzyXContainer(
-          decoration: BoxDecoration(boxShadow: [
-            BoxShadow(
-                color: Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerLowest
-                    .withOpacity(0.6),
-                blurRadius: 10)
-          ]),
-          child: TextField(
-            onChanged: (String value) {
-              handleEpisodes(value);
-            },
-            decoration: InputDecoration(
-              labelText: "Search Episode",
-              prefixIcon: const Icon(Broken.search_favorite),
-              focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(
-                      color: Theme.of(context).colorScheme.primary)),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(20),
-                borderSide: BorderSide(
-                    color: Theme.of(context).colorScheme.primary),
-              ),
-              fillColor:
-                  Theme.of(context).colorScheme.surfaceContainerLowest,
-              filled: true,
-            ),
-          ),
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        Obx(() => widget.hasError.value
-            ? Image.asset('assets/images/sticker.png', fit: BoxFit.contain)
-            : widget.episodelist.isEmpty
-                ? AzyXContainer(
-                    height: Get.height * 0.5,
-                    alignment: Alignment.center,
-                    child: const CircularProgressIndicator(),
-                  )
-                : widget.episodelist.first.desc!.isEmpty
-                    ? EpisodesList(
-                        episodeList: widget.episodelist,
-                        image: widget.image,
-                        selectedSource: widget.selectedSource.value,
-                        settings: widget.settings,
-                        title: widget.animeTitle.value,
-                        id: widget.id,
-                      )
-                    : AnifyEpisodesWidget(
-                        id: widget.id,
-                        title: widget.animeTitle.value,
-                        anifyEpisodes: widget.episodelist,
-                        settings: widget.settings,
-                        selectedSource: widget.selectedSource.value,
-                        image: widget.image,
-                      )),
+        FloaterWidget(
+          title: widget.animeTitle.value,
+          icon: Icons.movie_filter,
+          name: "Watch",
+        )
       ],
     );
   }

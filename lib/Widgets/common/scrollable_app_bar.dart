@@ -2,24 +2,20 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:azyx/Classes/anime_details_data.dart';
-import 'package:azyx/Controllers/ui_setting_controller.dart';
 import 'package:azyx/Providers/theme_provider.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/common/back_button.dart';
-import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 class ScrollableAppBar extends StatelessWidget {
-  final UiSettingController settings;
-  final Rx<DetailsData> mediaData;
+  final Rx<AnilistMediaData> mediaData;
   final String image;
   final String tagg;
   const ScrollableAppBar({
     super.key,
-    required this.settings,
     required this.mediaData,
     required this.image,
     required this.tagg,
@@ -30,7 +26,7 @@ class ScrollableAppBar extends StatelessWidget {
     final isDarkMode =
         Provider.of<ThemeProvider>(context, listen: false).isDarkMode!;
     return SliverAppBar(
-      leading: CustomBackButton(),
+      leading: const CustomBackButton(),
       expandedHeight: Platform.isAndroid || Platform.isIOS ? 380 : 430,
       flexibleSpace: FlexibleSpaceBar(
           background: Stack(children: [

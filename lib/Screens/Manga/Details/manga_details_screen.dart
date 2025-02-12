@@ -5,8 +5,7 @@ import 'dart:developer';
 import 'package:azyx/Classes/anime_details_data.dart';
 import 'package:azyx/Classes/episode_class.dart';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
-import 'package:azyx/Controllers/ui_setting_controller.dart';
-import 'package:azyx/Screens/Manga/Details/tabs/manga_details_section.dart';
+import 'package:azyx/Screens/Anime/Details/tabs/details_section.dart';
 import 'package:azyx/Screens/Manga/Details/tabs/read_section.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
@@ -40,9 +39,7 @@ class MangaDetailsScreen extends ConsumerStatefulWidget {
 
 class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
     with SingleTickerProviderStateMixin {
-  final AnilistDataController _controller = Get.put(AnilistDataController());
-  final UiSettingController _settings = Get.put(UiSettingController());
-  final Rx<DetailsData> mediaData = DetailsData().obs;
+  final Rx<AnilistMediaData> mediaData = AnilistMediaData().obs;
   final Rx<bool> isLoading = true.obs;
   final RxList<Source> installedExtensions = RxList<Source>();
   final Rx<Source> selectedSource = Source().obs;
@@ -54,7 +51,8 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
   final Rx<bool> _extenstionError = false.obs;
   Future<void> loadData() async {
     try {
-      final response = await _controller.fetchAnilistMangaDetails(widget.id);
+      final response =
+          await anilistDataController.fetchAnilistMangaDetails(widget.id);
       mediaData.value = response;
       isLoading.value = false;
     } catch (e) {
@@ -125,7 +123,6 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
       body: CustomScrollView(
         slivers: [
           ScrollableAppBar(
-            settings: _settings,
             mediaData: mediaData,
             image: widget.image,
             tagg: widget.tagg,
@@ -199,8 +196,11 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
                               )
                             : const CircularProgressIndicator(),
                       )
-                    : MangaDetailsSection(
-                        mediaData: mediaData, settings: _settings)),
+                    : DetailsSection(
+                        mediaData: mediaData,
+                        index: _tabBarController.index,
+                        animeTitle: mangaTitle.value,
+                      )),
                 Obx(
                   () => installedExtensions.isEmpty
                       ? const PlaceholderExtensions()
@@ -233,7 +233,6 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
                           hasError: _extenstionError,
                           id: widget.id,
                           image: mediaData.value.coverImage ?? widget.image,
-                          settings: _settings,
                           animeTitle: mangaTitle,
                           installedExtensions: installedExtensions,
                           selectedSource: selectedSource,
