@@ -1,9 +1,8 @@
-import 'package:azyx/Classes/anify_episodes.dart';
 import 'package:azyx/Classes/episode_class.dart';
 import 'package:azyx/api/Mangayomi/Eval/dart/model/video.dart';
 import 'package:azyx/api/Mangayomi/Model/Source.dart';
 
-class PlayerData {
+class AnimeAllData {
   String? url;
   String? episodeTitle;
   String? title;
@@ -14,7 +13,7 @@ class PlayerData {
   List<Episode>? episodeList;
   Source? source;
 
-  PlayerData(
+  AnimeAllData(
       {this.episodeList,
       this.episodeTitle,
       this.episodeUrls,
@@ -25,7 +24,7 @@ class PlayerData {
       this.image,
       this.url});
 
-  factory PlayerData.fromJson(
+  factory AnimeAllData.fromJson(
       String url,
       String episodeTitle,
       String title,
@@ -35,7 +34,7 @@ class PlayerData {
       List<Video> episodeUrls,
       List<Episode> episodeList,
       Source source) {
-    return PlayerData(
+    return AnimeAllData(
         url: url,
         episodeTitle: episodeTitle,
         title: title,
