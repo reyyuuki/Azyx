@@ -36,10 +36,10 @@ class AnimeScrollableList extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                               builder: (context) => AnimeDetailsScreen(
-                                  id: animeList[index].id ?? 1,
+                                  smallMedia: animeList[index],
                                   tagg: title + animeList[index].id.toString(),
-                                  image: animeList[index].image!,
-                                  title: animeList[index].title!)));
+                                  isOffline: false,
+                                  )));
                     },
                     child: ItemCard(
                       item: animeList[index],

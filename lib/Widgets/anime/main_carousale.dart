@@ -46,10 +46,9 @@ class MainCarousale extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => AnimeDetailsScreen(
-                          id: anime.id ?? 1,
-                          tagg: "${anime.id}MainCarousale",
-                          image: anime.image!,
-                          title: anime.title!)));
+                            smallMedia: anime,
+                            tagg: "${anime.id}MainCarousale",
+                          )));
             },
             child: AzyXContainer(
               width: MediaQuery.of(context).size.width,

@@ -1,4 +1,4 @@
-import 'package:azyx/Classes/player_class.dart';
+import 'package:azyx/Classes/anime_all_data.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 
-void showSubtitleSheet(Rx<PlayerData> animeData,Rx<String> selectedSbt) {
+void showSubtitleSheet(Rx<AnimeAllData> animeData,Rx<String> selectedSbt) {
   showModalBottomSheet(
       isScrollControlled: true,
       enableDrag: true,
@@ -148,7 +148,7 @@ void showSubtitleSheet(Rx<PlayerData> animeData,Rx<String> selectedSbt) {
       });
 }
 
-void showQualitySheet(BuildContext context, Rx<PlayerData> animeData,
+void showQualitySheet(BuildContext context, Rx<AnimeAllData> animeData,
     Player player, Rx<Duration> position, Rx<bool> isPotraitOrientaion) {
   showModalBottomSheet(
       isScrollControlled: true,

@@ -1,19 +1,20 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:azyx/Controllers/anilist_auth.dart';
+import 'package:azyx/Controllers/anilist_data_controller.dart';
+import 'package:azyx/Controllers/offline_controller.dart';
+import 'package:azyx/Controllers/ui_setting_controller.dart';
 import 'package:azyx/HiveClass/theme_data.dart';
 import 'package:azyx/HiveClass/ui_setting_class.dart';
 import 'package:azyx/Preferences/PrefManager.dart';
 import 'package:azyx/Providers/theme_provider.dart';
 import 'package:azyx/Screens/Anime/anime_screen.dart';
-import 'package:azyx/Screens/Favorite/favorite_screen.dart';
+import 'package:azyx/Screens/Library/library_screen.dart';
 import 'package:azyx/Screens/Home/home_screen.dart';
 import 'package:azyx/Screens/Manga/manga_screen.dart';
 import 'package:azyx/Screens/Novel/novel_screen.dart';
 import 'package:azyx/StorageProvider.dart';
 import 'package:azyx/Widgets/common/custom_nav_bar.dart';
-import 'package:azyx/Widgets/common/gradient_background.dart';
-import 'package:azyx/Widgets/header.dart';
 import 'package:azyx/api/EpisodeDetails/GetMediaIDs/GetMediaIDs.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -51,11 +52,16 @@ void main() async {
   await Hive.openBox('theme-data');
   await Hive.openBox('app-data');
   await Hive.openBox('ui-settings');
+  await Hive.openBox("offline-data");
   await dotenv.load(fileName: ".env");
   await StorageProvider().requestPermission();
   isar = await StorageProvider().initDB(null);
   await PrefManager.init();
   initializeDateFormatting();
+  Get.put(AnilistAuth());
+  Get.put(AnilistDataController());
+  Get.put(OfflineController());
+  Get.put(UiSettingController());
   GetMediaIDs.getData();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
@@ -94,7 +100,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final List<Widget> _screens = [
     const HomeScreen(),
-    const FavoriteScreen(),
+    const LibraryScreen(),
     const AnimeScreen(),
     const MangaScreen(),
     const NovelScreen(),
@@ -113,12 +119,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         extendBody: true,
-        body: GradientBackground(
-          child: ListView(
-            physics: const BouncingScrollPhysics(),
-            children: [const Header(), Obx(() => _screens[index.value])],
-          ),
-        ),
+        body: Obx(() => _screens[index.value]),
         bottomNavigationBar: Obx(() => CustomNavBar(
               screens: _screens,
               index: index.value,

@@ -2,6 +2,8 @@ import 'dart:developer';
 
 import 'package:azyx/Classes/anilist_anime_data.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
+import 'package:azyx/Widgets/header.dart';
 import 'package:azyx/Widgets/manga/main_carousale.dart';
 import 'package:azyx/Widgets/manga/manga_scrollable_list.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +19,6 @@ class MangaScreen extends StatefulWidget {
 }
 
 class _AnimeScreenState extends State<MangaScreen> {
-  final AnilistAuth anilistController = Get.put(AnilistAuth());
   Rx<AnilistAnimeData> animeData = Rx<AnilistAnimeData>(AnilistAnimeData());
 
   @override
@@ -28,7 +29,7 @@ class _AnimeScreenState extends State<MangaScreen> {
 
   Future<void> loadData() async {
     try {
-      final response = await anilistController.fetchAnilistManga();
+      final response = await anilistAuthController.fetchAnilistManga();
       if (response.isBlank!) {
         log("Error: Failed to fetch Anilist data. Response is null.");
         return;
@@ -42,47 +43,56 @@ class _AnimeScreenState extends State<MangaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      if (animeData.value.spotLightAnimes == null) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      }
-      return SingleChildScrollView(
-        child: ListView(
-          padding: const EdgeInsets.all(10),
-          physics: const BouncingScrollPhysics(),
-          shrinkWrap: true,
-          children: [
-            const SearchWidget(),
-            const SizedBox(
-              height: 10,
-            ),
-            MangaMainCarousale(data: animeData.value.spotLightAnimes!),
-            const SizedBox(
-              height: 20,
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            MangaScrollableList(
-              managaList: animeData.value.popularAnimes!,
-              title: "Popular Animes",
-            ),
-            MangaScrollableList(
-              managaList: animeData.value.topUpcomingAnimes!,
-              title: "TopUpcoming Manga",
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            MangaScrollableList(
-              managaList: animeData.value.completed!,
-              title: "Completed Manga",
-            ),
-          ],
-        ),
-      );
-    });
+    return AzyXGradientContainer(
+      child: ListView(
+        children: [
+          const Header(),
+          Obx(() {
+            if (animeData.value.spotLightAnimes == null) {
+               return Container(
+                alignment: Alignment.center,
+                height: Get.height * 0.8,
+                child: const CircularProgressIndicator(),
+              );
+            }
+            return SingleChildScrollView(
+              child: ListView(
+                padding: const EdgeInsets.all(10),
+                physics: const BouncingScrollPhysics(),
+                shrinkWrap: true,
+                children: [
+                  const SearchWidget(),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  MangaMainCarousale(data: animeData.value.spotLightAnimes!),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  MangaScrollableList(
+                    managaList: animeData.value.popularAnimes!,
+                    title: "Popular Animes",
+                  ),
+                  MangaScrollableList(
+                    managaList: animeData.value.topUpcomingAnimes!,
+                    title: "TopUpcoming Manga",
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  MangaScrollableList(
+                    managaList: animeData.value.completed!,
+                    title: "Completed Manga",
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
   }
 }

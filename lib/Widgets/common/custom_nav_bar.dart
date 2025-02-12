@@ -1,8 +1,8 @@
 // ignore_for_file: must_be_immutable
 
-import 'package:azyx/Controllers/ui_setting_controller.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
+import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -18,7 +18,6 @@ class CustomNavBar extends StatelessWidget {
     required this.onChanged,
   });
 
-  final UiSettingController settings = Get.put(UiSettingController());
   final List<IconData> _icons = [
     Broken.home_1,
     Broken.heart,
@@ -37,7 +36,10 @@ class CustomNavBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-                color: Theme.of(context).colorScheme.surfaceContainer.withOpacity(0.7),
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainer
+                    .withOpacity(0.7),
                 blurRadius: 10,
                 spreadRadius: 2)
           ]),
@@ -48,8 +50,8 @@ class CustomNavBar extends StatelessWidget {
           final isActive = index == item.key;
           return GestureDetector(
             onTap: () => onChanged(item.key),
-            child: Obx(() =>
-               AnimatedContainer(
+            child: Obx(
+              () => AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.fastOutSlowIn,
                 decoration: BoxDecoration(
@@ -59,13 +61,17 @@ class CustomNavBar extends StatelessWidget {
                     borderRadius: BorderRadius.circular(50),
                     boxShadow: [
                       BoxShadow(
-                          color:isActive
-                        ? Theme.of(context).colorScheme.primary.withOpacity(settings.glowMultiplier)
-                        : Colors.transparent,
-                          blurRadius: 10 * settings.blurMultiplier,
-                          spreadRadius: 2 * settings.spreadMultiplier)
+                          color: isActive
+                              ? Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(1.glowMultiplier())
+                              : Colors.transparent,
+                          blurRadius: 10.blurMultiplier(),
+                          spreadRadius: 2.spreadMultiplier())
                     ]),
-                padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                 child: TweenAnimationBuilder<double>(
                   tween: Tween<double>(begin: 0.0, end: isActive ? 1.2 : 0.9),
                   duration: const Duration(milliseconds: 300),
@@ -78,9 +84,11 @@ class CustomNavBar extends StatelessWidget {
                         size: 25,
                         shadows: [
                           BoxShadow(
-                            color: Theme.of(context).colorScheme.inverseSurface.withOpacity(settings.glowMultiplier),
-                            blurRadius: 5 * settings.blurMultiplier
-                          )
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .inverseSurface
+                                  .withOpacity(1.glowMultiplier()),
+                              blurRadius: 5.blurMultiplier())
                         ],
                         color: Theme.of(context).colorScheme.inverseSurface,
                       ),

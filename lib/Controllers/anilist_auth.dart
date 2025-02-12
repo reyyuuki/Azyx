@@ -10,6 +10,8 @@ import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
+final AnilistAuth anilistAuthController = Get.find();
+
 class AnilistAuth extends GetxController {
   Rx<User> userData = User().obs;
   RxList<UserAnime> userAnimeList = RxList<UserAnime>();

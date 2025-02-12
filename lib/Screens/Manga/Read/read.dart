@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:azyx/Classes/episode_class.dart';
 import 'package:azyx/Screens/Manga/Details/tabs/widgets/reader_controls.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/api/Mangayomi/Eval/dart/model/page.dart';
 import 'package:azyx/api/Mangayomi/Model/Source.dart';
 import 'package:azyx/api/Mangayomi/Search/get_pages.dart';
@@ -28,24 +29,56 @@ class ReadPage extends StatefulWidget {
 class _ReadPageState extends State<ReadPage> {
   final RxList<PageUrl> pagesList = RxList();
   final Rx<int> totalImages = 0.obs;
+  final Rx<int> _currentPage = 0.obs;
   final Rx<String> chapterTitle = ''.obs;
   final Rx<String> chapterUrl = ''.obs;
-  final Rx<bool> isShowed = false.obs;
+  final Rx<bool> isShowed = true.obs;
+  final ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    loadPages(widget.link);
+    chapterUrl.value = widget.link;
+    loadPages();
   }
 
-  Future<void> loadPages(String url) async {
+  Future<void> loadPages() async {
     try {
-      final pages = await getPagesList(source: widget.source, mangaId: url);
+      pagesList.value = [];
+      final pages =
+          await getPagesList(source: widget.source, mangaId: chapterUrl.value);
       pagesList.value = pages!;
-      chapterTitle.value =
-          widget.chapterList.firstWhere((i) => i.link == url).title!;
+      totalImages.value = pages.length;
+      _currentPage.value = 1;
+      final index =
+          widget.chapterList.indexWhere((i) => i.link == chapterUrl.value);
+      chapterTitle.value = widget.chapterList[index].title!;
     } catch (e) {
       log("Error: $e");
+      azyxSnackBar(e.toString());
+    }
+  }
+
+  void navigateChapter(bool isNext) {
+    final index =
+        widget.chapterList.indexWhere((i) => i.link == chapterUrl.value);
+    if (index == -1) return;
+    if (isNext && index > 0) {
+      chapterUrl.value = widget.chapterList[index - 1].link!;
+      loadPages();
+      azyxSnackBar(
+        '${widget.chapterList[index - 1].number} chapter',
+      );
+    } else if (!isNext && index < widget.chapterList.length - 1) {
+      chapterUrl.value = widget.chapterList[index + 1].link!;
+      loadPages();
+      azyxSnackBar(
+        '${widget.chapterList[index + 1].number} chapter',
+      );
+    } else {
+      azyxSnackBar(
+        'No Chapter Avail',
+      );
     }
   }
 
@@ -55,29 +88,62 @@ class _ReadPageState extends State<ReadPage> {
       body: Stack(
         children: [
           Obx(
-            () => GestureDetector(
-              onTap: () {
-                isShowed.value = !isShowed.value;
-                log("tapped");
-              },
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    ...pagesList.map((p) {
-                      return CachedNetworkImage(
-                          imageUrl: p.url, fit: BoxFit.cover);
-                    })
-                  ],
-                ),
-              ),
-            ),
+            () => pagesList.isEmpty
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : GestureDetector(
+                    onTap: () {
+                      isShowed.value = !isShowed.value;
+                      log("tapped");
+                    },
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: Column(
+                        children: [
+                          ...pagesList.map((p) {
+                            return CachedNetworkImage(
+                              imageUrl: p.url,
+                              fit: BoxFit.cover,
+                              placeholder: (context, index) {
+                                return Container(
+                                  alignment: Alignment.center,
+                                  height: 300,
+                                  child: const CircularProgressIndicator(),
+                                );
+                              },
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  ),
           ),
           ReaderControls(
+            scrollController: scrollController,
             totalImages: totalImages,
             mangaTitle: widget.mangaTitle,
             chapterTitle: chapterTitle,
             isShowed: isShowed,
-          )
+            chapterList: widget.chapterList,
+            currentPage: _currentPage,
+            onNavigate: (isNext) => navigateChapter(isNext),
+            onChapterChaged: (link) {
+              chapterUrl.value = link;
+              loadPages();
+            },
+          ),
+          Positioned(
+              bottom: 0,
+              width: Get.width,
+              child: Obx(
+                () => Text(
+                  "${_currentPage.value} / ${totalImages.value}",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      color: Colors.white, fontFamily: "Poppins-Bold"),
+                ),
+              ))
         ],
       ),
     );

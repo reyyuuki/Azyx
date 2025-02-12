@@ -1,10 +1,9 @@
-
 import 'package:azyx/Classes/episode_class.dart';
-import 'package:azyx/Classes/player_class.dart';
-import 'package:azyx/Controllers/ui_setting_controller.dart';
+import 'package:azyx/Classes/anime_all_data.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
+import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,8 +12,7 @@ class EpisodeListDrawer extends StatelessWidget {
   final Function(Episode) ontap;
   final Rx<bool> showEpisodesBox;
   final RxList<Episode> filteredEpisodes;
-  final Rx<PlayerData> animeData;
-  final UiSettingController settingController;
+  final Rx<AnimeAllData> animeData;
   final Rx<String> episodeNumber;
   final Rx<bool> isPotraitOrientaion;
 
@@ -24,7 +22,6 @@ class EpisodeListDrawer extends StatelessWidget {
       required this.showEpisodesBox,
       required this.animeData,
       required this.episodeNumber,
-      required this.settingController,
       required this.isPotraitOrientaion,
       required this.filteredEpisodes});
 
@@ -79,8 +76,7 @@ class EpisodeListDrawer extends StatelessWidget {
                           if (value.isNotEmpty) {
                             filteredEpisodes.value = animeData
                                 .value.episodeList!
-                                .where(
-                                    (i) => i.number!.contains(value))
+                                .where((i) => i.number.contains(value))
                                 .toList();
                           } else {
                             filteredEpisodes.value =
@@ -239,11 +235,9 @@ class EpisodeListDrawer extends StatelessWidget {
                                             color: Theme.of(context)
                                                 .colorScheme
                                                 .primary
-                                                .withOpacity(settingController
-                                                    .glowMultiplier),
-                                            blurRadius: 5 *
-                                                settingController
-                                                    .blurMultiplier,
+                                                .withOpacity(
+                                                    1.glowMultiplier()),
+                                            blurRadius: 5.blurMultiplier(),
                                           )
                                         ],
                                         borderRadius: const BorderRadius.only(

@@ -1,16 +1,14 @@
 import 'dart:io';
-
-import 'package:azyx/Controllers/ui_setting_controller.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
+import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class GradientTitle extends StatelessWidget {
   final String title;
-  GradientTitle({super.key, required this.title});
+  const GradientTitle({super.key, required this.title});
 
-  final UiSettingController settings = Get.put(UiSettingController());
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -27,9 +25,9 @@ class GradientTitle extends StatelessWidget {
                     color: Theme.of(context)
                         .colorScheme
                         .primary
-                        .withOpacity(settings.glowMultiplier),
-                    blurRadius: 10 * settings.blurMultiplier,
-                    spreadRadius: settings.spreadMultiplier)
+                        .withOpacity(1.glowMultiplier()),
+                    blurRadius: 10.blurMultiplier(),
+                    spreadRadius: 2.spreadMultiplier())
               ],
               foreground: Paint()
                 ..shader = LinearGradient(
@@ -51,9 +49,9 @@ class GradientTitle extends StatelessWidget {
                   color: Theme.of(context)
                       .colorScheme
                       .primary
-                      .withOpacity(settings.glowMultiplier),
-                  blurRadius: 10 * settings.blurMultiplier,
-                  spreadRadius: settings.spreadMultiplier)
+                      .withOpacity(1.glowMultiplier()),
+                  blurRadius: 10.blurMultiplier(),
+                  spreadRadius: 2..spreadMultiplier())
             ],
             size: Platform.isAndroid || Platform.isIOS ? 25 : 35,
             color: Theme.of(context).colorScheme.primary,
