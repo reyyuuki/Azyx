@@ -45,7 +45,7 @@ class PlaceholderExtensions extends StatelessWidget {
             items: const [
               DropdownMenuItem<String>(
                 value: "No Source Available",
-                child: AzyXText("No Source Available"),
+                child: AzyXText(text: "No Source Available"),
               ),
             ],
             onChanged: (String? value) {
@@ -56,13 +56,16 @@ class PlaceholderExtensions extends StatelessWidget {
             height: 50,
           ),
           const AzyXText(
-            "Oops! u didn't installed any extensions yet",
+            text: "Oops! u didn't installed any extensions yet",
             textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: 'Poppins', fontSize: 18),
+            fontSize: 18,
           ),
           GestureDetector(
-            onTap: (){
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const ExtensionScreen()));
+            onTap: () {
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const ExtensionScreen()));
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -74,12 +77,22 @@ class PlaceholderExtensions extends StatelessWidget {
                     color: Theme.of(context).colorScheme.primary,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child:  Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.extension,color: Theme.of(context).colorScheme.inversePrimary,),
-                      const SizedBox(width: 10,),
-                      AzyXText("Install Extensions",style: TextStyle(fontFamily: "Poppins-Bold",fontSize: 16,color: Theme.of(context).colorScheme.inversePrimary),)
+                      Icon(
+                        Icons.extension,
+                        color: Theme.of(context).colorScheme.inversePrimary,
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      AzyXText(
+                        text: "Install Extensions",
+                        fontVariant: FontVariant.bold,
+                        fontSize: 16,
+                        color: Theme.of(context).colorScheme.inversePrimary,
+                      )
                     ],
                   ),
                 ),

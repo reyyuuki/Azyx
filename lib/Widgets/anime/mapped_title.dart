@@ -25,19 +25,17 @@ class MappedTitle extends StatelessWidget {
           () => SizedBox(
             width: Platform.isAndroid || Platform.isIOS ? 180 : 400,
             child: AzyXText(
-               "Found: ${animeTitle.value}",
-              style: TextStyle(
-                  fontFamily: "Poppins-Bold",
-                  color: Theme.of(context).colorScheme.primary),
+              text: "Found: ${animeTitle.value}",
+              fontVariant: FontVariant.bold,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
         ),
         Obx(
           () => AzyXText(
-            "$name: ${totalEpisodes.value}",
-            style: TextStyle(
-                fontFamily: "Poppins-Bold",
-                color: Theme.of(context).colorScheme.primary),
+            text: "$name: ${totalEpisodes.value}",
+            fontVariant: FontVariant.bold,
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
       ],

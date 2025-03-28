@@ -14,31 +14,20 @@ class GradientTitle extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Obx(
-          () => AzyXText(
-            title,
-            style: TextStyle(
-              fontSize: Platform.isAndroid || Platform.isIOS ? 18 : 25,
-              fontFamily: "Poppins-Bold",
-              shadows: [
-                BoxShadow(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withOpacity(1.glowMultiplier()),
-                    blurRadius: 10.blurMultiplier(),
-                    spreadRadius: 2.spreadMultiplier())
-              ],
-              foreground: Paint()
-                ..shader = LinearGradient(
-                  colors: [
-                    Theme.of(context).colorScheme.inverseSurface,
-                    Theme.of(context).colorScheme.primary,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ).createShader(const Rect.fromLTWH(0, 0, 200, 70)),
-            ),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: Platform.isAndroid || Platform.isIOS ? 18 : 25,
+            fontFamily: "Poppins-Bold",
+            foreground: Paint()
+              ..shader = LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.inverseSurface,
+                  Theme.of(context).colorScheme.primary,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ).createShader(const Rect.fromLTWH(0, 0, 200, 70)),
           ),
         ),
         Obx(

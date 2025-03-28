@@ -11,15 +11,19 @@ void azyxSnackBar(
   Duration? duration,
 }) {
   Get.snackbar(
-    title,
+    '',
     '',
     maxWidth: width ?? (Platform.isAndroid || Platform.isIOS ? 200 : 400),
-    duration: duration ?? const Duration(milliseconds: 1500),
-    animationDuration: const Duration(milliseconds: 1500),
+    duration: duration ?? const Duration(milliseconds: 2000),
+    animationDuration: const Duration(milliseconds: 2000),
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
     margin: const EdgeInsets.only(bottom: 20),
-    
-    icon: icon ??
+    messageText: Text(
+      title,
+      textAlign: TextAlign.center,
+      style: const TextStyle(fontFamily: "Poppins-Bold"),
+    ),
+    titleText: icon ??
         AzyXContainer(
           height: 50,
           width: 50,
@@ -34,14 +38,5 @@ void azyxSnackBar(
           ),
         ),
     snackPosition: SnackPosition.BOTTOM,
-    titleText: Text(
-      title,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
-      textAlign: TextAlign.center,
-    ),
   );
 }

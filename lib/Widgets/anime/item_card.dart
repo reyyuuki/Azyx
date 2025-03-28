@@ -24,15 +24,13 @@ class ItemCard extends StatelessWidget {
               width: Platform.isAndroid || Platform.isIOS ? 103 : 160,
               margin: const EdgeInsets.only(right: 10),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(45),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.5),
-                    blurRadius: 10,
-                    offset: const Offset(2,2)
-                  )
-                ]
-              ),
+                  borderRadius: BorderRadius.circular(45),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black.withOpacity(0.5),
+                        blurRadius: 10,
+                        offset: const Offset(2, 2))
+                  ]),
               child: Hero(
                 tag: tagg,
                 child: ClipRRect(
@@ -60,9 +58,11 @@ class ItemCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                            color: Theme.of(context).colorScheme.surfaceBright.withOpacity(0.6),
-                            blurRadius: 10
-                          )
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceBright
+                                  .withOpacity(0.6),
+                              blurRadius: 10)
                         ],
                         color: Theme.of(context).colorScheme.surfaceBright,
                         borderRadius: const BorderRadius.only(
@@ -75,11 +75,10 @@ class ItemCard extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             AzyXText(
-                              item.rating!,
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontFamily: "Poppins-Bold"),
+                              text: item.rating!,
+                              fontSize: 12,
+                              color: Theme.of(context).colorScheme.primary,
+                              fontVariant: FontVariant.bold,
                             ),
                             Icon(
                               Broken.star,
@@ -112,14 +111,14 @@ class ItemCard extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         AzyXText(
-          Platform.isAndroid || Platform.isIOS
+          text: Platform.isAndroid || Platform.isIOS
               ? (item.title!.length > 12
                   ? '${item.title!.substring(0, 10)}...'
                   : item.title!)
               : (item.title!.length > 20
                   ? '${item.title!.substring(0, 17)}...'
                   : item.title!),
-          style: const TextStyle(fontFamily: "Poppins-Bold"),
+          fontVariant: FontVariant.bold,
         ),
       ],
     );

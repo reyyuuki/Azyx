@@ -69,11 +69,10 @@ class CharacterCard extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             AzyXText(
-                              item.popularity.toString(),
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontFamily: "Poppins-Bold"),
+                              text: item.popularity.toString(),
+                              fontSize: 12,
+                              color: Theme.of(context).colorScheme.primary,
+                              fontVariant: FontVariant.bold,
                             ),
                             const SizedBox(
                               width: 5,
@@ -99,12 +98,12 @@ class CharacterCard extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         AzyXText(
-          item.name != null
+          text: item.name != null
               ? item.name!.length > 12
                   ? '${item.name!.substring(0, 10)}...'
                   : item.name!
               : "N/A",
-          style: const TextStyle(fontFamily: "Poppins-Bold"),
+          fontVariant: FontVariant.bold,
         ),
       ],
     );

@@ -52,10 +52,8 @@ class _ThemeModesState extends State<CustomColor> {
             child: const ListTile(
               leading: Icon(Broken.color_swatch),
               title: AzyXText(
-                "Custom Color",
-                style: TextStyle(
-                  fontFamily: "Poppins-Bold",
-                ),
+                text: "Custom Color",
+               fontVariant: FontVariant.bold,
               ),
             ),
           ),

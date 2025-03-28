@@ -18,7 +18,7 @@ class AzyXCard extends StatelessWidget {
         AzyXContainer(
           height: Platform.isAndroid || Platform.isIOS ? 150 : 230,
           width: Platform.isAndroid || Platform.isIOS ? 103 : 160,
-          margin: const EdgeInsets.symmetric(horizontal: 5,vertical: 5),
+          margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(45),
               boxShadow: [
@@ -41,8 +41,9 @@ class AzyXCard extends StatelessWidget {
           ),
         ),
         AzyXText(
-          item.tilte!,
-          style: const TextStyle(fontFamily: "Poppins-Bold",fontSize: 12),
+          text: item.tilte!,
+          fontVariant: FontVariant.bold,
+          fontSize: 12,
           textAlign: TextAlign.center,
           maxLines: 3,
           overflow: TextOverflow.ellipsis,

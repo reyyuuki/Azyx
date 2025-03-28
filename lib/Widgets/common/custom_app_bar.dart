@@ -27,9 +27,9 @@ class CustomAppBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               AzyXText(
-                title,
-                style:
-                    const TextStyle(fontFamily: "Poppins-Bold", fontSize: 25),
+                text: title,
+                fontVariant: FontVariant.bold,
+                fontSize: 25,
               ),
               Icon(
                 icon,

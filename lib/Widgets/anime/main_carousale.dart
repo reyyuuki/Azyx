@@ -117,20 +117,20 @@ class MainCarousale extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               AzyXText(
-                                anime.title!,
+                                text: anime.title!,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                    fontSize: 20, fontFamily: "Poppins-Bold"),
+                                fontSize: 20,
+                                fontVariant: FontVariant.bold,
                               ),
                               const SizedBox(
                                 height: 5,
                               ),
                               Flexible(
                                 child: AzyXText(
-                                  anime.description!,
-                                  style: const TextStyle(
-                                      fontSize: 12, fontFamily: "Poppins"),
+                                  text: anime.description!,
+                                  fontSize: 12,
+                                  fontVariant: FontVariant.bold,
                                   maxLines: 5,
                                   overflow: TextOverflow.ellipsis,
                                 ),
