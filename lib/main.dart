@@ -1,5 +1,6 @@
-// ignore_for_file: must_be_immutable
+// ignore_for_file: must_be_immutable, depend_on_referenced_packages
 
+import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
 import 'package:azyx/Controllers/offline_controller.dart';
@@ -15,7 +16,7 @@ import 'package:azyx/Screens/Manga/manga_screen.dart';
 import 'package:azyx/Screens/Novel/novel_screen.dart';
 import 'package:azyx/StorageProvider.dart';
 import 'package:azyx/Widgets/common/custom_nav_bar.dart';
-import 'package:azyx/api/EpisodeDetails/GetMediaIDs/GetMediaIDs.dart';
+import 'package:azyx/Controllers/local_history_controller.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -62,7 +63,8 @@ void main() async {
   Get.put(AnilistDataController());
   Get.put(OfflineController());
   Get.put(UiSettingController());
-  GetMediaIDs.getData();
+  Get.put(AnilistAddToListController());
+  Get.put(LocalHistoryController());
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(systemNavigationBarColor: Colors.transparent));
