@@ -36,10 +36,10 @@ class MangaScrollableList extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                               builder: (context) => MangaDetailsScreen(
-                                  id: managaList[index].id ?? 1,
-                                  tagg: title + managaList[index].id.toString(),
-                                  image: managaList[index].image!,
-                                  title: managaList[index].title!)));
+                                    smallMedia: managaList[index],
+                                    tagg:
+                                        title + managaList[index].id.toString(),
+                                  )));
                     },
                     child: ItemCard(
                       item: managaList[index],

@@ -11,7 +11,7 @@ class Video {
   Video(this.url, this.quality, this.originalUrl,
       {this.headers, this.subtitles, this.audios});
 
-  factory Video.fromJson(Map<String, dynamic> json) {
+  factory Video.fromJson(Map<dynamic, dynamic> json) {
     return Video(
         json['url'].toString().trim(),
         json['quality'].toString().trim(),

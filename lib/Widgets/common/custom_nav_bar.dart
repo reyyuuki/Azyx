@@ -20,7 +20,7 @@ class CustomNavBar extends StatelessWidget {
 
   final List<IconData> _icons = [
     Broken.home_1,
-    Broken.heart,
+    Broken.element_4,
     Icons.movie_filter,
     Broken.book,
     Icons.book,
@@ -73,7 +73,7 @@ class CustomNavBar extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                 child: TweenAnimationBuilder<double>(
-                  tween: Tween<double>(begin: 0.0, end: isActive ? 1.2 : 0.9),
+                  tween: Tween<double>(begin: 0.0, end: isActive ? 1.1 : 0.9),
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
                   builder: (context, scale, child) {
@@ -82,14 +82,6 @@ class CustomNavBar extends StatelessWidget {
                       child: Icon(
                         _icons[item.key],
                         size: 25,
-                        shadows: [
-                          BoxShadow(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .inverseSurface
-                                  .withOpacity(1.glowMultiplier()),
-                              blurRadius: 5.blurMultiplier())
-                        ],
                         color: Theme.of(context).colorScheme.inverseSurface,
                       ),
                     );
