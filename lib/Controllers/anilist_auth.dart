@@ -156,6 +156,7 @@ class AnilistAuth extends GetxController {
             }
             progress
             status
+            score
           }
         }
       }
@@ -512,8 +513,8 @@ class AnilistAuth extends GetxController {
     final Map<String, dynamic> variables = {
       'mediaId': mediaId,
       'status': status ?? "CURRENT",
-      'score': score ?? 5.0,
-      'progress': progress,
+      if (score != null) 'score': score,
+      if(progress != null)'progress': progress,
     };
 
     final response = await http.post(

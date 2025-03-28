@@ -10,11 +10,11 @@ Future<List<Episode>> fetchAnifyEpisodes(int id, List<Episode> data) async {
   if (response.statusCode == 200) {
     try {
       final json = jsonDecode(response.body);
-      final episodesList = json[0]['data'];
+      final episodesList = json[0]['data'] ?? json[1]['data'];
       if (episodesList == null || episodesList.isEmpty) {
         return data;
       }
-      for (int i = 0; i < data.length; i++) {
+      for (int i = 0; i < data.length && i < episodesList.length; i++) {
         if (i < episodesList.length) {
           data[i].title = episodesList[i]['title'] ?? data[i].title;
           data[i].desc = episodesList[i]['description'] ?? data[i].desc;

@@ -1,0 +1,2 @@
+C:/Users/Admin/Documents/GitHub/Azyx/android/app/.cxx/Debug/i214x256/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/Admin/Documents/GitHub/Azyx/android/app/.cxx/Debug/i214x256/x86_64/CMakeFiles/rebuild_cache.dir

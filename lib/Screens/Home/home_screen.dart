@@ -7,7 +7,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: AzyXText("Home Screen"),
+      child: AzyXText(text: "Home Screen"),
     );
   }
 }

@@ -114,7 +114,7 @@ class AlertDialogBuilder {
       builder: (BuildContext context) {
         _onShow?.call();
         return AlertDialog(
-          title: _titleWidget ?? AzyXText(_title ?? ''),
+          title: _titleWidget ?? AzyXText(text: _title ?? ''),
           titleTextStyle: TextStyle(
               fontSize: 20, fontWeight: FontWeight.bold, color: theme.primary),
           content: StatefulBuilder(
@@ -182,9 +182,11 @@ class AlertDialogBuilder {
                   String item = entry.value;
                   return CheckboxListTile(
                     key: ValueKey(item),
-                    title: AzyXText(item,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
+                    title: AzyXText(
+                      text: item,
+                      fontSize: 16,
+                      fontVariant: FontVariant.bold,
+                    ),
                     value: _checkedItems![index],
                     onChanged: (bool? value) {
                       setState(() {
@@ -214,9 +216,11 @@ class AlertDialogBuilder {
                 children: _reorderableItems!.map((item) {
                   return ListTile(
                     key: ValueKey(item),
-                    title: AzyXText(item,
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
+                    title: AzyXText(
+                      text: item,
+                      fontSize: 16,
+                      fontVariant: FontVariant.bold,
+                    ),
                   );
                 }).toList(),
               ),
@@ -227,9 +231,11 @@ class AlertDialogBuilder {
 
   Widget _buildRadioListContent(StateSetter setState) => _buildListContent(
         (item) => RadioListTile<int>(
-          title: AzyXText(item,
-              style:
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          title: AzyXText(
+            text: item,
+            fontSize: 16,
+            fontVariant: FontVariant.bold,
+          ),
           value: _items!.indexOf(item),
           groupValue: _selectedItemIndex,
           onChanged: (int? value) {
@@ -244,9 +250,11 @@ class AlertDialogBuilder {
         (item) {
           final index = _items!.indexOf(item);
           return CheckboxListTile(
-            title: AzyXText(item,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            title: AzyXText(
+              text: item,
+              fontSize: 16,
+              fontVariant: FontVariant.bold,
+            ),
             value: _checkedItems![index],
             onChanged: (bool? value) {
               setState(() => _checkedItems![index] = value!);
@@ -271,7 +279,7 @@ class AlertDialogBuilder {
   Widget _buildDefaultContent() => ConstrainedBox(
         constraints:
             BoxConstraints(minWidth: MediaQuery.of(context).size.width * 0.7),
-        child: _customView ?? AzyXText(_message ?? ''),
+        child: _customView ?? AzyXText(text: _message ?? ''),
       );
 
   List<Widget> _buildActions() {
@@ -298,11 +306,11 @@ class AlertDialogBuilder {
           onClick?.call();
           Navigator.of(context).pop();
         },
-        child: AzyXText(title,
-            style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: theme.primary)),
+        child: AzyXText(
+            text: title,
+            fontSize: 16,
+            fontVariant: FontVariant.bold,
+            color: theme.primary),
       );
 
   AlertDialogBuilder _with(VoidCallback action) {

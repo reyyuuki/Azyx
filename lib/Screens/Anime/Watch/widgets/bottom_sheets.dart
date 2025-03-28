@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 
-void showSubtitleSheet(Rx<AnimeAllData> animeData,Rx<String> selectedSbt) {
+void showSubtitleSheet(Rx<AnimeAllData> animeData, Rx<String> selectedSbt) {
   showModalBottomSheet(
       isScrollControlled: true,
       enableDrag: true,
@@ -43,8 +43,9 @@ void showSubtitleSheet(Rx<AnimeAllData> animeData,Rx<String> selectedSbt) {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight)),
                 child: const AzyXText(
-                  "Sorry, no subtitles found.",
-                  style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 25),
+                  text: "Sorry, no subtitles found.",
+                  fontSize: 25,
+                  fontVariant: FontVariant.bold,
                   textAlign: TextAlign.center,
                 ),
               )
@@ -77,38 +78,39 @@ void showSubtitleSheet(Rx<AnimeAllData> animeData,Rx<String> selectedSbt) {
                   physics: const BouncingScrollPhysics(),
                   children: [
                     const AzyXText(
-                      "Select Subtitle",
-                      style:
-                          TextStyle(fontFamily: "Poppins-Bold", fontSize: 20),
+                      text: "Select Subtitle",
+                      fontSize: 20,
+                      fontVariant: FontVariant.bold,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(
                       height: 10,
                     ),
                     GestureDetector(
-                              onTap: () {},
-                              child: AzyXContainer(
-                                margin: const EdgeInsets.all(10),
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                    color: selectedSbt.value.isEmpty ? Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                        width: 0.4,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .secondary)),
-                                child: const AzyXText(
-                                  "None",
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                      fontFamily: "Poppins-Bold", fontSize: 18),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
+                      onTap: () {},
+                      child: AzyXContainer(
+                        margin: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                            color: selectedSbt.value.isEmpty
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                                width: 0.4,
+                                color:
+                                    Theme.of(context).colorScheme.secondary)),
+                        child: const AzyXText(
+                          text: "None",
+                          color: Colors.black,
+                          fontVariant: FontVariant.bold,
+                          fontSize: 18,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
                     SingleChildScrollView(
                       child: ListView.builder(
                           shrinkWrap: true,
@@ -134,9 +136,8 @@ void showSubtitleSheet(Rx<AnimeAllData> animeData,Rx<String> selectedSbt) {
                                             .colorScheme
                                             .secondary)),
                                 child: AzyXText(
-                                  item.label!,
-                                  style: const TextStyle(
-                                      fontFamily: "Poppins", fontSize: 18),
+                                  text: item.label!,
+                                  fontSize: 18,
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -181,8 +182,9 @@ void showQualitySheet(BuildContext context, Rx<AnimeAllData> animeData,
               physics: const BouncingScrollPhysics(),
               children: [
                 const AzyXText(
-                  "Select Quality",
-                  style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 20),
+                  text: "Select Quality",
+                  fontSize: 20,
+                  fontVariant: FontVariant.bold,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(
@@ -217,15 +219,14 @@ void showQualitySheet(BuildContext context, Rx<AnimeAllData> animeData,
                                         .colorScheme
                                         .onPrimaryContainer)),
                             child: AzyXText(
-                              item.quality,
-                              style: TextStyle(
-                                  fontFamily: "Poppins-Bold",
-                                  fontSize: 18,
-                                  color: item.url == animeData.value.url
-                                      ? Colors.black
-                                      : Theme.of(context)
-                                          .colorScheme
-                                          .inverseSurface),
+                              text: item.quality,
+                              fontVariant: FontVariant.bold,
+                              fontSize: 18,
+                              color: item.url == animeData.value.url
+                                  ? Colors.black
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .inverseSurface,
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -267,8 +268,9 @@ void showSpeedBottomList(context, RxList<double> speedList,
             child: Column(
               children: [
                 const AzyXText(
-                  "Select Speed",
-                  style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 20),
+                  text: "Select Speed",
+                  fontVariant: FontVariant.bold,
+                  fontSize: 20,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(
@@ -313,13 +315,12 @@ void showSpeedBottomList(context, RxList<double> speedList,
                               const SizedBox(width: 12),
                               Expanded(
                                 child: AzyXText(
-                                  '${speedList[index]}x',
-                                  style: TextStyle(
-                                      fontFamily: "Poppins-Bold",
-                                      fontSize: 16,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .inversePrimary),
+                                  text: '${speedList[index]}x',
+                                  fontVariant: FontVariant.bold,
+                                  fontSize: 16,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .inversePrimary,
                                 ),
                               ),
                               SizedBox(

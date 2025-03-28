@@ -135,7 +135,7 @@ class _WatchSectionState extends State<WatchSection> {
                 ),
                 items: widget.installedExtensions.map((item) {
                   return DropdownMenuItem<Source>(
-                      value: item, child: AzyXText(item.name!));
+                      value: item, child: AzyXText(text: item.name!));
                 }).toList(),
                 onChanged: (value) {
                   widget.onSourceChanged(value!);
@@ -154,8 +154,9 @@ class _WatchSectionState extends State<WatchSection> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const AzyXText(
-                  "Episodes",
-                  style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 25),
+                  text: "Episodes",
+                  fontVariant: FontVariant.bold,
+                  fontSize: 25,
                 ),
                 AzyXContainer(
                     padding: const EdgeInsets.all(10),
@@ -195,7 +196,7 @@ class _WatchSectionState extends State<WatchSection> {
                 },
                 child: Align(
                   alignment: Alignment.bottomRight,
-                  child: AzyXText(
+                  child: Text(
                     "Wrong Title?",
                     style: TextStyle(
                         fontFamily: "Poppins-Bold",
@@ -269,11 +270,10 @@ class _WatchSectionState extends State<WatchSection> {
             child: Column(
               children: [
                 AzyXText(
-                  widget.selectedSource.value.name!,
-                  style: TextStyle(
-                      fontFamily: "Poppins-Bold",
-                      fontSize: 20,
-                      color: Theme.of(context).colorScheme.primary),
+                  text: widget.selectedSource.value.name!,
+                  fontVariant: FontVariant.bold,
+                  fontSize: 20,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(
                   height: 20,

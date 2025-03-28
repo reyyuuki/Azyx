@@ -62,10 +62,8 @@ class UiSettings extends StatelessWidget {
             child: const ListTile(
               leading: Icon(Broken.blur),
               title: AzyXText(
-                "Color Blur",
-                style: TextStyle(
-                  fontFamily: "Poppins-Bold",
-                ),
+                text: "Color Blur",
+                fontVariant: FontVariant.bold,
               ),
             ),
           ),
@@ -80,20 +78,22 @@ class UiSettings extends StatelessWidget {
                   const ListTile(
                     leading: Icon(Ionicons.color_wand),
                     title: AzyXText(
-                      "Blur Multiplier",
-                      style: TextStyle(fontFamily: "Poppins-Bold"),
+                      text: "Blur Multiplier",
+                      fontVariant: FontVariant.bold,
                     ),
                     subtitle: AzyXText(
-                      "Adjust the blur for your vibe",
-                      style: TextStyle(fontSize: 12, fontFamily: "Poppins"),
+                      text: "Adjust the blur for your vibe",
+                      fontSize: 12,
+                      fontVariant: FontVariant.bold,
                     ),
                   ),
                   Row(
                     children: [
                       Obx(
                         () => AzyXText(
-                          uiSettingController.blurMultiplier.toStringAsFixed(1),
-                          style: const TextStyle(fontFamily: "Poppins-Bold"),
+                          text: uiSettingController.blurMultiplier
+                              .toStringAsFixed(1),
+                          fontVariant: FontVariant.bold,
                         ),
                       ),
                       const SizedBox(
@@ -127,8 +127,8 @@ class UiSettings extends StatelessWidget {
                         width: 10,
                       ),
                       const AzyXText(
-                        "5.0",
-                        style: TextStyle(fontFamily: "Poppins-Bold"),
+                        text: "5.0",
+                        fontVariant: FontVariant.bold,
                       )
                     ],
                   )
@@ -155,10 +155,8 @@ class UiSettings extends StatelessWidget {
             child: const ListTile(
               leading: Icon(Broken.colorfilter),
               title: AzyXText(
-                "Color Glow",
-                style: TextStyle(
-                  fontFamily: "Poppins-Bold",
-                ),
+                text: "Color Glow",
+                fontVariant: FontVariant.bold,
               ),
             ),
           ),
@@ -173,20 +171,22 @@ class UiSettings extends StatelessWidget {
                   const ListTile(
                     leading: Icon(Ionicons.color_fill),
                     title: AzyXText(
-                      "Glow Multiplier",
-                      style: TextStyle(fontFamily: "Poppins-Bold"),
+                      text: "Glow Multiplier",
+                      fontVariant: FontVariant.bold,
                     ),
                     subtitle: AzyXText(
-                      "Adjust the glow for your vibe",
-                      style: TextStyle(fontSize: 12, fontFamily: "Poppins"),
+                      text: "Adjust the glow for your vibe",
+                      fontSize: 12,
+                      fontVariant: FontVariant.bold,
                     ),
                   ),
                   Row(
                     children: [
                       Obx(
                         () => AzyXText(
-                          uiSettingController.glowMultiplier.toStringAsFixed(1),
-                          style: const TextStyle(fontFamily: "Poppins-Bold"),
+                          text: uiSettingController.glowMultiplier
+                              .toStringAsFixed(1),
+                          fontVariant: FontVariant.bold,
                         ),
                       ),
                       const SizedBox(
@@ -220,8 +220,8 @@ class UiSettings extends StatelessWidget {
                         width: 10,
                       ),
                       const AzyXText(
-                        "1.0",
-                        style: TextStyle(fontFamily: "Poppins-Bold"),
+                        text: "1.0",
+                        fontVariant: FontVariant.bold,
                       )
                     ],
                   )

@@ -12,8 +12,9 @@ void showloader(context) {
             child: Column(
               children: [
                 AzyXText(
-                  "Getting data",
-                  style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 20),
+                 text:  "Getting data",
+                  fontSize: 20,
+                  fontVariant: FontVariant.bold,
                 ),
                 SizedBox(
                   height: 10,

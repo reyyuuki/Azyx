@@ -3,7 +3,12 @@ import 'dart:developer';
 import 'dart:math' as max;
 import 'package:azyx/Classes/episode_class.dart';
 import 'package:azyx/Classes/anime_all_data.dart';
+import 'package:azyx/Classes/local_history.dart';
 import 'package:azyx/Constants/constants.dart';
+import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
+import 'package:azyx/Controllers/anilist_auth.dart';
+import 'package:azyx/Controllers/local_history_controller.dart';
+import 'package:azyx/Functions/string_extensions.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/bottom_sheets.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/custom_controls.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/episode_list_drawer.dart';
@@ -36,7 +41,7 @@ enum ResizeModes {
   fill,
 }
 
-class _WatchScreenState extends State<WatchScreen> {
+class _WatchScreenState extends State<WatchScreen> with WidgetsBindingObserver {
   late Player player;
   late VideoController controller;
   final Rx<bool> showControls = true.obs;
@@ -56,9 +61,12 @@ class _WatchScreenState extends State<WatchScreen> {
   final Rx<double> _brightnessValue = 0.0.obs;
   final Rx<bool> isPotraitOrientaion = false.obs;
   final Rx<String> selectedSbt = ''.obs;
+  final Rx<LocalHistory> localHistoryData = LocalHistory().obs;
+  Timer? updateTimer;
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     SystemChrome.setPreferredOrientations([
@@ -68,10 +76,24 @@ class _WatchScreenState extends State<WatchScreen> {
     player = Player();
     controller = VideoController(player);
     if (mounted) {
-      player.open(Media(widget.playerData.url!));
       intializeData();
+      player.open(Media(widget.playerData.url!));
       _handleVolumeAndBrightness();
+      updateTimer = Timer.periodic(
+          const Duration(minutes: 1), (timer) => localHistoryEntry());
     }
+  }
+
+  void localHistoryEntry() {
+    localHistoryData.value = LocalHistory(
+        animeData: animeData.value,
+        progress: episodeNumber.value,
+        totalDuration: totalDuration.value,
+        currentTime: position.value,
+        mediaId: widget.playerData.id,
+        lastTime:
+            Duration(seconds: DateTime.now().microsecondsSinceEpoch ~/ 1000));
+    localHistoryController.addToWatchingHistory(localHistoryData.value);
   }
 
   Future<void> _handleVolumeAndBrightness() async {
@@ -96,6 +118,7 @@ class _WatchScreenState extends State<WatchScreen> {
     episodeNumber.value = widget.playerData.number!;
     episodeTitle.value = widget.playerData.episodeTitle!;
     filteredEpisodes.value = widget.playerData.episodeList!;
+    localHistoryEntry();
   }
 
   void changeResizeMode() {
@@ -105,6 +128,7 @@ class _WatchScreenState extends State<WatchScreen> {
   }
 
   Future<void> loadEpisodeurl(String url) async {
+    log("new ${widget.playerData.source!.name!}");
     try {
       final response =
           await getVideo(source: widget.playerData.source!, url: url);
@@ -117,6 +141,7 @@ class _WatchScreenState extends State<WatchScreen> {
             orElse: () => response.first);
         animeData.value.episodeUrls = response;
         animeData.value.url = result.url;
+        localHistoryEntry();
         player.open(Media(result.url));
       } else {
         log("extracting error when fetching link");
@@ -128,11 +153,22 @@ class _WatchScreenState extends State<WatchScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp]);
     player.dispose();
+    localHistoryEntry();
+    updateTimer?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      localHistoryEntry();
+    }
   }
 
   Widget topControls() {
@@ -156,6 +192,7 @@ class _WatchScreenState extends State<WatchScreen> {
         padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
             color: Colors.black.withOpacity(0.6),
+            border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
             borderRadius: BorderRadius.circular(40)),
         child: const Icon(
           Broken.arrow_left_2,
@@ -170,6 +207,7 @@ class _WatchScreenState extends State<WatchScreen> {
     return AzyXContainer(
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(40),
+          border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
           color: Colors.black.withOpacity(0.6)),
       child: Row(
         children: [
@@ -215,11 +253,10 @@ class _WatchScreenState extends State<WatchScreen> {
             alignment: Alignment.topLeft,
             child: Obx(
               () => AzyXText(
-                "Episode ${episodeNumber.value}: ${episodeTitle.value}",
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 16,
-                    fontFamily: "Poppins-Bold"),
+                text: "Episode ${episodeNumber.value}: ${episodeTitle.value}",
+                fontVariant: FontVariant.bold,
+                color: Theme.of(context).colorScheme.primary,
+                fontSize: 16,
                 maxLines: 2,
               ),
             ),
@@ -227,13 +264,10 @@ class _WatchScreenState extends State<WatchScreen> {
           AzyXContainer(
             alignment: Alignment.topLeft,
             child: AzyXText(
-              widget.playerData.title!,
-              style: const TextStyle(
-                color: Color.fromARGB(255, 190, 190, 190),
-                fontSize: 13,
-                fontFamily: "Poppins",
-                overflow: TextOverflow.ellipsis,
-              ),
+              text: widget.playerData.title!,
+              color: Color.fromARGB(255, 190, 190, 190),
+              fontSize: 13,
+              overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
           ),
@@ -286,6 +320,7 @@ class _WatchScreenState extends State<WatchScreen> {
     return AzyXContainer(
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(40),
+          border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
           color: Colors.black.withOpacity(0.6)),
       child: Row(
         children: [
@@ -350,9 +385,8 @@ class _WatchScreenState extends State<WatchScreen> {
         ? const SizedBox.shrink()
         : Row(
             children: [
-              seek10Widget(),
-              speedButton(),
               seek85(true),
+              speedButton(),
             ],
           );
   }
@@ -393,6 +427,7 @@ class _WatchScreenState extends State<WatchScreen> {
       margin: const EdgeInsets.only(right: 10),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(40),
+          border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
           color: Colors.black.withOpacity(0.6)),
       child: IconButton(
         onPressed: () {
@@ -413,6 +448,7 @@ class _WatchScreenState extends State<WatchScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(40),
+          border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
           color: Colors.black.withOpacity(0.6)),
       child: IconButton(
         onPressed: () {
@@ -431,18 +467,18 @@ class _WatchScreenState extends State<WatchScreen> {
                     color: Colors.white,
                   ),
                   AzyXText(
-                    " -85",
-                    style: TextStyle(
-                        fontFamily: "Poppins-Bold", color: Colors.white),
+                    text: " -85",
+                    color: Colors.white,
+                    fontVariant: FontVariant.bold,
                   )
                 ],
               )
             : const Row(
                 children: [
                   AzyXText(
-                    "+85 ",
-                    style: TextStyle(
-                        fontFamily: "Poppins-Bold", color: Colors.white),
+                    text: "+85 ",
+                    fontVariant: FontVariant.bold,
+                    color: Colors.white,
                   ),
                   Icon(
                     Broken.forward,
@@ -528,13 +564,12 @@ class _WatchScreenState extends State<WatchScreen> {
                     width: 10,
                   ),
                   AzyXText(
-                    isLeftSide.value
+                    text: isLeftSide.value
                         ? "-${skipDuration.value}s"
                         : "+${skipDuration.value}s",
-                    style: const TextStyle(
-                        fontFamily: "Poppins-Bold",
-                        fontSize: 25,
-                        color: Colors.white),
+                    fontVariant: FontVariant.bold,
+                    fontSize: 25,
+                    color: Colors.white,
                   ),
                 ],
               ),
@@ -598,8 +633,8 @@ class _WatchScreenState extends State<WatchScreen> {
               child: const Row(
                 children: [
                   AzyXText(
-                    "2.0x ",
-                    style: TextStyle(fontFamily: "Poppins-Bold"),
+                    text: "2.0x ",
+                    fontVariant: FontVariant.bold,
                   ),
                   Icon(Broken.forward)
                 ],
@@ -682,17 +717,32 @@ class _WatchScreenState extends State<WatchScreen> {
                   topBar: topControls(),
                   bottomBar: bottomControls(),
                   changeEpisode: (isNext) {
+                    if (anilistAuthController.userData.value.name != null) {
+                      anilistAddToListController.updateAnimeProgress(
+                          widget.playerData, (episodeNumber.value.toInt()));
+                      azyxSnackBar("Tracking Episode $episodeNumber");
+                    }
                     final index = filteredEpisodes
-                        .indexWhere((i) => i.title == episodeTitle.value);
+                        .indexWhere((i) => i.number == episodeNumber.value);
                     if (isNext && filteredEpisodes.length > index) {
+                      log("Next");
                       player.open(Media(""));
                       episodeTitle.value = filteredEpisodes[index + 1].title!;
                       episodeNumber.value = filteredEpisodes[index + 1].number;
+                      animeData.value.episodeTitle =
+                          filteredEpisodes[index + 1].title!;
+                      animeData.value.number =
+                          filteredEpisodes[index + 1].number;
                       loadEpisodeurl(filteredEpisodes[index + 1].url!);
                     } else if (index > 0) {
+                      log("previous");
                       player.open(Media(""));
                       episodeTitle.value = filteredEpisodes[index - 1].title!;
                       episodeNumber.value = filteredEpisodes[index - 1].number;
+                      animeData.value.episodeTitle =
+                          filteredEpisodes[index - 1].title!;
+                      animeData.value.number =
+                          filteredEpisodes[index - 1].number;
                       loadEpisodeurl(filteredEpisodes[index - 1].url!);
                     } else {
                       log("No episode");
@@ -706,9 +756,16 @@ class _WatchScreenState extends State<WatchScreen> {
             )),
             EpisodeListDrawer(
               ontap: (item) {
+                if (anilistAuthController.userData.value.name != null) {
+                  anilistAddToListController.updateAnimeProgress(
+                      widget.playerData, (episodeNumber.value.toInt()));
+                  azyxSnackBar("Tracking Episode $episodeNumber");
+                }
                 player.open(Media(""));
                 episodeTitle.value = item.title!;
                 episodeNumber.value = item.number;
+                animeData.value.title = item.title!;
+                animeData.value.number = item.number;
                 showEpisodesBox.value = false;
                 loadEpisodeurl(item.url!);
               },

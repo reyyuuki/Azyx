@@ -113,7 +113,7 @@ class EpisodeListDrawer extends StatelessWidget {
                       physics: const BouncingScrollPhysics(),
                       itemCount: filteredEpisodes.length,
                       itemBuilder: (context, index) {
-                        final image = filteredEpisodes[index].thumbnail!.isEmpty
+                        final image = filteredEpisodes[index].thumbnail == null
                             ? animeData.value.image
                             : filteredEpisodes[index].thumbnail!;
                         return GestureDetector(
@@ -182,33 +182,30 @@ class EpisodeListDrawer extends StatelessWidget {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               AzyXText(
-                                                filteredEpisodes[index].title!,
+                                                text: filteredEpisodes[index]
+                                                    .title!,
                                                 maxLines: 2,
-                                                style: TextStyle(
-                                                    fontFamily: "Poppins-Bold",
-                                                    fontSize: 14,
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .primary),
+                                                fontVariant: FontVariant.bold,
+                                                fontSize: 14,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary,
                                               ),
                                               const SizedBox(
                                                 height: 5,
                                               ),
                                               AzyXText(
-                                                filteredEpisodes[index]
-                                                        .desc!
+                                                text: filteredEpisodes[index]
+                                                        .desc
                                                         .isEmpty
                                                     ? "Get ready for an exciting episode filled with twists, action, and unforgettable moments!"
                                                     : filteredEpisodes[index]
-                                                        .desc!,
-                                                style: TextStyle(
-                                                    fontFamily: "Poppins",
-                                                    fontSize: 12,
-                                                    fontStyle: FontStyle.italic,
-                                                    color: Colors.grey.shade400
-                                                        .withOpacity(0.7),
-                                                    overflow:
-                                                        TextOverflow.ellipsis),
+                                                        .desc,
+                                                fontSize: 12,
+                                                fontStyle: FontStyle.italic,
+                                                color: Colors.grey.shade400
+                                                    .withOpacity(0.7),
+                                                overflow: TextOverflow.ellipsis,
                                                 maxLines: 3,
                                               )
                                             ],
@@ -244,12 +241,11 @@ class EpisodeListDrawer extends StatelessWidget {
                                             topLeft: Radius.circular(10),
                                             bottomRight: Radius.circular(10))),
                                     child: AzyXText(
-                                      filteredEpisodes[index].number.toString(),
-                                      style: const TextStyle(
-                                          fontFamily: "Poppins-Bold",
-                                          color: Colors.black,
-                                          fontSize: 20),
-                                    ),
+                                        text: filteredEpisodes[index]
+                                            .number
+                                            .toString(),
+                                        color: Colors.black,
+                                        fontSize: 20),
                                   ))
                             ],
                           ),

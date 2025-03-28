@@ -1,3 +1,5 @@
+import 'package:azyx/Controllers/local_history_controller.dart';
+import 'package:azyx/Controllers/offline_controller.dart';
 import 'package:azyx/Screens/Settings/Pages/theme_setting.dart';
 import 'package:azyx/Screens/Settings/Pages/ui_settings.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
@@ -118,9 +120,10 @@ class SettingScreen extends StatelessWidget {
           ),
           ElevatedButton(
               onPressed: () {
-                Hive.box('offline-data').clear();
+                // Hive.box('offline-data').clear();
+                offlineController.loadOfflineData();
               },
-              child: const AzyXText("Testing"))
+              child: const AzyXText(text: "Testing"))
         ],
       )),
     );
@@ -139,8 +142,8 @@ class SettingScreen extends StatelessWidget {
               child: Column(
                 children: [
                   const AzyXText(
-                    "Want to reset all the settings",
-                    style: TextStyle(fontFamily: "Poppins", fontSize: 16),
+                    text: "Want to reset all the settings",
+                    fontSize: 16,
                   ),
                   const SizedBox(
                     height: 10,
@@ -157,10 +160,8 @@ class SettingScreen extends StatelessWidget {
                             Navigator.pop(context);
                           },
                           child: AzyXText(
-                            "Cancel",
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.surface,
-                                fontFamily: "Poppins"),
+                            text: "Cancel",
+                            color: Theme.of(context).colorScheme.surface,
                           )),
                       ElevatedButton(
                           style: ButtonStyle(
@@ -172,10 +173,8 @@ class SettingScreen extends StatelessWidget {
                             // Provider.of<ThemeProvider>(context,listen: false).resetSetting();
                           },
                           child: AzyXText(
-                            "Reset",
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.surface,
-                                fontFamily: "Poppins"),
+                            text: "Reset",
+                            color: Theme.of(context).colorScheme.surface,
                           ))
                     ],
                   )
@@ -191,13 +190,13 @@ class SettingScreen extends StatelessWidget {
     return ListTile(
       leading: icon,
       title: AzyXText(
-        title,
-        style: const TextStyle(fontFamily: "Poppins-Bold"),
+        text: title,
+        fontVariant: FontVariant.bold,
       ),
       trailing: const Icon(Broken.arrow_right_3),
       subtitle: AzyXText(
-        subtitle,
-        style: const TextStyle(fontFamily: "Poppins", fontSize: 12),
+        text: subtitle,
+        fontSize: 12,
       ),
     );
   }

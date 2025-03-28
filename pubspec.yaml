@@ -19,7 +19,7 @@ dependencies:
   http: ^1.2.2
   device_info_plus: any
   permission_handler: any
-  flutter_local_notifications: any
+  # flutter_local_notifications: any
   dio: ^5.7.0
   media_kit: ^1.1.10+1
   media_kit_video: ^1.2.4
@@ -28,8 +28,9 @@ dependencies:
   flutter_web_auth_2: ^4.0.2
   sidebarx: ^0.17.1
   dart_eval: ^0.7.10
-  isar: 3.1.0+1
-  isar_flutter_libs: 3.1.0+1
+  isar_flutter_libs:
+    git:
+      url: https://github.com/MrLittleWhite/isar_flutter_libs.git
   http_interceptor: ^2.0.0
   share_plus: ^10.1.3
   js_packer: ^0.0.5
@@ -58,7 +59,6 @@ dependencies:
   checkmark: ^0.0.2+1
   shimmer: ^3.0.0
   ionicons: ^0.2.2
-  custom_sliding_segmented_control: ^1.8.4
   carousel_slider: ^5.0.0
   flutter_inappwebview: ^6.1.5
 

@@ -1,19 +1,15 @@
-// ignore_for_file: invalid_use_of_protected_member
-
-import 'dart:developer';
-import 'dart:io';
-
-import 'package:azyx/Classes/offline_item.dart';
 import 'package:azyx/Controllers/offline_controller.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
+import 'package:azyx/Screens/Library/widgets/grid_list.dart';
+import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
-import 'package:azyx/Widgets/common/shimmer_effect.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ionicons/ionicons.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -23,186 +19,314 @@ class LibraryScreen extends StatefulWidget {
 }
 
 class _FavoriteScreenState extends State<LibraryScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   TabController? tabController;
+  final Rx<String> contentType = "Anime".obs;
 
   @override
   void initState() {
     super.initState();
-    tabController =
-        TabController(length: offlineController.categories.length, vsync: this);
+    _initializeTabController();
+  }
+
+  void _initializeTabController() {
+    tabController = TabController(
+      length: contentType.value == "Anime"
+          ? offlineController.offlineAnimeCategories.length
+          : offlineController.offlineMangaCategories.length,
+      vsync: this,
+    );
+  }
+
+  void _updateTabController() {
+    tabController?.dispose();
+    _initializeTabController();
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    tabController?.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          title: const AzyXText(
-            "Library",
-            style: TextStyle(fontFamily: "Poppins-Bold"),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(
+            height: 50,
           ),
-          centerTitle: true,
-          bottom: TabBar(
-              controller: tabController,
-              tabs: offlineController.categories.map((i) {
-                return Tab(
-                  text: i.name,
-                );
-              }).toList())),
-      body: AzyXGradientContainer(
-        padding: const EdgeInsets.all(10),
-        child: TabBarView(
-            controller: tabController,
-            children: offlineController.categories.map((i) {
-              final data =
-                  offlineController.allOfflineAnime.value.where((item) {
-                log('Checking item: ${item.mediaData.id}, Category IDs: ${i.anilistIds}');
-                return i.anilistIds.contains(item.mediaData.id);
-              });
-              return listWidget(data, i.name!);
-            }).toList()),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const AzyXText(
+                      text: "Library",
+                      fontVariant: FontVariant.bold,
+                      fontSize: 20,
+                    ),
+                    AzyXText(
+                      text: "Continue Where You Left Off",
+                      color: Theme.of(context).colorScheme.primary,
+                      fontVariant: FontVariant.bold,
+                      fontSize: 12,
+                    ),
+                  ],
+                ),
+                GestureDetector(
+                  onTap: () {
+                    changeContentSheet();
+                  },
+                  child: AzyXContainer(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(1.glowMultiplier()),
+                            blurRadius: 10.blurMultiplier(),
+                            spreadRadius: 2.spreadMultiplier())
+                      ],
+                    ),
+                    child: Obx(
+                      () => Row(
+                        children: [
+                          Icon(
+                            contentType.value == "Anime"
+                                ? Ionicons.logo_youtube
+                                : Broken.book,
+                            color: Colors.black,
+                          ),
+                          5.width,
+                          AzyXText(
+                            text: contentType.value,
+                            fontVariant: FontVariant.bold,
+                            color: Colors.black,
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                IconButton(
+                    onPressed: () {},
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStatePropertyAll(
+                          Theme.of(context).colorScheme.surfaceContainerHigh),
+                      padding: const WidgetStatePropertyAll(EdgeInsets.all(10)),
+                    ),
+                    icon: const Icon(Broken.search_normal))
+              ],
+            ),
+          ),
+          Expanded(
+            child: AzyXGradientContainer(
+              child: Column(
+                children: [
+                  AzyXContainer(
+                    padding: const EdgeInsets.all(0),
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: TabBar(
+                      controller: tabController,
+                      isScrollable: true,
+                      tabs: contentType.value == "Anime"
+                          ? offlineController.offlineAnimeCategories
+                              .map((category) {
+                              return Tab(
+                                text: category.name,
+                              );
+                            }).toList()
+                          : offlineController.offlineMangaCategories
+                              .map((category) {
+                              return Tab(
+                                text: category.name,
+                              );
+                            }).toList(),
+                      labelStyle: const TextStyle(
+                          fontSize: 14,
+                          fontFamily: "Poppins-Bold",
+                          color: Colors.black),
+                      unselectedLabelStyle: TextStyle(
+                          fontSize: 14,
+                          fontFamily: "Poppins-Bold",
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withOpacity(0.6)),
+                      indicator: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Theme.of(context).colorScheme.primary,
+                          boxShadow: [
+                            BoxShadow(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(1.glowMultiplier()),
+                                spreadRadius: 2.spreadMultiplier(),
+                                blurRadius: 5.blurMultiplier())
+                          ]),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      dividerColor: Colors.transparent,
+                      tabAlignment: TabAlignment.start,
+                      automaticIndicatorColorAdjustment: true,
+                      indicatorAnimation: TabIndicatorAnimation.elastic,
+                      indicatorPadding: const EdgeInsets.all(6),
+                    ),
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      controller: tabController,
+                      children: contentType.value == "Anime"
+                          ? offlineController.offlineAnimeCategories.map((i) {
+                              final data = offlineController.offlineAnimeList
+                                  .where((item) {
+                                return i.anilistIds.contains(item.mediaData.id);
+                              }).toList();
+                              return GridList(
+                                data: data,
+                                tagg: i.name!,
+                                ontap: (item, tagg) {
+                                  Get.to(AnimeDetailsScreen(
+                                    tagg: tagg,
+                                    allData: item,
+                                    isOffline: true,
+                                  ));
+                                },
+                              );
+                            }).toList()
+                          : offlineController.offlineMangaCategories.map((i) {
+                              final data = offlineController.offlineMangaList
+                                  .where((item) {
+                                return i.anilistIds.contains(item.mediaData.id);
+                              }).toList();
+                              return GridList(
+                                data: data,
+                                tagg: i.name!,
+                                ontap: (item, tagg) {
+                                  contentType.value == "Anime"
+                                      ? Get.to(AnimeDetailsScreen(
+                                          tagg: tagg,
+                                          allData: item,
+                                          isOffline: true,
+                                        ))
+                                      : Get.to(MangaDetailsScreen(
+                                          tagg: tagg,
+                                          allData: item,
+                                          isOffline: true));
+                                },
+                              );
+                            }).toList(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  ListView listWidget(Iterable<OfflineItem> data, String name) {
-    return ListView(
-      physics: const BouncingScrollPhysics(),
-      children: data.map((i) {
-        final item = i.mediaData;
-        final tagg = '$name&${item.id}';
-        return GestureDetector(
-          onTap: () {
-            Get.to(AnimeDetailsScreen(
-              allData: i,
-              isOffline: true,
-              tagg: tagg,
-            ));
-          },
-          child: SizedBox(
+  void changeContentSheet() {
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        enableDrag: true,
+        showDragHandle: true,
+        builder: (context) {
+          return AzyXContainer(
+            height: 150,
+            padding: const EdgeInsets.all(10),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Stack(
-                  children: [
-                    AzyXContainer(
-                      height: Platform.isAndroid || Platform.isIOS ? 150 : 230,
-                      width: Platform.isAndroid || Platform.isIOS ? 103 : 160,
-                      margin: const EdgeInsets.only(right: 10),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(45),
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black.withOpacity(0.5),
-                                blurRadius: 10,
-                                offset: const Offset(2, 2))
-                          ]),
-                      child: Hero(
-                        tag: tagg,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
-                          child: CachedNetworkImage(
-                            imageUrl: item.image!,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => ShimmerEffect(
-                              height: Platform.isAndroid || Platform.isIOS
-                                  ? 150
-                                  : 230,
-                              width: Platform.isAndroid || Platform.isIOS
-                                  ? 103
-                                  : 160,
-                            ),
-                            errorWidget: (context, url, error) =>
-                                const Icon(Icons.error),
-                          ),
-                        ),
-                      ),
-                    ),
-                    item.rating != null
-                        ? Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: AzyXContainer(
-                              height: 22,
-                              margin: const EdgeInsets.only(right: 10),
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .surfaceBright
-                                          .withOpacity(0.6),
-                                      blurRadius: 10)
-                                ],
-                                color:
-                                    Theme.of(context).colorScheme.surfaceBright,
-                                borderRadius: const BorderRadius.only(
-                                    bottomRight: Radius.circular(10),
-                                    topLeft: Radius.circular(25)),
-                              ),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    AzyXText(
-                                      item.rating!,
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                          fontFamily: "Poppins-Bold"),
-                                    ),
-                                    Icon(
-                                      Broken.star,
-                                      size: 16,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                    item.status != null &&
-                            (item.status == "RELEASING" ||
-                                item.status == "Ongoing")
-                        ? Positioned(
-                            bottom: 0,
-                            left: 0,
-                            child: AzyXContainer(
-                              height: 15,
-                              width: 15,
-                              decoration: BoxDecoration(
-                                  color: const Color.fromARGB(255, 95, 209, 99),
-                                  border: Border.all(
-                                      width: 2,
-                                      color: const Color.fromARGB(
-                                          255, 8, 117, 11)),
-                                  borderRadius: BorderRadius.circular(20)),
-                            ))
-                        : const SizedBox.shrink()
-                  ],
+                GestureDetector(
+                  onTap: () {
+                    contentType.value = "Anime";
+                    _updateTabController();
+                    Future.delayed(
+                        const Duration(milliseconds: 300), () => Get.back());
+                  },
+                  child: listItem(
+                    context,
+                    "Anime",
+                    Ionicons.logo_youtube,
+                  ),
                 ),
-                const SizedBox(height: 10),
-                AzyXText(
-                  Platform.isAndroid || Platform.isIOS
-                      ? (item.title!.length > 12
-                          ? '${item.title!.substring(0, 10)}...'
-                          : item.title!)
-                      : (item.title!.length > 20
-                          ? '${item.title!.substring(0, 17)}...'
-                          : item.title!),
-                  style: const TextStyle(fontFamily: "Poppins-Bold"),
-                ),
+                GestureDetector(
+                    onTap: () {
+                      contentType.value = "Manga";
+                      _updateTabController();
+                      Future.delayed(
+                          const Duration(milliseconds: 300), () => Get.back());
+                    },
+                    child: listItem(context, "Manga", Broken.book)),
               ],
             ),
-          ),
-        );
-      }).toList(),
+          );
+        });
+  }
+
+  Obx listItem(BuildContext context, String title, IconData icon) {
+    return Obx(
+      () => AzyXContainer(
+        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+            color: contentType.value == title
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.surfaceContainerHighest,
+            boxShadow: [
+              BoxShadow(
+                color: contentType.value == title
+                    ? Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withOpacity(1.glowMultiplier())
+                    : Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHighest
+                        .withOpacity(1.glowMultiplier()),
+                spreadRadius: 2.spreadMultiplier(),
+                blurRadius: 10.blurMultiplier(),
+              )
+            ],
+            borderRadius: BorderRadius.circular(20)),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: contentType.value == title
+                  ? Colors.black
+                  : Theme.of(context).colorScheme.inverseSurface,
+            ),
+            10.width,
+            AzyXText(
+              text: title,
+              fontVariant: FontVariant.bold,
+              color: contentType.value == title
+                  ? Colors.black
+                  : Theme.of(context).colorScheme.inverseSurface,
+            )
+          ],
+        ),
+      ),
     );
   }
 }

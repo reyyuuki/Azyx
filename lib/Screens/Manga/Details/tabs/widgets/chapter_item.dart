@@ -22,7 +22,7 @@ class ChapterItem extends StatelessWidget {
             BoxShadow(
                 color: Theme.of(context).colorScheme.primary.withAlpha(30),
                 blurRadius: 10.blurMultiplier(),
-                spreadRadius: 2 .spreadMultiplier())
+                spreadRadius: 2.spreadMultiplier())
           ],
           borderRadius: BorderRadius.circular(10)),
       child: Row(
@@ -33,22 +33,19 @@ class ChapterItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AzyXText(
-                  chapter.title!.toString(),
+                  text: chapter.title!.toString(),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontFamily: "Poppins-Bold",
-                      color: Theme.of(context).colorScheme.primary),
+                  fontVariant: FontVariant.bold,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(
                   height: 5,
                 ),
                 AzyXText(
-                  chapter.releaseDate!,
-                  style: TextStyle(
-                      fontFamily: "Poppins",
-                      color: Colors.grey.shade500,
-                      fontStyle: FontStyle.italic),
+                  text: chapter.releaseDate!,
+                  color: Colors.grey.shade500,
+                  fontStyle: FontStyle.italic,
                 ),
               ],
             ),
@@ -59,14 +56,17 @@ class ChapterItem extends StatelessWidget {
               decoration: BoxDecoration(
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.primary,
-                      blurRadius: 10.blurMultiplier(),
-                      spreadRadius: 2.spreadMultiplier()
-                    )
+                        color: Theme.of(context).colorScheme.primary,
+                        blurRadius: 10.blurMultiplier(),
+                        spreadRadius: 2.spreadMultiplier())
                   ],
                   color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(10)),
-              child: AzyXText(chapter.number!.toString(),style: TextStyle(fontFamily: "Poppins-Bold",color: Theme.of(context).colorScheme.inversePrimary),)),
+              child: AzyXText(
+                text: chapter.number!.toString(),
+                fontVariant: FontVariant.bold,
+                color: Theme.of(context).colorScheme.inversePrimary,
+              )),
         ],
       ),
     );

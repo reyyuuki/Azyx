@@ -5,7 +5,6 @@ import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:media_kit/media_kit.dart';
 
 class CustomControls extends StatefulWidget {
@@ -75,6 +74,8 @@ class _CustomControlsState extends State<CustomControls> {
           margin: const EdgeInsets.all(10),
           decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.6),
+              border:
+                  Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
               borderRadius: BorderRadius.circular(50)),
           child: Icon(
             icon,
@@ -93,16 +94,17 @@ class _CustomControlsState extends State<CustomControls> {
             ontap: () {
               widget.changeEpisode(false);
             },
-            icon: Broken.backward),
+            icon: Broken.previous),
         Obx(() => isBuffering.value
             ? const CircularProgressIndicator()
             : GestureDetector(
                 onTap: () => widget.player.playOrPause(),
                 child: AzyXContainer(
-                  padding: const EdgeInsets.all(15),
+                  padding: const EdgeInsets.all(8),
                   margin: const EdgeInsets.symmetric(horizontal: 30),
                   decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
+                      color:
+                          Theme.of(context).colorScheme.primary.withAlpha(80),
                       boxShadow: [
                         BoxShadow(
                             color: Theme.of(context)
@@ -114,14 +116,16 @@ class _CustomControlsState extends State<CustomControls> {
                       ],
                       borderRadius: BorderRadius.circular(50)),
                   child: Icon(
-                    isPlaying.value ? Icons.pause : Ionicons.play,
-                    color: Colors.black,
-                    size: isPlaying.value ? 50 : 45,
+                    isPlaying.value
+                        ? Icons.pause_rounded
+                        : Icons.play_arrow_rounded,
+                    color: Theme.of(context).colorScheme.inversePrimary,
+                    size: isPlaying.value ? 60 : 60,
                     shadows: [
                       BoxShadow(
-                          color: Colors.black.withOpacity(0.8),
-                          blurRadius: 20,
-                          spreadRadius: 5)
+                          color: Theme.of(context).colorScheme.inversePrimary,
+                          blurRadius: 10.blurMultiplier(),
+                          spreadRadius: 2.spreadMultiplier())
                     ],
                   ),
                 ))),
@@ -129,7 +133,7 @@ class _CustomControlsState extends State<CustomControls> {
             ontap: () {
               widget.changeEpisode(true);
             },
-            icon: Broken.forward)
+            icon: Broken.next)
       ],
     );
   }
@@ -171,7 +175,7 @@ class _CustomControlsState extends State<CustomControls> {
           Obx(() => widget.isControlsLocked()
               ? const SizedBox.shrink()
               : AnimatedContainer(
-                  height: widget.isPotraitOrientation.value ? 150 : 100,
+                  height: widget.isPotraitOrientation.value ? 150 : 101,
                   alignment: Alignment.center,
                   transform: Matrix4.translationValues(
                       0, widget.showControls.value ? 0 : -Get.height, 0),
@@ -189,7 +193,7 @@ class _CustomControlsState extends State<CustomControls> {
             )),
           ),
           AnimatedContainer(
-            height: widget.isPotraitOrientation.value ? 150 : 100,
+            height: widget.isPotraitOrientation.value ? 150 : 101,
             transform: Matrix4.translationValues(
                 0, widget.showControls.value ? 0 : Get.height, 0),
             duration: const Duration(milliseconds: 1000),
@@ -199,18 +203,17 @@ class _CustomControlsState extends State<CustomControls> {
                 Row(
                   children: [
                     Obx(() => AzyXText(
-                          getFormattedTime(widget.position.value.inSeconds),
-                          style: TextStyle(
-                              fontFamily: "Poppins-Bold",
-                              color: Theme.of(context).colorScheme.primary),
+                         text:  getFormattedTime(widget.position.value.inSeconds),
+                         fontVariant: FontVariant.bold,
+                              color: Theme.of(context).colorScheme.primary,
                         )),
                     const AzyXText(
-                      ' / ',
-                      style: TextStyle(fontFamily: "Poppins-Bold"),
+                      text: ' / ',
+                     fontVariant: FontVariant.bold,
                     ),
                     Obx(() => AzyXText(
-                          getFormattedTime(widget.duration.value.inSeconds),
-                          style: const TextStyle(fontFamily: "Poppins-Bold"),
+                        text:   getFormattedTime(widget.duration.value.inSeconds),
+                          fontVariant: FontVariant.bold,
                         ))
                   ],
                 ),
@@ -222,7 +225,7 @@ class _CustomControlsState extends State<CustomControls> {
                         max: widget.duration.value.inSeconds > 0
                             ? widget.duration.value.inSeconds.toDouble()
                             : 0.0,
-                        secondaryTrackValue: buffered.value.inSeconds > 0.0
+                        secondaryTrackValue: widget.duration.value.inSeconds > 0
                             ? buffered.value.inSeconds.toDouble()
                             : 0.0,
                         indiactorTime:
