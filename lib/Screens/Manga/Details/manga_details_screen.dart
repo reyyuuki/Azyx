@@ -2,8 +2,11 @@
 
 import 'dart:developer';
 
+import 'package:azyx/Classes/anime_class.dart';
 import 'package:azyx/Classes/anime_details_data.dart';
 import 'package:azyx/Classes/episode_class.dart';
+import 'package:azyx/Classes/offline_item.dart';
+import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/details_section.dart';
 import 'package:azyx/Screens/Manga/Details/tabs/read_section.dart';
@@ -22,16 +25,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
 class MangaDetailsScreen extends ConsumerStatefulWidget {
-  final int id;
-  final String title;
   final String tagg;
-  final String image;
+  final Anime? smallMedia;
+  final OfflineItem? allData;
+  final bool isOffline;
   const MangaDetailsScreen(
       {super.key,
-      required this.id,
       required this.tagg,
-      required this.title,
-      required this.image});
+      this.isOffline = false,
+      this.smallMedia,
+      this.allData});
 
   @override
   ConsumerState<MangaDetailsScreen> createState() => _DetailsScreenState();
@@ -39,6 +42,10 @@ class MangaDetailsScreen extends ConsumerStatefulWidget {
 
 class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
     with SingleTickerProviderStateMixin {
+  final Rx<String> title = ''.obs;
+  final Rx<String> image = ''.obs;
+  final Rx<String> coverImage = ''.obs;
+  final Rx<int> id = 0.obs;
   final Rx<AnilistMediaData> mediaData = AnilistMediaData().obs;
   final Rx<bool> isLoading = true.obs;
   final RxList<Source> installedExtensions = RxList<Source>();
@@ -51,8 +58,8 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
   final Rx<bool> _extenstionError = false.obs;
   Future<void> loadData() async {
     try {
-      final response =
-          await anilistDataController.fetchAnilistMangaDetails(widget.id);
+      final response = await anilistDataController
+          .fetchAnilistMangaDetails(widget.smallMedia!.id!);
       mediaData.value = response;
       isLoading.value = false;
     } catch (e) {
@@ -73,25 +80,52 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
     }
   }
 
+  void convertData() {
+    if (widget.isOffline) {
+      anilistAddToListController.findManga(widget.allData!.mediaData);
+      image.value = widget.allData!.mediaData.image!;
+      title.value = widget.allData!.mediaData.title!;
+      id.value = widget.allData!.mediaData.id!;
+      chaptersList.value = widget.allData!.chaptersList!;
+      mangaTitle.value = widget.allData!.animeTitle ?? '';
+      mediaData.value = widget.allData!.mediaData;
+      coverImage.value = widget.allData?.mediaData.coverImage! ?? image.value;
+      totalChapters.value = chaptersList.length.toString();
+      isLoading.value = false;
+    } else {
+      anilistAddToListController.findManga(AnilistMediaData(
+          id: widget.smallMedia?.id,
+          title: widget.smallMedia?.title,
+          episodes: widget.allData?.episodesList!.length));
+      image.value = widget.smallMedia!.image!;
+      title.value = widget.smallMedia!.title!;
+      id.value = widget.smallMedia!.id!;
+      loadData();
+    }
+  }
+
   Future<void> getChapters(String link, Source source) async {
     final episodeResult = await getDetail(url: link, source: source);
     log(episodeResult.chapters!.first.dateUpload.toString());
     totalChapters.value = chaptersList.length.toString();
     //Step:4 - Mapping Chapters
     chaptersList.value =
-        mChapterToChapter(episodeResult.chapters!, widget.title);
+        mChapterToChapter(episodeResult.chapters!, widget.smallMedia!.title!);
   }
 
   Future<void> loadDetails(Source source) async {
     try {
       //Step:1 - Searching Manga
       final response = await search(
-          source: source, query: widget.title, page: 1, filterList: []);
+          source: source,
+          query: widget.smallMedia!.title!,
+          page: 1,
+          filterList: []);
 
       //Step:2 - Mapping Manga by title
       if (response != null) {
-        final result =
-            await mappingHelper(widget.title, response.toJson()['list']);
+        final result = await mappingHelper(
+            widget.smallMedia!.title!, response.toJson()['list']);
         log(result.toString());
 
         //Step:3 - Fetchting details
@@ -112,8 +146,8 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
   void initState() {
     super.initState();
     _tabBarController = TabController(length: 2, vsync: this);
-    loadData();
     _initExtensions();
+    convertData();
   }
 
   @override
@@ -124,7 +158,7 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
         slivers: [
           ScrollableAppBar(
             mediaData: mediaData,
-            image: widget.image,
+            image: image.value,
             tagg: widget.tagg,
           ),
           SliverPersistentHeader(
@@ -189,10 +223,9 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
                     ? Center(
                         child: _anilistError.value.isNotEmpty
                             ? AzyXText(
-                                _anilistError.value,
+                                text: _anilistError.value,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                    fontFamily: "Poppins", fontSize: 20),
+                                fontSize: 20,
                               )
                             : const CircularProgressIndicator(),
                       )
@@ -200,6 +233,8 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
                         mediaData: mediaData,
                         index: _tabBarController.index,
                         animeTitle: mangaTitle.value,
+                        isManga: true,
+                        chapterList: chaptersList,
                       )),
                 Obx(
                   () => installedExtensions.isEmpty
@@ -226,13 +261,12 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
                           },
                           onSourceChanged: (value) {
                             selectedSource.value = value;
-                            // anifyEpisodes.value = [];
                             _extenstionError.value = false;
                             loadDetails(value);
                           },
                           hasError: _extenstionError,
-                          id: widget.id,
-                          image: mediaData.value.coverImage ?? widget.image,
+                          id: id.value,
+                          image: mediaData.value.coverImage ?? image.value,
                           animeTitle: mangaTitle,
                           installedExtensions: installedExtensions,
                           selectedSource: selectedSource,

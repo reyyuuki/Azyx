@@ -90,7 +90,7 @@ class Source {
       this.isLocal = false,
       this.isObsolete = false});
 
-  Source.fromJson(Map<String, dynamic> json) {
+  Source.fromJson(Map<dynamic, dynamic> json) {
     apiUrl = json['apiUrl'];
     appMinVerReq = json['appMinVerReq'];
     baseUrl = json['baseUrl'];

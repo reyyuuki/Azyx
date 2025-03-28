@@ -19,11 +19,11 @@ class Anime {
   factory Anime.fromJson(Map<dynamic, dynamic> data) {
     return Anime(
         id: data['id'],
-        title: data['title']['english'] ?? data['title']['romaji'],
-        image: data['coverImage']['large'] ?? "N/A",
+        title: data['title']?['english'] ?? data['title']?['romaji'] ?? "Unknown",
+        image: data['coverImage']?['large'] ?? "N/A",
         description: data['description'] ?? "N/A",
-        bannerImage: data['bannerImage'] ?? data['coverImage']['large'],
-        status: data['status'],
+        bannerImage: data['bannerImage'] ?? data['coverImage']?['large'] ?? '',
+        status: data['status'] ?? "",
         rating: data['averageScore'] != null
             ? (data['averageScore'] / 10).toString()
             : "5.0");

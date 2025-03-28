@@ -24,24 +24,37 @@ class AnimeAllData {
       this.image,
       this.url});
 
-  factory AnimeAllData.fromJson(
-      String url,
-      String episodeTitle,
-      String title,
-      String number,
-      String image,
-      int id,
-      List<Video> episodeUrls,
-      List<Episode> episodeList,
-      Source source) {
+  factory AnimeAllData.fromJson(Map<dynamic, dynamic> json) {
     return AnimeAllData(
-        url: url,
-        episodeTitle: episodeTitle,
-        title: title,
-        number: number,
-        id: id,
-        image: image,
-        episodeUrls: episodeUrls,
-        episodeList: episodeList);
+      url: json['url'] as String?,
+      episodeTitle: json['episodeTitle'] as String?,
+      title: json['title'] as String?,
+      image: json['image'] as String?,
+      number: json['number'] as String?,
+      id: json['id'] as int?,
+      episodeUrls: (json['episodeUrls'] as List<dynamic>?)
+          ?.map((e) => Video.fromJson(e as Map<dynamic, dynamic>))
+          .toList(),
+      episodeList: (json['episodeList'] as List<dynamic>?)
+          ?.map((e) => Episode.fromJson(e as Map<dynamic, dynamic>, ""))
+          .toList(),
+      source: json['source'] != null
+          ? Source.fromJson(json['source'] as Map<dynamic, dynamic>)
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'url': url,
+      'episodeTitle': episodeTitle,
+      'title': title,
+      'image': image,
+      'number': number,
+      'id': id,
+      'episodeUrls': episodeUrls?.map((e) => e.toJson()).toList(),
+      'episodeList': episodeList?.map((e) => e.toJson()).toList(),
+      'source': source?.toJson(),
+    };
   }
 }
