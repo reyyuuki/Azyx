@@ -1,4 +1,3 @@
-
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:flutter/material.dart';
@@ -30,62 +29,66 @@ class CustomColorTemplate extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
           child: AzyXContainer(
-            margin: const EdgeInsets.all(5),
-            height: 130,
-            width: 76,
-            decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHigh, borderRadius: BorderRadius.circular(18)),
-            child: Column(
-                      children: [
-                        const SizedBox(height: 10,),
-                        Column(
-                          children: [
-                            AzyXContainer(
-                              height: 16,
-                              width: 65,
-                              decoration: BoxDecoration(
-                                  color: color,
-                                  borderRadius: BorderRadius.circular(5)),
-                            ),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            AzyXContainer(
-                              height: 10,
-                              width: 45,
-                              decoration: BoxDecoration(
-                                  color: color,
-                                  borderRadius: BorderRadius.circular(5)),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 30),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            ball(),
-                            ball(),
-                            ball(),
-                            ball(),
-                            ball(),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        AzyXContainer(
-                          height: 14,
-                          width: 60,
-                          decoration: BoxDecoration(
-                              color: color,
-                              borderRadius: BorderRadius.circular(5)),
-                        ),
-                      ],
-                    )
-          ),
+              margin: const EdgeInsets.all(5),
+              height: 130,
+              width: 76,
+              decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(18)),
+              child: Column(
+                children: [
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Column(
+                    children: [
+                      AzyXContainer(
+                        height: 16,
+                        width: 65,
+                        decoration: BoxDecoration(
+                            color: color,
+                            borderRadius: BorderRadius.circular(5)),
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      AzyXContainer(
+                        height: 10,
+                        width: 45,
+                        decoration: BoxDecoration(
+                            color: color,
+                            borderRadius: BorderRadius.circular(5)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 30),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ball(),
+                      ball(),
+                      ball(),
+                      ball(),
+                      ball(),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  AzyXContainer(
+                    height: 14,
+                    width: 60,
+                    decoration: BoxDecoration(
+                        color: color, borderRadius: BorderRadius.circular(5)),
+                  ),
+                ],
+              )),
         ),
         const SizedBox(
           height: 10,
         ),
-        AzyXText(name, style: const TextStyle(fontFamily: "LexendDeca"),),
+        AzyXText(
+          text: name,
+          fontVariant: FontVariant.bold,
+        ),
       ],
     );
   }
@@ -94,9 +97,8 @@ class CustomColorTemplate extends StatelessWidget {
     return AzyXContainer(
       height: 10,
       width: 10,
-      decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(5)),
+      decoration:
+          BoxDecoration(color: color, borderRadius: BorderRadius.circular(5)),
     );
   }
 }

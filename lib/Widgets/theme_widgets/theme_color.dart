@@ -30,7 +30,6 @@ class _ThemeModesState extends State<ThemeColor> {
     "Vibrant"
   ];
 
-
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ThemeProvider>(context);
@@ -53,10 +52,8 @@ class _ThemeModesState extends State<ThemeColor> {
             child: const ListTile(
               leading: Icon(Broken.designtools),
               title: AzyXText(
-                "Customization",
-                style: TextStyle(
-                  fontFamily: "Poppins-Bold",
-                ),
+                text: "Customization",
+                fontVariant: FontVariant.bold,
               ),
             ),
           ),
@@ -74,13 +71,13 @@ class _ThemeModesState extends State<ThemeColor> {
                     size: 28,
                   ),
                   title: const AzyXText(
-                    "Dynamic Coloring",
-                    style: TextStyle(fontFamily: "Poppins-Bold", fontSize: 14),
+                    text: "Dynamic Coloring",
+                    fontVariant: FontVariant.bold,
+                    fontSize: 14,
                   ),
                   subtitle: const AzyXText(
-                    "Automatically pick colors from current wallpaper",
-                    style:
-                        TextStyle(fontFamily: "Poppins", fontSize: 12),
+                    text: "Automatically pick colors from current wallpaper",
+                    fontSize: 12,
                   ),
                   trailing: Switch(
                       value: Provider.of<ThemeProvider>(context).isMaterial!,
@@ -96,16 +93,17 @@ class _ThemeModesState extends State<ThemeColor> {
                     size: 28,
                   ),
                   title: const AzyXText(
-                    "Custom Coloring",
-                    style: TextStyle(fontFamily: "LexendDeca", fontSize: 14),
+                    text: "Custom Coloring",
+                    fontVariant: FontVariant.bold,
+                    fontSize: 14,
                   ),
                   subtitle: const AzyXText(
-                    "Use custom color to change your vibe",
-                    style:
-                        TextStyle(fontFamily: "LexendDeca-thin", fontSize: 12),
+                    text: "Use custom color to change your vibe",
+                    fontSize: 12,
                   ),
                   trailing: Switch(
-                      value: !Provider.of<ThemeProvider>(context,listen: false).isMaterial!,
+                      value: !Provider.of<ThemeProvider>(context, listen: false)
+                          .isMaterial!,
                       onChanged: (bool isTrue) {
                         log(isTrue.toString());
                         isTrue
@@ -119,13 +117,13 @@ class _ThemeModesState extends State<ThemeColor> {
                     size: 28,
                   ),
                   title: const AzyXText(
-                    "Palette Color",
-                    style: TextStyle(fontFamily: "LexendDeca", fontSize: 14),
+                    text: "Palette Color",
+                    fontVariant: FontVariant.bold,
+                    fontSize: 14,
                   ),
                   subtitle: const AzyXText(
-                    "Use custom color to change your vibe",
-                    style:
-                        TextStyle(fontFamily: "LexendDeca-thin", fontSize: 12),
+                    text: "Use custom color to change your vibe",
+                    fontSize: 12,
                   ),
                   onTap: () {
                     paletteBox(context);
@@ -153,9 +151,7 @@ class _ThemeModesState extends State<ThemeColor> {
             children: [
               BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                child: AzyXContainer(
-                    color: Colors.black
-                        .withOpacity(0.0)),
+                child: AzyXContainer(color: Colors.black.withOpacity(0.0)),
               ),
               AzyXContainer(
                 margin: const EdgeInsets.all(20),
@@ -172,12 +168,9 @@ class _ThemeModesState extends State<ThemeColor> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const AzyXText(
-                          "Palette Mode",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontFamily: "LexendDeca",
-                            fontWeight: FontWeight.bold,
-                          ),
+                          text: "Palette Mode",
+                          fontSize: 16,
+                          fontVariant: FontVariant.bold,
                         ),
                         const SizedBox(height: 10),
                         Flexible(
@@ -214,11 +207,9 @@ class _ThemeModesState extends State<ThemeColor> {
                                       const SizedBox(width: 12),
                                       Expanded(
                                         child: AzyXText(
-                                          paletteList[index],
-                                          style: const TextStyle(
-                                            fontFamily: "LexendDeca",
-                                            fontSize: 12,
-                                          ),
+                                          text: paletteList[index],
+                                          fontVariant: FontVariant.bold,
+                                          fontSize: 12,
                                         ),
                                       ),
                                       SizedBox(
@@ -255,8 +246,8 @@ class _ThemeModesState extends State<ThemeColor> {
                               style: ButtonStyle(
                                   elevation: WidgetStateProperty.all(0)),
                               child: const AzyXText(
-                                "Cancel",
-                                style: TextStyle(fontFamily: "LexendDeca"),
+                                text: "Cancel",
+                                fontVariant: FontVariant.bold,
                               ),
                             ),
                             ElevatedButton(
@@ -274,12 +265,11 @@ class _ThemeModesState extends State<ThemeColor> {
                                 Navigator.pop(context);
                               },
                               child: AzyXText(
-                                "Confirm",
-                                style: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .inverseSurface,
-                                    fontFamily: "LexendDeca"),
+                                text: "Confirm",
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .inverseSurface,
+                                fontVariant: FontVariant.bold,
                               ),
                             ),
                           ],

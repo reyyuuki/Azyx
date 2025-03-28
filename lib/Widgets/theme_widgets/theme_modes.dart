@@ -33,10 +33,8 @@ class _ThemeModesState extends State<ThemeModes> {
             child: const ListTile(
               leading: Icon(Broken.brush),
               title: AzyXText(
-                "Theme Mode",
-                style: TextStyle(
-                  fontFamily: "Poppins-Bold",
-                ),
+               text:  "Theme Mode",
+               fontVariant: FontVariant.bold,
               ),
             ),
           ),
