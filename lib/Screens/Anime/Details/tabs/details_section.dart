@@ -2,6 +2,7 @@ import 'package:azyx/Classes/anime_details_data.dart';
 import 'package:azyx/Classes/episode_class.dart';
 import 'package:azyx/Classes/offline_item.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/add_to_list_floater.dart';
+import 'package:azyx/Screens/Manga/Details/tabs/widgets/manga_add_to_list.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/anime/anime_scrollable_list.dart';
 import 'package:azyx/Widgets/anime/characters_list.dart';
@@ -15,12 +16,16 @@ class DetailsSection extends StatelessWidget {
   final Rx<AnilistMediaData> mediaData;
   final int index;
   final List<Episode>? episodesList;
+  final List<Chapter>? chapterList;
   final String animeTitle;
+  final bool isManga;
   const DetailsSection(
       {super.key,
       required this.mediaData,
       required this.index,
       required this.animeTitle,
+      required this.isManga,
+      this.chapterList,
       this.episodesList});
 
   @override
@@ -32,11 +37,12 @@ class DetailsSection extends StatelessWidget {
           physics: const BouncingScrollPhysics(),
           children: [
             AzyXText(
-              mediaData.value.title!,
+              text: mediaData.value.title!,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontFamily: "Poppins-Bold", fontSize: 18),
+              fontSize: 18,
+              fontVariant: FontVariant.bold,
             ),
             const SizedBox(
               height: 10,
@@ -58,9 +64,9 @@ class DetailsSection extends StatelessWidget {
                   width: 5,
                 ),
                 AzyXText(
-                  mediaData.value.rating!,
-                  style:
-                      const TextStyle(fontFamily: "Poppins-Bold", fontSize: 16),
+                  text: mediaData.value.rating!,
+                  fontSize: 16,
+                  fontVariant: FontVariant.bold,
                 )
               ],
             ),
@@ -92,19 +98,9 @@ class DetailsSection extends StatelessWidget {
                                 ],
                                 borderRadius: BorderRadius.circular(20)),
                             child: AzyXText(
-                              i,
-                              style: TextStyle(
-                                  fontFamily: "Poppins-Bold",
-                                  color: Theme.of(context).colorScheme.primary,
-                                  shadows: [
-                                    BoxShadow(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary
-                                            .withOpacity(1.glowMultiplier()),
-                                        blurRadius: 10.blurMultiplier(),
-                                        spreadRadius: 2.spreadMultiplier())
-                                  ]),
+                              text: i,
+                              fontVariant: FontVariant.bold,
+                              color: Theme.of(context).colorScheme.primary,
                             )))
                         .toList(),
                   ),
@@ -131,19 +127,9 @@ class DetailsSection extends StatelessWidget {
                                       spreadRadius: 2.spreadMultiplier())
                                 ]),
                             child: AzyXText(
-                              i,
-                              style: TextStyle(
-                                  fontFamily: "Poppins-Bold",
-                                  color: Theme.of(context).colorScheme.primary,
-                                  shadows: [
-                                    BoxShadow(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary
-                                            .withOpacity(1.glowMultiplier()),
-                                        blurRadius: 10.blurMultiplier(),
-                                        spreadRadius: 2.spreadMultiplier())
-                                  ]),
+                              text: i,
+                              fontVariant: FontVariant.bold,
+                              color: Theme.of(context).colorScheme.primary,
                             )))
                         .toList(),
                   ),
@@ -184,11 +170,10 @@ class DetailsSection extends StatelessWidget {
               height: 20,
             ),
             AzyXText(
-              mediaData.value.description ?? "??",
+              text: mediaData.value.description ?? "??",
               maxLines: 5,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                  fontFamily: "Poppins", fontStyle: FontStyle.italic),
+              fontStyle: FontStyle.italic,
             ),
             const SizedBox(
               height: 20,
@@ -209,14 +194,24 @@ class DetailsSection extends StatelessWidget {
                 title: "Recommendations")
           ],
         ),
-        AddToListFloater(
-          index: index,
-          data: OfflineItem(
-              mediaData: mediaData.value,
-              number: '1',
-              animeTitle: animeTitle,
-              episodesList: episodesList!),
-        )
+        isManga
+            ? MangaAddToList(
+                index: index,
+                mediaData: mediaData.value,
+                data: OfflineItem(
+                    mediaData: mediaData.value,
+                    number: '1',
+                    animeTitle: animeTitle,
+                    chaptersList: chapterList ?? []))
+            : AddToListFloater(
+                index: index,
+                mediaData: mediaData.value,
+                data: OfflineItem(
+                    mediaData: mediaData.value,
+                    number: '1',
+                    animeTitle: animeTitle,
+                    episodesList: episodesList ?? []),
+              )
       ],
     );
   }
@@ -224,7 +219,9 @@ class DetailsSection extends StatelessWidget {
   Column detailsItem(String name, String data) {
     return Column(
       children: [
-        AzyXText(name, style: const TextStyle(fontFamily: "Poppins")),
+        AzyXText(
+          text: name,
+        ),
         const SizedBox(
           height: 10,
         ),
@@ -238,19 +235,10 @@ class DetailsSection extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         AzyXText(
-          '#$data',
-          style: TextStyle(
-              fontFamily: "Poppins-Bold",
-              fontSize: 16,
-              color: Get.theme.colorScheme.primary,
-              shadows: [
-                BoxShadow(
-                    color: Get.theme.colorScheme.primary
-                        .withOpacity(1.glowMultiplier()),
-                    blurRadius: 10.blurMultiplier(),
-                    spreadRadius: 2.spreadMultiplier())
-              ]),
-        )
+            text: '#$data',
+            fontVariant: FontVariant.bold,
+            fontSize: 16,
+            color: Get.theme.colorScheme.primary)
       ],
     );
   }

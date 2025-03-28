@@ -5,15 +5,13 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 
 class AnilistMediaData {
   int? id;
+  int? episodes;
   String? title;
-  String? japaneseTitle;
   String? description;
   String? image;
   String? coverImage;
   String? rating;
-  String? premiered;
   String? type;
-  String? quality;
   String? status;
   int? popularity;
   int? timeUntilAiring;
@@ -25,14 +23,12 @@ class AnilistMediaData {
   AnilistMediaData({
     this.id,
     this.title,
-    this.japaneseTitle,
+    this.episodes,
     this.description,
     this.image,
     this.coverImage,
     this.rating,
-    this.premiered,
     this.type,
-    this.quality,
     this.status,
     this.popularity,
     this.timeUntilAiring,
@@ -66,18 +62,14 @@ class AnilistMediaData {
     return AnilistMediaData(
       id: json['id'] ?? 1,
       title: json['title']['english'] ?? json['title']['romaji'] ?? "Unknown",
-      japaneseTitle: json['title']['native'] ?? "",
       description: json['description'],
       image: json['coverImage']['large'],
+      episodes: isManga ? json['chapters'] : json['episodes'],
       coverImage: json['bannerImage'] ?? json['coverImage']['large'],
       rating: json['averageScore'] != null
           ? (json['averageScore'] / 10).toString()
           : 'N/A',
-      premiered: json['season'] != null
-          ? '${json['season']} ${json['seasonYear']}'
-          : 'N/A',
       type: json['type'],
-      quality: json['format'] ?? "",
       status: json['status'] ?? '',
       popularity: json['popularity'] ?? "",
       timeUntilAiring:
@@ -88,7 +80,8 @@ class AnilistMediaData {
               .toList() ??
           [],
       recommendations: (json['recommendations']['edges'] as List?)
-              ?.map((e) => Anime.fromJson(e['node']['mediaRecommendation']))
+              ?.map(
+                  (e) => Anime.fromJson(e['node']['mediaRecommendation'] ?? {}))
               .toList() ??
           [],
       characters: (json['characters']['edges'] as List?)
@@ -104,17 +97,15 @@ class AnilistMediaData {
       'title': {
         'english': title,
         'romaji': title,
-        'native': japaneseTitle,
       },
       'description': description,
       'coverImage': {
         'large': image,
       },
       'bannerImage': coverImage != image ? coverImage : null,
-      'averageScore':
-          (double.parse(rating!) * 10).toInt(),
+      'episodes': episodes,
+      'averageScore': (double.parse(rating!) * 10).toInt(),
       'type': type,
-      'format': quality,
       'status': status,
       'popularity': popularity,
       'nextAiringEpisode':

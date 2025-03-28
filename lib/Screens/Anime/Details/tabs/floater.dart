@@ -28,9 +28,7 @@ class FloaterWidget extends StatelessWidget {
       bottom: positionOffset,
       left: 0,
       right: 0,
-      duration: Duration(
-          milliseconds:
-              1000 + (index ?? 0) * 200), // Stagger the duration based on index
+      duration: Duration(milliseconds: 1000 + (index ?? 0) * 200),
       curve: Curves.easeInOut,
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 1000),
@@ -41,12 +39,6 @@ class FloaterWidget extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.1),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.white.withOpacity(0.3),
-                    blurRadius: 10.blurMultiplier(),
-                    spreadRadius: 2.spreadMultiplier())
-              ],
               borderRadius: BorderRadius.circular(10)),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),
@@ -71,12 +63,10 @@ class FloaterWidget extends StatelessWidget {
                             style: const TextStyle(fontFamily: "Poppins-Bold"),
                           ),
                           AzyXText(
-                            "Episode 1",
-                            style: TextStyle(
-                                fontFamily: "Poppins-Bold",
-                                fontStyle: FontStyle.italic,
-                                color: Colors.grey[500]),
-                          )
+                              text: "Episode 1",
+                              fontVariant: FontVariant.bold,
+                              fontStyle: FontStyle.italic,
+                              color: Colors.grey[500]),
                         ],
                       ),
                     ),

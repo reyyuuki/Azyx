@@ -14,11 +14,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
 
-class AddToListFloater extends StatelessWidget {
+class MangaAddToList extends StatelessWidget {
   final int? index;
   final OfflineItem data;
   final AnilistMediaData mediaData;
-  const AddToListFloater(
+  const MangaAddToList(
       {super.key, this.index, required this.data, required this.mediaData});
 
   @override
@@ -58,8 +58,8 @@ class AddToListFloater extends StatelessWidget {
                     anilistAuthController.userData.value.name != null
                         ? Expanded(
                             child: GestureDetector(
-                              onTap: () =>
-                                  anilistAddToListController.addToListSheet(
+                              onTap: () => anilistAddToListController
+                                  .addToMangaListSheet(
                                       context,
                                       mediaData.image!,
                                       mediaData.title!,
@@ -76,47 +76,44 @@ class AddToListFloater extends StatelessWidget {
                                           blurRadius: 10.blurMultiplier(),
                                           spreadRadius: 2.spreadMultiplier())
                                     ]),
-                                child: Obx(
-                                  () => Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      anilistAddToListController
-                                                  .anime.value.status ==
-                                              null
-                                          ? Icon(
-                                              Broken.add,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                              shadows: [
-                                                BoxShadow(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .primary,
-                                                    blurRadius:
-                                                        10.blurMultiplier(),
-                                                    spreadRadius:
-                                                        2.spreadMultiplier())
-                                              ],
-                                            )
-                                          : const SizedBox(),
-                                      const SizedBox(
-                                        width: 5,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    anilistAddToListController
+                                                .manga.value.status ==
+                                            null
+                                        ? Icon(
+                                            Broken.add,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            shadows: [
+                                              BoxShadow(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .primary,
+                                                  blurRadius:
+                                                      10.blurMultiplier(),
+                                                  spreadRadius:
+                                                      2.spreadMultiplier())
+                                            ],
+                                          )
+                                        : const SizedBox(),
+                                    const SizedBox(
+                                      width: 5,
+                                    ),
+                                    Obx(
+                                      () => AzyXText(
+                                        text: anilistAddToListController
+                                                .manga.value.status ??
+                                            "Add to list",
+                                        fontVariant: FontVariant.bold,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
                                       ),
-                                      Obx(
-                                        () => Text(
-                                          anilistAddToListController
-                                                  .anime.value.status ??
-                                              "Add to list",
-                                          style: TextStyle(
-                                              fontFamily: "Poppins-Bold",
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary),
-                                        ),
-                                      )
-                                    ],
-                                  ),
+                                    )
+                                  ],
                                 ),
                               ),
                             ),
@@ -218,11 +215,11 @@ class AddToListFloater extends StatelessWidget {
                     height: 10,
                   ),
                   Obx(() => offlineController
-                          .offlineAnimeCategories.value.isEmpty
+                          .offlineMangaCategories.value.isEmpty
                       ? const SizedBox.shrink()
                       : Column(
                           children:
-                              offlineController.offlineAnimeCategories.map((i) {
+                              offlineController.offlineMangaCategories.map((i) {
                             final Rx<bool> isSelected =
                                 i.anilistIds.contains(data.mediaData.id).obs;
                             return Container(
@@ -256,10 +253,12 @@ class AddToListFloater extends StatelessWidget {
                                     onTap: () {
                                       isSelected.value = !isSelected.value;
                                       isSelected.value
-                                          ? offlineController.addOfflineItem(
-                                              data, i.name!)
-                                          : offlineController.removeOfflineItem(
-                                              data, i.name!);
+                                          ? offlineController
+                                              .addMangaOfflineItem(
+                                                  data, i.name!)
+                                          : offlineController
+                                              .removeMangaOfflineItem(
+                                                  data, i.name!);
                                     },
                                     child: SizedBox(
                                       width: 18,
@@ -383,7 +382,7 @@ class AddToListFloater extends StatelessWidget {
                     TextButton(
                       onPressed: () {
                         offlineController
-                            .createCategory(textEditingController.text);
+                            .createMangaCategory(textEditingController.text);
                         Navigator.of(context).pop(textEditingController.text);
                       },
                       style: TextButton.styleFrom(

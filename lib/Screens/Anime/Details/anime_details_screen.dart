@@ -6,11 +6,13 @@ import 'package:azyx/Classes/anime_class.dart';
 import 'package:azyx/Classes/anime_details_data.dart';
 import 'package:azyx/Classes/episode_class.dart';
 import 'package:azyx/Classes/offline_item.dart';
+import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/details_section.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/watch_section.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
+import 'package:azyx/Widgets/common/_placeholder.dart';
 import 'package:azyx/Widgets/common/scrollable_app_bar.dart';
 import 'package:azyx/api/Mangayomi/Extensions/extensions_provider.dart';
 import 'package:azyx/api/Mangayomi/Model/Source.dart';
@@ -82,18 +84,22 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
   }
 
   void convertData() {
-    _initExtensions();
     if (widget.isOffline) {
+      anilistAddToListController.findAnime(widget.allData!.mediaData);
       image.value = widget.allData!.mediaData.image!;
       title.value = widget.allData!.mediaData.title!;
       id.value = widget.allData!.mediaData.id!;
-      episodesList.value = widget.allData!.episodesList;
+      episodesList.value = widget.allData!.episodesList!;
       animeTitle.value = widget.allData!.animeTitle ?? '';
       mediaData.value = widget.allData!.mediaData;
       coverImage.value = widget.allData?.mediaData.coverImage! ?? image.value;
       totalEpisodes.value = episodesList.length.toString();
       isLoading.value = false;
     } else {
+      anilistAddToListController.findAnime(AnilistMediaData(
+          id: widget.smallMedia?.id,
+          title: widget.smallMedia?.title,
+          episodes: widget.allData?.episodesList!.length));
       image.value = widget.smallMedia!.image!;
       title.value = widget.smallMedia!.title!;
       id.value = widget.smallMedia!.id!;
@@ -149,6 +155,7 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
   void initState() {
     super.initState();
     _tabBarController = TabController(length: 2, vsync: this);
+    _initExtensions();
     convertData();
   }
 
@@ -225,22 +232,22 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
                     ? Center(
                         child: _anilistError.value.isNotEmpty
                             ? AzyXText(
-                                _anilistError.value,
+                                text: _anilistError.value,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                    fontFamily: "Poppins", fontSize: 20),
+                                fontSize: 20,
                               )
                             : const CircularProgressIndicator(),
                       )
                     : DetailsSection(
+                        tabController: _tabBarController,
                         animeTitle: animeTitle.value,
                         episodesList: episodesList,
                         mediaData: mediaData,
-                        index: _tabBarController.index,
+                        isManga: false,
                       )),
                 Obx(
                   () => installedExtensions.isEmpty
-                      ? const Placeholder()
+                      ? const PlaceholderExtensions()
                       : WatchSection(
                           onChanged: (value) {
                             totalEpisodes.value = '??';
