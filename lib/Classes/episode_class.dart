@@ -18,7 +18,7 @@ class Episode {
       this.url,
       required this.number,
       this.thumbnail,
-     required this.desc,
+      required this.desc,
       this.filler});
 
   factory Episode.fromJson(Map<dynamic, dynamic> data, String? number) {
@@ -38,7 +38,7 @@ class Episode {
       'dateUpload': date ?? '',
       'number': number,
       'thumbnail': thumbnail ?? '',
-      'desc': desc ?? "",
+      'desc': desc,
       'filler': filler
     };
   }
@@ -148,6 +148,25 @@ class Chapter {
 
   Chapter(
       {this.link, this.number, this.releaseDate, this.scanlator, this.title});
+  factory Chapter.fromJson(Map<dynamic, dynamic> json) {
+    return Chapter(
+      title: json['title'],
+      link: json['link'],
+      scanlator: json['scanlator'],
+      number: (json['number'] as num?)?.toDouble(),
+      releaseDate: json['releaseDate'],
+    );
+  }
+
+  Map<dynamic, dynamic> toJson() {
+    return {
+      'title': title,
+      'link': link,
+      'scanlator': scanlator,
+      'number': number,
+      'releaseDate': releaseDate,
+    };
+  }
 }
 
 List<Chapter> mChapterToChapter(List<MChapter> chapters, String title) {
