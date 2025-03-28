@@ -1,4 +1,3 @@
-
 import 'package:azyx/HiveClass/theme_data.dart';
 import 'package:azyx/Providers/theme.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -27,12 +26,13 @@ class ThemeProvider with ChangeNotifier {
 
   ThemeProvider() {
     var box = Hive.box('theme-data');
-    theme = box.get('themeClass',defaultValue: ThemeClass());
+    theme = box.get('themeClass', defaultValue: ThemeClass());
     _isMaterial = theme.isMaterial;
     _isLightMode = theme.isLightMode;
     _isDarkMode = theme.isDarkMode;
     _variant = theme.varient;
     _colorName = theme.seedColor;
+    setPaletteColor(_variant!);
     if (_isMaterial!) {
       loadDynamicColors();
     } else {

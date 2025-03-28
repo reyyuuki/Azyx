@@ -85,7 +85,7 @@ class _ReaderControlsState extends State<ReaderControls> {
             () => AnimatedContainer(
               transform: Matrix4.identity()
                 ..translate(0.0, widget.isShowed.value ? 0 : -100),
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10,30,10,10),
               width: Get.width,
               duration: const Duration(milliseconds: 500),
               curve: Curves.elasticOut,
@@ -105,23 +105,19 @@ class _ReaderControlsState extends State<ReaderControls> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               AzyXText(
-                                widget.mangaTitle,
+                                text: widget.mangaTitle,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    fontFamily: "Poppins-Bold",
-                                    fontSize: 18),
+                                color: Theme.of(context).colorScheme.primary,
+                                fontVariant: FontVariant.bold,
+                                fontSize: 18,
                               ),
                               AzyXText(
-                                widget.chapterTitle.value,
+                                text: widget.chapterTitle.value,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    fontStyle: FontStyle.italic,
-                                    fontFamily: "Poppins",
-                                    color: Colors.grey.shade400),
+                                fontStyle: FontStyle.italic,
+                                color: Colors.grey.shade400,
                               )
                             ],
                           ),
@@ -165,7 +161,7 @@ class _ReaderControlsState extends State<ReaderControls> {
                       child: Container(
                         decoration: BoxDecoration(boxShadow: [
                           BoxShadow(
-                              color: Theme.of(context).colorScheme.primary,
+                              color: Theme.of(context).colorScheme.primary.withOpacity(1.glowMultiplier()),
                               blurRadius: 10.blurMultiplier(),
                               spreadRadius: 2.spreadMultiplier())
                         ]),
@@ -209,7 +205,7 @@ class _ReaderControlsState extends State<ReaderControls> {
           borderRadius: BorderRadius.circular(50),
           boxShadow: [
             BoxShadow(
-                color: Theme.of(context).colorScheme.primary,
+                color: Theme.of(context).colorScheme.primary.withOpacity(1.glowMultiplier()),
                 blurRadius: 10.blurMultiplier(),
                 spreadRadius: 2.spreadMultiplier())
           ]),
@@ -240,12 +236,11 @@ class _ReaderControlsState extends State<ReaderControls> {
               physics: const BouncingScrollPhysics(),
               children: [
                 AzyXText(
-                  "Chapters List",
+                  text: "Chapters List",
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontFamily: "Poppins-Bold",
-                      fontSize: 20,
-                      color: Theme.of(context).colorScheme.primary),
+                  fontVariant: FontVariant.bold,
+                  fontSize: 20,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(
                   height: 10,

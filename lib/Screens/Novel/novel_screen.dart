@@ -7,7 +7,7 @@ class NovelScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: AzyXText("Novel Screen"),
+      child: AzyXText(text: "Novel Screen"),
     );
   }
 }

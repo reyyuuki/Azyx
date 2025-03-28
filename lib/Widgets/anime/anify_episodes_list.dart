@@ -7,8 +7,8 @@ import 'package:azyx/Classes/episode_class.dart';
 import 'package:azyx/Classes/anime_all_data.dart';
 import 'package:azyx/Screens/Anime/Watch/watch_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
-import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
+import 'package:azyx/Widgets/anime/episode_bottom_sheet.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';
 import 'package:azyx/api/Mangayomi/Eval/dart/model/video.dart';
 import 'package:azyx/api/Mangayomi/Model/Source.dart';
@@ -55,57 +55,6 @@ class AnifyEpisodesWidget extends StatelessWidget {
     }
   }
 
-  void displayBottomSheet(BuildContext context, String number) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
-      isScrollControlled: true,
-      enableDrag: true,
-      elevation: 5,
-      barrierColor: Colors.black87.withOpacity(0.5),
-      builder: (context) => AzyXGradientContainer(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-        height: 350,
-        child: ListView(
-          physics: const BouncingScrollPhysics(),
-          children: [
-            AzyXText(
-              "Select Quality",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 25,
-                  fontFamily: "Poppins-Bold",
-                  color: Theme.of(context).colorScheme.primary),
-            ),
-            const SizedBox(
-              height: 15,
-            ),
-            Obx(() => hasError.value
-                ? Image.asset(
-                    'assets/images/sticker.png',
-                    fit: BoxFit.contain,
-                  )
-                : episodeUrls.isEmpty
-                    ? Container(
-                        alignment: Alignment.center,
-                        height: 250,
-                        child: const CircularProgressIndicator(),
-                      )
-                    : Column(
-                        children: episodeUrls.map((item) {
-                          return serverAzyXContainer(
-                              context, item.quality, item.url, number);
-                        }).toList(),
-                      )),
-          ],
-        ),
-      ),
-    );
-  }
-
   GestureDetector serverAzyXContainer(
     BuildContext context,
     String name,
@@ -141,8 +90,9 @@ class AnifyEpisodesWidget extends StatelessWidget {
                 width: 1, color: Theme.of(context).colorScheme.inversePrimary)),
         child: Center(
           child: AzyXText(
-            name,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            text: name,
+            fontSize: 18,
+            fontVariant: FontVariant.bold,
           ),
         ),
       ),
@@ -156,10 +106,24 @@ class AnifyEpisodesWidget extends StatelessWidget {
       return GestureDetector(
         onTap: () {
           if (episodeTitle.value == entry.title) {
-            displayBottomSheet(context, entry.number);
+            showEpisodeBottomSheet(
+              context,
+              entry.number,
+              episodeUrls,
+              hasError,
+              (context, name, url, number) =>
+                  serverAzyXContainer(context, name, url, number),
+            );
           } else {
             episodeUrls.value = [];
-            displayBottomSheet(context, entry.number);
+            showEpisodeBottomSheet(
+              context,
+              entry.number,
+              episodeUrls,
+              hasError,
+              (context, name, url, number) =>
+                  serverAzyXContainer(context, name, url, number),
+            );
             fetchEpisodeLink(entry.url!, entry.number, entry.title!, context);
           }
         },
@@ -215,13 +179,10 @@ class AnifyEpisodesWidget extends StatelessWidget {
                             ],
                           ),
                           child: AzyXText(
-                            entry.number.toString(),
-                            style: TextStyle(
-                                fontFamily: "Poppins-Bold",
-                                fontSize: 20,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .inversePrimary),
+                            text: entry.number.toString(),
+                            fontVariant: FontVariant.bold,
+                            fontSize: 20,
+                            color: Theme.of(context).colorScheme.inversePrimary,
                           ),
                         ))
                   ],
@@ -237,20 +198,18 @@ class AnifyEpisodesWidget extends StatelessWidget {
                   child: Column(
                     children: [
                       AzyXText(
-                        entry.title!,
-                        style: TextStyle(
-                            fontFamily: "Poppins-Bold",
-                            fontSize: 16,
-                            color: Theme.of(context).colorScheme.primary),
+                        text: entry.title!,
+                        fontVariant: FontVariant.bold,
+                        fontSize: 16,
+                        color: Theme.of(context).colorScheme.primary,
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(
                         height: 10,
                       ),
                       AzyXText(
-                        entry.desc ?? "Enjoy the episode",
-                        style: const TextStyle(
-                            fontFamily: "Poppins", fontSize: 12),
+                        text: entry.desc,
+                        fontSize: 12,
                         maxLines: 3,
                       )
                     ],
