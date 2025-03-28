@@ -29,23 +29,8 @@ class AnilistDataController extends GetxController {
         averageScore
         episodes
         type
-        season
-        seasonYear
-        duration
         status
-        chapters
-        format
         popularity
-        startDate {
-          year
-          month
-          day
-        }
-        endDate {
-          year
-          month
-          day
-        }
         genres
         studios {
           nodes {
