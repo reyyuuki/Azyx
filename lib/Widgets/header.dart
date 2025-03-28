@@ -1,5 +1,3 @@
-
-
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Extensions/ExtensionScreen.dart';
 import 'package:azyx/Providers/theme_provider.dart';
@@ -28,17 +26,16 @@ class Header extends StatelessWidget {
             children: [
               Obx(
                 () => AzyXText(
-                  anilistAuthController.userData.value.name != null
+                  text: anilistAuthController.userData.value.name != null
                       ? anilistAuthController.userData.value.name!
                       : "Guest",
-                  style:
-                      const TextStyle(fontFamily: "Poppins-Bold", fontSize: 18),
+                  fontVariant: FontVariant.bold,
+                  fontSize: 18,
                   textAlign: TextAlign.start,
                 ),
               ),
               const AzyXText(
-                "Enjoy unlimited entertainment",
-                style: TextStyle(fontFamily: "Poppins"),
+                text: "Enjoy unlimited entertainment",
               ),
             ],
           ),
@@ -57,7 +54,8 @@ class Header extends StatelessWidget {
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(50),
                           child: CachedNetworkImage(
-                            imageUrl: anilistAuthController.userData.value.avatar!,
+                            imageUrl:
+                                anilistAuthController.userData.value.avatar!,
                             fit: BoxFit.cover,
                           ),
                         )
@@ -103,11 +101,12 @@ class Header extends StatelessWidget {
                     children: [
                       Obx(
                         () => AzyXText(
-                          anilistAuthController.userData.value.name != null
-                              ? anilistAuthController.userData.value.name!
-                              : "Guest",
-                          style: const TextStyle(
-                              fontFamily: "Poppins-Bold", fontSize: 18),
+                          text:
+                              anilistAuthController.userData.value.name != null
+                                  ? anilistAuthController.userData.value.name!
+                                  : "Guest",
+                          fontVariant: FontVariant.bold,
+                          fontSize: 18,
                           textAlign: TextAlign.start,
                         ),
                       ),
@@ -119,11 +118,13 @@ class Header extends StatelessWidget {
                                   .colorScheme
                                   .surfaceContainer,
                               borderRadius: BorderRadius.circular(50)),
-                          child: anilistAuthController.userData.value.avatar != null
+                          child: anilistAuthController.userData.value.avatar !=
+                                  null
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(50),
                                   child: CachedNetworkImage(
-                                    imageUrl: anilistAuthController.userData.value.avatar!,
+                                    imageUrl: anilistAuthController
+                                        .userData.value.avatar!,
                                     fit: BoxFit.cover,
                                   ),
                                 )
@@ -213,8 +214,9 @@ class Header extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           AzyXText(
-            name,
-            style: const TextStyle(fontFamily: "Poppins-Bold", fontSize: 16),
+            text: name,
+            fontVariant: FontVariant.bold,
+            fontSize: 16,
           ),
           Icon(icon)
         ],

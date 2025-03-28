@@ -47,10 +47,9 @@ class MangaMainCarousale extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => MangaDetailsScreen(
-                          id: anime.id ?? 1,
-                          tagg: "${anime.id}MainCarousale",
-                          image: anime.image!,
-                          title: anime.title!)));
+                            smallMedia: anime,
+                            tagg: "${anime.id}MainCarousale",
+                          )));
             },
             child: AzyXContainer(
               width: MediaQuery.of(context).size.width,
@@ -119,20 +118,19 @@ class MangaMainCarousale extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               AzyXText(
-                                anime.title!,
+                                text: anime.title!,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                    fontSize: 20, fontFamily: "Poppins-Bold"),
+                                fontSize: 20,
+                                fontVariant: FontVariant.bold,
                               ),
                               const SizedBox(
                                 height: 5,
                               ),
                               Flexible(
                                 child: AzyXText(
-                                  anime.description!,
-                                  style: const TextStyle(
-                                      fontSize: 12, fontFamily: "Poppins"),
+                                  text: anime.description!,
+                                  fontSize: 12,
                                   maxLines: 5,
                                   overflow: TextOverflow.ellipsis,
                                 ),

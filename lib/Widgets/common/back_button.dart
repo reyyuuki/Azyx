@@ -9,7 +9,7 @@ class CustomBackButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
         onPressed: () {
-          Get.back();
+          Navigator.pop(context);
         },
         icon: Icon(
           Broken.arrow_left_2,

@@ -7,11 +7,11 @@ import 'package:azyx/Classes/anime_all_data.dart';
 import 'package:azyx/Screens/Anime/Watch/watch_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
+import 'package:azyx/Widgets/anime/episode_bottom_sheet.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';
 import 'package:azyx/api/Mangayomi/Eval/dart/model/video.dart';
 import 'package:azyx/api/Mangayomi/Model/Source.dart';
 import 'package:azyx/api/Mangayomi/Search/getVideo.dart';
-import 'package:azyx/utils/loaders/bottom_sheet_loader.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -33,6 +33,7 @@ class EpisodesList extends StatelessWidget {
   final RxList<Video> epiosdeUrls = RxList();
   final Rx<String> episodeTitle = ''.obs;
   AnimeAllData playerData = AnimeAllData();
+  final Rx<bool> hasError = false.obs;
 
   Future<void> fetchEpisodeLink(
       String url, String number, String setTitle, context) async {
@@ -41,50 +42,13 @@ class EpisodesList extends StatelessWidget {
       if (response.isNotEmpty) {
         epiosdeUrls.value = response;
         episodeTitle.value = setTitle;
-        Get.back();
-        displayBottomSheet(context, number);
+      } else {
+        hasError.value = true;
       }
     } catch (e) {
+      hasError.value = true;
       log("Error while fetching episode url: $e");
     }
-  }
-
-  void displayBottomSheet(BuildContext context, String number) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      showDragHandle: true,
-      barrierColor: Colors.black87.withOpacity(0.5),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: SizedBox(
-          height: 320,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                const AzyXText(
-                  "Select Server",
-                  style: TextStyle(fontSize: 25, fontFamily: "Poppins-Bold"),
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                ...epiosdeUrls.map<Widget>((item) {
-                  return serverAzyXContainer(
-                      context, item.quality, item.url, number);
-                }),
-                const SizedBox(
-                  height: 10,
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   GestureDetector serverAzyXContainer(
@@ -106,6 +70,7 @@ class EpisodesList extends StatelessWidget {
                     number: number,
                     image: image,
                     id: id,
+                    source: selectedSource,
                     episodeUrls: epiosdeUrls,
                     episodeList: episodeList),
               ),
@@ -121,8 +86,9 @@ class EpisodesList extends StatelessWidget {
                 width: 1, color: Theme.of(context).colorScheme.inversePrimary)),
         child: Center(
           child: AzyXText(
-            name,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            text: name,
+            fontSize: 18,
+            fontVariant: FontVariant.bold,
           ),
         ),
       ),
@@ -136,9 +102,24 @@ class EpisodesList extends StatelessWidget {
       return GestureDetector(
         onTap: () {
           if (episodeTitle.value == episode.title) {
-            displayBottomSheet(context, episode.number);
+            showEpisodeBottomSheet(
+              context,
+              episode.number,
+              epiosdeUrls,
+              hasError,
+              (context, name, url, number) =>
+                  serverAzyXContainer(context, name, url, number),
+            );
           } else {
-            showloader(context);
+            epiosdeUrls.value = [];
+            showEpisodeBottomSheet(
+              context,
+              episode.number,
+              epiosdeUrls,
+              hasError,
+              (context, name, url, number) =>
+                  serverAzyXContainer(context, name, url, number),
+            );
             fetchEpisodeLink(episode.url!, episode.number, title, context);
           }
         },
@@ -171,25 +152,20 @@ class EpisodesList extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: AzyXText(
-                      episode.title!.length > 25
+                      text: episode.title!.length > 25
                           ? '${episode.title!.substring(0, 25)}...'
                           : episode.title!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.inverseSurface,
-                        fontFamily: "Poppins-Bold",
-                      ),
+                      color: Theme.of(context).colorScheme.inverseSurface,
+                      fontVariant: FontVariant.bold,
                     ),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(right: 8.0),
                   child: AzyXText(
-                    'Ep- ${episode.number}',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Theme.of(context).colorScheme.inverseSurface,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    text: 'Ep- ${episode.number}',
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.inverseSurface,
                   ),
                 ),
               ],

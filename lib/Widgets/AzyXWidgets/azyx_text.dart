@@ -1,44 +1,60 @@
 import 'package:flutter/material.dart';
 
+enum FontVariant {
+  regular,
+  bold,
+}
+
 class AzyXText extends StatelessWidget {
-  final String data;
-  final TextStyle? style;
+  final String text;
+  final FontVariant fontVariant;
   final TextAlign? textAlign;
-  final TextDirection? textDirection;
-  final Locale? locale;
-  final bool softWrap;
-  final TextOverflow overflow;
+  final double? fontSize;
+  final Color? color;
   final int? maxLines;
-  final TextWidthBasis? textWidthBasis;
-  final TextHeightBehavior? textHeightBehavior;
+  final TextOverflow? overflow;
+  final double? lineHeight;
+  final FontStyle? fontStyle;
 
   const AzyXText(
-    this.data, {
-    super.key,
-    this.style,
-    this.textAlign,
-    this.textDirection,
-    this.locale,
-    this.softWrap = true,
-    this.overflow = TextOverflow.clip,
-    this.maxLines,
-    this.textWidthBasis,
-    this.textHeightBehavior,
-  });
+      {super.key,
+      required this.text,
+      this.fontVariant = FontVariant.regular,
+      this.textAlign,
+      this.overflow = TextOverflow.clip,
+      this.maxLines,
+      this.color,
+      this.fontSize,
+      this.fontStyle,
+      this.lineHeight});
+
+  TextStyle _getTextStyle() {
+    switch (fontVariant) {
+      case FontVariant.bold:
+        return TextStyle(
+            fontFamily: "Poppins-Bold",
+            fontSize: fontSize,
+            color: color,
+            fontStyle: fontStyle,
+            height: lineHeight);
+      case FontVariant.regular:
+        return TextStyle(
+            fontFamily: "Poppins",
+            fontSize: fontSize,
+            color: color,
+            fontStyle: fontStyle,
+            height: lineHeight);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Text(
-      data,
-      style: style,
+      text,
+      style: _getTextStyle(),
       textAlign: textAlign,
-      textDirection: textDirection,
-      locale: locale,
-      softWrap: softWrap,
       overflow: overflow,
       maxLines: maxLines,
-      textWidthBasis: textWidthBasis,
-      textHeightBehavior: textHeightBehavior,
     );
   }
 }
