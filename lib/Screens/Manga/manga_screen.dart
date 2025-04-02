@@ -11,35 +11,8 @@ import 'package:get/get.dart';
 
 import '../../Widgets/common/search_bar.dart';
 
-class MangaScreen extends StatefulWidget {
+class MangaScreen extends StatelessWidget {
   const MangaScreen({super.key});
-
-  @override
-  State<MangaScreen> createState() => _AnimeScreenState();
-}
-
-class _AnimeScreenState extends State<MangaScreen> {
-  Rx<AnilistAnimeData> animeData = Rx<AnilistAnimeData>(AnilistAnimeData());
-
-  @override
-  void initState() {
-    super.initState();
-    loadData();
-  }
-
-  Future<void> loadData() async {
-    try {
-      final response = await anilistAuthController.fetchAnilistManga();
-      if (response.isBlank!) {
-        log("Error: Failed to fetch Anilist data. Response is null.");
-        return;
-      }
-      animeData.value = response;
-      log("Anime data fetched successfully: ${animeData.value.spotLightAnimes!.first.id.toString()}");
-    } catch (e, stackTrace) {
-      log("Exception occurred in loadData: $e", stackTrace: stackTrace);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +21,8 @@ class _AnimeScreenState extends State<MangaScreen> {
         children: [
           const Header(),
           Obx(() {
-            if (animeData.value.spotLightAnimes == null) {
-               return Container(
+            if (anilistAuthController.mangaData.value.spotLightAnimes == null) {
+              return Container(
                 alignment: Alignment.center,
                 height: Get.height * 0.8,
                 child: const CircularProgressIndicator(),
@@ -65,7 +38,9 @@ class _AnimeScreenState extends State<MangaScreen> {
                   const SizedBox(
                     height: 10,
                   ),
-                  MangaMainCarousale(data: animeData.value.spotLightAnimes!),
+                  MangaMainCarousale(
+                      data: anilistAuthController
+                          .mangaData.value.spotLightAnimes!),
                   const SizedBox(
                     height: 20,
                   ),
@@ -73,18 +48,21 @@ class _AnimeScreenState extends State<MangaScreen> {
                     height: 10,
                   ),
                   MangaScrollableList(
-                    managaList: animeData.value.popularAnimes!,
+                    managaList:
+                        anilistAuthController.mangaData.value.popularAnimes!,
                     title: "Popular Animes",
                   ),
                   MangaScrollableList(
-                    managaList: animeData.value.topUpcomingAnimes!,
+                    managaList: anilistAuthController
+                        .mangaData.value.topUpcomingAnimes!,
                     title: "TopUpcoming Manga",
                   ),
                   const SizedBox(
                     height: 10,
                   ),
                   MangaScrollableList(
-                    managaList: animeData.value.completed!,
+                    managaList:
+                        anilistAuthController.mangaData.value.completed!,
                     title: "Completed Manga",
                   ),
                 ],

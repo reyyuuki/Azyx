@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 const Color seedColor = Colors.purple;
 
 ThemeData lightmode = ThemeData(
@@ -11,8 +10,9 @@ ThemeData lightmode = ThemeData(
       seedColor: seedColor,
       brightness: Brightness.light,
     ),
-  );
-
+    scaffoldBackgroundColor:
+        ColorScheme.fromSeed(seedColor: seedColor, brightness: Brightness.light)
+            .surface);
 
 ThemeData darkMode = ThemeData(
     brightness: Brightness.dark,
@@ -22,4 +22,6 @@ ThemeData darkMode = ThemeData(
       seedColor: seedColor,
       brightness: Brightness.dark,
     ),
-  );
+    scaffoldBackgroundColor:
+        ColorScheme.fromSeed(seedColor: seedColor, brightness: Brightness.dark)
+            .surface);

@@ -2,6 +2,7 @@ import 'package:azyx/HiveClass/theme_data.dart';
 import 'package:azyx/Providers/theme.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class ThemeProvider with ChangeNotifier {
@@ -87,6 +88,7 @@ class ThemeProvider with ChangeNotifier {
         ),
       );
     }
+    syncStatusBar();
     updateBox();
     notifyListeners();
   }
@@ -107,6 +109,15 @@ class ThemeProvider with ChangeNotifier {
     _isLightMode = false;
     _isDarkMode = false;
     updateTheme();
+  }
+
+  void syncStatusBar() {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        systemNavigationBarColor: Colors.transparent,
+        statusBarColor: Colors.transparent,
+        statusBarBrightness: _isLightMode! ? Brightness.dark : Brightness.light,
+        statusBarIconBrightness:
+            _isLightMode! ? Brightness.dark : Brightness.light));
   }
 
   void updateSeedColor(String newColor) {

@@ -17,13 +17,14 @@ final AnilistAddToListController anilistAddToListController =
 class AnilistAddToListController extends GetxController {
   final Rx<UserAnime> anime = UserAnime().obs;
   final Rx<UserAnime> manga = UserAnime().obs;
+  final Rx<String> animeStatus = ''.obs;
+  final Rx<String> mangaStatus = ''.obs;
   TextEditingController? controller;
 
   void findAnime(AnilistMediaData data) {
-    log("Started");
     if (anilistAuthController.userAnimeList.isNotEmpty) {
       anime.value = anilistAuthController.userAnimeList.firstWhere(
-        (i) => i.id == data.id,
+        (i) => i.id == data.id!,
         orElse: () {
           return UserAnime(
               id: data.id,
@@ -32,7 +33,7 @@ class AnilistAddToListController extends GetxController {
               tilte: data.title);
         },
       );
-      log("status: ${anime.value.status}");
+      animeStatus.value = anime.value.status ?? "";
     }
     log("status: ${anime.value.status}");
   }
@@ -49,6 +50,7 @@ class AnilistAddToListController extends GetxController {
               tilte: data.title);
         },
       );
+      mangaStatus.value = manga.value.status ?? '';
       log("status: ${manga.value.status}");
     } else {
       log("nothing found");
@@ -148,6 +150,7 @@ class AnilistAddToListController extends GetxController {
                     if (newValue != null) {
                       anime.value.status = newValue;
                     }
+                    log(anime.value.status.toString());
                   },
                 ),
                 const SizedBox(
@@ -192,7 +195,7 @@ class AnilistAddToListController extends GetxController {
                   height: 20,
                 ),
                 inputbox(context, controller, totalEpisodes,
-                    (value) => anime.value.progress = value,"Episode"),
+                    (value) => anime.value.progress = value, "Episode"),
                 const SizedBox(height: 30),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -206,9 +209,10 @@ class AnilistAddToListController extends GetxController {
                     ),
                     GestureDetector(
                       onTap: () {
+                        animeStatus.value = anime.value.status ?? "CURRENT";
                         anilistAuthController.addToAniList(
                             mediaId: anime.value.id!,
-                            status: anime.value.status,
+                            status: animeStatus.value,
                             score: anime.value.score?.toDouble() ?? 5.0,
                             progress: anime.value.progress);
                         Navigator.pop(context);
@@ -350,6 +354,7 @@ class AnilistAddToListController extends GetxController {
                     ),
                     GestureDetector(
                       onTap: () {
+                        mangaStatus.value = manga.value.status ?? 'CURRENT';
                         anilistAuthController.addToAniList(
                             mediaId: manga.value.id!,
                             status: manga.value.status,

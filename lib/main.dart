@@ -4,6 +4,7 @@ import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
 import 'package:azyx/Controllers/offline_controller.dart';
+import 'package:azyx/Controllers/settings_controller.dart';
 import 'package:azyx/Controllers/ui_setting_controller.dart';
 import 'package:azyx/HiveClass/theme_data.dart';
 import 'package:azyx/HiveClass/ui_setting_class.dart';
@@ -65,6 +66,7 @@ void main() async {
   Get.put(UiSettingController());
   Get.put(AnilistAddToListController());
   Get.put(LocalHistoryController());
+  Get.put(SettingsController());
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(systemNavigationBarColor: Colors.transparent));
@@ -87,19 +89,14 @@ class MainApp extends StatelessWidget {
       scrollBehavior: MyCustomScrollBehavior(),
       debugShowCheckedModeBanner: false,
       theme: provider.themeData,
-      home: const HomePage(),
+      home: HomePage(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class HomePage extends StatelessWidget {
+  HomePage({super.key});
 
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const LibraryScreen(),
@@ -109,13 +106,8 @@ class _HomePageState extends State<HomePage> {
   ];
 
   final AnilistAuth controller = Get.put(AnilistAuth());
-  Rx<int> index = 2.obs;
 
-  @override
-  void initState() {
-    super.initState();
-    controller.tryAutoLogin();
-  }
+  Rx<int> index = 2.obs;
 
   @override
   Widget build(BuildContext context) {

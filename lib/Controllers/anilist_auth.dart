@@ -14,15 +14,23 @@ final AnilistAuth anilistAuthController = Get.find();
 
 class AnilistAuth extends GetxController {
   Rx<User> userData = User().obs;
+  Rx<AnilistAnimeData> animeData = Rx<AnilistAnimeData>(AnilistAnimeData());
+  Rx<AnilistAnimeData> mangaData = Rx<AnilistAnimeData>(AnilistAnimeData());
   RxList<UserAnime> userAnimeList = RxList<UserAnime>();
   RxList<UserAnime> userMangaList = RxList<UserAnime>();
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchAnilistAnimes();
+    fetchAnilistManga();
+    tryAutoLogin();
+  }
 
   Future<void> tryAutoLogin() async {
     final token = await Hive.box("app-data").get("auth_token");
     if (token != null) {
       await fetchUserProfile();
-      await fetchUserAnimeList();
-      await fetchUserMangaList();
     }
 
     return log('Auth token not available!');
@@ -124,6 +132,8 @@ class AnilistAuth extends GetxController {
     } else {
       throw Exception('Failed to load user profile');
     }
+    await fetchUserAnimeList();
+    await fetchUserMangaList();
   }
 
   Future<void> fetchUserAnimeList() async {
@@ -201,6 +211,7 @@ class AnilistAuth extends GetxController {
                     .map((entry) => UserAnime.fromJson(entry)))
                 .toList(),
           );
+          log(data['data']['MediaListCollection']['lists'].toString());
         } else {
           log('Unexpected response structure: ${response.body}');
         }
@@ -304,7 +315,7 @@ class AnilistAuth extends GetxController {
     userMangaList.clear();
   }
 
-  Future<AnilistAnimeData> fetchAnilistAnimes() async {
+  Future<void> fetchAnilistAnimes() async {
     String url = 'https://graphql.anilist.co/';
     Map<String, String> headers = {
       'Content-Type': 'application/json',
@@ -384,13 +395,13 @@ class AnilistAuth extends GetxController {
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return AnilistAnimeData.fromJson(data['data']);
+      animeData.value = AnilistAnimeData.fromJson(data['data']);
     } else {
       throw Exception('Failed to load data');
     }
   }
 
-  Future<AnilistAnimeData> fetchAnilistManga() async {
+  Future<void> fetchAnilistManga() async {
     String url = 'https://graphql.anilist.co/';
     Map<String, String> headers = {
       'Content-Type': 'application/json',
@@ -473,7 +484,7 @@ class AnilistAuth extends GetxController {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
 
-      return AnilistAnimeData.fromJson(data['data']);
+      mangaData.value = AnilistAnimeData.fromJson(data['data']);
     } else {
       throw Exception('Failed to load data');
     }
@@ -514,7 +525,7 @@ class AnilistAuth extends GetxController {
       'mediaId': mediaId,
       'status': status ?? "CURRENT",
       if (score != null) 'score': score,
-      if(progress != null)'progress': progress,
+      if (progress != null) 'progress': progress,
     };
 
     final response = await http.post(

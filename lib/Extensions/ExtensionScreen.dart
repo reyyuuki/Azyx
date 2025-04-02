@@ -82,7 +82,7 @@ class _BrowseScreenState extends ConsumerState<ExtensionScreen>
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const HomePage()));
+                          builder: (context) =>  HomePage()));
                 },
                 icon: const Icon(Broken.arrow_left_2)),
             iconTheme: IconThemeData(color: theme.primary),

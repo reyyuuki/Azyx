@@ -239,10 +239,10 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
                             : const CircularProgressIndicator(),
                       )
                     : DetailsSection(
-                        tabController: _tabBarController,
                         animeTitle: animeTitle.value,
                         episodesList: episodesList,
                         mediaData: mediaData,
+                        index: _tabBarController.index,
                         isManga: false,
                       )),
                 Obx(

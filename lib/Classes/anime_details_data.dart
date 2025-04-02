@@ -80,8 +80,7 @@ class AnilistMediaData {
               .toList() ??
           [],
       recommendations: (json['recommendations']['edges'] as List?)
-              ?.map(
-                  (e) => Anime.fromJson(e['node']['mediaRecommendation'] ?? {}))
+              ?.map((e) => Anime.fromJson(e['node']['mediaRecommendation'] ?? {}))
               .toList() ??
           [],
       characters: (json['characters']['edges'] as List?)
