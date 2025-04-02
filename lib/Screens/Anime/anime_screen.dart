@@ -11,35 +11,8 @@ import 'package:get/get.dart';
 
 import '../../Widgets/common/search_bar.dart';
 
-class AnimeScreen extends StatefulWidget {
+class AnimeScreen extends StatelessWidget {
   const AnimeScreen({super.key});
-
-  @override
-  State<AnimeScreen> createState() => _AnimeScreenState();
-}
-
-class _AnimeScreenState extends State<AnimeScreen> {
-  Rx<AnilistAnimeData> animeData = Rx<AnilistAnimeData>(AnilistAnimeData());
-
-  @override
-  void initState() {
-    super.initState();
-    loadData();
-  }
-
-  Future<void> loadData() async {
-    try {
-      final response = await anilistAuthController.fetchAnilistAnimes();
-      if (response.isBlank!) {
-        log("Error: Failed to fetch Anilist data. Response is null.");
-        return;
-      }
-      animeData.value = response;
-      log("Anime data fetched successfully: ${animeData.value.spotLightAnimes!.first.id.toString()}");
-    } catch (e, stackTrace) {
-      log("Exception occurred in loadData: $e", stackTrace: stackTrace);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +21,7 @@ class _AnimeScreenState extends State<AnimeScreen> {
         children: [
           const Header(),
           Obx(() {
-            if (animeData.value.spotLightAnimes == null) {
+            if (anilistAuthController.animeData.value.spotLightAnimes == null) {
               return Container(
                 alignment: Alignment.center,
                 height: Get.height * 0.8,
@@ -65,23 +38,27 @@ class _AnimeScreenState extends State<AnimeScreen> {
                   const SizedBox(
                     height: 10,
                   ),
-                  MainCarousale(animeData: animeData.value.spotLightAnimes!),
+                  MainCarousale(
+                      animeData: anilistAuthController
+                          .animeData.value.spotLightAnimes!),
                   const SizedBox(
                     height: 20,
                   ),
                   AnimeScrollableList(
-                    animeList: animeData.value.popularAnimes!,
+                    animeList:
+                        anilistAuthController.animeData.value.popularAnimes!,
                     title: "Popular Animes",
                   ),
                   AnimeScrollableList(
-                    animeList: animeData.value.topUpcomingAnimes!,
+                    animeList: anilistAuthController
+                        .animeData.value.topUpcomingAnimes!,
                     title: "TopUpcoming Animes",
                   ),
                   const SizedBox(
                     height: 10,
                   ),
                   AnimeScrollableList(
-                    animeList: animeData.value.completed!,
+                    animeList: anilistAuthController.animeData.value.completed!,
                     title: "Completed Animes",
                   ),
                 ],

@@ -105,8 +105,10 @@ class MangaAddToList extends StatelessWidget {
                                     Obx(
                                       () => AzyXText(
                                         text: anilistAddToListController
-                                                .manga.value.status ??
-                                            "Add to list",
+                                                .mangaStatus.value.isEmpty
+                                            ? "Add to list"
+                                            : anilistAddToListController
+                                                .mangaStatus.value,
                                         fontVariant: FontVariant.bold,
                                         color: Theme.of(context)
                                             .colorScheme

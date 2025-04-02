@@ -106,8 +106,10 @@ class AddToListFloater extends StatelessWidget {
                                       Obx(
                                         () => Text(
                                           anilistAddToListController
-                                                  .anime.value.status ??
-                                              "Add to list",
+                                                  .animeStatus.value.isEmpty
+                                              ? "Add to list"
+                                              : anilistAddToListController
+                                                  .animeStatus.value,
                                           style: TextStyle(
                                               fontFamily: "Poppins-Bold",
                                               color: Theme.of(context)
