@@ -1,4 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
+import 'dart:developer';
+
+import 'package:azyx/Controllers/settings_controller.dart';
 import 'package:azyx/Controllers/ui_setting_controller.dart';
 import 'package:azyx/Providers/theme_provider.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
@@ -29,16 +32,56 @@ class UiSettings extends StatelessWidget {
               title: "UI Settings",
               icon: Broken.designtools,
             ),
+            glow_setting(context, provider),
+            10.height,
             Padding(
               padding: const EdgeInsets.all(12),
-              child: glow_setting(context, provider),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: blur_setting(context, provider),
+              child: Column(
+                children: [
+                  settingTitle(context, "Performance settings", Broken.moon),
+                  AzyXContainer(
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerLowest,
+                        boxShadow: [
+                          BoxShadow(
+                              blurRadius: 10,
+                              color: Colors.black.withOpacity(0.6))
+                        ],
+                        borderRadius: const BorderRadius.vertical(
+                            bottom: Radius.circular(20))),
+                    child: Column(
+                      children: [
+                        ListTile(
+                          leading: Obx(
+                            () => Icon(settingsController.isGradient.value
+                                ? Icons.visibility
+                                : Icons.visibility_off),
+                          ),
+                          title: const AzyXText(
+                            text: "Gradeint effect",
+                            fontVariant: FontVariant.bold,
+                          ),
+                          subtitle: const AzyXText(
+                            text: "Disable gradient for better performance",
+                            fontSize: 12,
+                            fontVariant: FontVariant.bold,
+                          ),
+                          trailing: Obx(
+                            () => Switch(
+                                value: settingsController.isGradient.value,
+                                onChanged: (value) {
+                                  settingsController.gradientToggler(value);
+                                }),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
             )
           ],
         ),
@@ -46,120 +89,17 @@ class UiSettings extends StatelessWidget {
     );
   }
 
-  AzyXContainer blur_setting(BuildContext context, ThemeProvider provider) {
-    return AzyXContainer(
-      width: MediaQuery.of(context).size.width,
-      decoration: BoxDecoration(boxShadow: [
-        BoxShadow(blurRadius: 10, color: Colors.black.withOpacity(0.6))
-      ], borderRadius: BorderRadius.circular(20)),
-      child: Column(
-        children: [
-          AzyXContainer(
-            decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(20))),
-            child: const ListTile(
-              leading: Icon(Broken.blur),
-              title: AzyXText(
-                text: "Color Blur",
-                fontVariant: FontVariant.bold,
-              ),
-            ),
-          ),
-          AzyXContainer(
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerLowest,
-                  borderRadius:
-                      const BorderRadius.vertical(bottom: Radius.circular(20))),
-              child: Column(
-                children: [
-                  const ListTile(
-                    leading: Icon(Ionicons.color_wand),
-                    title: AzyXText(
-                      text: "Blur Multiplier",
-                      fontVariant: FontVariant.bold,
-                    ),
-                    subtitle: AzyXText(
-                      text: "Adjust the blur for your vibe",
-                      fontSize: 12,
-                      fontVariant: FontVariant.bold,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Obx(
-                        () => AzyXText(
-                          text: uiSettingController.blurMultiplier
-                              .toStringAsFixed(1),
-                          fontVariant: FontVariant.bold,
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Expanded(
-                        child: Obx(
-                          () => AzyXContainer(
-                            decoration: BoxDecoration(boxShadow: [
-                              BoxShadow(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withOpacity(1.glowMultiplier()),
-                                  blurRadius: 5..blurMultiplier())
-                            ]),
-                            child: CustomSlider(
-                                onChanged: (double newValue) {
-                                  uiSettingController.blurMultiplier = newValue;
-                                },
-                                divisions: 10,
-                                max: 5.0,
-                                min: 1.0,
-                                value: double.parse(uiSettingController
-                                    .blurMultiplier
-                                    .toStringAsFixed(2))),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      const AzyXText(
-                        text: "5.0",
-                        fontVariant: FontVariant.bold,
-                      )
-                    ],
-                  )
-                ],
-              )),
-        ],
-      ),
-    );
-  }
-
   AzyXContainer glow_setting(BuildContext context, ThemeProvider provider) {
     return AzyXContainer(
+      margin: const EdgeInsets.all(12),
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(boxShadow: [
         BoxShadow(blurRadius: 10, color: Colors.black.withOpacity(0.6))
       ], borderRadius: BorderRadius.circular(20)),
       child: Column(
         children: [
-          AzyXContainer(
-            decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(20))),
-            child: const ListTile(
-              leading: Icon(Broken.colorfilter),
-              title: AzyXText(
-                text: "Color Glow",
-                fontVariant: FontVariant.bold,
-              ),
-            ),
-          ),
+          settingTitle(
+              context, "Visual Effects Customization", Broken.colorfilter),
           AzyXContainer(
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
@@ -224,10 +164,84 @@ class UiSettings extends StatelessWidget {
                         fontVariant: FontVariant.bold,
                       )
                     ],
-                  )
+                  ),
+                  10.height,
+                  const ListTile(
+                    leading: Icon(Ionicons.color_wand),
+                    title: AzyXText(
+                      text: "Blur Multiplier",
+                      fontVariant: FontVariant.bold,
+                    ),
+                    subtitle: AzyXText(
+                      text: "Adjust the blur for your vibe",
+                      fontSize: 12,
+                      fontVariant: FontVariant.bold,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Obx(
+                        () => AzyXText(
+                          text: uiSettingController.blurMultiplier
+                              .toStringAsFixed(1),
+                          fontVariant: FontVariant.bold,
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Obx(
+                          () => AzyXContainer(
+                            decoration: BoxDecoration(boxShadow: [
+                              BoxShadow(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary
+                                      .withOpacity(1.glowMultiplier()),
+                                  blurRadius: 5.blurMultiplier())
+                            ]),
+                            child: CustomSlider(
+                                onChanged: (double newValue) {
+                                  uiSettingController.blurMultiplier = newValue;
+                                },
+                                divisions: 10,
+                                max: 5.0,
+                                min: 1.0,
+                                value: double.parse(uiSettingController
+                                    .blurMultiplier
+                                    .toStringAsFixed(2))),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      const AzyXText(
+                        text: "5.0",
+                        fontVariant: FontVariant.bold,
+                      )
+                    ],
+                  ),
                 ],
               )),
         ],
+      ),
+    );
+  }
+
+  AzyXContainer settingTitle(
+      BuildContext context, String title, IconData icon) {
+    return AzyXContainer(
+      decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20))),
+      child: ListTile(
+        leading: Icon(icon),
+        title: AzyXText(
+          text: title,
+          fontVariant: FontVariant.bold,
+        ),
       ),
     );
   }

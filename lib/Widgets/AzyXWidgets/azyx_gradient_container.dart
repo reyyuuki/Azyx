@@ -1,5 +1,7 @@
+import 'package:azyx/Controllers/settings_controller.dart';
 import 'package:azyx/Providers/theme_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:provider/provider.dart';
 
 class AzyXGradientContainer extends StatelessWidget {
@@ -17,24 +19,39 @@ class AzyXGradientContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isDarkMode = Provider.of<ThemeProvider>(context).isDarkMode!;
-    return Container(
-      height: height,
-      padding: padding,
-      decoration: BoxDecoration(
-          borderRadius: borderRadius,
-          gradient: LinearGradient(
-              colors: isDarkMode
-                  ? [
-                      Theme.of(context).colorScheme.surface.withAlpha(20),
-                      Theme.of(context).colorScheme.primary.withAlpha(90),
-                    ]
-                  : [
-                      Theme.of(context).colorScheme.surface,
-                      Theme.of(context).colorScheme.surface
-                    ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight)),
-      child: child,
-    );
+    return Obx(() {
+      if (settingsController.isGradient.value) {
+        return Container(
+          height: height,
+          padding: padding,
+          decoration: BoxDecoration(
+              borderRadius: borderRadius,
+              color: Theme.of(context).colorScheme.surface,
+              gradient: LinearGradient(
+                  colors: isDarkMode
+                      ? [
+                          Theme.of(context).colorScheme.surface.withAlpha(20),
+                          Theme.of(context).colorScheme.primary.withAlpha(90),
+                        ]
+                      : [
+                          Theme.of(context).colorScheme.surface,
+                          Theme.of(context).colorScheme.surface
+                        ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight)),
+          child: child,
+        );
+      } else {
+        return Container(
+          height: height,
+          padding: padding,
+          decoration: BoxDecoration(
+            borderRadius: borderRadius,
+            color: Theme.of(context).colorScheme.surface,
+          ),
+          child: child,
+        );
+      }
+    });
   }
 }
