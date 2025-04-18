@@ -1,8 +1,8 @@
 // ignore_for_file: use_build_context_synchronously, must_be_immutable
 
 import 'dart:developer';
-import 'package:azyx/Classes/episode_class.dart';
-import 'package:azyx/Classes/wrong_title_search.dart';
+import 'package:azyx/Models/episode_class.dart';
+import 'package:azyx/Models/wrong_title_search.dart';
 import 'package:azyx/Screens/Manga/Details/tabs/widgets/chapter_item.dart';
 import 'package:azyx/Screens/Manga/Read/read.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';

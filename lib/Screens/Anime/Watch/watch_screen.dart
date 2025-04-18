@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:math' as max;
-import 'package:azyx/Classes/episode_class.dart';
-import 'package:azyx/Classes/anime_all_data.dart';
-import 'package:azyx/Classes/local_history.dart';
+import 'package:azyx/Models/episode_class.dart';
+import 'package:azyx/Models/anime_all_data.dart';
+import 'package:azyx/Models/local_history.dart';
 import 'package:azyx/Constants/constants.dart';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';

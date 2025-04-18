@@ -1,7 +1,7 @@
 // ignore_for_file: inva, invalid_use_of_protected_member
 import 'dart:ui';
-import 'package:azyx/Classes/anime_details_data.dart';
-import 'package:azyx/Classes/offline_item.dart';
+import 'package:azyx/Models/anime_details_data.dart';
+import 'package:azyx/Models/offline_item.dart';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/offline_controller.dart';

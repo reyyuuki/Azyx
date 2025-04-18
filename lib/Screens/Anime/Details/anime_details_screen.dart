@@ -2,10 +2,11 @@
 
 import 'dart:developer';
 
-import 'package:azyx/Classes/anime_class.dart';
-import 'package:azyx/Classes/anime_details_data.dart';
-import 'package:azyx/Classes/episode_class.dart';
-import 'package:azyx/Classes/offline_item.dart';
+import 'package:azyx/Models/anime_class.dart';
+import 'package:azyx/Models/anime_details_data.dart';
+import 'package:azyx/Models/carousale_data.dart';
+import 'package:azyx/Models/episode_class.dart';
+import 'package:azyx/Models/offline_item.dart';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/details_section.dart';
@@ -27,7 +28,7 @@ import 'package:get/get.dart';
 
 class AnimeDetailsScreen extends ConsumerStatefulWidget {
   final String tagg;
-  final Anime? smallMedia;
+  final CarousaleData? smallMedia;
   final OfflineItem? allData;
   final bool isOffline;
   const AnimeDetailsScreen(
@@ -100,9 +101,9 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
           id: widget.smallMedia?.id,
           title: widget.smallMedia?.title,
           episodes: widget.allData?.episodesList!.length));
-      image.value = widget.smallMedia!.image!;
-      title.value = widget.smallMedia!.title!;
-      id.value = widget.smallMedia!.id!;
+      image.value = widget.smallMedia!.image;
+      title.value = widget.smallMedia!.title;
+      id.value = widget.smallMedia!.id;
       loadData();
     }
   }

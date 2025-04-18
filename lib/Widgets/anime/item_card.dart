@@ -1,6 +1,7 @@
 import 'dart:io';
 
-import 'package:azyx/Classes/anime_class.dart';
+import 'package:azyx/Models/anime_class.dart';
+import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';
@@ -9,7 +10,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class ItemCard extends StatelessWidget {
-  final Anime item;
+  final CarousaleData item;
   final String tagg;
   const ItemCard({super.key, required this.item, required this.tagg});
 
@@ -36,7 +37,7 @@ class ItemCard extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
                   child: CachedNetworkImage(
-                    imageUrl: item.image!,
+                    imageUrl: item.image,
                     fit: BoxFit.cover,
                     placeholder: (context, url) => ShimmerEffect(
                       height: Platform.isAndroid || Platform.isIOS ? 150 : 230,
@@ -48,7 +49,7 @@ class ItemCard extends StatelessWidget {
                 ),
               ),
             ),
-            item.rating != null
+            item.extraData != null
                 ? Positioned(
                     bottom: 0,
                     right: 0,
@@ -75,7 +76,7 @@ class ItemCard extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             AzyXText(
-                              text: item.rating!,
+                              text: item.extraData!,
                               fontSize: 12,
                               color: Theme.of(context).colorScheme.primary,
                               fontVariant: FontVariant.bold,
@@ -91,8 +92,8 @@ class ItemCard extends StatelessWidget {
                     ),
                   )
                 : const SizedBox.shrink(),
-            item.status != null &&
-                    (item.status == "RELEASING" || item.status == "Ongoing")
+            item.other != null &&
+                    (item.other == "RELEASING" || item.other == "Ongoing")
                 ? Positioned(
                     bottom: 0,
                     left: 0,
@@ -112,12 +113,12 @@ class ItemCard extends StatelessWidget {
         const SizedBox(height: 10),
         AzyXText(
           text: Platform.isAndroid || Platform.isIOS
-              ? (item.title!.length > 12
-                  ? '${item.title!.substring(0, 10)}...'
-                  : item.title!)
-              : (item.title!.length > 20
-                  ? '${item.title!.substring(0, 17)}...'
-                  : item.title!),
+              ? (item.title.length > 12
+                  ? '${item.title.substring(0, 10)}...'
+                  : item.title)
+              : (item.title.length > 20
+                  ? '${item.title.substring(0, 17)}...'
+                  : item.title),
           fontVariant: FontVariant.bold,
         ),
       ],

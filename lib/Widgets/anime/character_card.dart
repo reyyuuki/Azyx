@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:azyx/Classes/anime_details_data.dart';
+import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';

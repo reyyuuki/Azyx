@@ -1,5 +1,5 @@
-import 'package:azyx/Classes/anilist_search.dart';
-import 'package:azyx/Classes/anime_details_data.dart';
+import 'package:azyx/Models/anilist_search.dart';
+import 'package:azyx/Models/anime_details_data.dart';
 import 'package:get/get.dart';
 import 'dart:convert';
 import 'dart:developer';

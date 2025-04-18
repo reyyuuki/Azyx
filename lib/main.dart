@@ -107,7 +107,7 @@ class HomePage extends StatelessWidget {
 
   final AnilistAuth controller = Get.put(AnilistAuth());
 
-  Rx<int> index = 2.obs;
+  Rx<int> index = 0.obs;
 
   @override
   Widget build(BuildContext context) {

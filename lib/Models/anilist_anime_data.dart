@@ -1,4 +1,4 @@
-import 'package:azyx/Classes/anime_class.dart';
+import 'package:azyx/Models/anime_class.dart';
 
 class AnilistAnimeData {
   List<Anime>? spotLightAnimes;

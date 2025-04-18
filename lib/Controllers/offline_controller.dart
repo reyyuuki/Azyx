@@ -1,8 +1,8 @@
 import 'dart:developer';
-import 'package:azyx/Classes/offline_item.dart';
+import 'package:azyx/Models/offline_item.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import '../Classes/category_class.dart';
+import '../Models/category_class.dart';
 
 final OfflineController offlineController = Get.find();
 
@@ -12,12 +12,8 @@ class OfflineController extends GetxController {
   final RxList<Category> offlineAnimeCategories = RxList();
   final RxList<Category> offlineMangaCategories = RxList();
 
-  @override
-  void onInit() {
-    super.onInit();
-    loadOfflineData();
-  }
-
+ 
+ 
   void addOfflineItem(OfflineItem data, String categoryName) {
     final index =
         offlineAnimeList.indexWhere((i) => i.mediaData.id == data.mediaData.id);

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:azyx/Classes/anime_details_data.dart';
+import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Providers/theme_provider.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/common/back_button.dart';

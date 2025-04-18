@@ -2,10 +2,11 @@
 
 import 'dart:developer';
 
-import 'package:azyx/Classes/anime_class.dart';
-import 'package:azyx/Classes/anime_details_data.dart';
-import 'package:azyx/Classes/episode_class.dart';
-import 'package:azyx/Classes/offline_item.dart';
+import 'package:azyx/Models/anime_class.dart';
+import 'package:azyx/Models/anime_details_data.dart';
+import 'package:azyx/Models/carousale_data.dart';
+import 'package:azyx/Models/episode_class.dart';
+import 'package:azyx/Models/offline_item.dart';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/details_section.dart';
@@ -26,7 +27,7 @@ import 'package:get/get.dart';
 
 class MangaDetailsScreen extends ConsumerStatefulWidget {
   final String tagg;
-  final Anime? smallMedia;
+  final CarousaleData? smallMedia;
   final OfflineItem? allData;
   final bool isOffline;
   const MangaDetailsScreen(
@@ -59,7 +60,7 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
   Future<void> loadData() async {
     try {
       final response = await anilistDataController
-          .fetchAnilistMangaDetails(widget.smallMedia!.id!);
+          .fetchAnilistMangaDetails(widget.smallMedia!.id);
       mediaData.value = response;
       isLoading.value = false;
     } catch (e) {
@@ -97,9 +98,9 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
           id: widget.smallMedia?.id,
           title: widget.smallMedia?.title,
           episodes: widget.allData?.episodesList!.length));
-      image.value = widget.smallMedia!.image!;
-      title.value = widget.smallMedia!.title!;
-      id.value = widget.smallMedia!.id!;
+      image.value = widget.smallMedia!.image;
+      title.value = widget.smallMedia!.title;
+      id.value = widget.smallMedia!.id;
       loadData();
     }
   }
@@ -110,7 +111,7 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
     totalChapters.value = chaptersList.length.toString();
     //Step:4 - Mapping Chapters
     chaptersList.value =
-        mChapterToChapter(episodeResult.chapters!, widget.smallMedia!.title!);
+        mChapterToChapter(episodeResult.chapters!, widget.smallMedia!.title);
   }
 
   Future<void> loadDetails(Source source) async {
@@ -118,14 +119,14 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
       //Step:1 - Searching Manga
       final response = await search(
           source: source,
-          query: widget.smallMedia!.title!,
+          query: widget.smallMedia!.title,
           page: 1,
           filterList: []);
 
       //Step:2 - Mapping Manga by title
       if (response != null) {
         final result = await mappingHelper(
-            widget.smallMedia!.title!, response.toJson()['list']);
+            widget.smallMedia!.title, response.toJson()['list']);
         log(result.toString());
 
         //Step:3 - Fetchting details

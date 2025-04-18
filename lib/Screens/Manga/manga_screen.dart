@@ -1,8 +1,10 @@
 import 'dart:developer';
 
-import 'package:azyx/Classes/anilist_anime_data.dart';
+import 'package:azyx/Models/anilist_anime_data.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
+import 'package:azyx/Widgets/anime/anime_scrollable_list.dart';
+import 'package:azyx/Widgets/anime/main_carousale.dart';
 import 'package:azyx/Widgets/header.dart';
 import 'package:azyx/Widgets/manga/main_carousale.dart';
 import 'package:azyx/Widgets/manga/manga_scrollable_list.dart';
@@ -38,7 +40,8 @@ class MangaScreen extends StatelessWidget {
                   const SizedBox(
                     height: 10,
                   ),
-                  MangaMainCarousale(
+                  MainCarousale(
+                    isManga: true,
                       data: anilistAuthController
                           .mangaData.value.spotLightAnimes!),
                   const SizedBox(
@@ -47,22 +50,24 @@ class MangaScreen extends StatelessWidget {
                   const SizedBox(
                     height: 10,
                   ),
-                  MangaScrollableList(
-                    managaList:
+                  AnimeScrollableList(
+                    animeList:
                         anilistAuthController.mangaData.value.popularAnimes!,
+                    isManga: true,
                     title: "Popular Animes",
                   ),
-                  MangaScrollableList(
-                    managaList: anilistAuthController
+                  AnimeScrollableList(
+                    isManga: true,
+                    animeList: anilistAuthController
                         .mangaData.value.topUpcomingAnimes!,
                     title: "TopUpcoming Manga",
                   ),
                   const SizedBox(
                     height: 10,
                   ),
-                  MangaScrollableList(
-                    managaList:
-                        anilistAuthController.mangaData.value.completed!,
+                  AnimeScrollableList(
+                    animeList: anilistAuthController.mangaData.value.completed!,
+                    isManga: true,
                     title: "Completed Manga",
                   ),
                 ],
