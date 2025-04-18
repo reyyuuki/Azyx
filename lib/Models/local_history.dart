@@ -1,5 +1,5 @@
-import 'package:azyx/Classes/anime_all_data.dart';
-import 'package:azyx/Classes/episode_class.dart';
+import 'package:azyx/Models/anime_all_data.dart';
+import 'package:azyx/Models/episode_class.dart';
 
 import '../api/Mangayomi/Model/Source.dart';
 

@@ -1,8 +1,10 @@
 // ignore_for_file: must_be_immutable
 
-import 'package:azyx/Classes/anime_class.dart';
+import 'package:azyx/Models/anime_class.dart';
+import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Providers/theme_provider.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
+import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';
@@ -12,13 +14,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 
 class MainCarousale extends StatelessWidget {
-  final List<Anime> animeData;
-  const MainCarousale({super.key, required this.animeData});
+  final List<Anime> data;
+  final bool isManga;
+  const MainCarousale(
+      {super.key, required this.data, required this.isManga});
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Provider.of<ThemeProvider>(context).isDarkMode!;
-    if (animeData.isEmpty) {
+    if (data.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -39,14 +43,28 @@ class MainCarousale extends StatelessWidget {
           enlargeFactor: 0.1,
           scrollDirection: Axis.horizontal,
         ),
-        items: animeData.map<Widget>((anime) {
+        items: data.map<Widget>((anime) {
           return GestureDetector(
             onTap: () {
+              isManga ? 
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => MangaDetailsScreen(
+                            smallMedia: CarousaleData(
+                                id: anime.id!,
+                                image: anime.image!,
+                                title: anime.title!),
+                            tagg: "${anime.id}MainCarousale",
+                          ))):
               Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) => AnimeDetailsScreen(
-                            smallMedia: anime,
+                            smallMedia: CarousaleData(
+                                id: anime.id!,
+                                image: anime.image!,
+                                title: anime.title!),
                             tagg: "${anime.id}MainCarousale",
                           )));
             },

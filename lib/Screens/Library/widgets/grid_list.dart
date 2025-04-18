@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'dart:math';
-import 'package:azyx/Classes/offline_item.dart';
+import 'package:azyx/Models/offline_item.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';
@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 class GridList extends StatelessWidget {
   final String tagg;
   final List<OfflineItem> data;
+  
   final void Function(OfflineItem, String) ontap;
   const GridList(
       {super.key, required this.data, required this.tagg, required this.ontap});

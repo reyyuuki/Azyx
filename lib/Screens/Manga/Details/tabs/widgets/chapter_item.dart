@@ -1,4 +1,4 @@
-import 'package:azyx/Classes/episode_class.dart';
+import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';

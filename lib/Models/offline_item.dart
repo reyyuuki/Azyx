@@ -1,5 +1,5 @@
-import 'package:azyx/Classes/anime_details_data.dart';
-import 'package:azyx/Classes/episode_class.dart';
+import 'package:azyx/Models/anime_details_data.dart';
+import 'package:azyx/Models/episode_class.dart';
 
 class OfflineItem {
   String number;

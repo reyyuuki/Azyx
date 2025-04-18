@@ -1,4 +1,4 @@
-import 'package:azyx/Classes/anime_all_data.dart';
+import 'package:azyx/Models/anime_all_data.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';

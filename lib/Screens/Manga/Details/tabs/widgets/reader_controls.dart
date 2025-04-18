@@ -1,6 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
-import 'package:azyx/Classes/episode_class.dart';
+import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Screens/Manga/Details/tabs/widgets/chapter_item.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';

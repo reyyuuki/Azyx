@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:azyx/Classes/anilist_anime_data.dart';
-import 'package:azyx/Classes/anilist_user_data.dart';
-import 'package:azyx/Classes/user_anime.dart';
+import 'package:azyx/Models/anilist_anime_data.dart';
+import 'package:azyx/Models/anilist_user_data.dart';
+import 'package:azyx/Models/user_anime.dart';
+import 'package:azyx/Models/user_lists_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:get/get.dart';
@@ -18,6 +19,8 @@ class AnilistAuth extends GetxController {
   Rx<AnilistAnimeData> mangaData = Rx<AnilistAnimeData>(AnilistAnimeData());
   RxList<UserAnime> userAnimeList = RxList<UserAnime>();
   RxList<UserAnime> userMangaList = RxList<UserAnime>();
+  Rxn<UserListsModel> userSepratedAnimeList = Rxn();
+  Rxn<UserListsModel> userSepratedMangaList = Rxn();
 
   @override
   void onInit() {
@@ -205,13 +208,13 @@ class AnilistAuth extends GetxController {
             data['data']['MediaListCollection'] != null) {
           final lists =
               data['data']['MediaListCollection']['lists'] as List<dynamic>;
+          userSepratedAnimeList.value = UserListsModel.fromJson(lists);
           userAnimeList.assignAll(
             lists
                 .expand((list) => (list['entries'] as List<dynamic>)
                     .map((entry) => UserAnime.fromJson(entry)))
                 .toList(),
           );
-          log(data['data']['MediaListCollection']['lists'].toString());
         } else {
           log('Unexpected response structure: ${response.body}');
         }

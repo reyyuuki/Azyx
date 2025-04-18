@@ -1,4 +1,4 @@
-import 'package:azyx/Classes/episode_class.dart';
+import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/api/Mangayomi/Eval/dart/model/video.dart';
 import 'package:azyx/api/Mangayomi/Model/Source.dart';
 

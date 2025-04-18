@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:azyx/Classes/local_history.dart';
+import 'package:azyx/Models/local_history.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 

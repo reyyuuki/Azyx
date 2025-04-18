@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:azyx/Classes/wrong_title_search.dart';
+import 'package:azyx/Models/wrong_title_search.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';

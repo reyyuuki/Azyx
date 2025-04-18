@@ -1,6 +1,7 @@
+
 import 'dart:io';
 
-import 'package:azyx/Classes/anime_details_data.dart';
+import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Widgets/Animation/scale_animation.dart';
 import 'package:azyx/Widgets/anime/character_card.dart';
 import 'package:azyx/Widgets/common/gradient_title.dart';

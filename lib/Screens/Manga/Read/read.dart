@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:azyx/Classes/episode_class.dart';
+import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Screens/Manga/Details/tabs/widgets/reader_controls.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/api/Mangayomi/Eval/dart/model/page.dart';

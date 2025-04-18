@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:azyx/Classes/anime_class.dart';
+import 'package:azyx/Models/anime_class.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 
 class AnilistMediaData {
