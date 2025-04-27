@@ -10,6 +10,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+enum Mode { webtoon, left, right, standard }
+
 class ReadPage extends StatefulWidget {
   final String mangaTitle;
   final String link;
@@ -34,6 +36,8 @@ class _ReadPageState extends State<ReadPage> {
   final Rx<String> chapterUrl = ''.obs;
   final Rx<bool> isShowed = true.obs;
   final ScrollController scrollController = ScrollController();
+  final PageController _pageController = PageController();
+  final Rx<Mode> selectedMode = Mode.webtoon.obs;
 
   @override
   void initState() {
@@ -87,40 +91,43 @@ class _ReadPageState extends State<ReadPage> {
     return Scaffold(
       body: Stack(
         children: [
-          Obx(
-            () => pagesList.isEmpty
-                ? const Center(
-                    child: CircularProgressIndicator(),
-                  )
-                : GestureDetector(
-                    onTap: () {
-                      isShowed.value = !isShowed.value;
-                      log("tapped");
-                    },
-                    child: SingleChildScrollView(
-                      controller: scrollController,
-                      child: Column(
-                        children: [
-                          ...pagesList.map((p) {
-                            return CachedNetworkImage(
-                              imageUrl: p.url,
-                              fit: BoxFit.cover,
-                              placeholder: (context, index) {
-                                return Container(
-                                  alignment: Alignment.center,
-                                  height: 300,
-                                  child: const CircularProgressIndicator(),
+          Obx(() => pagesList.isEmpty
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : GestureDetector(
+                  onTap: () {
+                    isShowed.value = !isShowed.value;
+                    log("tapped");
+                  },
+                  child: selectedMode.value == Mode.webtoon
+                      ? SingleChildScrollView(
+                          controller: scrollController,
+                          child: Column(
+                            children: [
+                              ...pagesList.map((p) {
+                                return CachedNetworkImage(
+                                  imageUrl: p.url,
+                                  fit: BoxFit.cover,
+                                  httpHeaders: {
+                                    'Referer': widget.source.baseUrl!,
+                                  },
+                                  placeholder: (context, index) {
+                                    return Container(
+                                      alignment: Alignment.center,
+                                      height: 300,
+                                      child: const CircularProgressIndicator(),
+                                    );
+                                  },
                                 );
-                              },
-                            );
-                          }),
-                        ],
-                      ),
-                    ),
-                  ),
-          ),
+                              }),
+                            ],
+                          ),
+                        )
+                      : _pageView())),
           ReaderControls(
             scrollController: scrollController,
+            selectedMode: selectedMode,
             totalImages: totalImages,
             mangaTitle: widget.mangaTitle,
             chapterTitle: chapterTitle,
@@ -145,6 +152,35 @@ class _ReadPageState extends State<ReadPage> {
                 ),
               ))
         ],
+      ),
+    );
+  }
+
+  Widget _pageView() {
+    return PageView.builder(
+      controller: _pageController,
+      onPageChanged: (index) {
+        _currentPage.value = index;
+      },
+      scrollDirection:
+          selectedMode.value == Mode.standard ? Axis.vertical : Axis.horizontal,
+      reverse: selectedMode.value == Mode.left,
+      itemCount: pagesList.length,
+      itemBuilder: (context, index) => Center(
+        child: CachedNetworkImage(
+          imageUrl: pagesList[index].url,
+          fit: BoxFit.cover,
+          httpHeaders: {
+            'Referer': widget.source.baseUrl!,
+          },
+          placeholder: (context, index) {
+            return Container(
+              alignment: Alignment.center,
+              height: 300,
+              child: const CircularProgressIndicator(),
+            );
+          },
+        ),
       ),
     );
   }
