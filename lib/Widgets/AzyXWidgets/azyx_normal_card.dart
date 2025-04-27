@@ -41,7 +41,7 @@ class AzyXCard extends StatelessWidget {
           ),
         ),
         AzyXText(
-          text: item.tilte!,
+          text: item.title!,
           fontVariant: FontVariant.bold,
           fontSize: 12,
           textAlign: TextAlign.center,

@@ -30,7 +30,7 @@ class AnilistAddToListController extends GetxController {
               id: data.id,
               progress: 0,
               episodes: data.episodes,
-              tilte: data.title);
+              title: data.title);
         },
       );
       animeStatus.value = anime.value.status ?? "";
@@ -47,7 +47,7 @@ class AnilistAddToListController extends GetxController {
               id: data.id,
               progress: 0,
               episodes: data.episodes,
-              tilte: data.title);
+              title: data.title);
         },
       );
       mangaStatus.value = manga.value.status ?? '';
@@ -61,7 +61,7 @@ class AnilistAddToListController extends GetxController {
     if (anilistAuthController.userAnimeList.isNotEmpty) {
       try {
         anime.value = anilistAuthController.userAnimeList.firstWhere(
-          (i) => i.tilte == data.title,
+          (i) => i.title == data.title,
           orElse: () {
             log("No existing anime found, creating new UserAnime entry.");
             return UserAnime(
@@ -217,7 +217,7 @@ class AnilistAddToListController extends GetxController {
                             progress: anime.value.progress);
                         Navigator.pop(context);
                         log(anime.value.progress.toString());
-                        azyxSnackBar("Sucessfully added ${anime.value.tilte}");
+                        azyxSnackBar("Sucessfully added ${anime.value.title}");
                       },
                       child: customButton(context, "Save"),
                     )
@@ -361,7 +361,7 @@ class AnilistAddToListController extends GetxController {
                             score: manga.value.score?.toDouble() ?? 5.0,
                             progress: manga.value.progress ?? 0);
                         Navigator.pop(context);
-                        azyxSnackBar("Sucessfully added ${manga.value.tilte}");
+                        azyxSnackBar("Sucessfully added ${manga.value.title}");
                       },
                       child: customButton(context, "Save"),
                     )

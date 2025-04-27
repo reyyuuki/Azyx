@@ -14,7 +14,7 @@ List<CarousaleData> getCarousaleData(
             id: d.id!,
             image: d.image!,
             extraData: d.rating!,
-            title: d.tilte!,
+            title: d.title!,
             other: d.progress.toString());
       case CarousaleVarient.regular:
         final d = e as Anime;
@@ -30,7 +30,7 @@ List<CarousaleData> getCarousaleData(
             id: d.id!,
             image: d.image!,
             extraData: d.rating!,
-            title: d.tilte!,
+            title: d.title!,
             other: d.progress.toString());
     }
   }).toList();

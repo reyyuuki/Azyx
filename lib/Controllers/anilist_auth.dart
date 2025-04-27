@@ -215,6 +215,7 @@ class AnilistAuth extends GetxController {
                     .map((entry) => UserAnime.fromJson(entry)))
                 .toList(),
           );
+          log("test: ${lists.toString()}");
         } else {
           log('Unexpected response structure: ${response.body}');
         }
@@ -295,10 +296,12 @@ class AnilistAuth extends GetxController {
             data['data']['MediaListCollection'] != null) {
           final lists =
               data['data']['MediaListCollection']['lists'] as List<dynamic>;
+          userSepratedMangaList.value = UserListsModel.fromJson(lists);
           userMangaList.assignAll(lists
               .expand((list) => (list['entries'] as List<dynamic>)
                   .map((item) => UserAnime.fromJson(item)))
               .toList());
+          log("manga data: $lists");
         } else {
           log('Unexpected response structure: ${response.body}');
         }
@@ -356,6 +359,8 @@ class AnilistAuth extends GetxController {
         }
         averageScore
         status
+        type
+        episodes
       }
     }
     latestReleasing: Page {
@@ -427,6 +432,8 @@ class AnilistAuth extends GetxController {
         }
         averageScore
         status
+        type
+        chapters
       }
     }
     popular: Page {
