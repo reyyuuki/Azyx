@@ -335,7 +335,7 @@ class _WatchSectionState extends State<WatchSection> {
                                         widget.episodelist.value = [];
                                         Navigator.pop(context);
                                         widget.onChanged(item.link!);
-                                        widget.onTitleChanged(item.tilte!);
+                                        widget.onTitleChanged(item.title!);
                                       },
                                       child: AzyXCard(
                                         item: item,

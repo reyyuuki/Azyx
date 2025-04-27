@@ -1,5 +1,3 @@
-import 'package:azyx/Controllers/local_history_controller.dart';
-import 'package:azyx/Controllers/offline_controller.dart';
 import 'package:azyx/Screens/Settings/Pages/theme_setting.dart';
 import 'package:azyx/Screens/Settings/Pages/ui_settings.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
@@ -7,11 +5,10 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import '../../Widgets/common/custom_app_bar.dart';
 
 class SettingScreen extends StatelessWidget {
-  SettingScreen({super.key});
+  const SettingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -118,12 +115,6 @@ class SettingScreen extends StatelessWidget {
           const SizedBox(
             height: 20,
           ),
-          ElevatedButton(
-              onPressed: () {
-                // Hive.box('offline-data').clear();
-                offlineController.loadOfflineData();
-              },
-              child: const AzyXText(text: "Testing"))
         ],
       )),
     );

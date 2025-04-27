@@ -12,7 +12,7 @@ class AnilistTracking extends GetxController {
   // void updateAnimeProgress(AnimeAllData data) {
   //   if (anilistAuthController.userAnimeList.isNotEmpty) {
   //     anime.value = anilistAuthController.userAnimeList.firstWhere(
-  //       (i) => i.tilte == data.title,
+  //       (i) => i.title == data.title,
   //       orElse: () => UserAnime(
   //         id: data.id,
   //         progress: data.number?.toInt(),

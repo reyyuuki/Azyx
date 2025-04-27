@@ -1,8 +1,6 @@
 import 'dart:io';
 
-import 'package:azyx/Models/anime_class.dart';
 import 'package:azyx/Models/carousale_data.dart';
-import 'package:azyx/Models/user_anime.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
 import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
 import 'package:azyx/Widgets/Animation/scale_animation.dart';
@@ -44,23 +42,23 @@ class AnimeScrollableList extends StatelessWidget {
                 return SlideAndScaleAnimation(
                   child: GestureDetector(
                     onTap: () {
-                      isManga ? 
-                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => MangaDetailsScreen(
-                                    smallMedia: item,
-                                    tagg: title + data[index].id.toString(),
-                                    isOffline: false,
-                                  ))) :
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => AnimeDetailsScreen(
-                                    smallMedia: item,
-                                    tagg: title + data[index].id.toString(),
-                                    isOffline: false,
-                                  )));
+                      isManga
+                          ? Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MangaDetailsScreen(
+                                        smallMedia: item,
+                                        tagg: title + data[index].id.toString(),
+                                        isOffline: false,
+                                      )))
+                          : Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => AnimeDetailsScreen(
+                                        smallMedia: item,
+                                        tagg: title + data[index].id.toString(),
+                                        isOffline: false,
+                                      )));
                     },
                     child: ItemCard(
                       item: data[index],
