@@ -1,5 +1,7 @@
+import 'package:azyx/Models/anilist_schedules.dart';
 import 'package:azyx/Models/anilist_search.dart';
 import 'package:azyx/Models/anime_details_data.dart';
+import 'package:azyx/utils/Anilist/anilist_calender.dart';
 import 'package:get/get.dart';
 import 'dart:convert';
 import 'dart:developer';
@@ -9,6 +11,12 @@ final AnilistDataController anilistDataController = Get.find();
 
 class AnilistDataController extends GetxController {
   final String graphqlEndpoint = 'https://graphql.anilist.co';
+  final RxList<AnilistSchedules> anilistSchedules = RxList();
+  @override
+  void onInit() async {
+    super.onInit();
+    await fetchCalendarData(anilistSchedules);
+  }
 
   Future<AnilistMediaData> fetchAnilistAnimeDetails(int animeId,
       {dynamic offlineData}) async {
@@ -348,4 +356,68 @@ class AnilistDataController extends GetxController {
       throw Exception('Failed to search anime: $error');
     }
   }
+
+  // Future<List<AnilistSchedules>> fetchAniListCalendar() async {
+  //   const String url = 'https://graphql.anilist.co';
+  //   const String query = r'''
+  //   query {
+  //     Page(page: 1, perPage: 50) {
+  //       airingSchedules(notYetAired: true, sort: TIME) {
+  //         id
+  //         airingAt
+  //         episode
+  //         media {
+  //           id
+  //           title {
+  //             romaji
+  //             english
+  //             native
+  //           }
+  //           coverImage {
+  //             large
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // ''';
+
+  //   final response = await http.post(
+  //     Uri.parse(url),
+  //     headers: {'Content-Type': 'application/json'},
+  //     body: jsonEncode({'query': query}),
+  //   );
+
+  //   if (response.statusCode == 200) {
+  //     final data = jsonDecode(response.body);
+  //     final List<dynamic> schedules = data['data']['Page']['airingSchedules'];
+
+  //     Map<String, List<Anime>> dateToAnimeList = {};
+
+  //     for (var schedule in schedules) {
+  //       int airingAt = schedule['airingAt'];
+  //       DateTime dateTime =
+  //           DateTime.fromMillisecondsSinceEpoch(airingAt * 1000);
+  //       String formattedDate = DateFormat('EEEE, MMMM d, y').format(dateTime);
+
+  //       var media = schedule['media'];
+
+  //       if (!dateToAnimeList.containsKey(formattedDate)) {
+  //         dateToAnimeList[formattedDate] = [];
+  //       }
+  //       dateToAnimeList[formattedDate]!.add(Anime.fromJson(media));
+  //     }
+
+  //     List<AnilistSchedules> result = dateToAnimeList.entries.map((entry) {
+  //       return AnilistSchedules(
+  //         date: entry.key,
+  //         animeList: entry.value,
+  //       );
+  //     }).toList();
+
+  //     return result;
+  //   } else {
+  //     throw Exception('Failed to fetch AniList calendar');
+  //   }
+  // }
 }

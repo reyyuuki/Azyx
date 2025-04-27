@@ -1,5 +1,6 @@
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Screens/AI/ai_recommendations_page.dart';
+import 'package:azyx/Screens/Home/Calender/calender.dart';
 import 'package:azyx/Screens/Home/UserLists/user_lists.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
@@ -391,7 +392,9 @@ class HomeScreen extends StatelessWidget {
                             color: Colors.transparent,
                             child: InkWell(
                               borderRadius: BorderRadius.circular(20),
-                              onTap: () {},
+                              onTap: () {
+                                Get.to(() => const CalenderPage());
+                              },
                               child: const Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 16),
                                 child: Center(

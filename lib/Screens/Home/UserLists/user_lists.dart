@@ -48,6 +48,7 @@ class _UserListScreenState extends State<UserListPage>
           ontap: () {
             filterCategories.value = filterCategories.reversed.toList();
           },
+          subtitle: "Continue Where You Left Off",
           title: widget.isManga
               ? "${anilistAuthController.userData.value.name}'s MangaList"
               : "${anilistAuthController.userData.value.name}'s AnimeList"),
@@ -120,8 +121,13 @@ class _UserListScreenState extends State<UserListPage>
 
 class ListAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
+  final String subtitle;
   final VoidCallback ontap;
-  const ListAppBar({super.key, required this.title, required this.ontap});
+  const ListAppBar(
+      {super.key,
+      required this.title,
+      required this.ontap,
+      required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +163,7 @@ class ListAppBar extends StatelessWidget implements PreferredSizeWidget {
             fontSize: 18,
           ),
           AzyXText(
-            text: "Continue Where You Left Off",
+            text: subtitle,
             color: Theme.of(context).colorScheme.primary,
             fontVariant: FontVariant.bold,
             fontSize: 12,
