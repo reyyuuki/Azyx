@@ -1,6 +1,4 @@
 import 'dart:developer';
-
-import 'package:azyx/Models/anime_class.dart';
 import 'package:azyx/Models/user_anime.dart';
 import 'package:get/get.dart';
 
@@ -18,13 +16,11 @@ class UserListsModel {
     final model = UserListsModel();
 
     for (var item in jsonList) {
-      final status = item['status'];
       final entries = item['entries'] as List<dynamic>?;
-
       if (entries == null) continue;
       for (var entry in entries) {
         final anime = UserAnime.fromJson(entry);
-        log("check: $entry");
+        final status = entry['status'];
         switch (status) {
           case 'CURRENT':
             model.currentlyWatching.add(anime);

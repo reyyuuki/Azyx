@@ -1,5 +1,5 @@
 class UserAnime {
-  String? tilte;
+  String? title;
   String? image;
   String? status;
   String? rating;
@@ -11,7 +11,7 @@ class UserAnime {
   UserAnime(
       {this.id,
       this.image,
-      this.tilte,
+      this.title,
       this.rating,
       this.status,
       this.progress,
@@ -21,13 +21,13 @@ class UserAnime {
   factory UserAnime.fromJson(Map<String, dynamic> data) {
     return UserAnime(
         id: data['media']['id'],
-        tilte: data['media']['title']?['english'] ??
+        title: data['media']['title']?['english'] ??
             data['media']['title']?['romaji'] ??
             "Unknown",
         image: data['media']['coverImage']['large'],
         rating: ((data['media']['averageScore'] / 10) ?? 1).toString(),
         progress: data['progress'],
-        episodes: data['media']['epiosdes'],
+        episodes: data['media']['episodes'] ?? data['media']['chapters'],
         score: data['score'],
         status: data['status']);
   }
