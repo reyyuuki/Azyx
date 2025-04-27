@@ -6,7 +6,14 @@ import 'package:get/get.dart';
 class CustomAppBar extends StatelessWidget {
   final String title;
   final IconData icon;
-  const CustomAppBar({super.key, required this.title, required this.icon});
+  final double? size;
+  final VoidCallback? ontap;
+  const CustomAppBar(
+      {super.key,
+      required this.title,
+      required this.icon,
+      this.size,
+      this.ontap});
 
   @override
   Widget build(BuildContext context) {
@@ -29,11 +36,14 @@ class CustomAppBar extends StatelessWidget {
               AzyXText(
                 text: title,
                 fontVariant: FontVariant.bold,
-                fontSize: 25,
+                fontSize: size ?? 25,
               ),
-              Icon(
-                icon,
-                size: 35,
+              GestureDetector(
+                onTap: ontap,
+                child: Icon(
+                  icon,
+                  size: 35,
+                ),
               )
             ],
           ),
