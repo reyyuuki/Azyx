@@ -322,7 +322,7 @@ class _WatchSectionState extends State<ReadSection> {
                                             .toJson()['chapters']
                                             .reversed
                                             .toList());
-                                        widget.onTitleChanged(item.tilte!);
+                                        widget.onTitleChanged(item.title!);
                                       },
                                       child: AzyXCard(
                                         item: item,
