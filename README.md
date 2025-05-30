@@ -2,11 +2,10 @@
     <img src='assets/images/icon.jpg' alt='AzyX Icon' style="border-radius: 50px; height: 300px; width: 300px;"/>
     <h1 style="font-size:2rem; font-weight:bold;">AzyX</h1>
   <a href="https://github.com/reyyuuki/Azyx/releases"/>
-    <img src="https://img.shields.io/github/downloads/reyyuuki/azyx/total.svg?color=white&labelColor=purple&style=for-the-badge" alt="Total Downloads"/>
-  </a>
+    <img src="https://img.shields.io/github/downloads/reyyuuki/azyx/total.svg?color=white&labelColor=purple&style=for-the-badge" alt="Total Downloads"/></a>
+    
   <a href="https://github.com/reyyuuki/Azyx/releases/latest">
-    <img src="https://img.shields.io/github/v/release/reyyuuki/Azyx?color=white&labelColor=purple&style=for-the-badge" alt="Latest Release"/>
-  </a>
+    <img src="https://img.shields.io/github/v/release/reyyuuki/Azyx?color=white&labelColor=purple&style=for-the-badge" alt="Latest Release"/></a>
   <a href="https://github.com/reyyuuki/Azyx/stargazers">
     <img src="https://img.shields.io/github/stars/reyyuuki/Azyx?color=white&labelColor=purple&style=for-the-badge" alt="GitHub Stars"/>
   </a>
