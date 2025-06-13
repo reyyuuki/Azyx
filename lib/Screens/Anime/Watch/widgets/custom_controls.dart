@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/slider_bar.dart';
@@ -44,11 +46,15 @@ class _CustomControlsState extends State<CustomControls> {
     listners();
   }
 
+  Timer? _positionUpdateTimer;
+  Duration _lastPosition = Duration.zero;
+
   void listners() {
     if (mounted) {
       widget.player.stream.playing.listen((p) {
         isPlaying.value = p;
       });
+
       widget.player.stream.buffering.listen((b) {
         isBuffering.value = b;
       });
@@ -56,13 +62,31 @@ class _CustomControlsState extends State<CustomControls> {
       widget.player.stream.buffer.listen((d) {
         buffered.value = d;
       });
+
       widget.player.stream.position.listen((p) {
-        widget.position.value = p;
+        if ((p - _lastPosition).abs().inSeconds >= 1) {
+          _lastPosition = p;
+
+          _positionUpdateTimer?.cancel();
+
+          _positionUpdateTimer = Timer(const Duration(milliseconds: 100), () {
+            if (mounted) {
+              widget.position.value = p;
+            }
+          });
+        }
       });
+
       widget.player.stream.duration.listen((d) {
         widget.duration.value = d;
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _positionUpdateTimer?.cancel();
+    super.dispose();
   }
 
   Widget buildIconButton(
@@ -203,16 +227,18 @@ class _CustomControlsState extends State<CustomControls> {
                 Row(
                   children: [
                     Obx(() => AzyXText(
-                         text:  getFormattedTime(widget.position.value.inSeconds),
-                         fontVariant: FontVariant.bold,
-                              color: Theme.of(context).colorScheme.primary,
+                          text:
+                              getFormattedTime(widget.position.value.inSeconds),
+                          fontVariant: FontVariant.bold,
+                          color: Theme.of(context).colorScheme.primary,
                         )),
                     const AzyXText(
                       text: ' / ',
-                     fontVariant: FontVariant.bold,
+                      fontVariant: FontVariant.bold,
                     ),
                     Obx(() => AzyXText(
-                        text:   getFormattedTime(widget.duration.value.inSeconds),
+                          text:
+                              getFormattedTime(widget.duration.value.inSeconds),
                           fontVariant: FontVariant.bold,
                         ))
                   ],
@@ -240,7 +266,6 @@ class _CustomControlsState extends State<CustomControls> {
                         },
                         isLocked: widget.isControlsLocked(),
                         onChanged: (value) {
-                          widget.player.pause();
                           widget.position.value =
                               Duration(seconds: value.toInt());
                         }),
