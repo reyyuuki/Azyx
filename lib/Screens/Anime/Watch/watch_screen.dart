@@ -77,7 +77,28 @@ class _WatchScreenState extends State<WatchScreen> with WidgetsBindingObserver {
     controller = VideoController(player);
     if (mounted) {
       intializeData();
-      player.open(Media(widget.playerData.url!));
+      widget.playerData.episodeUrls!.forEach(
+        (element) {
+          log("Headers: ${element.headers} / ${widget.playerData.source!.baseUrl!}");
+        },
+      );
+      log("Headers: ${widget.playerData.episodeUrls!.first.headers} / ${widget.playerData.source!.baseUrl!}");
+      player.open(
+        Media(
+          widget.playerData.url!,
+          httpHeaders: {
+            'Referer':
+                widget.playerData.episodeUrls!.first.headers!['Referer'] ??
+                    widget.playerData.source!.baseUrl!,
+            'Origin': widget.playerData.episodeUrls!.first.headers!['Origin'] ??
+                widget.playerData.source!.baseUrl!,
+            'User-Agent': widget
+                    .playerData.episodeUrls!.first.headers!['user-agent'] ??
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          },
+        ),
+      );
+
       _handleVolumeAndBrightness();
       updateTimer = Timer.periodic(
           const Duration(minutes: 1), (timer) => localHistoryEntry());
@@ -91,6 +112,7 @@ class _WatchScreenState extends State<WatchScreen> with WidgetsBindingObserver {
         totalDuration: totalDuration.value,
         currentTime: position.value,
         mediaId: widget.playerData.id,
+        link: widget.playerData.url,
         lastTime:
             Duration(seconds: DateTime.now().microsecondsSinceEpoch ~/ 1000));
     localHistoryController.addToWatchingHistory(localHistoryData.value);
@@ -265,7 +287,7 @@ class _WatchScreenState extends State<WatchScreen> with WidgetsBindingObserver {
             alignment: Alignment.topLeft,
             child: AzyXText(
               text: widget.playerData.title!,
-              color: Color.fromARGB(255, 190, 190, 190),
+              color: const Color.fromARGB(255, 190, 190, 190),
               fontSize: 13,
               overflow: TextOverflow.ellipsis,
               maxLines: 1,

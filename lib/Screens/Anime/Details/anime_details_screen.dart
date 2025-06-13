@@ -253,6 +253,7 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
                           onChanged: (value) {
                             totalEpisodes.value = '??';
                             getEpisodes(value, selectedSource.value);
+                            _extenstionError.value = false;
                           },
                           onTitleChanged: (value) {
                             animeTitle.value = value;
