@@ -59,6 +59,7 @@ class EpisodesList extends StatelessWidget {
   ) {
     return GestureDetector(
       onTap: () async {
+        log("Selected URL: $url");
         Navigator.push(
             context,
             MaterialPageRoute(

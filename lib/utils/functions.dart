@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:azyx/Models/anime_class.dart';
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Models/user_anime.dart';
@@ -34,4 +36,19 @@ List<CarousaleData> getCarousaleData(
             other: d.progress.toString());
     }
   }).toList();
+}
+
+extension Utility on String {
+  String ellipsis([args]) {
+    log(args.toString());
+    if (args.length > 2) {
+      throw Exception('You can only pass 2 max params');
+    }
+
+    if (args.length == 1) {
+      return substring(0, args[0]);
+    } else {
+      return substring(args[0], args[1]);
+    }
+  }
 }
