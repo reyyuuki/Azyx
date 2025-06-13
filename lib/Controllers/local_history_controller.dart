@@ -10,11 +10,11 @@ class LocalHistoryController extends GetxController {
   final RxList<LocalHistory> animeWatchingHistory = RxList();
   final RxList<LocalHistory> mangaReadingHistory = RxList();
 
-  // @override
-  // void onInit() {
-  //   super.onInit();
-  //   // loadfromHive();
-  // }
+  @override
+  void onInit() {
+    super.onInit();
+    loadfromHive();
+  }
 
   void addToWatchingHistory(LocalHistory data) {
     final index =
@@ -45,7 +45,7 @@ class LocalHistoryController extends GetxController {
           .map((i) => LocalHistory.fromJson(i))
           .toList());
     }
-    log(animeWatchingHistory.length.toString());
+    log(storedAnimeWatchingHistory.toString());
   }
 
   void removeFromWatchingHistory(int mediaId) {
