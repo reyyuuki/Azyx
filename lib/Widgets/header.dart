@@ -40,7 +40,7 @@ class Header extends StatelessWidget {
             ],
           ),
           Obx(
-            () => GestureDetector(
+            () => InkWell(
               onTap: () {
                 showBottomSheet(context);
               },
@@ -132,7 +132,7 @@ class Header extends StatelessWidget {
                     ],
                   ),
                 ),
-                GestureDetector(
+                InkWell(
                     onTap: () {
                       Get.back();
                       Navigator.push(
@@ -160,7 +160,7 @@ class Header extends StatelessWidget {
                       );
                     },
                     child: tile("Extensions", Icons.extension)),
-                GestureDetector(
+                InkWell(
                     onTap: () {
                       Get.back();
                       Navigator.push(
@@ -189,13 +189,13 @@ class Header extends StatelessWidget {
                     },
                     child: tile("Settings", Icons.settings)),
                 anilistAuthController.userData.value.name != null
-                    ? GestureDetector(
+                    ? InkWell(
                         onTap: () {
                           anilistAuthController.logout();
                           Get.back();
                         },
                         child: tile("LogOut", Icons.logout))
-                    : GestureDetector(
+                    : InkWell(
                         onTap: () {
                           anilistAuthController.login();
                           Get.back();

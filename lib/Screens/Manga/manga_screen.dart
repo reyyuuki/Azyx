@@ -41,7 +41,7 @@ class MangaScreen extends StatelessWidget {
                     height: 10,
                   ),
                   MainCarousale(
-                    isManga: true,
+                      isManga: true,
                       data: anilistAuthController
                           .mangaData.value.spotLightAnimes!),
                   const SizedBox(
@@ -54,7 +54,7 @@ class MangaScreen extends StatelessWidget {
                     animeList:
                         anilistAuthController.mangaData.value.popularAnimes!,
                     isManga: true,
-                    title: "Popular Animes",
+                    title: "Popular Mangas",
                   ),
                   AnimeScrollableList(
                     isManga: true,
