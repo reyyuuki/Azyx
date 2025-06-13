@@ -467,23 +467,23 @@ class AnilistAuth extends GetxController {
       }
     }
     recentlyCompleted: Page {
-      media(type: MANGA, status: FINISHED, sort: END_DATE_DESC) {
-        id
-        title {
-          english
-          romaji
-          native
-        }
-        chapters
-        coverImage {
-          large
-        }
-        averageScore
-        status
+    media(type: MANGA, status: FINISHED, sort: END_DATE_DESC, isAdult: false) {
+      id
+      title {
+        english
+        romaji
+        native
       }
+      chapters
+      coverImage {
+        large
+      }
+      averageScore
+      status
     }
   }
-  ''';
+}
+''';
 
     final response = await http.post(
       Uri.parse(url),
