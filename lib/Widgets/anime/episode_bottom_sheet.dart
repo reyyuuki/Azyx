@@ -28,11 +28,11 @@ class EpisodeBottomSheet extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         children: [
           AzyXText(
-           text: "Select Quality",
-          
-                fontSize: 25,
-                fontVariant: FontVariant.bold,
-                color: Theme.of(context).colorScheme.primary,
+            text: "Select Quality",
+            fontSize: 25,
+            fontVariant: FontVariant.bold,
+            color: Theme.of(context).colorScheme.primary,
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 15),
           Obx(() => hasError.value
