@@ -1,13 +1,14 @@
 import 'dart:developer';
 
+import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Models/anime_all_data.dart';
 import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Models/user_anime.dart';
-import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/utils/constants.dart';
+import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,25 +23,29 @@ class AnilistAddToListController extends GetxController {
   TextEditingController? controller;
 
   void findAnime(AnilistMediaData data) {
-    if (anilistAuthController.userAnimeList.isNotEmpty) {
-      anime.value = anilistAuthController.userAnimeList.firstWhere(
+    for (var i in serviceHandler.userAnimeList.value.allList) {
+      Utils.log(i.id.toString());
+    }
+    if (serviceHandler.userAnimeList.value.allList.isNotEmpty) {
+      log("id:${serviceHandler.userAnimeList.value.allList.first.id} / ${data.id}");
+      anime.value = serviceHandler.userAnimeList.value.allList.firstWhere(
         (i) => i.id == data.id!,
         orElse: () {
           return UserAnime(
               id: data.id,
-              progress: 0,
+              progress: 1,
               episodes: data.episodes,
               title: data.title);
         },
       );
-      animeStatus.value = anime.value.status ?? "";
+      animeStatus.value = returnConvertedStatus(anime.value.status ?? '');
     }
     log("status: ${anime.value.status}");
   }
 
   void findManga(AnilistMediaData data) {
-    if (anilistAuthController.userMangaList.isNotEmpty) {
-      manga.value = anilistAuthController.userMangaList.firstWhere(
+    if (serviceHandler.userMangaList.value.allList.isNotEmpty) {
+      manga.value = serviceHandler.userMangaList.value.allList.firstWhere(
         (i) => i.id == data.id,
         orElse: () {
           return UserAnime(
@@ -50,7 +55,7 @@ class AnilistAddToListController extends GetxController {
               title: data.title);
         },
       );
-      mangaStatus.value = manga.value.status ?? '';
+      mangaStatus.value = returnConvertedStatus(manga.value.status ?? '');
       log("status: ${manga.value.status}");
     } else {
       log("nothing found");
@@ -58,9 +63,9 @@ class AnilistAddToListController extends GetxController {
   }
 
   void updateAnimeProgress(AnimeAllData data, int number) {
-    if (anilistAuthController.userAnimeList.isNotEmpty) {
+    if (serviceHandler.userAnimeList.value.allList.isNotEmpty) {
       try {
-        anime.value = anilistAuthController.userAnimeList.firstWhere(
+        anime.value = serviceHandler.userAnimeList.value.allList.firstWhere(
           (i) => i.title == data.title,
           orElse: () {
             log("No existing anime found, creating new UserAnime entry.");
@@ -72,11 +77,13 @@ class AnilistAddToListController extends GetxController {
             );
           },
         );
-        anilistAuthController.addToAniList(
-          mediaId: anime.value.id!,
-          progress: number,
-          status: anime.value.status,
-        );
+        serviceHandler.updateListEntry(
+            UserAnime(
+              id: anime.value.id!,
+              progress: number,
+              status: anime.value.status,
+            ),
+            isAnime: true);
       } catch (e) {
         log("Error in updateAnimeProgress: $e");
       }
@@ -210,11 +217,13 @@ class AnilistAddToListController extends GetxController {
                     GestureDetector(
                       onTap: () {
                         animeStatus.value = anime.value.status ?? "CURRENT";
-                        anilistAuthController.addToAniList(
-                            mediaId: anime.value.id!,
-                            status: animeStatus.value,
-                            score: anime.value.score?.toDouble() ?? 5.0,
-                            progress: anime.value.progress);
+                        serviceHandler.updateListEntry(
+                            UserAnime(
+                                id: anime.value.id!,
+                                status: animeStatus.value,
+                                score: anime.value.score ?? 5,
+                                progress: anime.value.progress),
+                            isAnime: true);
                         Navigator.pop(context);
                         log(anime.value.progress.toString());
                         azyxSnackBar("Sucessfully added ${anime.value.title}");
@@ -265,7 +274,8 @@ class AnilistAddToListController extends GetxController {
                   height: 30,
                 ),
                 DropdownButtonFormField<String>(
-                  value: manga.value.status ?? "CURRENT",
+                  value:
+                      mangaStatus.value.isEmpty ? "CURRENT" : mangaStatus.value,
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: 'Choose Status',
@@ -355,11 +365,13 @@ class AnilistAddToListController extends GetxController {
                     GestureDetector(
                       onTap: () {
                         mangaStatus.value = manga.value.status ?? 'CURRENT';
-                        anilistAuthController.addToAniList(
-                            mediaId: manga.value.id!,
-                            status: manga.value.status,
-                            score: manga.value.score?.toDouble() ?? 5.0,
-                            progress: manga.value.progress ?? 0);
+                        serviceHandler.updateListEntry(
+                            UserAnime(
+                                id: manga.value.id!,
+                                status: manga.value.status,
+                                score: manga.value.score ?? 5,
+                                progress: manga.value.progress ?? 0),
+                            isAnime: false);
                         Navigator.pop(context);
                         azyxSnackBar("Sucessfully added ${manga.value.title}");
                       },
@@ -402,7 +414,7 @@ class AnilistAddToListController extends GetxController {
         controller: controller,
         onChanged: (value) {
           if (value.isNotEmpty) {
-            int number = int.tryParse(value) ?? 0;
+            int number = int.tryParse(value) ?? 1;
             onChanged(number);
             if (number > max) {
               controller.value = TextEditingValue(
