@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 import 'dart:math' as max;
+import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Models/anime_all_data.dart';
 import 'package:azyx/Models/local_history.dart';
@@ -9,6 +11,7 @@ import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/local_history_controller.dart';
 import 'package:azyx/Functions/string_extensions.dart';
+import 'package:azyx/Models/user_anime.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/bottom_sheets.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/custom_controls.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/episode_list_drawer.dart';
@@ -18,6 +21,8 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/api/Mangayomi/Search/getVideo.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
+import 'package:azyx/utils/color_profiler.dart';
+import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -73,27 +78,28 @@ class _WatchScreenState extends State<WatchScreen> with WidgetsBindingObserver {
       DeviceOrientation.landscapeRight,
       DeviceOrientation.landscapeLeft,
     ]);
+    updateEntry();
     player = Player();
-    controller = VideoController(player);
+    controller = VideoController(player,
+        configuration: const VideoControllerConfiguration(
+            androidAttachSurfaceAfterVideoParameters: true));
     if (mounted) {
       intializeData();
-      widget.playerData.episodeUrls!.forEach(
-        (element) {
-          log("Headers: ${element.headers} / ${widget.playerData.source!.baseUrl!}");
-        },
-      );
+      for (var element in widget.playerData.episodeUrls!) {
+        log("Headers: ${element.headers} / ${widget.playerData.source!.baseUrl!}");
+      }
       log("Headers: ${widget.playerData.episodeUrls!.first.headers} / ${widget.playerData.source!.baseUrl!}");
       player.open(
         Media(
           widget.playerData.url!,
           httpHeaders: {
             'Referer':
-                widget.playerData.episodeUrls!.first.headers!['Referer'] ??
+                widget.playerData.episodeUrls!.first.headers?['Referer'] ??
                     widget.playerData.source!.baseUrl!,
-            'Origin': widget.playerData.episodeUrls!.first.headers!['Origin'] ??
+            'Origin': widget.playerData.episodeUrls!.first.headers?['Origin'] ??
                 widget.playerData.source!.baseUrl!,
             'User-Agent': widget
-                    .playerData.episodeUrls!.first.headers!['user-agent'] ??
+                    .playerData.episodeUrls!.first.headers?['user-agent'] ??
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
           },
         ),
@@ -118,21 +124,29 @@ class _WatchScreenState extends State<WatchScreen> with WidgetsBindingObserver {
     localHistoryController.addToWatchingHistory(localHistoryData.value);
   }
 
+  void updateEntry() async {
+    await serviceHandler.updateListEntry(anilistAddToListController.anime.value,
+        isAnime: true);
+  }
+
   Future<void> _handleVolumeAndBrightness() async {
-    VolumeController().showSystemUI = false;
-    _volumeValue.value = await VolumeController().getVolume();
-    VolumeController().listener((value) {
+    final volumeController = VolumeController.instance;
+
+    volumeController.showSystemUI = false;
+    _volumeValue.value = await volumeController.getVolume();
+    volumeController.addListener((value) {
       if (mounted && !_volumeInterceptEventStream.value) {
         _volumeValue.value = value;
       }
     });
-
-    _brightnessValue.value = await ScreenBrightness().current;
-    ScreenBrightness().onCurrentBrightnessChanged.listen((value) {
-      if (mounted) {
-        _brightnessValue.value = value;
-      }
-    });
+    if (Platform.isAndroid || Platform.isIOS) {
+      _brightnessValue.value = await ScreenBrightness.instance.current;
+      ScreenBrightness.instance.onCurrentBrightnessChanged.listen((value) {
+        if (mounted) {
+          _brightnessValue.value = value;
+        }
+      });
+    }
   }
 
   void intializeData() {
@@ -173,6 +187,10 @@ class _WatchScreenState extends State<WatchScreen> with WidgetsBindingObserver {
     }
   }
 
+  final currentVisualProfile = 'natural'.obs;
+
+  void applySavedProfile() => ColorProfileManager()
+      .applyColorProfile(currentVisualProfile.value, player);
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -225,6 +243,26 @@ class _WatchScreenState extends State<WatchScreen> with WidgetsBindingObserver {
     );
   }
 
+  void showColorProfileSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ColorProfileBottomSheet(
+        currentProfile: currentVisualProfile.value,
+        player: player,
+        onProfileSelected: (profile) {
+          Utils.log('Selected profile: $profile');
+          currentVisualProfile.value = profile;
+          // settings.preferences.put('currentVisualProfile', profile);
+        },
+        onCustomSettingsChanged: (settings) {
+          Utils.log('Custom settings applied: $settings');
+        },
+      ),
+    );
+  }
+
   AzyXContainer topRightControls() {
     return AzyXContainer(
       decoration: BoxDecoration(
@@ -244,7 +282,17 @@ class _WatchScreenState extends State<WatchScreen> with WidgetsBindingObserver {
           ),
           IconButton(
             onPressed: () {
-              showSubtitleSheet(animeData, selectedSbt);
+              showColorProfileSheet(context);
+            },
+            icon: const Icon(
+              Broken.blur,
+              color: Colors.white,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              showSubtitleSheet(animeData, selectedSbt, context,
+                  player: player);
             },
             icon: const Icon(
               Iconsax.subtitle_bold,
@@ -357,32 +405,34 @@ class _WatchScreenState extends State<WatchScreen> with WidgetsBindingObserver {
               color: Colors.white,
             ),
           ),
-          isControlsLocked.value
-              ? const SizedBox.shrink()
-              : IconButton(
-                  onPressed: () {
-                    isPotraitOrientaion.value = false;
-                    SystemChrome.setPreferredOrientations(
-                        [DeviceOrientation.landscapeLeft]);
-                  },
-                  icon: const Icon(
-                    Icons.screen_rotation,
-                    color: Colors.white,
+          if (Platform.isAndroid || Platform.isIOS)
+            isControlsLocked.value
+                ? const SizedBox.shrink()
+                : IconButton(
+                    onPressed: () {
+                      isPotraitOrientaion.value = false;
+                      SystemChrome.setPreferredOrientations(
+                          [DeviceOrientation.landscapeLeft]);
+                    },
+                    icon: const Icon(
+                      Icons.screen_rotation,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-          isControlsLocked.value
-              ? const SizedBox.shrink()
-              : IconButton(
-                  onPressed: () {
-                    isPotraitOrientaion.value = true;
-                    SystemChrome.setPreferredOrientations(
-                        [DeviceOrientation.portraitUp]);
-                  },
-                  icon: const Icon(
-                    Icons.phone_android,
-                    color: Colors.white,
+          if (Platform.isAndroid || Platform.isIOS)
+            isControlsLocked.value
+                ? const SizedBox.shrink()
+                : IconButton(
+                    onPressed: () {
+                      isPotraitOrientaion.value = true;
+                      SystemChrome.setPreferredOrientations(
+                          [DeviceOrientation.portraitUp]);
+                    },
+                    icon: const Icon(
+                      Icons.phone_android,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
           isControlsLocked.value
               ? const SizedBox.shrink()
               : IconButton(
@@ -609,7 +659,7 @@ class _WatchScreenState extends State<WatchScreen> with WidgetsBindingObserver {
 
   Future<void> setVolume(double value) async {
     try {
-      VolumeController().setVolume(value);
+      VolumeController.instance.setVolume(value);
     } catch (_) {}
     _volumeValue.value = value;
     _volumeIndicator.value = true;
@@ -625,15 +675,19 @@ class _WatchScreenState extends State<WatchScreen> with WidgetsBindingObserver {
 
   Future<void> setBrightness(double value) async {
     try {
-      await ScreenBrightness().setScreenBrightness(value);
-    } catch (_) {}
-    _brightnessIndicator.value = true;
-    _brightnessTimer?.cancel();
-    _brightnessTimer = Timer(const Duration(milliseconds: 200), () {
-      if (mounted) {
-        _brightnessIndicator.value = false;
+      if (Platform.isAndroid || Platform.isIOS) {
+        await ScreenBrightness.instance.setScreenBrightness(value);
       }
-    });
+    } catch (_) {}
+    if (Platform.isAndroid || Platform.isIOS) {
+      _brightnessIndicator.value = true;
+      _brightnessTimer?.cancel();
+      _brightnessTimer = Timer(const Duration(milliseconds: 200), () {
+        if (mounted) {
+          _brightnessIndicator.value = false;
+        }
+      });
+    }
   }
 
   final Rx<bool> isPressed = false.obs;
