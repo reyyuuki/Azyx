@@ -70,19 +70,17 @@ class _BrowseScreenState extends ConsumerState<ExtensionScreen>
             actions: [
               IconButton(
                   onPressed: () {
-                    "https://kodjodevf.github.io/mangayomi-extensions/anime_index.json";
+                    "https://miraienoki.github.io/anymex-extensions/anime_index.json";
 
-                    "https://kodjodevf.github.io/mangayomi-extensions/index.json";
+                    "https://miraienoki.github.io/anymex-extensions/index.json";
                     showBottom(context, (name) {});
                   },
                   icon: const Icon(Ionicons.logo_github))
             ],
             leading: IconButton(
                 onPressed: () {
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>  HomePage()));
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => HomePage()));
                 },
                 icon: const Icon(Broken.arrow_left_2)),
             iconTheme: IconThemeData(color: theme.primary),
