@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Models/wrong_title_search.dart';
 import 'package:azyx/Screens/Manga/Details/tabs/widgets/chapter_item.dart';
-import 'package:azyx/Screens/Manga/Read/read.dart';
+import 'package:azyx/Screens/Manga/Read/view/read.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
@@ -28,6 +28,7 @@ class ReadSection extends StatefulWidget {
   final Rx<String> totalEpisodes;
   final RxList<Chapter> chaptersList;
   final Rx<bool> hasError;
+  final Rx<String> syncId;
   Function(List<Map<String, dynamic>>) onChanged;
   Function(String) onTitleChanged;
   Function(Source) onSourceChanged;
@@ -44,6 +45,7 @@ class ReadSection extends StatefulWidget {
       required this.onChanged,
       required this.onTitleChanged,
       required this.onSourceChanged,
+      required this.syncId,
       required this.animeTitle});
 
   @override
@@ -197,7 +199,8 @@ class _WatchSectionState extends State<ReadSection> {
         ),
         SearchBox(
           name: "Search Chapter",
-          ontap: (value) {
+          ontap: () {},
+          onChanged: (value) {
             handleEpisodes(value);
           },
         ),
@@ -213,6 +216,7 @@ class _WatchSectionState extends State<ReadSection> {
                         Navigator.push(context,
                             MaterialPageRoute(builder: (context) {
                           return ReadPage(
+                              syncId: widget.syncId.value,
                               source: widget.selectedSource.value,
                               chapterList: widget.chaptersList,
                               link: ch.link!,
