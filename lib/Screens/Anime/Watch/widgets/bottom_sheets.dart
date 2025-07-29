@@ -2,18 +2,21 @@ import 'package:azyx/Models/anime_all_data.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
+import 'package:azyx/utils/utils.dart';
 import 'package:checkmark/checkmark.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 
-void showSubtitleSheet(Rx<AnimeAllData> animeData, Rx<String> selectedSbt) {
+void showSubtitleSheet(
+    Rx<AnimeAllData> animeData, Rx<String> selectedSbt, BuildContext context,
+    {required Player player}) {
   showModalBottomSheet(
       isScrollControlled: true,
       enableDrag: true,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
-      context: Get.context!,
+      context: context,
       builder: (context) {
         return animeData.value.episodeUrls!.first.subtitles == null
             ? AzyXContainer(
@@ -87,7 +90,10 @@ void showSubtitleSheet(Rx<AnimeAllData> animeData, Rx<String> selectedSbt) {
                       height: 10,
                     ),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        selectedSbt.value = '';
+                        player.setSubtitleTrack(SubtitleTrack.no());
+                      },
                       child: AzyXContainer(
                         margin: const EdgeInsets.all(10),
                         padding: const EdgeInsets.all(10),
@@ -96,15 +102,19 @@ void showSubtitleSheet(Rx<AnimeAllData> animeData, Rx<String> selectedSbt) {
                                 ? Theme.of(context)
                                     .colorScheme
                                     .onPrimaryContainer
-                                : Colors.transparent,
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .secondaryContainer,
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                                 width: 0.4,
                                 color:
                                     Theme.of(context).colorScheme.secondary)),
-                        child: const AzyXText(
+                        child: AzyXText(
                           text: "None",
-                          color: Colors.black,
+                          color: selectedSbt.value == ''
+                              ? Colors.black
+                              : Colors.white,
                           fontVariant: FontVariant.bold,
                           fontSize: 18,
                           textAlign: TextAlign.center,
@@ -112,37 +122,53 @@ void showSubtitleSheet(Rx<AnimeAllData> animeData, Rx<String> selectedSbt) {
                       ),
                     ),
                     SingleChildScrollView(
-                      child: ListView.builder(
-                          shrinkWrap: true,
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: animeData
-                              .value.episodeUrls!.first.subtitles!.length,
-                          itemBuilder: (context, index) {
-                            final item = animeData
-                                .value.episodeUrls!.first.subtitles![index];
-                            return GestureDetector(
-                              onTap: () {},
-                              child: AzyXContainer(
-                                margin: const EdgeInsets.all(10),
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .secondaryContainer,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                        width: 0.4,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .secondary)),
-                                child: AzyXText(
-                                  text: item.label!,
-                                  fontSize: 18,
-                                  textAlign: TextAlign.center,
+                      child: Obx(
+                        () => ListView.builder(
+                            shrinkWrap: true,
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: animeData
+                                .value.episodeUrls!.first.subtitles!.length,
+                            itemBuilder: (context, index) {
+                              final item = animeData
+                                  .value.episodeUrls!.first.subtitles![index];
+                              return GestureDetector(
+                                onTap: () {
+                                  selectedSbt.value = item.label!;
+                                  Utils.log('clecked: ${selectedSbt.value}');
+                                  player.setSubtitleTrack(
+                                      SubtitleTrack.uri(item.file!));
+                                  Get.back();
+                                },
+                                child: AzyXContainer(
+                                  margin: const EdgeInsets.all(10),
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                      color: selectedSbt.value == item.label
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .onPrimaryContainer
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .secondaryContainer,
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          width: 0.4,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .secondary)),
+                                  child: AzyXText(
+                                    text: item.label!,
+                                    fontVariant: FontVariant.bold,
+                                    fontSize: 18,
+                                    textAlign: TextAlign.center,
+                                    color: selectedSbt.value == item.label
+                                        ? Colors.black
+                                        : Colors.white,
+                                  ),
                                 ),
-                              ),
-                            );
-                          }),
+                              );
+                            }),
+                      ),
                     )
                   ],
                 ));

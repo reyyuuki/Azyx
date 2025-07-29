@@ -1,5 +1,6 @@
 // ignore_for_file: inva, invalid_use_of_protected_member
 import 'dart:ui';
+import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Models/offline_item.dart';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
@@ -55,7 +56,7 @@ class MangaAddToList extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10)),
                 child: Row(
                   children: [
-                    anilistAuthController.userData.value.name != null
+                    serviceHandler.userData.value.name != null
                         ? Expanded(
                             child: GestureDetector(
                               onTap: () => anilistAddToListController
@@ -80,8 +81,7 @@ class MangaAddToList extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     anilistAddToListController
-                                                .manga.value.status ==
-                                            null
+                                            .mangaStatus.isEmpty
                                         ? Icon(
                                             Broken.add,
                                             color: Theme.of(context)
@@ -128,7 +128,7 @@ class MangaAddToList extends StatelessWidget {
                       onTap: () {
                         addToLibrary(context);
                       },
-                      child: anilistAuthController.userData.value.name == null
+                      child: serviceHandler.userData.value.name == null
                           ? libraryButton(context, width: Get.width - 50)
                           : libraryButton(context),
                     )

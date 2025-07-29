@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:azyx/Models/anime_details_data.dart';
@@ -15,28 +14,30 @@ class CharactersList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        GradientTitle(title: title),
-        const SizedBox(
-          height: 15,
-        ),
-        SizedBox(
-          height: Platform.isAndroid || Platform.isIOS ? 200 : 270,
-          child: ListView.builder(
-              shrinkWrap: true,
-              physics: const BouncingScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              itemCount: characterList.length,
-              itemBuilder: (context, index) {
-                return SlideAndScaleAnimation(
-                  child: CharacterCard(
-                    item: characterList[index],
-                  ),
-                );
-              }),
-        )
-      ],
-    );
+    return characterList.isEmpty
+        ? const SizedBox.shrink()
+        : Column(
+            children: [
+              GradientTitle(title: title),
+              const SizedBox(
+                height: 15,
+              ),
+              SizedBox(
+                height: Platform.isAndroid || Platform.isIOS ? 200 : 270,
+                child: ListView.builder(
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: characterList.length,
+                    itemBuilder: (context, index) {
+                      return SlideAndScaleAnimation(
+                        child: CharacterCard(
+                          item: characterList[index],
+                        ),
+                      );
+                    }),
+              )
+            ],
+          );
   }
 }

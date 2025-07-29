@@ -1,6 +1,8 @@
 import 'package:azyx/Models/episode_class.dart';
-import 'package:azyx/api/Mangayomi/Eval/dart/model/video.dart';
-import 'package:azyx/api/Mangayomi/Model/Source.dart';
+import 'package:dartotsu_extension_bridge/Mangayomi/Eval/dart/model/video.dart';
+import 'package:dartotsu_extension_bridge/Models/Source.dart';
+// import 'package:azyx/api/Mangayomi/Eval/dart/model/video.dart';
+// import 'package:azyx/api/Mangayomi/Model/Source.dart';
 
 class AnimeAllData {
   String? url;
@@ -33,18 +35,18 @@ class AnimeAllData {
       number: json['number'] as String?,
       id: json['id'] as int?,
       episodeUrls: (json['episodeUrls'] as List<dynamic>?)
-          ?.map((e) => Video.fromJson(e as Map<dynamic, dynamic>))
+          ?.map((e) => Video.fromJson(e as Map<String, dynamic>))
           .toList(),
       episodeList: (json['episodeList'] as List<dynamic>?)
           ?.map((e) => Episode.fromJson(e as Map<dynamic, dynamic>, ""))
           .toList(),
       source: json['source'] != null
-          ? Source.fromJson(json['source'] as Map<dynamic, dynamic>)
+          ? Source.fromJson(json['source'] as Map<String, dynamic>)
           : null,
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<dynamic, dynamic> toJson() {
     return {
       'url': url,
       'episodeTitle': episodeTitle,

@@ -1,6 +1,6 @@
 // ignore_for_file: must_be_immutable
-
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
+import 'package:azyx/Widgets/helper/platform_builder.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +29,13 @@ class CustomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AzyXContainer(
-      margin: const EdgeInsets.fromLTRB(30, 0, 30, 30),
+      margin: EdgeInsets.fromLTRB(
+          getResponsiveSize(context,
+              mobileSize: 15, dektopSize: Get.width * 0.35),
+          0,
+          getResponsiveSize(context,
+              mobileSize: 15, dektopSize: Get.width * 0.35),
+          20),
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainerLowest,

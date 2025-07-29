@@ -1,9 +1,11 @@
-import 'package:azyx/Controllers/anilist_auth.dart';
+import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Extensions/ExtensionScreen.dart';
 import 'package:azyx/Providers/theme_provider.dart';
 import 'package:azyx/Screens/Settings/setting_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
+import 'package:azyx/Widgets/common/services_bottom_sheet.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -26,8 +28,8 @@ class Header extends StatelessWidget {
             children: [
               Obx(
                 () => AzyXText(
-                  text: anilistAuthController.userData.value.name != null
-                      ? anilistAuthController.userData.value.name!
+                  text: serviceHandler.userData.value.name != null
+                      ? serviceHandler.userData.value.name!
                       : "Guest",
                   fontVariant: FontVariant.bold,
                   fontSize: 18,
@@ -50,13 +52,14 @@ class Header extends StatelessWidget {
                   decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surfaceContainer,
                       borderRadius: BorderRadius.circular(50)),
-                  child: anilistAuthController.userData.value.avatar != null
+                  child: serviceHandler.userData.value.avatar != null
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(50),
                           child: CachedNetworkImage(
-                            imageUrl:
-                                anilistAuthController.userData.value.avatar!,
+                            imageUrl: serviceHandler.userData.value.avatar!,
                             fit: BoxFit.cover,
+                            errorWidget: (context, url, _) =>
+                                const Icon(Broken.user),
                           ),
                         )
                       : const Icon(Broken.setting_2)),
@@ -72,25 +75,8 @@ class Header extends StatelessWidget {
         context: context,
         barrierColor: Colors.black.withOpacity(0.4),
         builder: (context) {
-          final bool isDarkMode =
-              Provider.of<ThemeProvider>(context).isDarkMode!;
-          return AzyXContainer(
-            decoration: BoxDecoration(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(20)),
-                gradient: LinearGradient(
-                    colors: isDarkMode
-                        ? [
-                            Theme.of(context).colorScheme.surface.withAlpha(20),
-                            Theme.of(context).colorScheme.primary.withAlpha(90),
-                          ]
-                        : [
-                            Theme.of(context).colorScheme.surface,
-                            Theme.of(context).colorScheme.surface
-                          ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight)),
-            height: 250,
+          return AzyXGradientContainer(
+            height: 300,
             child: Column(
               children: [
                 AzyXContainer(
@@ -101,10 +87,9 @@ class Header extends StatelessWidget {
                     children: [
                       Obx(
                         () => AzyXText(
-                          text:
-                              anilistAuthController.userData.value.name != null
-                                  ? anilistAuthController.userData.value.name!
-                                  : "Guest",
+                          text: serviceHandler.userData.value.name != null
+                              ? serviceHandler.userData.value.name!
+                              : "Guest",
                           fontVariant: FontVariant.bold,
                           fontSize: 18,
                           textAlign: TextAlign.start,
@@ -118,14 +103,15 @@ class Header extends StatelessWidget {
                                   .colorScheme
                                   .surfaceContainer,
                               borderRadius: BorderRadius.circular(50)),
-                          child: anilistAuthController.userData.value.avatar !=
-                                  null
+                          child: serviceHandler.userData.value.avatar != null
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(50),
                                   child: CachedNetworkImage(
-                                    imageUrl: anilistAuthController
-                                        .userData.value.avatar!,
+                                    imageUrl:
+                                        serviceHandler.userData.value.avatar!,
                                     fit: BoxFit.cover,
+                                    errorWidget: (context, url, _) =>
+                                        const Icon(Broken.user),
                                   ),
                                 )
                               : const Icon(Broken.user))),
@@ -163,6 +149,12 @@ class Header extends StatelessWidget {
                 InkWell(
                     onTap: () {
                       Get.back();
+                      ServiceBottomSheet.showServiceBottomSheet(context);
+                    },
+                    child: tile("Service", Icons.sync)),
+                InkWell(
+                    onTap: () {
+                      Get.back();
                       Navigator.push(
                         context,
                         PageRouteBuilder(
@@ -182,22 +174,22 @@ class Header extends StatelessWidget {
                           },
                           pageBuilder:
                               (context, animation, secondaryAnimation) {
-                            return SettingScreen();
+                            return const SettingScreen();
                           },
                         ),
                       );
                     },
                     child: tile("Settings", Icons.settings)),
-                anilistAuthController.userData.value.name != null
+                serviceHandler.userData.value.name != null
                     ? InkWell(
                         onTap: () {
-                          anilistAuthController.logout();
+                          serviceHandler.logout();
                           Get.back();
                         },
                         child: tile("LogOut", Icons.logout))
                     : InkWell(
                         onTap: () {
-                          anilistAuthController.login();
+                          serviceHandler.login();
                           Get.back();
                         },
                         child: tile("Login", Icons.login))

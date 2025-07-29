@@ -212,9 +212,10 @@ class _WatchSectionState extends State<WatchSection> {
               height: 10,
             ),
             SearchBox(
-              ontap: (value) {
+              onChanged: (value) {
                 handleEpisodes(value);
               },
+              ontap: () {},
               name: "Search Episodes",
             ),
             const SizedBox(
@@ -246,11 +247,11 @@ class _WatchSectionState extends State<WatchSection> {
                           )),
           ],
         ),
-        FloaterWidget(
-          title: widget.animeTitle.value,
-          icon: Icons.movie_filter,
-          name: "Watch",
-        )
+        // FloaterWidget(
+        //   title: widget.animeTitle.value,
+        //   icon: Icons.movie_filter,
+        //   name: "Watch",
+        // )
       ],
     );
   }

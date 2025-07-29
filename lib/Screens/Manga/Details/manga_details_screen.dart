@@ -2,7 +2,7 @@
 
 import 'dart:developer';
 
-import 'package:azyx/Models/anime_class.dart';
+import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Models/episode_class.dart';
@@ -21,9 +21,12 @@ import 'package:azyx/api/Mangayomi/Search/get_detail.dart';
 import 'package:azyx/api/Mangayomi/Search/search.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/mapping_helper.dart';
+import 'package:azyx/utils/mapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
+
+import '../../../utils/utils.dart';
 
 class MangaDetailsScreen extends ConsumerStatefulWidget {
   final String tagg;
@@ -57,16 +60,24 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
   late TabController _tabBarController;
   final Rx<String> _anilistError = ''.obs;
   final Rx<bool> _extenstionError = false.obs;
+  final Rx<String> syncId = ''.obs;
   Future<void> loadData() async {
     try {
-      final response = await anilistDataController
-          .fetchAnilistMangaDetails(widget.smallMedia!.id);
+      final response =
+          await serviceHandler.fetchMangaDetails(widget.smallMedia!.id);
       mediaData.value = response;
       isLoading.value = false;
     } catch (e) {
       _anilistError.value = e.toString();
       log("Error while getting data for details: $e");
     }
+  }
+
+  Future<void> _syncMedia() async {
+    final response =
+        await MediaSyncer.mapMediaId(id.value.toString(), isManga: true);
+    syncId.value = response ?? '';
+    Utils.log('MAL ${syncId.value} / ${id.value}');
   }
 
   Future<void> _initExtensions() async {
@@ -147,6 +158,7 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
   void initState() {
     super.initState();
     _tabBarController = TabController(length: 2, vsync: this);
+    _syncMedia();
     _initExtensions();
     convertData();
   }
@@ -241,6 +253,7 @@ class _DetailsScreenState extends ConsumerState<MangaDetailsScreen>
                   () => installedExtensions.isEmpty
                       ? const PlaceholderExtensions()
                       : ReadSection(
+                          syncId: syncId,
                           onChanged: (value) {
                             int total = 0;
                             for (var item in value) {

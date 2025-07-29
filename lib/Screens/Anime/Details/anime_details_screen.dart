@@ -2,7 +2,7 @@
 
 import 'dart:developer';
 
-import 'package:azyx/Models/anime_class.dart';
+import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Models/episode_class.dart';
@@ -15,6 +15,7 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/_placeholder.dart';
 import 'package:azyx/Widgets/common/scrollable_app_bar.dart';
+import 'package:azyx/Widgets/helper/platform_builder.dart';
 import 'package:azyx/api/Mangayomi/Extensions/extensions_provider.dart';
 import 'package:azyx/api/Mangayomi/Model/Source.dart';
 import 'package:azyx/api/Mangayomi/Search/get_detail.dart';
@@ -22,6 +23,8 @@ import 'package:azyx/api/Mangayomi/Search/search.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Anify/anify_episodes.dart';
 import 'package:azyx/utils/Functions/mapping_helper.dart';
+import 'package:azyx/utils/mapper.dart';
+import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
@@ -58,11 +61,11 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
   late TabController _tabBarController;
   final Rx<String> _anilistError = ''.obs;
   final Rx<bool> _extenstionError = false.obs;
+  final Rx<String> syncId = ''.obs;
 
   Future<void> loadData() async {
     try {
-      final response =
-          await anilistDataController.fetchAnilistAnimeDetails(id.value);
+      final response = await serviceHandler.fetchAnimeDetails(id.value);
       mediaData.value = response;
       isLoading.value = false;
       coverImage.value = mediaData.value.coverImage ?? image.value;
@@ -70,7 +73,17 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
       _anilistError.value = e.toString();
       log("Error while getting data for details: $e");
     }
+    _syncMedia();
     loadDetails(selectedSource.value);
+  }
+
+  Future<void> _syncMedia() async {
+    final response = await MediaSyncer.mapMediaId(
+      id.value.toString(),
+      isManga: false,
+    );
+    syncId.value = response ?? '';
+    Utils.log('MAL ${syncId.value} / ${id.value}');
   }
 
   Future<void> _initExtensions() async {
@@ -119,7 +132,7 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
     episodesList.value = mappedList;
     totalEpisodes.value = episodesList.length.toString();
     //Step:2 - Fetching AnifyEpisodes
-    final temp = await fetchAnifyEpisodes(widget.smallMedia!.id!, mappedList);
+    final temp = await fetchAnifyEpisodes(widget.smallMedia!.id, mappedList);
     episodesList.value = temp;
     setState(() {});
   }
@@ -129,7 +142,7 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
       //Step:1 - Searching Anime
       final response = await search(
           source: source,
-          query: widget.smallMedia!.title!,
+          query: widget.smallMedia!.title,
           page: 1,
           filterList: []);
 
@@ -177,7 +190,13 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
             delegate: _TabBarDelegate(
               tabBar: AzyXContainer(
                 padding: const EdgeInsets.all(8),
-                margin: const EdgeInsets.fromLTRB(15, 40, 15, 0),
+                margin: EdgeInsets.fromLTRB(
+                    getResponsiveSize(context,
+                        mobileSize: 15, dektopSize: Get.width * 0.2),
+                    40,
+                    getResponsiveSize(context,
+                        mobileSize: 15, dektopSize: Get.width * 0.2),
+                    0),
                 decoration: BoxDecoration(
                     color:
                         Theme.of(context).colorScheme.surfaceContainerHighest,

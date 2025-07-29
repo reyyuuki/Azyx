@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  dartotsu_extension_bridge
   desktop_webview_window
   dynamic_color
   flutter_inappwebview_windows
@@ -14,6 +15,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   screen_brightness_windows
   share_plus
   url_launcher_windows
+  volume_controller
   window_to_front
 )
 

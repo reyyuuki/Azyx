@@ -1,12 +1,13 @@
 // ignore_for_file: inva, invalid_use_of_protected_member
 import 'dart:ui';
+import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Models/offline_item.dart';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
-import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/offline_controller.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
+import 'package:azyx/Widgets/helper/platform_builder.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:checkmark/checkmark.dart';
@@ -38,7 +39,13 @@ class AddToListFloater extends StatelessWidget {
         opacity: opacity,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 1000),
-          margin: const EdgeInsets.fromLTRB(10, 0, 10, 20),
+          margin: EdgeInsets.fromLTRB(
+              getResponsiveSize(context,
+                  mobileSize: 10, dektopSize: Get.width * 0.3),
+              0,
+              getResponsiveSize(context,
+                  mobileSize: 10, dektopSize: Get.width * 0.3),
+              20),
           alignment: Alignment.center,
           decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.4),
@@ -55,7 +62,7 @@ class AddToListFloater extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10)),
                 child: Row(
                   children: [
-                    anilistAuthController.userData.value.name != null
+                    serviceHandler.userData.value.name != null
                         ? Expanded(
                             child: GestureDetector(
                               onTap: () =>
@@ -81,8 +88,7 @@ class AddToListFloater extends StatelessWidget {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       anilistAddToListController
-                                                  .anime.value.status ==
-                                              null
+                                              .animeStatus.value.isEmpty
                                           ? Icon(
                                               Broken.add,
                                               color: Theme.of(context)
@@ -131,8 +137,11 @@ class AddToListFloater extends StatelessWidget {
                       onTap: () {
                         addToLibrary(context);
                       },
-                      child: anilistAuthController.userData.value.name == null
-                          ? libraryButton(context, width: Get.width - 50)
+                      child: serviceHandler.userData.value.name == null
+                          ? libraryButton(context,
+                              width: getResponsiveSize(context,
+                                  mobileSize: Get.width - 50,
+                                  dektopSize: Get.width - Get.width * 0.625))
                           : libraryButton(context),
                     )
                   ],

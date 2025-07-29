@@ -1,3 +1,4 @@
+import 'package:azyx/utils/utils.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 
@@ -19,6 +20,7 @@ class SettingsController extends GetxController {
 
   void gradientToggler(bool value) {
     isGradient.value = value;
+    Utils.log(value.toString());
     Hive.box('app-data').put("gradient", isGradient.value);
   }
 }
