@@ -240,6 +240,8 @@ class MarginedTrack extends SliderTrackShape {
       ..color = activeTrackColorTween.evaluate(enableAnimation)!;
     final Paint inactivePaint = Paint()
       ..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
+    final Paint secondaryPaint = Paint()
+      ..color = Colors.grey.shade500.withOpacity(0.7);
 
     Paint leftTrackPaint;
     Paint rightTrackPaint;
@@ -263,11 +265,16 @@ class MarginedTrack extends SliderTrackShape {
       isDiscrete: isDiscrete,
     );
 
-    final Rect leftTrackSegment = Rect.fromLTRB(
-        trackRect.left, trackRect.top, thumbCenter.dx - 7, trackRect.bottom);
-    final Rect rightTrackSegment = Rect.fromLTRB(
-        thumbCenter.dx + 7, trackRect.top, trackRect.right, trackRect.bottom);
+    // Define thumb gap (7px on each side)
+    const double thumbGap = 7.0;
 
+    // Primary track segments with proper gaps
+    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left, trackRect.top,
+        thumbCenter.dx - thumbGap, trackRect.bottom);
+    final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx + thumbGap,
+        trackRect.top, trackRect.right, trackRect.bottom);
+
+    // Draw primary tracks with gaps
     context.canvas.drawRRect(
       RRect.fromRectAndRadius(leftTrackSegment, const Radius.circular(50)),
       leftTrackPaint,
@@ -278,24 +285,42 @@ class MarginedTrack extends SliderTrackShape {
       rightTrackPaint,
     );
 
+    // Handle secondary track if present
     if (secondaryOffset != null) {
-      final Rect leftSecondaryTrackSegment = Rect.fromLTRB(
-          trackRect.left, trackRect.top, thumbCenter.dx - 7, trackRect.bottom);
+      // Secondary track should ONLY show buffered content ahead of current position
+      if (textDirection == TextDirection.ltr) {
+        // Only show secondary track if it's beyond the current thumb position
+        if (secondaryOffset.dx > thumbCenter.dx + thumbGap) {
+          final Rect secondarySegment = Rect.fromLTRB(
+              thumbCenter.dx + thumbGap,
+              trackRect.top,
+              secondaryOffset.dx
+                  .clamp(thumbCenter.dx + thumbGap, trackRect.right),
+              trackRect.bottom);
 
-      final Rect rightSecondaryTrackSegment = Rect.fromLTRB(thumbCenter.dx + 7,
-          trackRect.top, secondaryOffset.dx, trackRect.bottom);
+          context.canvas.drawRRect(
+            RRect.fromRectAndRadius(
+                secondarySegment, const Radius.circular(50)),
+            secondaryPaint,
+          );
+        }
+      } else {
+        // RTL: Secondary track shows buffered content ahead (to the left) of current position
+        if (secondaryOffset.dx < thumbCenter.dx - thumbGap) {
+          final Rect secondarySegment = Rect.fromLTRB(
+              secondaryOffset.dx
+                  .clamp(trackRect.left, thumbCenter.dx - thumbGap),
+              trackRect.top,
+              thumbCenter.dx - thumbGap,
+              trackRect.bottom);
 
-      context.canvas.drawRRect(
-        RRect.fromRectAndRadius(
-            leftSecondaryTrackSegment, const Radius.circular(50)),
-        Paint()..color = sliderTheme.activeTrackColor!,
-      );
-
-      context.canvas.drawRRect(
-        RRect.fromRectAndRadius(
-            rightSecondaryTrackSegment, const Radius.circular(50)),
-        Paint()..color = Colors.grey.shade500.withOpacity(0.7),
-      );
+          context.canvas.drawRRect(
+            RRect.fromRectAndRadius(
+                secondarySegment, const Radius.circular(50)),
+            secondaryPaint,
+          );
+        }
+      }
     }
   }
 }

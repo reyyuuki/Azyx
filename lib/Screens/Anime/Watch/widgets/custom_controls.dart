@@ -119,40 +119,19 @@ class _CustomControlsState extends State<CustomControls> {
               widget.changeEpisode(false);
             },
             icon: Broken.previous),
+        20.width,
         Obx(() => isBuffering.value
             ? const CircularProgressIndicator()
             : GestureDetector(
                 onTap: () => widget.player.playOrPause(),
-                child: AzyXContainer(
-                  padding: const EdgeInsets.all(8),
-                  margin: const EdgeInsets.symmetric(horizontal: 30),
-                  decoration: BoxDecoration(
-                      color:
-                          Theme.of(context).colorScheme.primary.withAlpha(80),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withOpacity(1.glowMultiplier()),
-                            blurRadius: 10.blurMultiplier(),
-                            spreadRadius: 3.spreadMultiplier())
-                      ],
-                      borderRadius: BorderRadius.circular(50)),
-                  child: Icon(
-                    isPlaying.value
-                        ? Icons.pause_rounded
-                        : Icons.play_arrow_rounded,
-                    color: Theme.of(context).colorScheme.inversePrimary,
-                    size: isPlaying.value ? 60 : 60,
-                    shadows: [
-                      BoxShadow(
-                          color: Theme.of(context).colorScheme.inversePrimary,
-                          blurRadius: 10.blurMultiplier(),
-                          spreadRadius: 2.spreadMultiplier())
-                    ],
-                  ),
+                child: Icon(
+                  isPlaying.value
+                      ? Icons.pause_rounded
+                      : Icons.play_arrow_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 60,
                 ))),
+        20.width,
         buildIconButton(
             ontap: () {
               widget.changeEpisode(true);
@@ -210,7 +189,7 @@ class _CustomControlsState extends State<CustomControls> {
             () => Expanded(
                 child: AnimatedOpacity(
               opacity: widget.showControls.value ? 1 : 0,
-              duration: const Duration(milliseconds: 1000),
+              duration: const Duration(milliseconds: 500),
               child: widget.isControlsLocked()
                   ? lockedCenterControls()
                   : centerControls(),

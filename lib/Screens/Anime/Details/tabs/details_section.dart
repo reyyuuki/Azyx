@@ -73,94 +73,286 @@ class DetailsSection extends StatelessWidget {
             const SizedBox(
               height: 10,
             ),
-            SizedBox(
-                height: 50,
-                child: PlatformBuilder(
-                  desktopBuilder: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: mediaData.value.genres!
-                        .map((i) => Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 15, vertical: 10),
-                            margin: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .secondaryContainer,
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .secondaryContainer
-                                          .withOpacity(1.glowMultiplier()),
-                                      blurRadius: 10.blurMultiplier(),
-                                      spreadRadius: 2.spreadMultiplier())
-                                ],
-                                borderRadius: BorderRadius.circular(20)),
-                            child: AzyXText(
-                              text: i,
-                              fontVariant: FontVariant.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                            )))
-                        .toList(),
-                  ),
-                  androidBuilder: ListView(
-                    physics: const BouncingScrollPhysics(),
-                    scrollDirection: Axis.horizontal,
-                    children: mediaData.value.genres!
-                        .map((i) => Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 15, vertical: 10),
-                            margin: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .secondaryContainer,
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .secondaryContainer
-                                          .withOpacity(1.glowMultiplier()),
-                                      blurRadius: 10.blurMultiplier(),
-                                      spreadRadius: 2.spreadMultiplier())
-                                ]),
-                            child: AzyXText(
-                              text: i,
-                              fontVariant: FontVariant.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                            )))
-                        .toList(),
-                  ),
-                )),
+            if (mediaData.value.genres != null ||
+                mediaData.value.genres!.isNotEmpty)
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.center,
+                children: mediaData.value.genres!.map((genre) {
+                  return Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primaryContainer
+                          .withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withOpacity(0.2),
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      genre,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Poppins',
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                    ),
+                  );
+                }).toList(),
+              ),
             const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
                   width: getResponsiveSize(context,
-                      mobileSize: Get.width - 40, dektopSize: 300),
+                      mobileSize: Get.width - 40, dektopSize: 600),
                   padding:
-                      const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                   decoration: BoxDecoration(
-                      color: Get.theme.colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Get.theme.colorScheme.secondaryContainer
-                                .withOpacity(1.glowMultiplier()),
-                            blurRadius: 10.blurMultiplier(),
-                            spreadRadius: 2.spreadMultiplier())
-                      ]),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Get.theme.colorScheme.secondaryContainer
+                            .withOpacity(0.95),
+                        Get.theme.colorScheme.secondaryContainer
+                            .withOpacity(0.8),
+                        Get.theme.colorScheme.secondaryContainer
+                            .withOpacity(0.95),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Get.theme.colorScheme.primary.withOpacity(0.15),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      // Main glow shadow
+                      BoxShadow(
+                        color: Get.theme.colorScheme.primary.withOpacity(0.3),
+                        blurRadius: 20,
+                        spreadRadius: 0,
+                        offset: const Offset(0, 8),
+                      ),
+                      // Inner highlight
+                      BoxShadow(
+                        color: Get.theme.colorScheme.surface.withOpacity(0.8),
+                        blurRadius: 8,
+                        spreadRadius: -4,
+                        offset: const Offset(0, -2),
+                      ),
+                      // Ambient shadow
+                      BoxShadow(
+                        color: Get.theme.colorScheme.shadow.withOpacity(0.15),
+                        blurRadius: 30,
+                        spreadRadius: 0,
+                        offset: const Offset(0, 12),
+                      ),
+                    ],
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      detailsItem("Rating", mediaData.value.rating!),
-                      detailsItem(
-                          "Popular", mediaData.value.popularity.toString()),
-                      detailsItem("Status", mediaData.value.status!)
+                      Expanded(
+                        child: Container(
+                          alignment: Alignment.center,
+                          child: detailsItem("Rating", mediaData.value.rating!),
+                        ),
+                      ),
+                      Container(
+                        height: 50,
+                        width: 1,
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Stack(
+                          children: [
+                            // Background glow
+                            Positioned(
+                              left: -3.5,
+                              child: Container(
+                                width: 8,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Get.theme.colorScheme.primary
+                                          .withOpacity(0.0),
+                                      Get.theme.colorScheme.primary
+                                          .withOpacity(0.1),
+                                      Get.theme.colorScheme.primary
+                                          .withOpacity(0.2),
+                                      Get.theme.colorScheme.primary
+                                          .withOpacity(0.1),
+                                      Get.theme.colorScheme.primary
+                                          .withOpacity(0.0),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: 1,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Get.theme.colorScheme.primary
+                                        .withOpacity(0.1),
+                                    Get.theme.colorScheme.primary
+                                        .withOpacity(0.6),
+                                    Get.theme.colorScheme.primary
+                                        .withOpacity(0.9),
+                                    Get.theme.colorScheme.primary
+                                        .withOpacity(0.6),
+                                    Get.theme.colorScheme.primary
+                                        .withOpacity(0.1),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(0.5),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Get.theme.colorScheme.primary
+                                        .withOpacity(0.4),
+                                    blurRadius: 4,
+                                    spreadRadius: 0,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Positioned(
+                              top: 22,
+                              left: -1.5,
+                              child: Container(
+                                width: 4,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: Get.theme.colorScheme.primary
+                                      .withOpacity(0.8),
+                                  borderRadius: BorderRadius.circular(2),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Get.theme.colorScheme.primary
+                                          .withOpacity(0.6),
+                                      blurRadius: 6,
+                                      spreadRadius: 0,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          alignment: Alignment.center,
+                          child: detailsItem(
+                              "Popular", mediaData.value.popularity.toString()),
+                        ),
+                      ),
+                      Container(
+                        height: 50,
+                        width: 1,
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              left: -3.5,
+                              child: Container(
+                                width: 8,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Get.theme.colorScheme.primary
+                                          .withOpacity(0.0),
+                                      Get.theme.colorScheme.primary
+                                          .withOpacity(0.1),
+                                      Get.theme.colorScheme.primary
+                                          .withOpacity(0.2),
+                                      Get.theme.colorScheme.primary
+                                          .withOpacity(0.1),
+                                      Get.theme.colorScheme.primary
+                                          .withOpacity(0.0),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: 1,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Get.theme.colorScheme.primary
+                                        .withOpacity(0.1),
+                                    Get.theme.colorScheme.primary
+                                        .withOpacity(0.6),
+                                    Get.theme.colorScheme.primary
+                                        .withOpacity(0.9),
+                                    Get.theme.colorScheme.primary
+                                        .withOpacity(0.6),
+                                    Get.theme.colorScheme.primary
+                                        .withOpacity(0.1),
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(0.5),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Get.theme.colorScheme.primary
+                                        .withOpacity(0.4),
+                                    blurRadius: 4,
+                                    spreadRadius: 0,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Positioned(
+                              top: 22,
+                              left: -1.5,
+                              child: Container(
+                                width: 4,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: Get.theme.colorScheme.primary
+                                      .withOpacity(0.8),
+                                  borderRadius: BorderRadius.circular(2),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Get.theme.colorScheme.primary
+                                          .withOpacity(0.6),
+                                      blurRadius: 6,
+                                      spreadRadius: 0,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          alignment: Alignment.center,
+                          child: detailsItem("Status", mediaData.value.status!),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -186,14 +378,14 @@ class DetailsSection extends StatelessWidget {
             ),
             AnimeScrollableList(
                 isManga: isManga,
-                animeList: mediaData.value.relations!,
+                animeList: mediaData.value.relations ?? [],
                 title: "Related Animes"),
             const SizedBox(
               height: 10,
             ),
             AnimeScrollableList(
                 isManga: isManga,
-                animeList: mediaData.value.recommendations!,
+                animeList: mediaData.value.recommendations ?? [],
                 title: "Recommendations")
           ],
         ),
@@ -228,20 +420,14 @@ class DetailsSection extends StatelessWidget {
         const SizedBox(
           height: 10,
         ),
-        iconWithText(data)
-      ],
-    );
-  }
-
-  Row iconWithText(String data) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
         AzyXText(
-            text: '#$data',
-            fontVariant: FontVariant.bold,
-            fontSize: 16,
-            color: Get.theme.colorScheme.primary)
+          text: '#$data',
+          fontVariant: FontVariant.bold,
+          fontSize: 16,
+          color: Get.theme.colorScheme.primary,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        )
       ],
     );
   }

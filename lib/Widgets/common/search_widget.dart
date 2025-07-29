@@ -4,13 +4,23 @@ import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
 
 class SearchBox extends StatelessWidget {
-  final void Function(String value) ontap;
+  final void Function() ontap;
+  final void Function(String value) onChanged;
   final String name;
-  const SearchBox({super.key, required this.ontap, required this.name});
+  final EdgeInsets? margin;
+  final TextEditingController? controller;
+  const SearchBox(
+      {super.key,
+      required this.ontap,
+      required this.name,
+      required this.onChanged,
+      this.margin,
+      this.controller});
 
   @override
   Widget build(BuildContext context) {
     return AzyXContainer(
+      margin: margin,
       decoration: BoxDecoration(boxShadow: [
         BoxShadow(
             color: Theme.of(context)
@@ -20,8 +30,12 @@ class SearchBox extends StatelessWidget {
             blurRadius: 10.blurMultiplier())
       ]),
       child: TextField(
+        controller: controller,
         onChanged: (String value) {
-          ontap(value);
+          onChanged(value);
+        },
+        onSubmitted: (v) {
+          ontap();
         },
         decoration: InputDecoration(
           labelText: name,

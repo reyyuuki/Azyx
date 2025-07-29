@@ -2,7 +2,9 @@
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
+import 'package:azyx/Controllers/services/mal_service.dart';
 import 'package:azyx/Controllers/offline_controller.dart';
+import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/settings_controller.dart';
 import 'package:azyx/Controllers/ui_setting_controller.dart';
 import 'package:azyx/HiveClass/theme_data.dart';
@@ -46,6 +48,10 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.transparent,
+      statusBarColor: Colors.transparent));
   MediaKit.ensureInitialized();
   await Hive.initFlutter();
   Hive.registerAdapter(ThemeClassAdapter());
@@ -54,21 +60,21 @@ void main() async {
   await Hive.openBox('app-data');
   await Hive.openBox('ui-settings');
   await Hive.openBox("offline-data");
+  await Hive.openBox("auth");
   await dotenv.load(fileName: ".env");
   await StorageProvider().requestPermission();
   isar = await StorageProvider().initDB(null);
   await PrefManager.init();
   initializeDateFormatting();
-  Get.put(AnilistAuth());
+  Get.put(AnilistService());
   Get.put(AnilistDataController());
   Get.put(OfflineController());
   Get.put(UiSettingController());
   Get.put(AnilistAddToListController());
   Get.put(LocalHistoryController());
   Get.put(SettingsController());
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(systemNavigationBarColor: Colors.transparent));
+  Get.put(MalService());
+  Get.put(ServiceHandler());
 
   runApp(MultiProvider(
     providers: [ChangeNotifierProvider(create: (_) => ThemeProvider())],
@@ -104,9 +110,7 @@ class HomePage extends StatelessWidget {
     const NovelScreen(),
   ];
 
-  final AnilistAuth controller = Get.put(AnilistAuth());
-
-  Rx<int> index = 0.obs;
+  Rx<int> index = 2.obs;
 
   @override
   Widget build(BuildContext context) {

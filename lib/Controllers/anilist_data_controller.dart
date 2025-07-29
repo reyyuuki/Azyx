@@ -1,5 +1,5 @@
 import 'package:azyx/Models/anilist_schedules.dart';
-import 'package:azyx/Models/anilist_search.dart';
+import 'package:azyx/Models/anime_class.dart';
 import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/utils/Anilist/anilist_calender.dart';
 import 'package:get/get.dart';
@@ -248,12 +248,43 @@ class AnilistDataController extends GetxController {
     }
   }
 
-  Future<List<AnilistSearchData>> searchAnilistManga(String query) async {
+  Future<List<Anime>> searchAnilistAnime({
+    String? query,
+    String? type = "ANIME",
+    String? format,
+    String? status,
+    String? season,
+    int? seasonYear,
+    List<String>? genres,
+    List<String>? tags,
+    List<String>? sort,
+  }) async {
     const String searchQuery = '''
-    query (\$search: String) {
+    query (
+      \$search: String,
+      \$type: MediaType,
+      \$format: MediaFormat,
+      \$status: MediaStatus,
+      \$season: MediaSeason,
+      \$seasonYear: Int,
+      \$genre_in: [String],
+      \$tag_in: [String],
+      \$sort: [MediaSort]
+    ) {
       Page(perPage: 30) {
-        media(search: \$search, type: MANGA) {
+        media(
+          search: \$search,
+          type: \$type,
+          format: \$format,
+          status: \$status,
+          season: \$season,
+          seasonYear: \$seasonYear,
+          genre_in: \$genre_in,
+          tag_in: \$tag_in,
+          sort: \$sort
+        ) {
           id
+          idMal
           title {
             romaji
             english
@@ -261,61 +292,7 @@ class AnilistDataController extends GetxController {
           }
           coverImage {
             large
-          }
-          bannerImage
-          averageScore
-          chapters
-          volumes
-          type
-          status
-        }
-      }
-    }
-  ''';
-
-    try {
-      final response = await http.post(
-        Uri.parse(graphqlEndpoint),
-        headers: {"Content-Type": "application/json"},
-        body: json.encode({
-          "query": searchQuery,
-          "variables": {"search": query},
-        }),
-      );
-
-      log('Request to AniList: search=$query, statusCode=${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final mangaList = data['data']['Page']['media'] as List<dynamic>;
-
-        log(mangaList.toString());
-        return mangaList.map<AnilistSearchData>((manga) {
-          return AnilistSearchData.fromJson(manga, true);
-        }).toList();
-      } else {
-        log('Error response: ${response.body}');
-        throw Exception('Failed to search manga: ${response.body}');
-      }
-    } catch (error) {
-      log('Exception: $error');
-      throw Exception('Failed to search manga: $error');
-    }
-  }
-
-  Future<List<AnilistSearchData>> searchAnilistAnime(String query) async {
-    const String searchQuery = '''
-    query (\$search: String) {
-      Page(perPage: 30) {
-        media(search: \$search, type: ANIME) {
-          id
-          title {
-            romaji
-            english
-            native
-          }
-          coverImage {
-            large
+            medium
           }
           bannerImage
           averageScore
@@ -324,36 +301,214 @@ class AnilistDataController extends GetxController {
           seasonYear
           type
           status
+          genres
+          tags {
+            name
+            isMediaSpoiler
+          }
+          startDate {
+            year
+            month
+            day
+          }
+          endDate {
+            year
+            month
+            day
+          }
+          description
+          popularity
+          trending
+          favourites
+          meanScore
+          isAdult
         }
       }
     }
   ''';
 
     try {
+      // Prepare variables, filtering out null values
+      final variables = <String, dynamic>{
+        if (query != null && query.trim().isNotEmpty) "search": query.trim(),
+        "type": type,
+        if (format != null) "format": format,
+        if (status != null) "status": status,
+        if (season != null) "season": season,
+        if (seasonYear != null) "seasonYear": seasonYear,
+        if (genres != null && genres.isNotEmpty) "genre_in": genres,
+        if (tags != null && tags.isNotEmpty) "tag_in": tags,
+        if (sort != null && sort.isNotEmpty) "sort": sort,
+      };
+
+      // Log the variables being sent
+      log('AniList request variables: $variables');
+
       final response = await http.post(
-        Uri.parse(graphqlEndpoint),
-        headers: {"Content-Type": "application/json"},
+        Uri.parse('https://graphql.anilist.co'),
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
         body: json.encode({
           "query": searchQuery,
-          "variables": {"search": query},
+          "variables": variables,
         }),
       );
 
-      log('Request to AniList: search=$query, statusCode=${response.statusCode}');
+      log('Request to AniList: statusCode=${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+
+        // Check for GraphQL errors
+        if (data['errors'] != null) {
+          log('GraphQL errors: ${data['errors']}');
+          throw Exception('GraphQL error: ${data['errors']}');
+        }
+
         final animeList = data['data']['Page']['media'] as List<dynamic>;
-        return animeList.map<AnilistSearchData>((anime) {
-          return AnilistSearchData.fromJson(anime, false);
-        }).toList();
+        log('Found ${animeList.length} results');
+
+        // Log first result if available
+        if (animeList.isNotEmpty) {
+          log('First result: ${animeList.first}');
+        }
+
+        return animeList.map<Anime>((anime) => Anime.fromJson(anime)).toList();
       } else {
         log('Error response: ${response.body}');
-        throw Exception('Failed to search anime: ${response.body}');
+        throw Exception(
+            'Failed to search anime: ${response.statusCode} - ${response.body}');
       }
     } catch (error) {
-      log('Exception: $error');
-      throw Exception('Failed to search anime: $error');
+      log('Exception in searchAnilistAnime: $error');
+      rethrow;
+    }
+  }
+
+// Similar method for manga search
+  Future<List<Anime>> searchAnilistManga({
+    String? query,
+    String? type = "MANGA",
+    String? format,
+    String? status,
+    List<String>? genres,
+    List<String>? tags,
+    List<String>? sort,
+  }) async {
+    const String searchQuery = '''
+    query (
+      \$search: String,
+      \$type: MediaType,
+      \$format: MediaFormat,
+      \$status: MediaStatus,
+      \$genre_in: [String],
+      \$tag_in: [String],
+      \$sort: [MediaSort]
+    ) {
+      Page(perPage: 30) {
+        media(
+          search: \$search,
+          type: \$type,
+          format: \$format,
+          status: \$status,
+          genre_in: \$genre_in,
+          tag_in: \$tag_in,
+          sort: \$sort
+        ) {
+          id
+          idMal
+          title {
+            romaji
+            english
+            native
+          }
+          coverImage {
+            large
+            medium
+          }
+          bannerImage
+          averageScore
+          chapters
+          volumes
+          type
+          status
+          genres
+          tags {
+            name
+            isMediaSpoiler
+          }
+          startDate {
+            year
+            month
+            day
+          }
+          endDate {
+            year
+            month
+            day
+          }
+          description
+          popularity
+          trending
+          favourites
+          meanScore
+          isAdult
+        }
+      }
+    }
+  ''';
+
+    try {
+      // Prepare variables, filtering out null values
+      final variables = <String, dynamic>{
+        if (query != null && query.trim().isNotEmpty) "search": query.trim(),
+        "type": type,
+        if (format != null) "format": format,
+        if (status != null) "status": status,
+        if (genres != null && genres.isNotEmpty) "genre_in": genres,
+        if (tags != null && tags.isNotEmpty) "tag_in": tags,
+        if (sort != null && sort.isNotEmpty) "sort": sort,
+      };
+
+      log('AniList manga request variables: $variables');
+
+      final response = await http.post(
+        Uri.parse('https://graphql.anilist.co'),
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: json.encode({
+          "query": searchQuery,
+          "variables": variables,
+        }),
+      );
+
+      log('Request to AniList: statusCode=${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        // Check for GraphQL errors
+        if (data['errors'] != null) {
+          log('GraphQL errors: ${data['errors']}');
+          throw Exception('GraphQL error: ${data['errors']}');
+        }
+
+        final mangaList = data['data']['Page']['media'] as List<dynamic>;
+        log('Found ${mangaList.length} manga results');
+
+        return mangaList.map<Anime>((manga) => Anime.fromJson(manga)).toList();
+      } else {
+        log('Error response: ${response.body}');
+        throw Exception(
+            'Failed to search manga: ${response.statusCode} - ${response.body}');
+      }
+    } catch (error) {
+      log('Exception in searchAnilistManga: $error');
+      rethrow;
     }
   }
 

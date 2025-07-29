@@ -410,7 +410,7 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                   ),
                 ),
                 icon: const Icon(Broken.discover, color: Colors.white),
-                label: AzyXText(
+                label: const AzyXText(
                   text: "Explore Anime",
                   fontSize: 16,
                   fontVariant: FontVariant.bold,

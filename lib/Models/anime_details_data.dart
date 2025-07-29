@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Models/anime_class.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 
@@ -19,24 +20,25 @@ class AnilistMediaData {
   List<Anime>? relations;
   List<Anime>? recommendations;
   List<Character>? characters;
+  ServicesType? servicesType;
 
-  AnilistMediaData({
-    this.id,
-    this.title,
-    this.episodes,
-    this.description,
-    this.image,
-    this.coverImage,
-    this.rating,
-    this.type,
-    this.status,
-    this.popularity,
-    this.timeUntilAiring,
-    this.genres,
-    this.relations,
-    this.recommendations,
-    this.characters,
-  });
+  AnilistMediaData(
+      {this.id,
+      this.title,
+      this.episodes,
+      this.description,
+      this.image,
+      this.coverImage,
+      this.rating,
+      this.type,
+      this.status,
+      this.popularity,
+      this.timeUntilAiring,
+      this.genres,
+      this.relations,
+      this.recommendations,
+      this.characters,
+      this.servicesType});
 
   static String formatAiredDates(
       Map<String, dynamic>? startDate, Map<String, dynamic>? endDate) {
@@ -58,36 +60,66 @@ class AnilistMediaData {
     }
   }
 
+  factory AnilistMediaData.fromFullMAL(Map<String, dynamic> json,
+      {bool isManga = false}) {
+    final node = json;
+
+    return AnilistMediaData(
+      id: node['id'],
+      title: node['title'] ?? '??',
+      description: node['synopsis'] ?? '??',
+      image: node['main_picture']?['medium'] ?? '??',
+      coverImage: node['main_picture']?['large'] ?? '??',
+      episodes: isManga ? node['num_chapters'] : node['num_episodes'],
+      type: node['media_type']?.toUpperCase() ?? '??',
+      status: node['status']?.split('_').first.toUpperCase() ?? '??',
+      rating: node['mean']?.toString() ?? '??',
+      popularity: node['popularity'],
+      // timeUntilAiring: int.parse(node['start_date']),
+      genres: (node['genres'] as List<dynamic>?)
+              ?.map((genre) => genre['name']?.toString() ?? '??')
+              .toList() ??
+          [],
+      characters: [],
+      recommendations: (node['recommendations'] as List<dynamic>)
+          .map((e) => Anime.fromMAL(e))
+          .toList(),
+      servicesType: ServicesType.mal,
+    );
+  }
+
   factory AnilistMediaData.fromJson(Map<dynamic, dynamic> json, bool isManga) {
     return AnilistMediaData(
-      id: json['id'] ?? 1,
-      title: json['title']['english'] ?? json['title']['romaji'] ?? "Unknown",
-      description: json['description'],
-      image: json['coverImage']['large'],
-      episodes: isManga ? json['chapters'] : json['episodes'],
-      coverImage: json['bannerImage'] ?? json['coverImage']['large'],
-      rating: json['averageScore'] != null
-          ? (json['averageScore'] / 10).toString()
-          : 'N/A',
-      type: json['type'],
-      status: json['status'] ?? '',
-      popularity: json['popularity'] ?? "",
-      timeUntilAiring:
-          !isManga ? (json['nextAiringEpisode']?['timeUntilAiring']) : 0,
-      genres: (json['genres'] as List?)?.map((e) => e as String).toList() ?? [],
-      relations: (json['relations']['edges'] as List?)
-              ?.map((e) => Anime.fromJson(e['node']))
-              .toList() ??
-          [],
-      recommendations: (json['recommendations']['edges'] as List?)
-              ?.map((e) => Anime.fromJson(e['node']['mediaRecommendation'] ?? {}))
-              .toList() ??
-          [],
-      characters: (json['characters']['edges'] as List?)
-              ?.map((e) => Character.fromJson(e['node']))
-              .toList() ??
-          [],
-    );
+        id: json['id'] ?? 1,
+        title: json['title']['english'] ?? json['title']['romaji'] ?? "Unknown",
+        description: json['description'],
+        image: json['coverImage']['large'],
+        episodes: isManga ? json['chapters'] : json['episodes'],
+        coverImage: json['bannerImage'] ?? json['coverImage']['large'],
+        rating: json['averageScore'] != null
+            ? (json['averageScore'] / 10).toString()
+            : 'N/A',
+        type: json['type'],
+        status: json['status'] ?? '',
+        popularity: json['popularity'] ?? "",
+        timeUntilAiring:
+            !isManga ? (json['nextAiringEpisode']?['timeUntilAiring']) : 0,
+        genres:
+            (json['genres'] as List?)?.map((e) => e as String).toList() ?? [],
+        relations: (json['relations']['edges'] as List?)
+                ?.map((e) => Anime.fromJson(e['node']))
+                .toList() ??
+            [],
+        recommendations: (json['recommendations']['edges'] as List?)
+                ?.map((e) =>
+                    Anime.fromJson(e['node']['mediaRecommendation'] ?? {}))
+                .toList() ??
+            [],
+        characters: (json['characters']['edges'] as List?)
+                ?.map((e) => Character.fromJson(e['node']))
+                .toList() ??
+            [],
+        servicesType: ServicesType.anilist);
   }
 
   dynamic toJson(bool isManga) {

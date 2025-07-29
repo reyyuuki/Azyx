@@ -113,6 +113,7 @@ class EpisodesList extends StatelessWidget {
             );
           } else {
             epiosdeUrls.value = [];
+            hasError.value = false;
             showEpisodeBottomSheet(
               context,
               episode.number,

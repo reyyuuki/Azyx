@@ -18,7 +18,7 @@ class User {
       this.minutesWatched,
       this.chaptersRead});
 
-  factory User.fromJson(dynamic data){
+  factory User.fromJson(dynamic data) {
     return User(
       name: data['name'],
       id: data['id'],
@@ -28,6 +28,23 @@ class User {
       episodesWatched: data['statistics']['anime']['episodeWatched'],
       minutesWatched: data['statistics']['anime']['minutesWatched'],
       chaptersRead: data['statistics']['manga']['chaptersRead'],
+    );
+  }
+
+  factory User.fromMAL(Map<String, dynamic> json) {
+    final animeStats = json['data']?['statistics']['anime'];
+    final mangaStats = json['data']?['statistics']['manga'];
+    return User(
+      id: json['data']?['mal_id'],
+      name: json['data']?['username'],
+      avatar: json['picture'] ??
+          json['data']?['images']?['jpg']?['image_url'] ??
+          json['data']?['images']?['webp']?['image_url'],
+      animeCount: animeStats['count'],
+      mangaCount: mangaStats['count'],
+      episodesWatched: animeStats['episodeWatched'],
+      minutesWatched: animeStats['minutesWatched'],
+      chaptersRead: mangaStats['chaptersRead'],
     );
   }
 }

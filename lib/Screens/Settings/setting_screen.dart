@@ -1,15 +1,17 @@
-import 'package:azyx/Controllers/anilist_data_controller.dart';
-import 'package:azyx/Screens/History/anime_history.dart';
+import 'package:azyx/Controllers/anilist_auth.dart';
+import 'package:azyx/Controllers/services/mal_service.dart';
+import 'package:azyx/Controllers/services/service_handler.dart';
+import 'package:azyx/Models/user_anime.dart';
 import 'package:azyx/Screens/Settings/Pages/theme_setting.dart';
 import 'package:azyx/Screens/Settings/Pages/ui_settings.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
+import 'package:azyx/Widgets/common/services_bottom_sheet.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
-import 'package:azyx/utils/Anilist/anilist_calender.dart';
+import 'package:azyx/utils/update_notifier.dart';
+import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import '../../Widgets/common/custom_app_bar.dart';
 
 class SettingScreen extends StatelessWidget {
@@ -74,7 +76,7 @@ class SettingScreen extends StatelessWidget {
                             position: offsetAnimation, child: child);
                       },
                       pageBuilder: (context, animation, secondaryAnimation) {
-                        return UiSettings();
+                        return const UiSettings();
                       }));
             },
             child: settingTile(
@@ -120,11 +122,11 @@ class SettingScreen extends StatelessWidget {
           const SizedBox(
             height: 20,
           ),
-          // ElevatedButton(
-          //     onPressed: () async {
-          //       Get.to(() => AnimeHistoryScreen());
-          //     },
-          //     child: Text("Testing"))
+          ElevatedButton(
+              onPressed: () async {
+                UpdateNotifier.downloadFile();
+              },
+              child: Text("Testing"))
         ],
       )),
     );

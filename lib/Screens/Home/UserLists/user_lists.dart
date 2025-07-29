@@ -1,9 +1,10 @@
-import 'package:azyx/Controllers/anilist_auth.dart';
+import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
+import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -50,8 +51,8 @@ class _UserListScreenState extends State<UserListPage>
           },
           subtitle: "Continue Where You Left Off",
           title: widget.isManga
-              ? "${anilistAuthController.userData.value.name}'s MangaList"
-              : "${anilistAuthController.userData.value.name}'s AnimeList"),
+              ? "${serviceHandler.userData.value.name}'s MangaList"
+              : "${serviceHandler.userData.value.name}'s AnimeList"),
       body: AzyXGradientContainer(
         child: Column(
           children: [

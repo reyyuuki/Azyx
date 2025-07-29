@@ -49,10 +49,10 @@ class LocalHistory {
           : null,
       currentPage: json['currentPage'] as int?,
       animeData: json['animeData'] != null
-          ? AnimeAllData.fromJson(json['animeData'] as dynamic)
+          ? AnimeAllData.fromJson(json['animeData'] as Map<dynamic, dynamic>)
           : null,
       source: json['source'] != null
-          ? Source.fromJson(json['source'] as Map<String, dynamic>)
+          ? Source.fromJson(json['source'] as Map<dynamic, dynamic>)
           : null,
       chapterList: json['chapterList'] != null
           ? (json['chapterList'] as List<dynamic>)
@@ -62,7 +62,7 @@ class LocalHistory {
     );
   }
 
-  Map<dynamic, dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       'mediaId': mediaId,
       'link': link,

@@ -1,4 +1,5 @@
 import 'package:azyx/Controllers/anilist_auth.dart';
+import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Screens/AI/ai_recommendations_page.dart';
 import 'package:azyx/Screens/Home/Calender/calender.dart';
 import 'package:azyx/Screens/Home/UserLists/user_lists.dart';
@@ -30,7 +31,7 @@ class HomeScreen extends StatelessWidget {
 
             SliverToBoxAdapter(
               child: Obx(
-                () => anilistAuthController.userData.value.name == null
+                () => serviceHandler.userData.value.name == null
                     ? const SizedBox.shrink()
                     : Padding(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -242,7 +243,8 @@ class HomeScreen extends StatelessWidget {
             ),
             SliverToBoxAdapter(
               child: Obx(
-                () => anilistAuthController.userData.value.name == null
+                () => serviceHandler.userData.value.name == null ||
+                        serviceHandler.userData.value.name!.isEmpty
                     ? const SizedBox.shrink()
                     : Padding(
                         padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
@@ -343,7 +345,7 @@ class HomeScreen extends StatelessWidget {
             // Season Section
             SliverToBoxAdapter(
               child: Obx(
-                () => anilistAuthController.userData.value.name == null
+                () => serviceHandler.userData.value.name == null
                     ? const SizedBox.shrink()
                     : Padding(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
@@ -447,61 +449,47 @@ class HomeScreen extends StatelessWidget {
 
             SliverToBoxAdapter(
               child: Obx(() {
-                if (anilistAuthController.animeData.value.spotLightAnimes ==
-                    null) {
-                  return Container(
-                    alignment: Alignment.center,
-                    height: Get.height * 0.3,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                        const SizedBox(height: 16),
-                        AzyXText(
-                          text: "Loading your anime",
-                          fontSize: 16,
-                          fontVariant: FontVariant.regular,
-                          color: Theme.of(context).colorScheme.onBackground,
-                        ),
-                      ],
-                    ),
-                  );
-                }
+                // if (serviceHandler.userData.value.id == null) {
+                //   return Container(
+                //     alignment: Alignment.center,
+                //     height: Get.height * 0.3,
+                //     child: Column(
+                //       mainAxisAlignment: MainAxisAlignment.center,
+                //       children: [
+                //         CircularProgressIndicator(
+                //           color: Theme.of(context).colorScheme.secondary,
+                //         ),
+                //         const SizedBox(height: 16),
+                //         AzyXText(
+                //           text: "Loading your anime",
+                //           fontSize: 16,
+                //           fontVariant: FontVariant.regular,
+                //           color: Theme.of(context).colorScheme.onBackground,
+                //         ),
+                //       ],
+                //     ),
+                //   );
+                // }
 
                 return Padding(
                   padding: const EdgeInsets.all(10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (anilistAuthController.userSepratedAnimeList.value
-                                  ?.currentlyWatching !=
-                              null &&
-                          anilistAuthController.userSepratedAnimeList.value!
-                              .currentlyWatching.isNotEmpty)
+                      if (serviceHandler
+                          .userAnimeList.value.currentlyWatching.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 16),
                           child: AnimeScrollableList(
                             varient: CarousaleVarient.userList,
                             isManga: false,
-                            animeList: anilistAuthController
-                                .userSepratedAnimeList.value!.currentlyWatching,
+                            animeList: serviceHandler
+                                .userAnimeList.value.currentlyWatching,
                             title: "Currently Watching",
                           ),
                         ),
-                      AnimeScrollableList(
-                        animeList: anilistAuthController
-                            .animeData.value.topUpcomingAnimes!,
-                        isManga: false,
-                        title: "Upcoming Animes",
-                      ),
-                      AnimeScrollableList(
-                        animeList:
-                            anilistAuthController.animeData.value.completed!,
-                        isManga: false,
-                        title: "Completed Animes",
-                      ),
+                      ...serviceHandler.homeWidgets(context),
+                      100.height
                     ],
                   ),
                 );

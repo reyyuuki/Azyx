@@ -1,25 +1,26 @@
 import 'package:azyx/Models/anime_class.dart';
 
-class AnilistAnimeData {
+class MediaData {
   List<Anime>? spotLightAnimes;
   List<Anime>? popularAnimes;
   List<Anime>? topUpcomingAnimes;
   List<Anime>? completed;
 
-  AnilistAnimeData({
+  MediaData({
     this.spotLightAnimes,
     this.popularAnimes,
     this.topUpcomingAnimes,
     this.completed,
   });
 
-  factory AnilistAnimeData.fromJson(dynamic data) {
-    return AnilistAnimeData(
+  factory MediaData.fromJson(dynamic data) {
+    return MediaData(
       spotLightAnimes: (data['trending']['media'] as List<dynamic>)
           .map((item) => Anime.fromJson(item))
           .toList(),
-      popularAnimes:
-          (data['popular']['media'] as List<dynamic>).map((item) => Anime.fromJson(item)).toList(),
+      popularAnimes: (data['popular']['media'] as List<dynamic>)
+          .map((item) => Anime.fromJson(item))
+          .toList(),
       topUpcomingAnimes: (data['latestReleasing']['media'] as List<dynamic>)
           .map((item) => Anime.fromJson(item))
           .toList(),

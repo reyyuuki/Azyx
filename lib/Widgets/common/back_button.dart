@@ -1,7 +1,6 @@
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class CustomBackButton extends StatelessWidget {
   const CustomBackButton({super.key});

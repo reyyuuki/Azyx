@@ -1,4 +1,4 @@
-import 'dart:developer';
+import 'package:azyx/Controllers/services/service_handler.dart';
 
 class Anime {
   String? title;
@@ -25,7 +25,9 @@ class Anime {
 
   factory Anime.fromJson(Map<dynamic, dynamic> data) {
     return Anime(
-      id: data['id'],
+      id: serviceHandler.serviceType.value == ServicesType.mal
+          ? data['idMal']
+          : data['id'],
       title: data['title']?['english'] ?? data['title']?['romaji'] ?? "Unknown",
       image: data['coverImage']?['large'] ?? "N/A",
       bannerImage: data['bannerImage'] ?? data['coverImage']?['large'] ?? '',
@@ -70,5 +72,43 @@ class Anime {
       'type': type,
       'episodes': episodes,
     };
+  }
+
+  factory Anime.fromMAL(Map<String, dynamic> json, {bool isManga = false}) {
+    final node = json['node'] ?? {};
+
+    return Anime(
+      id: node['id'] ?? 0,
+      title: node['title'] ?? node['alternative_titles']?['en'] ?? '??',
+      description: node['synopsis'] ?? '??',
+      image: node['main_picture']?['medium'] ?? '??',
+      bannerImage: node['main_picture']?['large'] ?? '??',
+      episodes: isManga ? node['num_chapters'] : node['num_episodes'],
+      type: node['media_type'] ?? '??',
+      // sea: node['start_season']?['season'] ?? '??',
+      // premiered: node['start_date'] ?? '??',
+      // duration: node['average_episode_duration']?.toString() ?? '??',
+      status: node['status'] ?? '??',
+      rating: node['mean']?.toString() ?? '??',
+      // popularity: node['popularity']?.toString() ?? '??',
+      // format: node['media_type'] ?? '??',
+      // aired: node['start_date'] ?? '??',
+      // totalChapters: node['num_chapters']?.toString() ?? '??',
+      genres: (node['genres'] as List<dynamic>?)
+              ?.map((genre) => genre['name']?.toString() ?? '??')
+              .toList() ??
+          [],
+      // studios: (node['studios'] as List<dynamic>?)
+      //     ?.map((studio) => studio['name']?.toString() ?? '??')
+      //     .toList(),
+      // characters: [],
+      // relations: [],
+      // recommendations: [],
+      // nextAiringEpisode: null,
+      // rankings: [],
+      // mediaContent: [],
+      // mediaType: node['media_type'] == 'tv' ? MediaType.anime : MediaType.manga,
+      // serviceType: ServicesType.mal,
+    );
   }
 }

@@ -120,19 +120,11 @@ class EpisodeListDrawer extends StatelessWidget {
                           onTap: () => ontap(filteredEpisodes[index]),
                           child: Stack(
                             children: [
-                              AzyXContainer(
-                                height: 120,
-                                width: 400,
-                                margin: const EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: CachedNetworkImage(
-                                    imageUrl: image!,
-                                    fit: BoxFit.cover,
-                                  ),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: CachedNetworkImage(
+                                  imageUrl: image!,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
                               Positioned.fill(

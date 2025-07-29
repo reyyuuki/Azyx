@@ -1,13 +1,10 @@
-
-import 'package:azyx/Controllers/anilist_auth.dart';
+import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
-import 'package:azyx/Widgets/anime/main_carousale.dart';
-import 'package:azyx/Widgets/anime/anime_scrollable_list.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/header.dart';
+import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../Widgets/common/search_bar.dart';
 
 class AnimeScreen extends StatelessWidget {
   const AnimeScreen({super.key});
@@ -18,57 +15,82 @@ class AnimeScreen extends StatelessWidget {
       child: ListView(
         children: [
           const Header(),
-          Obx(() {
-            if (anilistAuthController.animeData.value.spotLightAnimes == null) {
-              return Container(
-                alignment: Alignment.center,
-                height: Get.height * 0.8,
-                child: const CircularProgressIndicator(),
-              );
-            }
-            return SingleChildScrollView(
-              child: ListView(
-                padding: const EdgeInsets.all(10),
-                physics: const BouncingScrollPhysics(),
-                shrinkWrap: true,
-                children: [
-                  const SearchWidget(),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  MainCarousale(
-                    isManga: false,
-                      data: anilistAuthController
-                          .animeData.value.spotLightAnimes!),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  AnimeScrollableList(
-                    animeList:
-                        anilistAuthController.animeData.value.popularAnimes!,
-                          isManga: false,
-                    title: "Popular Animes",
-                  ),
-                  AnimeScrollableList(
-                    animeList: anilistAuthController
-                        .animeData.value.topUpcomingAnimes!,
-                          isManga: false,
-                    title: "TopUpcoming Animes",
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  AnimeScrollableList(
-                    animeList: anilistAuthController.animeData.value.completed!,
-                          isManga: false,
-                    title: "Completed Animes",
-                  ),
-                ],
-              ),
-            );
-          }),
+          Obx(() => serviceHandler.animeWidgets(context).value)
         ],
       ),
     );
   }
+}
+
+Widget buildSearchButton(BuildContext context, Function() ontap, bool isManga) {
+  return Material(
+    color: Colors.transparent,
+    child: InkWell(
+      onTap: ontap,
+      borderRadius: BorderRadius.circular(28),
+      splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+      highlightColor: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(
+            width: 1,
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).colorScheme.shadow.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(
+                Broken.search_normal,
+                size: 20,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: AzyXText(
+                text: isManga ? "Search for manga..." : "Search for anime...",
+                fontSize: 15,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                fontVariant: FontVariant.bold,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .primaryContainer
+                    .withOpacity(0.8),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }

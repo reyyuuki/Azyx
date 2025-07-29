@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  dartotsu_extension_bridge
   desktop_webview_window
   dynamic_color
   flutter_qjs
@@ -10,6 +11,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   media_kit_libs_linux
   media_kit_video
   url_launcher_linux
+  volume_controller
   window_to_front
 )
 

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:azyx/Models/anime_class.dart';
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';

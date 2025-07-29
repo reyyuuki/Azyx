@@ -1,5 +1,4 @@
 // ignore_for_file: non_constant_identifier_names
-import 'dart:developer';
 
 import 'package:azyx/Controllers/settings_controller.dart';
 import 'package:azyx/Controllers/ui_setting_controller.dart';
