@@ -3,33 +3,30 @@
 import 'dart:developer';
 
 import 'package:azyx/Controllers/services/service_handler.dart';
+import 'package:azyx/Controllers/source/source_controller.dart';
+import 'package:azyx/Controllers/source/source_mapper.dart';
 import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Models/offline_item.dart';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
-import 'package:azyx/Controllers/anilist_data_controller.dart';
+import 'package:azyx/Screens/Anime/Details/tabs/add_to_list_floater.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/details_section.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/watch_section.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
-import 'package:azyx/Widgets/common/_placeholder.dart';
 import 'package:azyx/Widgets/common/scrollable_app_bar.dart';
 import 'package:azyx/Widgets/helper/platform_builder.dart';
-import 'package:azyx/api/Mangayomi/Extensions/extensions_provider.dart';
-import 'package:azyx/api/Mangayomi/Model/Source.dart';
-import 'package:azyx/api/Mangayomi/Search/get_detail.dart';
-import 'package:azyx/api/Mangayomi/Search/search.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
-import 'package:azyx/utils/Anify/anify_episodes.dart';
-import 'package:azyx/utils/Functions/mapping_helper.dart';
+import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:azyx/utils/mapper.dart';
 import 'package:azyx/utils/utils.dart';
+import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
+import 'package:expandable_page_view/expandable_page_view.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 
-class AnimeDetailsScreen extends ConsumerStatefulWidget {
+class AnimeDetailsScreen extends StatefulWidget {
   final String tagg;
   final CarousaleData? smallMedia;
   final OfflineItem? allData;
@@ -42,26 +39,55 @@ class AnimeDetailsScreen extends ConsumerStatefulWidget {
       this.allData});
 
   @override
-  ConsumerState<AnimeDetailsScreen> createState() => _DetailsScreenState();
+  State<AnimeDetailsScreen> createState() => _DetailsScreenState();
 }
 
-class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
+class _DetailsScreenState extends State<AnimeDetailsScreen>
     with SingleTickerProviderStateMixin {
-  final Rx<String> title = ''.obs;
+  final RxString title = ''.obs;
   final Rx<String> image = ''.obs;
   final Rx<String> coverImage = ''.obs;
   final Rx<int> id = 0.obs;
   final Rx<AnilistMediaData> mediaData = AnilistMediaData().obs;
   final Rx<bool> isLoading = true.obs;
-  final RxList<Source> installedExtensions = RxList<Source>();
   final Rx<Source> selectedSource = Source().obs;
   final Rx<String> animeTitle = "??".obs;
   final Rx<String> totalEpisodes = "??".obs;
   final RxList<Episode> episodesList = RxList();
+
   late TabController _tabBarController;
+  late PageController _pageController;
+
   final Rx<String> _anilistError = ''.obs;
   final Rx<bool> _extenstionError = false.obs;
   final Rx<String> syncId = ''.obs;
+  final RxInt _currentIndex = 0.obs;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabBarController = TabController(length: 2, vsync: this);
+    _pageController = PageController();
+    _tabBarController.addListener(() {
+      if (_tabBarController.indexIsChanging) {
+        _currentIndex.value = _tabBarController.index;
+        _pageController.animateToPage(
+          _tabBarController.index,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+
+    convertData();
+  }
+
+  @override
+  void dispose() {
+    _tabBarController.dispose();
+    _pageController.dispose();
+    super.dispose();
+  }
 
   Future<void> loadData() async {
     try {
@@ -74,7 +100,7 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
       log("Error while getting data for details: $e");
     }
     _syncMedia();
-    loadDetails(selectedSource.value);
+    loadDetails();
   }
 
   Future<void> _syncMedia() async {
@@ -84,17 +110,6 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
     );
     syncId.value = response ?? '';
     Utils.log('MAL ${syncId.value} / ${id.value}');
-  }
-
-  Future<void> _initExtensions() async {
-    final container = ProviderContainer();
-    final extensions =
-        await container.read(getExtensionsStreamProvider(false).future);
-    installedExtensions.value =
-        extensions.where((source) => source.isAdded!).toList();
-    if (installedExtensions.isNotEmpty) {
-      selectedSource.value = installedExtensions.first;
-    }
   }
 
   void convertData() {
@@ -113,7 +128,7 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
       anilistAddToListController.findAnime(AnilistMediaData(
           id: widget.smallMedia?.id,
           title: widget.smallMedia?.title,
-          episodes: widget.allData?.episodesList!.length));
+          episodes: widget.allData?.episodesList?.length ?? 0));
       image.value = widget.smallMedia!.image;
       title.value = widget.smallMedia!.title;
       id.value = widget.smallMedia!.id;
@@ -121,157 +136,156 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
     }
   }
 
-  Future<void> getEpisodes(String link, Source source) async {
-    final episodeResult = await getDetail(url: link, source: source);
-    final data = episodeResult.chapters!.reversed.toList();
-
-    //Step:1 - Mapping Basic Episodes
+  Future<void> getEpisodes(String link) async {
+    final episodeResult = await sourceController.activeSource.value!.methods
+        .getDetail(DMedia.withUrl(link));
+    final data = episodeResult.episodes!.reversed.toList();
     final mappedList = data.map((item) {
       return mChapterToEpisode(item, episodeResult);
     }).toList();
     episodesList.value = mappedList;
     totalEpisodes.value = episodesList.length.toString();
-    //Step:2 - Fetching AnifyEpisodes
-    final temp = await fetchAnifyEpisodes(widget.smallMedia!.id, mappedList);
-    episodesList.value = temp;
-    setState(() {});
   }
 
-  Future<void> loadDetails(Source source) async {
+  Future<void> loadDetails() async {
     try {
-      //Step:1 - Searching Anime
-      final response = await search(
-          source: source,
-          query: widget.smallMedia!.title,
-          page: 1,
-          filterList: []);
+      final result = await mapMedia(formatTitles(mediaData.value), title);
 
-      //Step:2 - Mapping Anime by title
-      if (response != null) {
-        final result =
-            await mappingHelper(title.value, response.toJson()['list']);
-
-        //Step:3 - Fetchting details
-        if (result != null) {
-          getEpisodes(result['link'], source);
-          animeTitle.value = result['name'] ?? '';
-        } else {
-          log("error");
-          _extenstionError.value = true;
-        }
+      if (result != null) {
+        getEpisodes(result.url!);
+        animeTitle.value = result.title ?? '';
+      } else {
+        log("error");
+        _extenstionError.value = true;
       }
     } catch (e, stackTrace) {
       log("Error while loading episode data: $e / $stackTrace");
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _tabBarController = TabController(length: 2, vsync: this);
-    _initExtensions();
-    convertData();
+  List<String> formatTitles(AnilistMediaData media) {
+    return ['${media.title}*ANIME', media.title!];
+  }
+
+  void _onPageChanged(int index) {
+    _currentIndex.value = index;
+    _tabBarController.animateTo(index);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      body: CustomScrollView(
-        slivers: [
-          ScrollableAppBar(
-            mediaData: mediaData,
-            image: image.value,
-            tagg: widget.tagg,
-          ),
-          SliverPersistentHeader(
-            pinned: true,
-            floating: true,
-            delegate: _TabBarDelegate(
-              tabBar: AzyXContainer(
-                padding: const EdgeInsets.all(8),
-                margin: EdgeInsets.fromLTRB(
-                    getResponsiveSize(context,
-                        mobileSize: 15, dektopSize: Get.width * 0.2),
-                    40,
-                    getResponsiveSize(context,
-                        mobileSize: 15, dektopSize: Get.width * 0.2),
-                    0),
-                decoration: BoxDecoration(
-                    color:
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerLowest,
-                          spreadRadius: 2,
-                          offset: const Offset(0, 7),
-                          blurRadius: 20)
-                    ]),
-                child: TabBar(
-                  controller: _tabBarController,
-                  tabs: const [
-                    Tab(
-                      icon: Icon(Broken.information, size: 24),
-                      text: 'Details',
+      bottomNavigationBar: Container(
+        height: 90,
+        margin: const EdgeInsets.only(bottom: 10),
+        child: Obx(
+          () => AddToListFloater(
+              data: OfflineItem(
+                  mediaData: mediaData.value,
+                  number: '1',
+                  animeTitle: title.value,
+                  chaptersList: []),
+              mediaData: mediaData.value),
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            ScrollableAppBar(
+                mediaData: mediaData, image: image.value, tagg: widget.tagg),
+            if (sourceController.installedMangaExtensions.isNotEmpty)
+              if (sourceController.installedExtensions.isNotEmpty)
+                AzyXContainer(
+                  padding: const EdgeInsets.all(8),
+                  margin: EdgeInsets.fromLTRB(
+                      getResponsiveSize(context,
+                          mobileSize: 15, dektopSize: Get.width * 0.2),
+                      40,
+                      getResponsiveSize(context,
+                          mobileSize: 15, dektopSize: Get.width * 0.2),
+                      0),
+                  decoration: BoxDecoration(
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerLowest
+                                .withOpacity(1.glowMultiplier()),
+                            spreadRadius: 2.spreadMultiplier(),
+                            offset: const Offset(0, 7),
+                            blurRadius: 20.blurMultiplier())
+                      ]),
+                  child: SizedBox(
+                    height: 52,
+                    child: TabBar(
+                      controller: _tabBarController,
+                      splashBorderRadius: BorderRadius.circular(8),
+                      tabs: const [
+                        Tab(
+                          icon: Icon(Broken.information, size: 24),
+                          text: 'Details',
+                        ),
+                        Tab(
+                          icon: Icon(Icons.movie_filter, size: 24),
+                          text: 'Watch',
+                        ),
+                      ],
+                      labelStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: "Poppins-Bold",
+                          color: Colors.black),
+                      unselectedLabelStyle: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.normal,
+                        fontFamily: "Poppins-Bold",
+                        color: Colors.grey,
+                      ),
+                      indicator: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      dividerColor: Colors.transparent,
                     ),
-                    Tab(
-                      icon: Icon(Icons.movie_filter, size: 24),
-                      text: 'Watch',
-                    ),
-                  ],
-                  labelStyle: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: "Poppins-Bold",
-                      color: Colors.black),
-                  unselectedLabelStyle: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.normal,
-                    fontFamily: "Poppins-Bold",
-                    color: Colors.grey,
                   ),
-                  indicator: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  dividerColor: Colors.transparent,
                 ),
-              ),
-            ),
-          ),
-          SliverFillRemaining(
-            fillOverscroll: true,
-            child: TabBarView(
-              controller: _tabBarController,
+            const SizedBox(height: 20),
+            ExpandablePageView(
+              controller: _pageController,
+              onPageChanged: _onPageChanged,
               children: [
                 Obx(() => isLoading.value || _anilistError.value.isNotEmpty
-                    ? Center(
-                        child: _anilistError.value.isNotEmpty
-                            ? AzyXText(
-                                text: _anilistError.value,
-                                textAlign: TextAlign.center,
-                                fontSize: 20,
-                              )
-                            : const CircularProgressIndicator(),
+                    ? SizedBox(
+                        height: 400,
+                        child: Center(
+                          child: _anilistError.value.isNotEmpty
+                              ? AzyXText(
+                                  text: _anilistError.value,
+                                  textAlign: TextAlign.center,
+                                  fontSize: 20,
+                                )
+                              : const CircularProgressIndicator(),
+                        ),
                       )
                     : DetailsSection(
                         animeTitle: animeTitle.value,
                         episodesList: episodesList,
                         mediaData: mediaData,
-                        index: _tabBarController.index,
+                        index: 0,
                         isManga: false,
                       )),
                 Obx(
-                  () => installedExtensions.isEmpty
-                      ? const PlaceholderExtensions()
+                  () => sourceController.installedExtensions.isEmpty
+                      ? const SizedBox.shrink()
                       : WatchSection(
                           onChanged: (value) {
                             totalEpisodes.value = '??';
-                            getEpisodes(value, selectedSource.value);
+                            getEpisodes(value);
                             _extenstionError.value = false;
                           },
                           onTitleChanged: (value) {
@@ -280,53 +294,26 @@ class _DetailsScreenState extends ConsumerState<AnimeDetailsScreen>
                           onSourceChanged: (value) {
                             animeTitle.value = '??';
                             totalEpisodes.value = '??';
-                            selectedSource.value = value;
                             episodesList.value = [];
                             _extenstionError.value = false;
-                            loadDetails(value);
+                            loadDetails();
                           },
                           mediaData: mediaData.value,
                           hasError: _extenstionError,
                           id: id.value,
                           image: coverImage.value,
                           animeTitle: animeTitle,
-                          installedExtensions: installedExtensions,
-                          selectedSource: selectedSource,
+                          installedExtensions:
+                              sourceController.installedExtensions,
                           totalEpisodes: totalEpisodes,
                           episodelist: episodesList,
                         ),
                 ),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
-  }
-}
-
-class _TabBarDelegate extends SliverPersistentHeaderDelegate {
-  final Widget tabBar;
-
-  _TabBarDelegate({required this.tabBar});
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return AzyXContainer(
-      color: Theme.of(context).colorScheme.surface,
-      child: tabBar,
-    );
-  }
-
-  @override
-  double get maxExtent => 105;
-
-  @override
-  double get minExtent => 105;
-
-  @override
-  bool shouldRebuild(_TabBarDelegate oldDelegate) {
-    return tabBar != oldDelegate.tabBar;
   }
 }
