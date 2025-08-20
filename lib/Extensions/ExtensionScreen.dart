@@ -1,28 +1,27 @@
 // ignore_for_file: file_names
 
+import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Extensions/ExtensionList.dart';
+import 'package:azyx/Extensions/add_repo_sheet.dart';
 import 'package:azyx/Widgets/ScrollConfig.dart';
-import 'package:azyx/api/Mangayomi/Model/Source.dart';
+import 'package:azyx/Widgets/language.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
+import 'package:dartotsu_extension_bridge/Models/Source.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:isar/isar.dart';
 
-import '../../Preferences/PrefManager.dart';
-import '../../Preferences/Preferences.dart';
-import '../../StorageProvider.dart';
+import '../storage_provider.dart';
 import '../../main.dart';
 
-class ExtensionScreen extends ConsumerStatefulWidget {
+class ExtensionScreen extends StatefulWidget {
   const ExtensionScreen({super.key});
 
   @override
-  ConsumerState<ExtensionScreen> createState() => _BrowseScreenState();
+  State<ExtensionScreen> createState() => _BrowseScreenState();
 }
 
-class _BrowseScreenState extends ConsumerState<ExtensionScreen>
+class _BrowseScreenState extends State<ExtensionScreen>
     with TickerProviderStateMixin {
   late TabController _tabBarController;
 
@@ -35,7 +34,6 @@ class _BrowseScreenState extends ConsumerState<ExtensionScreen>
     _tabBarController.addListener(() {
       setState(() {
         _textEditingController.clear();
-        //_isSearch = false;
       });
     });
   }
@@ -45,8 +43,8 @@ class _BrowseScreenState extends ConsumerState<ExtensionScreen>
   }
 
   final _textEditingController = TextEditingController();
+  late final _selectedLanguage = 'all';
 
-  //bool _isSearch = false;
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context).colorScheme;
@@ -70,11 +68,9 @@ class _BrowseScreenState extends ConsumerState<ExtensionScreen>
             actions: [
               IconButton(
                   onPressed: () {
-                    "https://miraienoki.github.io/anymex-extensions/anime_index.json";
-
-                    "https://miraienoki.github.io/anymex-extensions/index.json";
                     showBottom(context, (name) {});
                   },
+                  tooltip: '',
                   icon: const Icon(Ionicons.logo_github))
             ],
             leading: IconButton(
@@ -82,6 +78,7 @@ class _BrowseScreenState extends ConsumerState<ExtensionScreen>
                   Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) => HomePage()));
                 },
+                tooltip: '',
                 icon: const Icon(Broken.arrow_left_2)),
             iconTheme: IconThemeData(color: theme.primary),
             bottom: TabBar(
@@ -90,10 +87,14 @@ class _BrowseScreenState extends ConsumerState<ExtensionScreen>
               controller: _tabBarController,
               dragStartBehavior: DragStartBehavior.start,
               tabs: [
-                _buildTab(context, 'INSTALLED ANIME', false, true),
-                _buildTab(context, 'AVAILABLE ANIME', false, false),
-                _buildTab(context, 'INSTALLED MANGA', true, true),
-                _buildTab(context, 'AVAILABLE MANGA', true, false),
+                _buildTab(
+                    context, 'INSTALLED ANIME', false, true, ItemType.anime),
+                _buildTab(
+                    context, 'AVAILABLE ANIME', false, false, ItemType.anime),
+                _buildTab(
+                    context, 'INSTALLED MANGA', true, true, ItemType.manga),
+                _buildTab(
+                    context, 'AVAILABLE MANGA', true, false, ItemType.manga),
               ],
             ),
           ),
@@ -104,21 +105,25 @@ class _BrowseScreenState extends ConsumerState<ExtensionScreen>
                 installed: true,
                 query: _textEditingController.text,
                 isManga: false,
+                itemType: ItemType.anime,
               ),
               Extension(
                 installed: false,
                 query: _textEditingController.text,
                 isManga: false,
+                itemType: ItemType.anime,
               ),
               Extension(
                 installed: true,
                 query: _textEditingController.text,
                 isManga: true,
+                itemType: ItemType.manga,
               ),
               Extension(
                 installed: false,
                 query: _textEditingController.text,
                 isManga: true,
+                itemType: ItemType.manga,
               ),
             ],
           ),
@@ -127,8 +132,8 @@ class _BrowseScreenState extends ConsumerState<ExtensionScreen>
     );
   }
 
-  Widget _buildTab(
-      BuildContext context, String label, bool isManga, bool installed) {
+  Widget _buildTab(BuildContext context, String label, bool isManga,
+      bool installed, ItemType itemType) {
     return Tab(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -142,30 +147,37 @@ class _BrowseScreenState extends ConsumerState<ExtensionScreen>
             ),
           ),
           const SizedBox(width: 8),
-          _extensionUpdateNumbers(context, isManga, installed),
+          _extensionUpdateNumbers(
+              context, isManga, installed, itemType, _selectedLanguage),
         ],
       ),
     );
   }
 }
 
-Widget _extensionUpdateNumbers(
-    BuildContext context, bool isManga, bool installed) {
+Widget _extensionUpdateNumbers(BuildContext context, bool isManga,
+    bool installed, ItemType itemType, String selectedLanguage) {
+  List<Source> getExtensionsList() {
+    if (installed) {
+      return sourceController.getInstalledExtensions(itemType);
+    } else {
+      return sourceController.getAvailableExtensions(itemType);
+    }
+  }
+
   return StreamBuilder(
-      stream: isar.sources
-          .filter()
-          .idIsNotNull()
-          .and()
-          .isAddedEqualTo(installed)
-          .isActiveEqualTo(true)
-          .isMangaEqualTo(isManga)
-          .watch(fireImmediately: true),
+      stream: Stream.periodic(
+          const Duration(seconds: 1), (_) => getExtensionsList()),
+      initialData: getExtensionsList(),
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data!.isNotEmpty) {
           final entries = snapshot.data!
-              .where((element) => PrefManager.getVal(PrefName.NSFWExtensions)
-                  ? true
-                  : element.isNsfw == false)
+              .where(
+                (element) => selectedLanguage != 'all'
+                    ? element.lang!.toLowerCase() ==
+                        completeLanguageCode(selectedLanguage)
+                    : true,
+              )
               .toList();
 
           return entries.isEmpty
@@ -181,65 +193,4 @@ Widget _extensionUpdateNumbers(
         }
         return Container();
       });
-}
-
-void showBottom(BuildContext context, Function(String) onAddRepository) {
-  TextEditingController controller = TextEditingController();
-
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-    ),
-    builder: (context) {
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              "Add Repository",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: "Repository URL",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor: WidgetStatePropertyAll(
-                    Theme.of(context).colorScheme.primary),
-                shadowColor: WidgetStatePropertyAll(
-                    Theme.of(context).colorScheme.primary),
-              ),
-              onPressed: () {
-                if (controller.text.isNotEmpty) {
-                  onAddRepository(controller.text);
-                  Navigator.pop(context);
-                }
-              },
-              child: Text(
-                "Add Repository",
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.inversePrimary,
-                    fontFamily: "Poppins-Bold"),
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              "Disclaimer: This app does not promote piracy. Please add only legal and authorized repositories.",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, fontFamily: "Poppins"),
-            ),
-          ],
-        ),
-      );
-    },
-  );
 }

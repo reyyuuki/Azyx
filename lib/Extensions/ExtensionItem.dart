@@ -1,43 +1,44 @@
 // ignore_for_file: non_constant_identifier_names, use_build_context_synchronously, file_names
 
-import 'package:azyx/Extensions/ExtensionSettings/ExtensionSettings.dart';
+import 'dart:developer';
+
+import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Widgets/AlertDialogBuilder.dart';
-import 'package:azyx/api/Mangayomi/Eval/dart/model/source_preference.dart';
-import 'package:azyx/api/Mangayomi/Model/Source.dart';
+import 'package:azyx/core/icons/icons_broken.dart';
+import 'package:azyx/utils/Functions/functions.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dartotsu_extension_bridge/ExtensionManager.dart';
+import 'package:dartotsu_extension_bridge/Models/Source.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:get/instance_manager.dart';
 import 'package:icons_plus/icons_plus.dart';
-import 'package:isar/isar.dart';
 
-import '../../api/Mangayomi/Extensions/GetSourceList.dart';
-import '../../api/Mangayomi/Extensions/fetch_anime_sources.dart';
-import '../../api/Mangayomi/Extensions/fetch_manga_sources.dart';
 import '../../main.dart';
 
-class ExtensionListTileWidget extends ConsumerStatefulWidget {
+class ExtensionListTileWidget extends StatefulWidget {
   final Source source;
-  final bool isTestSource;
+  final ItemType mediaType;
 
   const ExtensionListTileWidget({
     super.key,
     required this.source,
-    this.isTestSource = false,
+    required this.mediaType,
   });
 
   @override
-  ConsumerState<ExtensionListTileWidget> createState() =>
+  State<ExtensionListTileWidget> createState() =>
       _ExtensionListTileWidgetState();
 }
 
-class _ExtensionListTileWidgetState
-    extends ConsumerState<ExtensionListTileWidget>
+class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
     with TickerProviderStateMixin {
   bool _isLoading = false;
+  double _installProgress = 0.0;
   late AnimationController _shimmerController;
   late AnimationController _pulseController;
+  late AnimationController _progressController;
   late Animation<double> _shimmerAnimation;
   late Animation<double> _pulseAnimation;
 
@@ -53,6 +54,11 @@ class _ExtensionListTileWidgetState
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat(reverse: true);
+
+    _progressController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
 
     _shimmerAnimation = Tween<double>(
       begin: -1.0,
@@ -75,32 +81,71 @@ class _ExtensionListTileWidgetState
   void dispose() {
     _shimmerController.dispose();
     _pulseController.dispose();
+    _progressController.dispose();
     super.dispose();
   }
 
   Future<void> _handleSourceAction() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _installProgress = 0.0;
+    });
 
-    if (widget.source.isManga!) {
-      await ref.read(
-          fetchMangaSourcesListProvider(id: widget.source.id, reFresh: true)
-              .future);
-    } else {
-      await ref.read(
-          fetchAnimeSourcesListProvider(id: widget.source.id, reFresh: true)
-              .future);
+    _progressController.reset();
+    _progressController.forward();
+
+    try {
+      // More realistic progress animation
+      for (int i = 0; i <= 90; i += 15) {
+        await Future.delayed(const Duration(milliseconds: 100));
+        if (mounted) {
+          setState(() => _installProgress = i / 100);
+        }
+      }
+
+      await widget.source.extensionType
+          ?.getManager()
+          .installSource(widget.source);
+      await sourceController.sortExtensions();
+
+      // Complete the progress quickly
+      if (mounted) {
+        setState(() => _installProgress = 1.0);
+        // Immediately hide loading state after completion
+        await Future.delayed(const Duration(milliseconds: 100));
+        setState(() {
+          _isLoading = false;
+          _installProgress = 0.0;
+        });
+      }
+    } catch (e) {
+      log(e.toString());
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _installProgress = 0.0;
+        });
+      }
     }
-    if (mounted) setState(() => _isLoading = false);
+  }
+
+  List<Source> get _installedExtensions {
+    switch (widget.mediaType) {
+      case ItemType.manga:
+        return sourceController.installedMangaExtensions.value;
+      case ItemType.anime:
+        return sourceController.installedExtensions.value;
+      case ItemType.novel:
+        return sourceController.installedNovelExtensions.value;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
-    final updateAvailable = widget.isTestSource
-        ? false
-        : compareVersions(widget.source.version!, widget.source.versionLast!) <
-            0;
-    final sourceNotEmpty = widget.source.sourceCode?.isNotEmpty ?? false;
+    final updateAvailable = widget.source.hasUpdate ?? false;
+    final sourceNotEmpty =
+        _installedExtensions.any((e) => e.id == widget.source.id);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -144,7 +189,6 @@ class _ExtensionListTileWidgetState
             borderRadius: BorderRadius.circular(20),
             child: Stack(
               children: [
-                // Subtle shimmer effect
                 AnimatedBuilder(
                   animation: _shimmerAnimation,
                   builder: (context, child) {
@@ -163,55 +207,135 @@ class _ExtensionListTileWidgetState
                     );
                   },
                 ),
-                // Main content
+                if (_isLoading)
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: theme.surfaceVariant.withOpacity(0.5),
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(20),
+                          bottomRight: Radius.circular(20),
+                        ),
+                      ),
+                      child: FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: _installProgress,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                theme.primary,
+                                theme.primary.withOpacity(0.8),
+                              ],
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(20),
+                              bottomRight: Radius.circular(20),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      // Enhanced icon container
                       _buildIconContainer(theme, updateAvailable),
                       const SizedBox(width: 16),
-                      // Content section
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Title with gradient text effect
-                            ShaderMask(
-                              shaderCallback: (bounds) => LinearGradient(
-                                colors: [
-                                  theme.onSurface,
-                                  theme.onSurface.withOpacity(0.8),
-                                ],
-                              ).createShader(bounds),
-                              child: Text(
-                                widget.source.name!,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 16.0,
-                                  letterSpacing: 0.5,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ShaderMask(
+                                    shaderCallback: (bounds) => LinearGradient(
+                                      colors: [
+                                        theme.onSurface,
+                                        theme.onSurface.withOpacity(0.8),
+                                      ],
+                                    ).createShader(bounds),
+                                    child: Text(
+                                      widget.source.name!,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 16.0,
+                                        letterSpacing: 0.5,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                              ],
                             ),
                             const SizedBox(height: 6),
-                            // Enhanced subtitle row
-                            _buildSubtitleRow(theme),
+                            Row(
+                              children: [
+                                Expanded(child: _buildSubtitleRow(theme)),
+                                const SizedBox(width: 8),
+                                _buildExtensionTypeBadge(theme),
+                              ],
+                            ),
                           ],
                         ),
                       ),
                       const SizedBox(width: 12),
-                      // Enhanced action buttons
-                      _buildActionButtons(
-                          sourceNotEmpty, updateAvailable, theme),
+                      _buildButtons(sourceNotEmpty, updateAvailable, theme),
                     ],
                   ),
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExtensionTypeBadge(ColorScheme theme) {
+    if (widget.source.extensionType == null) return const SizedBox();
+
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: theme.primaryContainer.withOpacity(0.4),
+        border: Border.all(
+          color: theme.primary.withOpacity(0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: theme.primary.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(6),
+        child: CachedNetworkImage(
+          imageUrl: getExtensionIcon(widget.source.extensionType!),
+          fit: BoxFit.cover,
+          placeholder: (context, url) => Icon(
+            Icons.extension,
+            color: theme.onPrimaryContainer,
+            size: 16,
+          ),
+          errorWidget: (context, url, error) => Icon(
+            Icons.extension,
+            color: theme.onPrimaryContainer,
+            size: 16,
           ),
         ),
       ),
@@ -252,7 +376,7 @@ class _ExtensionListTileWidgetState
             child: Stack(
               children: [
                 Center(
-                  child: widget.source.iconUrl!.isEmpty
+                  child: widget.source.iconUrl?.isEmpty ?? true
                       ? Icon(
                           Icons.extension_rounded,
                           color: theme.onPrimaryContainer,
@@ -316,7 +440,6 @@ class _ExtensionListTileWidgetState
       spacing: 8,
       runSpacing: 4,
       children: [
-        // Version badge
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
           decoration: BoxDecoration(
@@ -338,8 +461,7 @@ class _ExtensionListTileWidgetState
             ),
           ),
         ),
-        // NSFW badge
-        if (widget.source.isNsfw!)
+        if (widget.source.isNsfw ?? false)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
@@ -361,7 +483,6 @@ class _ExtensionListTileWidgetState
               ),
             ),
           ),
-        // Obsolete badge
         if (widget.source.isObsolete ?? false)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -388,178 +509,120 @@ class _ExtensionListTileWidgetState
     );
   }
 
-  Widget _buildActionButtons(
+  Widget _buildButtons(
       bool sourceNotEmpty, bool updateAvailable, ColorScheme theme) {
-    if (_isLoading) {
-      return Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: theme.primary.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Center(
-          child: SizedBox(
-            width: 18,
-            height: 18,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.5,
-              valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
-            ),
-          ),
-        ),
-      );
-    }
-
-    if (!sourceNotEmpty) {
-      return _buildGlowingButton(
-        icon: Icons.download_rounded,
-        onPressed: _handleSourceAction,
-        theme: theme,
-        isPrimary: true,
-      );
-    }
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _buildGlowingButton(
-          icon:
-              updateAvailable ? Icons.update_rounded : FontAwesome.trash_solid,
-          onPressed: () => _handleUpdateOrDelete(updateAvailable),
-          theme: theme,
-          isPrimary: updateAvailable,
-          isDestructive: !updateAvailable,
-        ),
-        const SizedBox(width: 8),
-        _buildGlowingButton(
-          icon: FontAwesome.ellipsis_vertical_solid,
-          onPressed: () async {
-            Get.to(() => SourcePreferenceWidget(
-                  source: widget.source,
-                  sourcePreference: [],
-                ));
-          },
-          theme: theme,
-          isPrimary: false,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGlowingButton({
-    required IconData icon,
-    required VoidCallback onPressed,
-    required ColorScheme theme,
-    bool isPrimary = false,
-    bool isDestructive = false,
-  }) {
-    Color buttonColor;
-    Color iconColor;
-    Color glowColor;
-
-    if (isDestructive) {
-      buttonColor = theme.errorContainer.withOpacity(0.8);
-      iconColor = theme.onErrorContainer;
-      glowColor = theme.error;
-    } else if (isPrimary) {
-      buttonColor = theme.primaryContainer.withOpacity(0.9);
-      iconColor = theme.onPrimaryContainer;
-      glowColor = theme.primary;
-    } else {
-      buttonColor = theme.tertiaryContainer.withOpacity(0.8);
-      iconColor = theme.onTertiaryContainer;
-      glowColor = theme.tertiary;
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: glowColor.withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: buttonColor,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(12),
-          splashColor: glowColor.withOpacity(0.2),
-          highlightColor: glowColor.withOpacity(0.1),
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: glowColor.withOpacity(0.3),
-                width: 1,
-              ),
-            ),
-            child: Center(
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 18,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _handleUpdateOrDelete(bool updateAvailable) async {
-    if (updateAvailable) {
-      setState(() => _isLoading = true);
-      widget.source.isManga!
-          ? await ref.watch(
-              fetchMangaSourcesListProvider(id: widget.source.id, reFresh: true)
-                  .future)
-          : await ref.watch(
-              fetchAnimeSourcesListProvider(id: widget.source.id, reFresh: true)
-                  .future);
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    } else {
-      AlertDialogBuilder(context)
-        ..setTitle("Delete Extension")
-        ..setMessage("Are you sure you want to delete this extension?")
-        ..setPositiveButton("Yes", () async {
-          final sourcePrefsIds = isar.sourcePreferences
-              .filter()
-              .sourceIdEqualTo(widget.source.id!)
-              .findAllSync()
-              .map((e) => e.id!)
-              .toList();
-          final sourcePrefsStringIds = isar.sourcePreferenceStringValues
-              .filter()
-              .sourceIdEqualTo(widget.source.id!)
-              .findAllSync()
-              .map((e) => e.id)
-              .toList();
-          isar.writeTxnSync(() {
-            if (widget.source.isObsolete ?? false) {
-              isar.sources.deleteSync(widget.source.id!);
-            } else {
-              isar.sources.putSync(widget.source
-                ..sourceCode = ""
-                ..isAdded = false
-                ..isPinned = false);
+    void onTap() async {
+      if (updateAvailable) {
+        setState(() => _isLoading = true);
+        try {
+          widget.source.extensionType!.getManager().update([widget.source.id!]);
+          await sourceController.sortExtensions();
+        } catch (e) {
+          log("Update Failed => ${e.toString()}");
+        }
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+      } else {
+        AlertDialogBuilder(context)
+          ..setTitle("Delete Extension")
+          ..setMessage("Are you sure you want to delete this extension?")
+          ..setPositiveButton("Yes", () async {
+            setState(() => _isLoading = true);
+            try {
+              log("Uninstalling => ${widget.source.id}");
+              await widget.source.extensionType!
+                  .getManager()
+                  .uninstallSource(widget.source);
+              await sourceController.sortExtensions();
+            } catch (e) {
+              log("Uninstall Failed => ${e.toString()}");
             }
-            isar.sourcePreferences.deleteAllSync(sourcePrefsIds);
-            isar.sourcePreferenceStringValues
-                .deleteAllSync(sourcePrefsStringIds);
-          });
-        })
-        ..setNegativeButton("No", null)
-        ..show();
+            if (mounted) {
+              setState(() => _isLoading = false);
+            }
+          })
+          ..setNegativeButton("No", () => Get.back())
+          ..show();
+      }
     }
+
+    return !sourceNotEmpty
+        ? Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: theme.primaryContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: _isLoading
+                ? Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: theme.onPrimaryContainer,
+                        value:
+                            _installProgress == 0.0 ? null : _installProgress,
+                      ),
+                    ),
+                  )
+                : IconButton(
+                    onPressed: _isLoading ? null : () => _handleSourceAction(),
+                    icon: Icon(
+                      Icons.download,
+                      color: theme.onPrimaryContainer,
+                      size: 20,
+                    ),
+                  ),
+          )
+        : SizedBox(
+            width: 104,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: updateAvailable
+                        ? theme.tertiaryContainer
+                        : theme.errorContainer.withAlpha(122),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: onTap,
+                    icon: Icon(
+                      size: 16,
+                      updateAvailable ? Icons.update : Broken.trash,
+                      color: updateAvailable
+                          ? theme.onTertiaryContainer
+                          : theme.onErrorContainer,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: theme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: () async {},
+                    icon: Icon(
+                      Iconsax.setting_2_bold,
+                      size: 16,
+                      color: theme.onSecondaryContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
   }
 }
