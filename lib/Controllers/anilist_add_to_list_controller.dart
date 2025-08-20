@@ -7,6 +7,8 @@ import 'package:azyx/Models/user_anime.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
+import 'package:azyx/Widgets/custom_text_field.dart';
+import 'package:azyx/Widgets/drop_dwon.dart';
 import 'package:azyx/utils/constants.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +40,7 @@ class AnilistAddToListController extends GetxController {
               title: data.title);
         },
       );
-      animeStatus.value = returnConvertedStatus(anime.value.status ?? '');
+      animeStatus.value = anime.value.status ?? '';
     }
     log("status: ${anime.value.status}");
   }
@@ -55,7 +57,7 @@ class AnilistAddToListController extends GetxController {
               title: data.title);
         },
       );
-      mangaStatus.value = returnConvertedStatus(manga.value.status ?? '');
+      mangaStatus.value = manga.value.status ?? '';
       log("status: ${manga.value.status}");
     } else {
       log("nothing found");
@@ -100,138 +102,281 @@ class AnilistAddToListController extends GetxController {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      barrierColor: Colors.black87.withOpacity(0.5),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      barrierColor: Colors.black87.withOpacity(0.6),
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom * 1),
-          child: AzyXGradientContainer(
-            height: Get.height * 0.5,
-            padding: const EdgeInsets.all(15),
+        final theme = Theme.of(context).colorScheme;
+        return Container(
+          margin: const EdgeInsets.only(top: 50),
+          decoration: BoxDecoration(
+            color: theme.surface,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-            child: ListView(
+            boxShadow: [
+              BoxShadow(
+                color: theme.shadow.withOpacity(0.2),
+                blurRadius: 20,
+                spreadRadius: 0,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              top: 8,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                AzyXText(
-                  text: 'Add To List',
-                  textAlign: TextAlign.center,
-                  fontVariant: FontVariant.bold,
-                  fontSize: 20,
-                  color: Theme.of(context).colorScheme.primary,
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: theme.onSurfaceVariant.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-                const SizedBox(
-                  height: 30,
-                ),
-                DropdownButtonFormField<String>(
-                  value: anime.value.status ?? "CURRENT",
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: 'Choose Status',
-                    filled: true,
-                    fillColor:
-                        Theme.of(context).colorScheme.surfaceContainerLowest,
-                    labelStyle:
-                        TextStyle(color: Theme.of(context).colorScheme.primary),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onPrimaryFixedVariant),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.primary),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 60,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: theme.shadow.withOpacity(0.1),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(
+                                  image,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Container(
+                                    color: theme.surfaceContainerHighest,
+                                    child: Icon(
+                                      Icons.image_not_supported,
+                                      color: theme.onSurfaceVariant,
+                                      size: 24,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  AzyXText(
+                                    text: 'Add to Your List',
+                                    fontSize: 24,
+                                    fontVariant: FontVariant.bold,
+                                    color: theme.primary,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  AzyXText(
+                                    text: title,
+                                    fontSize: 16,
+                                    fontVariant: FontVariant.regular,
+                                    color: theme.onSurfaceVariant,
+                                    maxLines: 2,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: theme.primaryContainer,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: AzyXText(
+                                      text: '$totalEpisodes Episodes',
+                                      fontSize: 12,
+                                      fontVariant: FontVariant.bold,
+                                      color: theme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
+                        AzyXText(
+                          text: 'Watching Status',
+                          fontSize: 14,
+                          fontVariant: FontVariant.bold,
+                          color: theme.onSurface,
+                        ),
+                        const SizedBox(height: 8),
+                        Obx(() => CustomDropdown<String>(
+                              items: items,
+                              selectedValue: anime.value.status ?? "CURRENT",
+                              labelText: 'Watching Status',
+                              displayText: (value) => value,
+                              hintText: 'Select status...',
+                              onChanged: (String? newValue) {
+                                if (newValue != null) {
+                                  anime.update((val) {
+                                    val?.status = newValue;
+                                  });
+                                }
+                                log(anime.value.status.toString());
+                              },
+                            )),
+                        const SizedBox(height: 24),
+                        AzyXText(
+                          text: 'Your Rating',
+                          fontSize: 14,
+                          fontVariant: FontVariant.bold,
+                          color: theme.onSurface,
+                        ),
+                        const SizedBox(height: 8),
+                        Obx(() => CustomDropdown<double>(
+                              items: scoresItems,
+                              selectedValue:
+                                  anime.value.score?.toDouble() ?? 5.0,
+                              labelText: 'Rating',
+                              displayText: (value) => '${value.toString()} ⭐',
+                              hintText: 'Select rating...',
+                              onChanged: (double? newValue) {
+                                if (newValue != null) {
+                                  anime.update((val) {
+                                    val?.score = newValue;
+                                  });
+                                }
+                              },
+                            )),
+                        const SizedBox(height: 24),
+                        AzyXText(
+                          text: 'Progress',
+                          fontSize: 14,
+                          fontVariant: FontVariant.bold,
+                          color: theme.onSurface,
+                        ),
+                        const SizedBox(height: 8),
+                        CustomInputField(
+                          controller: controller!,
+                          labelText: 'Episode Progress',
+                          hintText: 'Enter episode number...',
+                          maxValue: totalEpisodes,
+                          suffixText: '/ $totalEpisodes',
+                          onChanged: (value) {
+                            anime.update((val) {
+                              val?.progress = value ?? 0;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 32),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => Get.back(),
+                                child: Container(
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    color: theme.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: theme.outline.withOpacity(0.2),
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: AzyXText(
+                                      text: 'Cancel',
+                                      fontSize: 16,
+                                      fontVariant: FontVariant.bold,
+                                      color: theme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              flex: 2,
+                              child: GestureDetector(
+                                onTap: () {
+                                  animeStatus.value =
+                                      anime.value.status ?? "CURRENT";
+                                  serviceHandler.updateListEntry(
+                                      UserAnime(
+                                          id: anime.value.id!,
+                                          status: animeStatus.value,
+                                          score: anime.value.score ?? 5,
+                                          progress: anime.value.progress),
+                                      isAnime: true);
+                                  Navigator.pop(context);
+                                  log(anime.value.progress.toString());
+                                  azyxSnackBar(
+                                      "Successfully added ${anime.value.title}");
+                                },
+                                child: Container(
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        theme.primary,
+                                        theme.primary.withOpacity(0.8),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: theme.primary.withOpacity(0.3),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.playlist_add,
+                                          color: theme.onPrimary,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        AzyXText(
+                                          text: 'Add to List',
+                                          fontSize: 16,
+                                          fontVariant: FontVariant.bold,
+                                          color: theme.onPrimary,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                     ),
                   ),
-                  isDense: true,
-                  items: items.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      anime.value.status = newValue;
-                    }
-                    log(anime.value.status.toString());
-                  },
                 ),
-                const SizedBox(
-                  height: 20,
-                ),
-                DropdownButtonFormField<double>(
-                  value: anime.value.score?.toDouble() ?? 5.0,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: 'Choose Score',
-                    filled: true,
-                    fillColor:
-                        Theme.of(context).colorScheme.surfaceContainerLowest,
-                    labelStyle:
-                        TextStyle(color: Theme.of(context).colorScheme.primary),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onPrimaryFixedVariant),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.primary),
-                    ),
-                  ),
-                  isDense: true,
-                  items:
-                      scoresItems.map<DropdownMenuItem<double>>((double value) {
-                    return DropdownMenuItem<double>(
-                      value: value,
-                      child: Text(value.toString()),
-                    );
-                  }).toList(),
-                  onChanged: (double? newValue) {
-                    if (newValue != null) {
-                      anime.value.score = newValue.toInt();
-                    }
-                  },
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                inputbox(context, controller, totalEpisodes,
-                    (value) => anime.value.progress = value, "Episode"),
-                const SizedBox(height: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () => Get.back(),
-                      child: customButton(context, "cancel"),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        animeStatus.value = anime.value.status ?? "CURRENT";
-                        serviceHandler.updateListEntry(
-                            UserAnime(
-                                id: anime.value.id!,
-                                status: animeStatus.value,
-                                score: anime.value.score ?? 5,
-                                progress: anime.value.progress),
-                            isAnime: true);
-                        Navigator.pop(context);
-                        log(anime.value.progress.toString());
-                        azyxSnackBar("Sucessfully added ${anime.value.title}");
-                      },
-                      child: customButton(context, "Save"),
-                    )
-                  ],
-                )
               ],
             ),
           ),
@@ -248,137 +393,282 @@ class AnilistAddToListController extends GetxController {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      barrierColor: Colors.black87.withOpacity(0.5),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      barrierColor: Colors.black87.withOpacity(0.6),
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom * 1),
-          child: AzyXGradientContainer(
-            height: Get.height * 0.5,
-            padding: const EdgeInsets.all(15),
+        final theme = Theme.of(context).colorScheme;
+        return Container(
+          margin: const EdgeInsets.only(top: 50),
+          decoration: BoxDecoration(
+            color: theme.surface,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-            child: ListView(
+            boxShadow: [
+              BoxShadow(
+                color: theme.shadow.withOpacity(0.2),
+                blurRadius: 20,
+                spreadRadius: 0,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              top: 8,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                AzyXText(
-                  text: 'Add To List',
-                  textAlign: TextAlign.center,
-                  fontVariant: FontVariant.bold,
-                  fontSize: 20,
-                  color: Theme.of(context).colorScheme.primary,
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: theme.onSurfaceVariant.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-                const SizedBox(
-                  height: 30,
-                ),
-                DropdownButtonFormField<String>(
-                  value:
-                      mangaStatus.value.isEmpty ? "CURRENT" : mangaStatus.value,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: 'Choose Status',
-                    filled: true,
-                    fillColor:
-                        Theme.of(context).colorScheme.surfaceContainerLowest,
-                    labelStyle:
-                        TextStyle(color: Theme.of(context).colorScheme.primary),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onPrimaryFixedVariant),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.primary),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 60,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: theme.shadow.withOpacity(0.1),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(
+                                  image,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Container(
+                                    color: theme.surfaceContainerHighest,
+                                    child: Icon(
+                                      Icons.image_not_supported,
+                                      color: theme.onSurfaceVariant,
+                                      size: 24,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  AzyXText(
+                                    text: 'Add to Your List',
+                                    fontSize: 24,
+                                    fontVariant: FontVariant.bold,
+                                    color: theme.primary,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  AzyXText(
+                                    text: title,
+                                    fontSize: 16,
+                                    fontVariant: FontVariant.regular,
+                                    color: theme.onSurfaceVariant,
+                                    maxLines: 2,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: theme.primaryContainer,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: AzyXText(
+                                      text: '$totalEpisodes Chapters',
+                                      fontSize: 12,
+                                      fontVariant: FontVariant.bold,
+                                      color: theme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
+                        AzyXText(
+                          text: 'Reading Status',
+                          fontSize: 14,
+                          fontVariant: FontVariant.bold,
+                          color: theme.onSurface,
+                        ),
+                        const SizedBox(height: 8),
+                        Obx(() => CustomDropdown<String>(
+                              items: items,
+                              selectedValue: mangaStatus.value.isEmpty
+                                  ? "CURRENT"
+                                  : mangaStatus.value,
+                              labelText: 'Reading Status',
+                              displayText: (value) => value,
+                              hintText: 'Select status...',
+                              onChanged: (String? newValue) {
+                                if (newValue != null) {
+                                  manga.update((val) {
+                                    val?.status = newValue;
+                                  });
+                                  mangaStatus.value = newValue;
+                                }
+                              },
+                            )),
+                        const SizedBox(height: 24),
+                        AzyXText(
+                          text: 'Your Rating',
+                          fontSize: 14,
+                          fontVariant: FontVariant.bold,
+                          color: theme.onSurface,
+                        ),
+                        const SizedBox(height: 8),
+                        Obx(() => CustomDropdown<double>(
+                              items: scoresItems,
+                              selectedValue:
+                                  manga.value.score?.toDouble() ?? 5.0,
+                              labelText: 'Rating',
+                              displayText: (value) => '${value.toString()} ⭐',
+                              hintText: 'Select rating...',
+                              onChanged: (double? newValue) {
+                                if (newValue != null) {
+                                  manga.update((val) {
+                                    val?.score = newValue;
+                                  });
+                                }
+                              },
+                            )),
+                        const SizedBox(height: 24),
+                        AzyXText(
+                          text: 'Progress',
+                          fontSize: 14,
+                          fontVariant: FontVariant.bold,
+                          color: theme.onSurface,
+                        ),
+                        const SizedBox(height: 8),
+                        CustomInputField(
+                          controller: controller!,
+                          labelText: 'Chapter Progress',
+                          hintText: 'Enter chapter number...',
+                          maxValue: totalEpisodes,
+                          suffixText: '/ $totalEpisodes',
+                          onChanged: (value) {
+                            manga.update((val) {
+                              val?.progress = value ?? 0;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 32),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => Get.back(),
+                                child: Container(
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    color: theme.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: theme.outline.withOpacity(0.2),
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: AzyXText(
+                                      text: 'Cancel',
+                                      fontSize: 16,
+                                      fontVariant: FontVariant.bold,
+                                      color: theme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              flex: 2,
+                              child: GestureDetector(
+                                onTap: () {
+                                  mangaStatus.value =
+                                      manga.value.status ?? 'CURRENT';
+                                  serviceHandler.updateListEntry(
+                                      UserAnime(
+                                          id: manga.value.id!,
+                                          status: manga.value.status,
+                                          score: manga.value.score ?? 5,
+                                          progress: manga.value.progress ?? 0),
+                                      isAnime: false);
+                                  Navigator.pop(context);
+                                  azyxSnackBar(
+                                      "Successfully added ${manga.value.title}");
+                                },
+                                child: Container(
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        theme.primary,
+                                        theme.primary.withOpacity(0.8),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: theme.primary.withOpacity(0.3),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.bookmark_add,
+                                          color: theme.onPrimary,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        AzyXText(
+                                          text: 'Add to List',
+                                          fontSize: 16,
+                                          fontVariant: FontVariant.bold,
+                                          color: theme.onPrimary,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                     ),
                   ),
-                  isDense: true,
-                  items: items.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      manga.value.status = newValue;
-                    }
-                  },
                 ),
-                const SizedBox(
-                  height: 20,
-                ),
-                DropdownButtonFormField<double>(
-                  value: manga.value.score?.toDouble() ?? 5.0,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: 'Choose Score',
-                    filled: true,
-                    fillColor:
-                        Theme.of(context).colorScheme.surfaceContainerLowest,
-                    labelStyle:
-                        TextStyle(color: Theme.of(context).colorScheme.primary),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onPrimaryFixedVariant),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.primary),
-                    ),
-                  ),
-                  isDense: true,
-                  items:
-                      scoresItems.map<DropdownMenuItem<double>>((double value) {
-                    return DropdownMenuItem<double>(
-                      value: value,
-                      child: Text(value.toString()),
-                    );
-                  }).toList(),
-                  onChanged: (double? newValue) {
-                    if (newValue != null) {
-                      manga.value.score = newValue.toInt();
-                    }
-                  },
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                inputbox(context, controller, totalEpisodes,
-                    (value) => manga.value.progress = value, "Chapter"),
-                const SizedBox(height: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () => Get.back(),
-                      child: customButton(context, "cancel"),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        mangaStatus.value = manga.value.status ?? 'CURRENT';
-                        serviceHandler.updateListEntry(
-                            UserAnime(
-                                id: manga.value.id!,
-                                status: manga.value.status,
-                                score: manga.value.score ?? 5,
-                                progress: manga.value.progress ?? 0),
-                            isAnime: false);
-                        Navigator.pop(context);
-                        azyxSnackBar("Sucessfully added ${manga.value.title}");
-                      },
-                      child: customButton(context, "Save"),
-                    )
-                  ],
-                )
               ],
             ),
           ),

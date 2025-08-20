@@ -10,11 +10,10 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/anime/episode_bottom_sheet.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';
-import 'package:azyx/api/Mangayomi/Eval/dart/model/video.dart';
-import 'package:azyx/api/Mangayomi/Model/Source.dart';
-import 'package:azyx/api/Mangayomi/Search/getVideo.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dartotsu_extension_bridge/Models/Source.dart';
+import 'package:dartotsu_extension_bridge/Models/Video.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -42,13 +41,13 @@ class AnifyEpisodesWidget extends StatelessWidget {
   Future<void> fetchEpisodeLink(
       String url, String number, String setTitle, context) async {
     try {
-      final response = await getVideo(source: selectedSource, url: url);
-      if (response.isNotEmpty) {
-        episodeUrls.value = response;
-        episodeTitle.value = setTitle;
-      } else {
-        hasError.value = true;
-      }
+      // final response = await getVideo(source: selectedSource, url: url);
+      // if (response.isNotEmpty) {
+      //   episodeUrls.value = response;
+      //   episodeTitle.value = setTitle;
+      // } else {
+      //   hasError.value = true;
+      // }
     } catch (e) {
       hasError.value = true;
       log("Error while fetching episode url: $e");
@@ -74,8 +73,8 @@ class AnifyEpisodesWidget extends StatelessWidget {
                     number: number,
                     id: id,
                     image: image,
-                    source: selectedSource,
-                    episodeUrls: episodeUrls,
+                    // source: selectedSource,
+                    // episodeUrls: episodeUrls,
                     episodeList: anifyEpisodes),
               ),
             ));

@@ -60,10 +60,9 @@ class AnilistMediaData {
     }
   }
 
-  factory AnilistMediaData.fromFullMAL(Map<String, dynamic> json,
+  factory AnilistMediaData.fromMAL(Map<String, dynamic> json,
       {bool isManga = false}) {
     final node = json;
-
     return AnilistMediaData(
       id: node['id'],
       title: node['title'] ?? '??',
@@ -89,6 +88,7 @@ class AnilistMediaData {
   }
 
   factory AnilistMediaData.fromJson(Map<dynamic, dynamic> json, bool isManga) {
+    log('new: ${json['episodes'] ?? ''}');
     return AnilistMediaData(
         id: json['id'] ?? 1,
         title: json['title']['english'] ?? json['title']['romaji'] ?? "Unknown",

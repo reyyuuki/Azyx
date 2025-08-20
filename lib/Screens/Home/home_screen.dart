@@ -28,7 +28,6 @@ class HomeScreen extends StatelessWidget {
             const SliverToBoxAdapter(
               child: Header(),
             ),
-
             SliverToBoxAdapter(
               child: Obx(
                 () => serviceHandler.userData.value.name == null
@@ -341,8 +340,6 @@ class HomeScreen extends StatelessWidget {
                       ),
               ),
             ),
-
-            // Season Section
             SliverToBoxAdapter(
               child: Obx(
                 () => serviceHandler.userData.value.name == null
@@ -446,7 +443,6 @@ class HomeScreen extends StatelessWidget {
                       ),
               ),
             ),
-
             SliverToBoxAdapter(
               child: Obx(() {
                 // if (serviceHandler.userData.value.id == null) {

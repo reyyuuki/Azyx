@@ -1,7 +1,11 @@
 import 'package:azyx/Controllers/services/service_handler.dart';
+import 'package:azyx/Controllers/source/source_mapper.dart';
+import 'package:azyx/Functions/string_extensions.dart';
+import 'package:dartotsu_extension_bridge/Models/DMedia.dart';
 
 class Anime {
   String? title;
+  String? url;
   String? image;
   String? bannerImage;
   String? description;
@@ -11,9 +15,12 @@ class Anime {
   String? type;
   int? episodes;
   List<String>? genres;
+  MediaType? mediaType;
+  ServicesType? servicesType;
   Anime(
       {this.id,
       this.image,
+      this.url,
       this.title,
       this.description,
       this.rating,
@@ -21,6 +28,8 @@ class Anime {
       this.episodes,
       this.type,
       this.status,
+      this.mediaType,
+      this.servicesType,
       this.genres});
 
   factory Anime.fromJson(Map<dynamic, dynamic> data) {
@@ -55,6 +64,20 @@ class Anime {
     );
   }
 
+  factory Anime.froDMedia(DMedia manga, MediaType type) {
+    return Anime(
+      url: manga.url ?? '',
+      title: manga.title ?? "Unknown Title",
+      description: manga.description ?? "No description available.",
+      image: manga.cover ?? "",
+      bannerImage: manga.cover,
+      episodes: manga.episodes?.length ?? 0,
+      status: '??',
+      mediaType: type,
+      genres: manga.genre ?? [],
+      servicesType: serviceHandler.serviceType.value,
+    );
+  }
   Map<String, dynamic> toJson() {
     return {
       'id': id,

@@ -1,4 +1,5 @@
 // ignore_for_file: inva, invalid_use_of_protected_member
+import 'dart:developer';
 import 'dart:ui';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Models/anime_details_data.dart';
@@ -24,116 +25,105 @@ class MangaAddToList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double positionOffset = (index ?? 0) * 10.0;
     final double opacity =
         (index != null) ? (1.0 - index! * 0.1).clamp(0.0, 1.0) : 1.0;
 
-    return AnimatedPositioned(
-      bottom: positionOffset,
-      left: 0,
-      right: 0,
-      duration: Duration(milliseconds: 1000 + (index ?? 0) * 200),
-      curve: Curves.easeInOut,
-      child: AnimatedOpacity(
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 1000),
+      opacity: opacity,
+      child: AnimatedContainer(
         duration: const Duration(milliseconds: 1000),
-        opacity: opacity,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 1000),
-          margin: const EdgeInsets.fromLTRB(10, 0, 10, 20),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.4),
-              borderRadius: BorderRadius.circular(10)),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.0),
-                    borderRadius: BorderRadius.circular(10)),
-                child: Row(
-                  children: [
-                    serviceHandler.userData.value.name != null
-                        ? Expanded(
-                            child: GestureDetector(
-                              onTap: () => anilistAddToListController
-                                  .addToMangaListSheet(
-                                      context,
-                                      mediaData.image!,
-                                      mediaData.title!,
-                                      mediaData.episodes ?? 24),
-                              child: Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                    color: Colors.black,
-                                    borderRadius: BorderRadius.circular(10),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          color: Colors.black
-                                              .withOpacity(1.glowMultiplier()),
-                                          blurRadius: 10.blurMultiplier(),
-                                          spreadRadius: 2.spreadMultiplier())
-                                    ]),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    anilistAddToListController
-                                            .mangaStatus.isEmpty
-                                        ? Icon(
-                                            Broken.add,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                            shadows: [
-                                              BoxShadow(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .primary,
-                                                  blurRadius:
-                                                      10.blurMultiplier(),
-                                                  spreadRadius:
-                                                      2.spreadMultiplier())
-                                            ],
-                                          )
-                                        : const SizedBox(),
-                                    const SizedBox(
-                                      width: 5,
+        margin: const EdgeInsets.fromLTRB(10, 0, 10, 20),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.4),
+            borderRadius: BorderRadius.circular(10)),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.0),
+                  borderRadius: BorderRadius.circular(10)),
+              child: Row(
+                children: [
+                  serviceHandler.userData.value.name != null
+                      ? Expanded(
+                          child: GestureDetector(
+                            onTap: () =>
+                                anilistAddToListController.addToMangaListSheet(
+                                    context,
+                                    mediaData.image ?? '',
+                                    mediaData.title ?? 'Unknown',
+                                    mediaData.episodes ?? 24),
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.black
+                                            .withOpacity(1.glowMultiplier()),
+                                        blurRadius: 10.blurMultiplier(),
+                                        spreadRadius: 2.spreadMultiplier())
+                                  ]),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  anilistAddToListController.mangaStatus.isEmpty
+                                      ? Icon(
+                                          Broken.add,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          shadows: [
+                                            BoxShadow(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary,
+                                                blurRadius: 10.blurMultiplier(),
+                                                spreadRadius:
+                                                    2.spreadMultiplier())
+                                          ],
+                                        )
+                                      : const SizedBox(),
+                                  const SizedBox(
+                                    width: 5,
+                                  ),
+                                  Obx(
+                                    () => AzyXText(
+                                      text: anilistAddToListController
+                                              .mangaStatus.value.isEmpty
+                                          ? "Add to list"
+                                          : anilistAddToListController
+                                              .mangaStatus.value,
+                                      fontVariant: FontVariant.bold,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
                                     ),
-                                    Obx(
-                                      () => AzyXText(
-                                        text: anilistAddToListController
-                                                .mangaStatus.value.isEmpty
-                                            ? "Add to list"
-                                            : anilistAddToListController
-                                                .mangaStatus.value,
-                                        fontVariant: FontVariant.bold,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                      ),
-                                    )
-                                  ],
-                                ),
+                                  )
+                                ],
                               ),
                             ),
-                          )
-                        : const SizedBox.shrink(),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        addToLibrary(context);
-                      },
-                      child: serviceHandler.userData.value.name == null
-                          ? libraryButton(context, width: Get.width - 50)
-                          : libraryButton(context),
-                    )
-                  ],
-                ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      addToLibrary(context);
+                    },
+                    child: serviceHandler.userData.value.name == null
+                        ? libraryButton(context, width: Get.width - 50)
+                        : libraryButton(context),
+                  )
+                ],
               ),
             ),
           ),

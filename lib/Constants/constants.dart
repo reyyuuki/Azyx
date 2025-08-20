@@ -1,4 +1,4 @@
-import 'package:azyx/Screens/Anime/Watch/watch_screen.dart';
+import 'package:azyx/Screens/Anime/Watch/controller/watch_controller.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

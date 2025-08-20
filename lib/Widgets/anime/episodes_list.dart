@@ -2,6 +2,7 @@
 
 import 'dart:developer';
 
+import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Models/anime_all_data.dart';
 import 'package:azyx/Screens/Anime/Watch/watch_screen.dart';
@@ -9,24 +10,20 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/anime/episode_bottom_sheet.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';
-import 'package:azyx/api/Mangayomi/Eval/dart/model/video.dart';
-import 'package:azyx/api/Mangayomi/Model/Source.dart';
-import 'package:azyx/api/Mangayomi/Search/getVideo.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class EpisodesList extends StatelessWidget {
   final List<Episode> episodeList;
   final String image;
-  final Source selectedSource;
   final String title;
   final int id;
   EpisodesList(
       {super.key,
       required this.episodeList,
       required this.image,
-      required this.selectedSource,
       required this.title,
       required this.id});
 
@@ -38,7 +35,8 @@ class EpisodesList extends StatelessWidget {
   Future<void> fetchEpisodeLink(
       String url, String number, String setTitle, context) async {
     try {
-      final response = await getVideo(source: selectedSource, url: url);
+      final response = await sourceController.activeSource.value!.methods
+          .getVideoList(DEpisode(episodeNumber: number, url: url));
       if (response.isNotEmpty) {
         epiosdeUrls.value = response;
         episodeTitle.value = setTitle;
@@ -71,8 +69,7 @@ class EpisodesList extends StatelessWidget {
                     number: number,
                     image: image,
                     id: id,
-                    source: selectedSource,
-                    episodeUrls: epiosdeUrls,
+                    episodeUrls: epiosdeUrls.value,
                     episodeList: episodeList),
               ),
             ));

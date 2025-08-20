@@ -3,14 +3,15 @@ import 'dart:io';
 
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
+import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Screens/Manga/Details/tabs/widgets/reader_controls.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
-import 'package:azyx/api/Mangayomi/Eval/dart/model/page.dart';
-import 'package:azyx/api/Mangayomi/Model/Source.dart';
-import 'package:azyx/api/Mangayomi/Search/get_pages.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dartotsu_extension_bridge/Models/Page.dart';
+import 'package:dartotsu_extension_bridge/Models/Source.dart';
+import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -57,6 +58,12 @@ class _ReadPageState extends State<ReadPage> {
     loadPages();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     updateEntry();
+    pageViewController.addPageChangeListener((e) {
+      Utils.log(
+          'DX => ${pageViewController.getCurrentOffset()?.dx.toString()}');
+      Utils.log(
+          'DY => ${pageViewController.getCurrentOffset()?.dy.toString()}');
+    });
     // pageViewController.addPageChangeListener((i) {
     //   Utils.log(i.toString());
     //   _currentPage.value = i;
@@ -76,9 +83,10 @@ class _ReadPageState extends State<ReadPage> {
   Future<void> loadPages() async {
     try {
       pagesList.value = [];
-      final pages =
-          await getPagesList(source: widget.source, mangaId: chapterUrl.value);
-      pagesList.value = pages!;
+      final pages = await sourceController.activeMangaSource.value!.methods
+          .getPageList(DEpisode(
+              episodeNumber: chapterTitle.value, url: chapterUrl.value));
+      pagesList.value = pages;
       totalImages.value = pages.length;
       final index =
           widget.chapterList.indexWhere((i) => i.link == chapterUrl.value);
@@ -139,6 +147,9 @@ class _ReadPageState extends State<ReadPage> {
                       MangaPageViewMode.paged => 1.0
                     },
                     maxZoomLevel: 8.0,
+                    // initialOffset: Offset(200, 0),
+                    initialPageIndex: 10,
+
                     // spacing: spacedPages.value ? 20 : 0,
                     pageWidthLimit: Platform.isAndroid || Platform.isIOS
                         ? double.infinity
@@ -160,7 +171,9 @@ class _ReadPageState extends State<ReadPage> {
                     imageUrl: pagesList[index].url,
                     fit: BoxFit.cover,
                     httpHeaders: {
-                      'Referer': widget.source.baseUrl!,
+                      'Referer':
+                          sourceController.activeMangaSource.value?.baseUrl ??
+                              'AzyX',
                     },
                     placeholder: (context, _) => Container(
                       alignment: Alignment.center,

@@ -1,7 +1,6 @@
 import 'package:azyx/Models/anime_all_data.dart';
 import 'package:azyx/Models/episode_class.dart';
-
-import '../api/Mangayomi/Model/Source.dart';
+import 'package:dartotsu_extension_bridge/Models/Source.dart';
 
 class LocalHistory {
   int? mediaId;
@@ -49,10 +48,10 @@ class LocalHistory {
           : null,
       currentPage: json['currentPage'] as int?,
       animeData: json['animeData'] != null
-          ? AnimeAllData.fromJson(json['animeData'] as Map<dynamic, dynamic>)
+          ? AnimeAllData.fromJson(json['animeData'] as Map<String, dynamic>)
           : null,
       source: json['source'] != null
-          ? Source.fromJson(json['source'] as Map<dynamic, dynamic>)
+          ? Source.fromJson(json['source'] as Map<String, dynamic>)
           : null,
       chapterList: json['chapterList'] != null
           ? (json['chapterList'] as List<dynamic>)

@@ -6,6 +6,7 @@ import 'package:azyx/Controllers/services/mal_service.dart';
 import 'package:azyx/Controllers/offline_controller.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/settings_controller.dart';
+import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Controllers/ui_setting_controller.dart';
 import 'package:azyx/HiveClass/theme_data.dart';
 import 'package:azyx/HiveClass/ui_setting_class.dart';
@@ -16,9 +17,10 @@ import 'package:azyx/Screens/Library/library_screen.dart';
 import 'package:azyx/Screens/Home/home_screen.dart';
 import 'package:azyx/Screens/Manga/manga_screen.dart';
 import 'package:azyx/Screens/Novel/novel_screen.dart';
-import 'package:azyx/StorageProvider.dart';
+import 'package:azyx/storage_provider.dart';
 import 'package:azyx/Widgets/common/custom_nav_bar.dart';
 import 'package:azyx/Controllers/local_history_controller.dart';
+import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,10 +33,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:isar/isar.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:provider/provider.dart';
-
-late Isar isar;
-
-WebViewEnvironment? webViewEnvironment;
 
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   @override
@@ -60,10 +58,10 @@ void main() async {
   await Hive.openBox('app-data');
   await Hive.openBox('ui-settings');
   await Hive.openBox("offline-data");
+
   await Hive.openBox("auth");
   await dotenv.load(fileName: ".env");
   await StorageProvider().requestPermission();
-  isar = await StorageProvider().initDB(null);
   await PrefManager.init();
   initializeDateFormatting();
   Get.put(AnilistService());
@@ -71,11 +69,11 @@ void main() async {
   Get.put(OfflineController());
   Get.put(UiSettingController());
   Get.put(AnilistAddToListController());
-  Get.put(LocalHistoryController());
+  // Get.put(LocalHistoryController());
   Get.put(SettingsController());
   Get.put(MalService());
   Get.put(ServiceHandler());
-
+  Get.put(SourceController());
   runApp(MultiProvider(
     providers: [ChangeNotifierProvider(create: (_) => ThemeProvider())],
     child: const ProviderScope(

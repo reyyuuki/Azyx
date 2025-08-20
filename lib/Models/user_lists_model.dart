@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:azyx/Models/user_anime.dart';
-import 'package:azyx/utils/utils.dart';
 import 'package:get/get.dart';
 
 class UserListsModel {

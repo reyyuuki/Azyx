@@ -1,15 +1,12 @@
 import 'dart:io';
 
-import 'package:azyx/api/Mangayomi/Model/settings.dart';
+import 'package:dartotsu_extension_bridge/Mangayomi/Eval/dart/model/source_preference.dart';
+import 'package:dartotsu_extension_bridge/Mangayomi/Models/Source.dart';
+import 'package:dartotsu_extension_bridge/Settings/Settings.dart';
 import 'package:isar/isar.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-
-import 'api/Mangayomi/Eval/dart/model/source_preference.dart';
-import 'api/Mangayomi/Model/Manga.dart';
-import 'api/Mangayomi/Model/Source.dart';
-import 'api/Mangayomi/Model/chapter.dart';
 
 class StorageProvider {
   Future<bool> requestPermission() async {
@@ -33,7 +30,7 @@ class StorageProvider {
     if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
       return dir;
     } else {
-      String dbDir = path.join(dir.path, 'azyx', 'databases');
+      String dbDir = path.join(dir.path, 'AnymeX', 'databases');
       await Directory(dbDir).create(recursive: true);
       return Directory(dbDir);
     }
@@ -48,21 +45,11 @@ class StorageProvider {
     }
 
     final isar = Isar.openSync([
-      MangaSchema,
-      SourceSchema,
-      ChapterSchema,
-      SettingsSchema,
+      MSourceSchema,
       SourcePreferenceSchema,
       SourcePreferenceStringValueSchema,
-    ], directory: dir!.path, name: "azyxDb", inspector: inspector);
-
-    if (isar.settings.filter().idEqualTo(227).isEmptySync()) {
-      isar.writeTxnSync(
-        () {
-          isar.settings.putSync(Settings());
-        },
-      );
-    }
+      BridgeSettingsSchema
+    ], directory: dir!.path, name: "AnymeX", inspector: inspector);
 
     return isar;
   }

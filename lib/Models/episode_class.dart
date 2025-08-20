@@ -1,6 +1,7 @@
-import 'package:azyx/api/Mangayomi/Eval/dart/model/m_chapter.dart';
-import 'package:azyx/api/Mangayomi/Eval/dart/model/m_manga.dart';
 import 'package:azyx/utils/time_formater.dart';
+import 'package:dartotsu_extension_bridge/Mangayomi/Eval/dart/model/m_chapter.dart';
+import 'package:dartotsu_extension_bridge/Mangayomi/Eval/dart/model/m_manga.dart';
+import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:intl/intl.dart';
 
 class Episode {
@@ -126,9 +127,9 @@ class ChapterRecognition {
   }
 }
 
-Episode mChapterToEpisode(MChapter chapter, MManga? selectedMedia) {
+Episode mChapterToEpisode(DEpisode chapter, DMedia? selectedMedia) {
   var episodeNumber = ChapterRecognition.parseChapterNumber(
-      selectedMedia?.name ?? '', chapter.name ?? '');
+      selectedMedia?.title ?? '', chapter.name ?? '');
   return Episode(
     number: episodeNumber != -1 ? episodeNumber.toString() : chapter.name ?? '',
     url: chapter.url,
@@ -169,7 +170,7 @@ class Chapter {
   }
 }
 
-List<Chapter> mChapterToChapter(List<MChapter> chapters, String title) {
+List<Chapter> mChapterToChapter(List<DEpisode> chapters, String title) {
   return chapters.map((e) {
     return Chapter(
         title: e.name,

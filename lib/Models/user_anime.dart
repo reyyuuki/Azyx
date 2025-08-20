@@ -3,7 +3,7 @@ class UserAnime {
   String? image;
   String? status;
   String? rating;
-  int? score;
+  double? score;
   int? progress;
   int? episodes;
   int? id;
@@ -25,10 +25,12 @@ class UserAnime {
             data['media']['title']?['romaji'] ??
             "Unknown",
         image: data['media']['coverImage']['large'],
-        rating: ((data['media']['averageScore'] / 10) ?? 1).toString(),
+        rating: data['media']['averageScore'] != null
+            ? ((data['media']['averageScore'] / 10) ?? 1).toString()
+            : '0',
         progress: data['progress'],
         episodes: data['media']['episodes'] ?? data['media']['chapters'],
-        score: data['score'],
+        score: data['score'] != null ? data['score'].toDouble() : 0.0,
         status: data['status']);
   }
 
