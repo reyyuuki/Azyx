@@ -2,6 +2,8 @@
 
 import 'dart:developer';
 
+import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
+
 double jaroWinklerDistance(String s1, String s2) {
   if (s1 == s2) return 1.0;
   final maxLength = [s1.length, s2.length].reduce((a, b) => a > b ? a : b);
@@ -45,13 +47,12 @@ double jaroWinklerDistance(String s1, String s2) {
   return jaroSimilarity + (l * 0.1 * (1 - jaroSimilarity));
 }
 
-
 Future<Map<String, dynamic>?> mappingHelper(
-    String query, List<dynamic> result) async {
+    String query, List<DMedia> result) async {
   try {
-    final animeList = result as List<dynamic>?;
+    final animeList = result;
 
-    if (animeList == null) {
+    if (animeList.isEmpty) {
       log('No anime data found.');
       return null;
     }
@@ -60,20 +61,15 @@ Future<Map<String, dynamic>?> mappingHelper(
     double highestSimilarity = 0.0;
 
     for (var anime in animeList) {
-      if (anime is Map<String, dynamic> &&
-          anime.containsKey('name') &&
-          anime['name'] is String) {
-        final name = anime['name'] as String;
-        final link = anime['link'];
-
+      if (anime.title is String) {
+        final name = anime.title as String;
+        final link = anime.url;
+        log('name: $name / link: $link');
         final similarity = jaroWinklerDistance(query, name);
 
         if (similarity > highestSimilarity) {
           highestSimilarity = similarity;
-          mostSimiliarAnime = {
-            'name': name,
-            'link': link
-          };
+          mostSimiliarAnime = {'name': name, 'link': link};
         }
       } else {
         log("Error: Manga item does not have the expected structure or types: ${anime.toString()}");
@@ -88,7 +84,6 @@ Future<Map<String, dynamic>?> mappingHelper(
     return null;
   }
 }
-
 
 Future<String> searchMostSimilarNovel(
     String query, Future<dynamic> Function(String) scrapeFunction) async {
@@ -117,10 +112,7 @@ Future<String> searchMostSimilarNovel(
 
         if (similarity > highestSimilarity) {
           highestSimilarity = similarity;
-          mostSimilarNovel = {
-            'title': title,
-            'id': id
-          };
+          mostSimilarNovel = {'title': title, 'id': id};
         }
       } else {
         log("Error: Novel item does not have the expected structure or types: ${novel.toString()}");
