@@ -42,87 +42,79 @@ final List<String> items = [
   "DROPPED"
 ];
 
-final List<Map<String, dynamic>> animeCategories = [
-  {
-    "name": "All",
-    "view": UserGridList(
-      data: serviceHandler.userAnimeList.value.allList,
-      isManga: false,
-    )
-  },
-  {
-    "name": "Completed",
-    "view": UserGridList(
-        isManga: false, data: serviceHandler.userAnimeList.value.completed)
-  },
-  {
-    "name": "Planning",
-    "view": UserGridList(
-        isManga: false, data: serviceHandler.userAnimeList.value.planning)
-  },
-  {
-    "name": "Watching",
-    "view": UserGridList(
-        isManga: false,
-        data: serviceHandler.userAnimeList.value.currentlyWatching)
-  },
-  {
-    "name": serviceHandler.userAnimeList.value.repeating.isEmpty
-        ? "Dropped"
-        : "Repeating",
-    "view": UserGridList(
-        isManga: false,
-        data: serviceHandler.userAnimeList.value.repeating.isEmpty
-            ? serviceHandler.userAnimeList.value.dropped
-            : serviceHandler.userAnimeList.value.repeating)
-  },
-  {
-    "name": "Paused",
-    "view": UserGridList(
-        isManga: false, data: serviceHandler.userAnimeList.value.paused)
-  },
-];
+List<Map<String, dynamic>> get animeCategories {
+  final list = serviceHandler.userAnimeList.value;
 
-final List<Map<String, dynamic>> mangaCategories = [
-  {
-    "name": "All",
-    "view": UserGridList(
-      data: serviceHandler.userMangaList.value.allList,
-      isManga: true,
-    )
-  },
-  {
-    "name": "Completed",
-    "view": UserGridList(
-        isManga: true, data: serviceHandler.userMangaList.value.completed)
-  },
-  {
-    "name": "Planning",
-    "view": UserGridList(
-        isManga: true, data: serviceHandler.userMangaList.value.planning)
-  },
-  {
-    "name": "Reading",
-    "view": UserGridList(
-        isManga: true,
-        data: serviceHandler.userMangaList.value.currentlyWatching)
-  },
-  {
-    "name": serviceHandler.userMangaList.value.repeating.isEmpty
-        ? "Dropped"
-        : "Repeating",
-    "view": UserGridList(
-        isManga: true,
-        data: serviceHandler.userMangaList.value.repeating.isEmpty
-            ? serviceHandler.userMangaList.value.dropped
-            : serviceHandler.userMangaList.value.repeating)
-  },
-  {
-    "name": "Paused",
-    "view": UserGridList(
-        isManga: true, data: serviceHandler.userMangaList.value.paused)
-  },
-];
+  return [
+    {
+      "name": "All",
+      "data": list.allList,
+      "isManga": false,
+    },
+    {
+      "name": "Completed",
+      "data": list.completed,
+      "isManga": false,
+    },
+    {
+      "name": "Planning",
+      "data": list.planning,
+      "isManga": false,
+    },
+    {
+      "name": "Watching",
+      "data": list.currentlyWatching,
+      "isManga": false,
+    },
+    {
+      "name": list.repeating.isEmpty ? "Dropped" : "Repeating",
+      "data": list.repeating.isEmpty ? list.dropped : list.repeating,
+      "isManga": false,
+    },
+    {
+      "name": "Paused",
+      "data": list.paused,
+      "isManga": false,
+    },
+  ];
+}
+
+List<Map<String, dynamic>> get mangaCategories {
+  final list = serviceHandler.userMangaList.value;
+
+  return [
+    {
+      "name": "All",
+      "data": list.allList,
+      "isManga": true,
+    },
+    {
+      "name": "Completed",
+      "data": list.completed,
+      "isManga": true,
+    },
+    {
+      "name": "Planning",
+      "data": list.planning,
+      "isManga": true,
+    },
+    {
+      "name": "Reading",
+      "data": list.currentlyWatching,
+      "isManga": true,
+    },
+    {
+      "name": list.repeating.isEmpty ? "Dropped" : "Repeating",
+      "data": list.repeating.isEmpty ? list.dropped : list.repeating,
+      "isManga": true,
+    },
+    {
+      "name": "Paused",
+      "data": list.paused,
+      "isManga": true,
+    },
+  ];
+}
 
 String getAniListStatusEquivalent(String status) {
   switch (status.toLowerCase()) {

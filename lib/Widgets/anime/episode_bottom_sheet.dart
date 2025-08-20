@@ -1,6 +1,6 @@
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
-import 'package:azyx/api/Mangayomi/Eval/dart/model/video.dart';
+import 'package:dartotsu_extension_bridge/Models/Video.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

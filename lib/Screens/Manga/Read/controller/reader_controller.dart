@@ -2,9 +2,8 @@ import 'dart:developer';
 
 import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
-import 'package:azyx/api/Mangayomi/Eval/dart/model/page.dart';
-import 'package:azyx/api/Mangayomi/Model/Source.dart';
-import 'package:azyx/api/Mangayomi/Search/get_pages.dart';
+import 'package:dartotsu_extension_bridge/Models/Page.dart';
+import 'package:dartotsu_extension_bridge/Models/Source.dart';
 import 'package:get/get.dart';
 import 'package:manga_page_view/manga_page_view.dart';
 
@@ -28,13 +27,13 @@ class ReaderController extends GetxController {
       {required Source source, required List<Chapter> chapterList}) async {
     try {
       pagesList.value = [];
-      final pages =
-          await getPagesList(source: source, mangaId: chapterUrl.value);
-      pagesList.value = pages!;
-      totalImages.value = pages.length;
-      _currentPage.value = 1;
-      final index = chapterList.indexWhere((i) => i.link == chapterUrl.value);
-      chapterTitle.value = chapterList[index].title!;
+      // final pages =
+      //     await getPagesList(source: source, mangaId: chapterUrl.value);
+      // pagesList.value = pages!;
+      // totalImages.value = pages.length;
+      // _currentPage.value = 1;
+      // final index = chapterList.indexWhere((i) => i.link == chapterUrl.value);
+      // chapterTitle.value = chapterList[index].title!;
     } catch (e) {
       log("Error: $e");
       azyxSnackBar(e.toString());

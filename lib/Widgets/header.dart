@@ -1,6 +1,5 @@
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Extensions/ExtensionScreen.dart';
-import 'package:azyx/Providers/theme_provider.dart';
 import 'package:azyx/Screens/Settings/setting_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
@@ -10,7 +9,6 @@ import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:provider/provider.dart';
 
 class Header extends StatelessWidget {
   const Header({super.key});
@@ -145,13 +143,13 @@ class Header extends StatelessWidget {
                         ),
                       );
                     },
-                    child: tile("Extensions", Icons.extension)),
+                    child: _buildTile("Extensions", Icons.extension)),
                 InkWell(
                     onTap: () {
                       Get.back();
                       ServiceBottomSheet.showServiceBottomSheet(context);
                     },
-                    child: tile("Service", Icons.sync)),
+                    child: _buildTile("Service", Icons.sync)),
                 InkWell(
                     onTap: () {
                       Get.back();
@@ -179,27 +177,27 @@ class Header extends StatelessWidget {
                         ),
                       );
                     },
-                    child: tile("Settings", Icons.settings)),
+                    child: _buildTile("Settings", Icons.settings)),
                 serviceHandler.userData.value.name != null
                     ? InkWell(
                         onTap: () {
                           serviceHandler.logout();
                           Get.back();
                         },
-                        child: tile("LogOut", Icons.logout))
+                        child: _buildTile("LogOut", Icons.logout))
                     : InkWell(
                         onTap: () {
                           serviceHandler.login();
                           Get.back();
                         },
-                        child: tile("Login", Icons.login))
+                        child: _buildTile("Login", Icons.login))
               ],
             ),
           );
         });
   }
 
-  Widget tile(String name, IconData icon) {
+  Widget _buildTile(String name, IconData icon) {
     return AzyXContainer(
       padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
       child: Row(

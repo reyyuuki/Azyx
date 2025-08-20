@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously, must_be_immutable
 
 import 'dart:developer';
+import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Models/wrong_title_search.dart';
 import 'package:azyx/Screens/Manga/Details/tabs/widgets/chapter_item.dart';
@@ -11,11 +12,12 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/anime/mapped_title.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_normal_card.dart';
 import 'package:azyx/Widgets/common/search_widget.dart';
-import 'package:azyx/api/Mangayomi/Model/Source.dart';
-import 'package:azyx/api/Mangayomi/Search/get_detail.dart';
-import 'package:azyx/api/Mangayomi/Search/search.dart';
+import 'package:azyx/Widgets/custom_drop_down.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
+import 'package:dartotsu_extension_bridge/ExtensionManager.dart';
+import 'package:dartotsu_extension_bridge/Models/Source.dart';
+import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -29,9 +31,9 @@ class ReadSection extends StatefulWidget {
   final RxList<Chapter> chaptersList;
   final Rx<bool> hasError;
   final Rx<String> syncId;
-  Function(List<Map<String, dynamic>>) onChanged;
+  Function(List<DEpisode>) onChanged;
   Function(String) onTitleChanged;
-  Function(Source) onSourceChanged;
+  Function() onSourceChanged;
 
   ReadSection(
       {super.key,
@@ -66,15 +68,13 @@ class _WatchSectionState extends State<ReadSection> {
 
   Future<void> wrongTitleSearch(String query, BuildContext context) async {
     try {
-      final response = await search(
-          source: widget.selectedSource.value,
-          query: query,
-          page: 1,
-          filterList: []);
-      if (response != null) {
-        final data = response.toJson()['list'];
+      final response = await sourceController.activeMangaSource.value!.methods
+          .search(query, 1, []);
+      if (response.list.isNotEmpty) {
+        final data = response.list;
         for (var item in data) {
-          wrongTitleSearchData.add(WrongTitleSearch.fromJson(item));
+          wrongTitleSearchData.add(WrongTitleSearch(
+              image: item.cover, title: item.title, link: item.url));
         }
       }
     } catch (e) {
@@ -98,35 +98,22 @@ class _WatchSectionState extends State<ReadSection> {
       shrinkWrap: true,
       physics: const BouncingScrollPhysics(),
       children: [
-        DropdownButtonFormField(
-            value: widget.selectedSource.value,
-            isExpanded: true,
-            decoration: InputDecoration(
-              labelText: 'Choose Source',
-              filled: true,
-              fillColor: Theme.of(context).colorScheme.surface,
-              labelStyle:
-                  TextStyle(color: Theme.of(context).colorScheme.primary),
-              border: OutlineInputBorder(
-                borderSide:
-                    BorderSide(color: Theme.of(context).colorScheme.primary),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                    color: Theme.of(context).colorScheme.onPrimaryFixedVariant),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide:
-                    BorderSide(color: Theme.of(context).colorScheme.primary),
-              ),
-            ),
-            items: widget.installedExtensions.map((item) {
-              return DropdownMenuItem<Source>(
-                  value: item, child: AzyXText(text: item.name!));
-            }).toList(),
-            onChanged: (value) {
-              widget.onSourceChanged(value!);
-            }),
+        CustomSourceDropdown(
+          items: sourceController.installedMangaExtensions,
+          selectedSource: sourceController.activeMangaSource.value,
+          sourceController: sourceController,
+          labelText: 'Choose Source',
+          onChanged: (value) {
+            if (value != null) {
+              final matched = sourceController.installedMangaExtensions
+                  .firstWhere((i) => "${i.name}_${i.extensionType}" == value);
+              widget.onSourceChanged();
+              sourceController.activeMangaSource.value = matched;
+              sourceController.setActiveSource(matched);
+              setState(() {});
+            }
+          },
+        ),
         const SizedBox(
           height: 20,
         ),
@@ -176,6 +163,7 @@ class _WatchSectionState extends State<ReadSection> {
         ),
         GestureDetector(
             onTap: () {
+              widget.hasError.value = false;
               wrongTitle.text = widget.animeTitle.value;
               wrongTitleSearch(wrongTitle.text, context);
               wrongTitleSheet(context);
@@ -207,27 +195,33 @@ class _WatchSectionState extends State<ReadSection> {
         const SizedBox(
           height: 20,
         ),
-        Obx(() => widget.chaptersList.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                children: filteredList.map((ch) {
-                  return GestureDetector(
-                      onTap: () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) {
-                          return ReadPage(
-                              syncId: widget.syncId.value,
-                              source: widget.selectedSource.value,
-                              chapterList: widget.chaptersList,
-                              link: ch.link!,
-                              mangaTitle: widget.animeTitle.value);
-                        }));
-                      },
-                      child: ChapterItem(
-                        chapter: ch,
-                      ));
-                }).toList(),
-              ))
+        Obx(() => widget.hasError.value
+            ? Image.asset(
+                'assets/images/sticker.png',
+                fit: BoxFit.contain,
+              )
+            : widget.chaptersList.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : Column(
+                    children: filteredList.map((ch) {
+                      return GestureDetector(
+                          onTap: () {
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) {
+                              return ReadPage(
+                                  syncId: widget.syncId.value,
+                                  source: widget.selectedSource.value,
+                                  chapterList: widget.chaptersList,
+                                  link: ch.link!,
+                                  mangaTitle: widget.animeTitle.value);
+                            }));
+                          },
+                          child: ChapterItem(
+                            chapter: ch,
+                          ));
+                    }).toList(),
+                  )),
+        100.height
       ],
     );
   }
@@ -257,15 +251,17 @@ class _WatchSectionState extends State<ReadSection> {
                 ),
                 TextField(
                   onSubmitted: (value) async {
+                    widget.hasError.value = false;
                     wrongTitleSearchData.value = [];
-                    final data = await search(
-                        source: widget.selectedSource.value,
-                        query: value,
-                        page: 1,
-                        filterList: []);
-                    final result = data!.toJson()['list'].reversed.toList();
+                    final data = await sourceController
+                        .activeMangaSource.value!.methods
+                        .search(value, 1, []);
+                    final result = data.list;
                     for (var item in result) {
-                      wrongTitleSearchData.add(WrongTitleSearch.fromJson(item));
+                      wrongTitleSearchData.add(WrongTitleSearch(
+                          image: item.cover,
+                          title: item.title,
+                          link: item.url));
                     }
                   },
                   controller: wrongTitle,
@@ -316,17 +312,19 @@ class _WatchSectionState extends State<ReadSection> {
                                 children: wrongTitleSearchData.map((item) {
                                   return GestureDetector(
                                       onTap: () async {
-                                        // widget.chaptersList.value = [];
+                                        widget.chaptersList.value = [];
                                         Navigator.pop(context);
-                                        final data = await getDetail(
-                                            url: item.link!,
-                                            source:
-                                                widget.selectedSource.value);
-                                        widget.onChanged(data
-                                            .toJson()['chapters']
-                                            .reversed
-                                            .toList());
+                                        final data = await sourceController
+                                            .activeMangaSource.value!.methods
+                                            .getDetail(
+                                          DMedia.withUrl(item.link!),
+                                        );
+                                        widget.onChanged(
+                                            data.episodes!.reversed.toList());
                                         widget.onTitleChanged(item.title!);
+                                        widget.chaptersList.value =
+                                            mChapterToChapter(
+                                                data.episodes!, item.title!);
                                       },
                                       child: AzyXCard(
                                         item: item,

@@ -2,30 +2,29 @@
 
 import 'dart:developer';
 
+import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Models/wrong_title_search.dart';
-import 'package:azyx/Screens/Anime/Details/tabs/floater.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
-import 'package:azyx/Widgets/anime/anify_episodes_list.dart';
 import 'package:azyx/Widgets/anime/episodes_list.dart';
 import 'package:azyx/Widgets/anime/mapped_title.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_normal_card.dart';
 import 'package:azyx/Widgets/common/search_widget.dart';
-import 'package:azyx/api/Mangayomi/Model/Source.dart';
-import 'package:azyx/api/Mangayomi/Search/search.dart';
+import 'package:azyx/Widgets/custom_drop_down.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
+import 'package:dartotsu_extension_bridge/ExtensionManager.dart';
+import 'package:dartotsu_extension_bridge/Models/Source.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class WatchSection extends StatefulWidget {
   final String image;
   final int id;
-  final Rx<Source> selectedSource;
   final AnilistMediaData mediaData;
   final RxList<Source> installedExtensions;
   final Rx<String> animeTitle;
@@ -34,7 +33,7 @@ class WatchSection extends StatefulWidget {
   final Rx<bool> hasError;
   Function(String link) onChanged;
   Function(String) onTitleChanged;
-  Function(Source) onSourceChanged;
+  Function(String) onSourceChanged;
 
   WatchSection(
       {super.key,
@@ -42,7 +41,6 @@ class WatchSection extends StatefulWidget {
       required this.image,
       required this.installedExtensions,
       required this.totalEpisodes,
-      required this.selectedSource,
       required this.episodelist,
       required this.hasError,
       required this.onChanged,
@@ -70,15 +68,13 @@ class _WatchSectionState extends State<WatchSection> {
 
   Future<void> wrongTitleSearch(String query, BuildContext context) async {
     try {
-      final response = await search(
-          source: widget.selectedSource.value,
-          query: query,
-          page: 1,
-          filterList: []);
-      if (response != null) {
-        final data = response.toJson()['list'];
+      final response = await sourceController.activeSource.value!.methods
+          .search(query, 1, []);
+      if (response.list.isNotEmpty) {
+        final data = response.list;
         for (var item in data) {
-          wrongTitleSearchData.add(WrongTitleSearch.fromJson(item));
+          wrongTitleSearchData.add(WrongTitleSearch(
+              image: item.cover, title: item.title, link: item.url));
         }
       } else {
         searchError.value = true;
@@ -109,37 +105,21 @@ class _WatchSectionState extends State<WatchSection> {
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
           children: [
-            DropdownButtonFormField(
-                value: widget.selectedSource.value,
-                isExpanded: true,
-                decoration: InputDecoration(
-                  labelText: 'Choose Source',
-                  filled: true,
-                  fillColor: Theme.of(context).colorScheme.surface,
-                  labelStyle:
-                      TextStyle(color: Theme.of(context).colorScheme.primary),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.primary),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onPrimaryFixedVariant),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.primary),
-                  ),
-                ),
-                items: widget.installedExtensions.map((item) {
-                  return DropdownMenuItem<Source>(
-                      value: item, child: AzyXText(text: item.name!));
-                }).toList(),
-                onChanged: (value) {
-                  widget.onSourceChanged(value!);
-                }),
+            CustomSourceDropdown(
+              items: sourceController.installedExtensions,
+              sourceController: sourceController,
+              labelText: 'Choose Source',
+              onChanged: (value) {
+                if (value != null) {
+                  final matched = sourceController.installedExtensions
+                      .firstWhere(
+                          (i) => "${i.name}_${i.extensionType}" == value);
+                  widget.onSourceChanged(value);
+                  sourceController.activeSource.value = matched;
+                  sourceController.setActiveSource(matched);
+                }
+              },
+            ),
             const SizedBox(
               height: 20,
             ),
@@ -189,6 +169,7 @@ class _WatchSectionState extends State<WatchSection> {
             ),
             GestureDetector(
                 onTap: () {
+                  searchError.value = false;
                   wrongTitleSearchData.value = [];
                   wrongTitle.text = widget.animeTitle.value;
                   wrongTitleSearch(wrongTitle.text, context);
@@ -229,22 +210,12 @@ class _WatchSectionState extends State<WatchSection> {
                         alignment: Alignment.center,
                         child: const CircularProgressIndicator(),
                       )
-                    : widget.episodelist.first.desc.isEmpty
-                        ? EpisodesList(
-                            episodeList: widget.episodelist,
-                            image: widget.image,
-                            selectedSource: widget.selectedSource.value,
-                            title: widget.animeTitle.value,
-                            id: widget.id,
-                          )
-                        : AnifyEpisodesWidget(
-                            data: widget.mediaData,
-                            id: widget.id,
-                            title: widget.animeTitle.value,
-                            anifyEpisodes: widget.episodelist,
-                            selectedSource: widget.selectedSource.value,
-                            image: widget.image,
-                          )),
+                    : EpisodesList(
+                        episodeList: widget.episodelist,
+                        image: widget.image,
+                        title: widget.animeTitle.value,
+                        id: widget.id,
+                      ))
           ],
         ),
         // FloaterWidget(
@@ -271,7 +242,7 @@ class _WatchSectionState extends State<WatchSection> {
             child: Column(
               children: [
                 AzyXText(
-                  text: widget.selectedSource.value.name!,
+                  text: sourceController.activeSource.value?.name ?? '',
                   fontVariant: FontVariant.bold,
                   fontSize: 20,
                   color: Theme.of(context).colorScheme.primary,

@@ -118,128 +118,135 @@ class EpisodeListDrawer extends StatelessWidget {
                             : filteredEpisodes[index].thumbnail!;
                         return GestureDetector(
                           onTap: () => ontap(filteredEpisodes[index]),
-                          child: Stack(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: CachedNetworkImage(
-                                  imageUrl: image!,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              Positioned.fill(
-                                  child: AzyXContainer(
-                                height: 120,
-                                width: 400,
-                                margin: const EdgeInsets.all(5),
-                                decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.6),
-                                    borderRadius: BorderRadius.circular(10)),
-                              )),
-                              Positioned.fill(
-                                child: AzyXContainer(
-                                  margin: const EdgeInsets.all(5),
-                                  decoration: BoxDecoration(
-                                      color: filteredEpisodes[index].number ==
-                                              episodeNumber.value
-                                          ? Theme.of(context)
-                                              .colorScheme
-                                              .primaryContainer
-                                          : Colors.transparent,
-                                      borderRadius: BorderRadius.circular(10)),
-                                  child: Row(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius:
-                                            const BorderRadius.horizontal(
-                                                left: Radius.circular(10)),
-                                        child: CachedNetworkImage(
-                                          height: 150,
-                                          width: 180,
-                                          imageUrl: image,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        width: 10,
-                                      ),
-                                      Expanded(
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 5),
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              AzyXText(
-                                                text: filteredEpisodes[index]
-                                                    .title!,
-                                                maxLines: 2,
-                                                fontVariant: FontVariant.bold,
-                                                fontSize: 14,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .primary,
-                                              ),
-                                              const SizedBox(
-                                                height: 5,
-                                              ),
-                                              AzyXText(
-                                                text: filteredEpisodes[index]
-                                                        .desc
-                                                        .isEmpty
-                                                    ? "Get ready for an exciting episode filled with twists, action, and unforgettable moments!"
-                                                    : filteredEpisodes[index]
-                                                        .desc,
-                                                fontSize: 12,
-                                                fontStyle: FontStyle.italic,
-                                                color: Colors.grey.shade400
-                                                    .withOpacity(0.7),
-                                                overflow: TextOverflow.ellipsis,
-                                                maxLines: 3,
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      )
-                                    ],
+                          child: Container(
+                            margin: const EdgeInsets.all(10),
+                            height: 150,
+                            child: Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: CachedNetworkImage(
+                                    imageUrl: image!,
+                                    fit: BoxFit.cover,
+                                    height: 150,
                                   ),
                                 ),
-                              ),
-                              Positioned(
-                                  top: 0,
-                                  left: 0,
+                                Positioned.fill(
+                                    child: AzyXContainer(
+                                  height: 150,
+                                  margin: const EdgeInsets.all(0),
+                                  decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.6),
+                                      borderRadius: BorderRadius.circular(10)),
+                                )),
+                                Positioned.fill(
                                   child: AzyXContainer(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 5),
                                     margin: const EdgeInsets.all(5),
                                     decoration: BoxDecoration(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Theme.of(context)
+                                        color: filteredEpisodes[index].number ==
+                                                episodeNumber.value
+                                            ? Theme.of(context)
                                                 .colorScheme
-                                                .primary
-                                                .withOpacity(
-                                                    1.glowMultiplier()),
-                                            blurRadius: 5.blurMultiplier(),
-                                          )
-                                        ],
-                                        borderRadius: const BorderRadius.only(
-                                            topLeft: Radius.circular(10),
-                                            bottomRight: Radius.circular(10))),
-                                    child: AzyXText(
-                                        text: filteredEpisodes[index]
-                                            .number
-                                            .toString(),
-                                        color: Colors.black,
-                                        fontSize: 20),
-                                  ))
-                            ],
+                                                .primaryContainer
+                                            : Colors.transparent,
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: Row(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              const BorderRadius.horizontal(
+                                                  left: Radius.circular(10)),
+                                          child: CachedNetworkImage(
+                                            height: 150,
+                                            width: 180,
+                                            imageUrl: image,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                        Expanded(
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 5),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                AzyXText(
+                                                  text: filteredEpisodes[index]
+                                                      .title!,
+                                                  maxLines: 2,
+                                                  fontVariant: FontVariant.bold,
+                                                  fontSize: 14,
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .primary,
+                                                ),
+                                                const SizedBox(
+                                                  height: 5,
+                                                ),
+                                                AzyXText(
+                                                  text: filteredEpisodes[index]
+                                                          .desc
+                                                          .isEmpty
+                                                      ? "Get ready for an exciting episode filled with twists, action, and unforgettable moments!"
+                                                      : filteredEpisodes[index]
+                                                          .desc,
+                                                  fontSize: 12,
+                                                  fontStyle: FontStyle.italic,
+                                                  color: Colors.grey.shade400
+                                                      .withOpacity(0.7),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  maxLines: 3,
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                    top: 0,
+                                    left: 0,
+                                    child: AzyXContainer(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 5),
+                                      margin: const EdgeInsets.all(5),
+                                      decoration: BoxDecoration(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                                  .withOpacity(
+                                                      1.glowMultiplier()),
+                                              blurRadius: 5.blurMultiplier(),
+                                            )
+                                          ],
+                                          borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(10),
+                                              bottomRight:
+                                                  Radius.circular(10))),
+                                      child: AzyXText(
+                                          text: filteredEpisodes[index]
+                                              .number
+                                              .toString(),
+                                          color: Colors.black,
+                                          fontSize: 20),
+                                    ))
+                              ],
+                            ),
                           ),
                         );
                       }),

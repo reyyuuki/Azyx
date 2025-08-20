@@ -1,7 +1,11 @@
+import 'dart:developer';
+
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/services/mal_service.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
+import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Models/user_anime.dart';
+// import 'package:azyx/Screens/Extension/view/extension.dart';
 import 'package:azyx/Screens/Settings/Pages/theme_setting.dart';
 import 'package:azyx/Screens/Settings/Pages/ui_settings.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
@@ -12,6 +16,7 @@ import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/update_notifier.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../Widgets/common/custom_app_bar.dart';
 
 class SettingScreen extends StatelessWidget {
@@ -124,7 +129,7 @@ class SettingScreen extends StatelessWidget {
           ),
           ElevatedButton(
               onPressed: () async {
-                UpdateNotifier.downloadFile();
+                anilistAuthController.fetchUserAnimeList();
               },
               child: Text("Testing"))
         ],

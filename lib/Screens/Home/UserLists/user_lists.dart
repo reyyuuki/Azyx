@@ -1,12 +1,15 @@
 import 'package:azyx/Controllers/services/service_handler.dart';
+import 'package:azyx/Models/user_anime.dart';
+import 'package:azyx/Screens/Home/UserLists/widgets/grid_list.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
-import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../../utils/utils.dart';
 
 class UserListPage extends StatefulWidget {
   final List<Map<String, dynamic>> categories;
@@ -26,6 +29,11 @@ class _UserListScreenState extends State<UserListPage>
   void initState() {
     super.initState();
     _initializeTabController();
+    Utils.log('leo: ${widget.categories.firstWhere((i) {
+      Utils.log('checking: ${i['data']}');
+      return i['name'] == 'Completed';
+    })['data']}');
+
     filterCategories.value = widget.categories;
   }
 
@@ -109,7 +117,9 @@ class _UserListScreenState extends State<UserListPage>
                 () => TabBarView(
                     controller: tabController,
                     children: filterCategories.map((i) {
-                      return i['view'] as Widget;
+                      return UserGridList(
+                          data: (i['data'] as RxList<UserAnime>),
+                          isManga: (i['isManga'] as bool));
                     }).toList()),
               ),
             ),
