@@ -23,14 +23,14 @@ dependencies:
   dio: ^5.7.0
   media_kit: ^1.2.0
   media_kit_video: ^1.2.4
-  media_kit_libs_video: ^1.0.5
+  media_kit_libs_video: ^1.0.6
   wakelock_plus: ^1.2.8
   flutter_web_auth_2: ^4.0.2
   # sidebarx: ^0.17.1
   # dart_eval: ^0.7.10
   dartotsu_extension_bridge:
     git:
-     url: https://github.com/aayush2622/DartotsuExtensionBridge.git
+     url: https://github.com/RyanYuuki/DartotsuExtensionBridge.git
      ref: master
   # isar_flutter_libs:
   #   git:
@@ -48,10 +48,10 @@ dependencies:
   freezed_annotation: ^2.0.0
   flutter_rust_bridge: ^2.3.0
   xpath_selector_html_parser: ^3.0.1
-  flutter_qjs:
-    git:
-      url: https://github.com/kodjodevf/flutter_qjs.git
-      ref: main
+  # flutter_qjs:
+  #   git:
+  #     url: https://github.com/kodjodevf/flutter_qjs.git
+  #     ref: main
   # pseudom: ^1.0.1
   # intl: ^0.18.1
   icons_plus: ^5.0.0
@@ -67,8 +67,10 @@ dependencies:
   carousel_slider: ^5.0.0
   flutter_inappwebview: ^6.1.5
   scrollable_positioned_list: ^0.3.8
-  manga_page_view: ^1.0.5
+  manga_page_view:
+    git: https://github.com/reyyuuki/manga_page_view
   path_provider: ^2.1.5
+  expandable_page_view: ^1.0.17
 
 dev_dependencies:
   flutter_test:

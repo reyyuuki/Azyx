@@ -17,14 +17,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.7.1"
-  android_intent_plus:
-    dependency: transitive
-    description:
-      name: android_intent_plus
-      sha256: dfc1fd3a577205ae8f11e990fb4ece8c90cceabbee56fcf48e463ecf0bd6aae3
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.3.0"
   antlr4:
     dependency: transitive
     description:
@@ -302,8 +294,8 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "8076606f1b80d6ff4155633b91a38ed73ffa61b7"
-      url: "https://github.com/aayush2622/DartotsuExtensionBridge.git"
+      resolved-ref: "17373f422bd528ab95641a6b247f7051f39340ec"
+      url: "https://github.com/RyanYuuki/DartotsuExtensionBridge.git"
     source: git
     version: "0.0.4"
   dartx:
@@ -395,6 +387,14 @@ packages:
       url: "https://github.com/kodjodevf/epubx.dart.git"
     source: git
     version: "4.0.3"
+  expandable_page_view:
+    dependency: "direct main"
+    description:
+      name: expandable_page_view
+      sha256: "210dc6961cfc29f7ed42867824eb699c9a4b9b198a7c04b8bdc1c05844969dc6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.17"
   expressions:
     dependency: transitive
     description:
@@ -553,7 +553,7 @@ packages:
     source: hosted
     version: "4.0.0"
   flutter_qjs:
-    dependency: "direct main"
+    dependency: transitive
     description:
       path: "."
       ref: main
@@ -886,10 +886,11 @@ packages:
   manga_page_view:
     dependency: "direct main"
     description:
-      name: manga_page_view
-      sha256: "1e075fe21396c4bd73d2c092a5a628273ceac2cc92553e175c7bd02eaf9d2c66"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: d434782beecab35f6420eba00a498ca30f066b7a
+      url: "https://github.com/reyyuuki/manga_page_view"
+    source: git
     version: "1.0.5"
   matcher:
     dependency: transitive
@@ -927,10 +928,10 @@ packages:
     dependency: transitive
     description:
       name: media_kit_libs_android_video
-      sha256: "9dd8012572e4aff47516e55f2597998f0a378e3d588d0fad0ca1f11a53ae090c"
+      sha256: adff9b571b8ead0867f9f91070f8df39562078c0eb3371d88b9029a2d547d7b7
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.6"
+    version: "1.3.7"
   media_kit_libs_ios_video:
     dependency: transitive
     description:
@@ -943,10 +944,10 @@ packages:
     dependency: transitive
     description:
       name: media_kit_libs_linux
-      sha256: e186891c31daa6bedab4d74dcdb4e8adfccc7d786bfed6ad81fe24a3b3010310
+      sha256: "2b473399a49ec94452c4d4ae51cfc0f6585074398d74216092bf3d54aac37ecf"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.3"
+    version: "1.2.1"
   media_kit_libs_macos_video:
     dependency: transitive
     description:
@@ -959,26 +960,18 @@ packages:
     dependency: "direct main"
     description:
       name: media_kit_libs_video
-      sha256: "20bb4aefa8fece282b59580e1cd8528117297083a6640c98c2e98cfc96b93288"
+      sha256: "958cc55e7065d9d01f52a2842dab2a0812a92add18489f1006d864fb5e42a3ef"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.5"
+    version: "1.0.6"
   media_kit_libs_windows_video:
     dependency: transitive
     description:
       name: media_kit_libs_windows_video
-      sha256: "32654572167825c42c55466f5d08eee23ea11061c84aa91b09d0e0f69bdd0887"
+      sha256: dff76da2778729ab650229e6b4ec6ec111eb5151431002cbd7ea304ff1f112ab
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.10"
-  media_kit_native_event_loop:
-    dependency: transitive
-    description:
-      name: media_kit_native_event_loop
-      sha256: "7d82e3b3e9ded5c35c3146c5ba1da3118d1dd8ac3435bac7f29f458181471b40"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.9"
+    version: "1.0.11"
   media_kit_video:
     dependency: "direct main"
     description:

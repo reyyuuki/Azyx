@@ -330,7 +330,7 @@ class MalService extends GetxController implements BaseService, OnlineService {
         "fields=mean,status,media_type,synopsis,genres,type,num_episodes,num_chapters,start_date,end_date,source,rating,rank,popularity,favorites,statistics,recommendations";
 
     final data = await fetchMAL('$url?$newField') as Map<String, dynamic>;
-    return AnilistMediaData.fromFullMAL(data);
+    return AnilistMediaData.fromMAL(data);
   }
 
   @override

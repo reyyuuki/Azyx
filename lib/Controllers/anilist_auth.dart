@@ -53,7 +53,8 @@ class AnilistService extends GetxController
   //   tryAutoLogin();
   // }
 
-  Future<void> tryAutoLogin() async {
+  @override
+  Future<void> autoLogin() async {
     final token = await Hive.box("app-data").get("auth_token");
     if (token != null) {
       await fetchUserProfile();
@@ -233,13 +234,14 @@ class AnilistService extends GetxController
           final lists =
               data['data']['MediaListCollection']['lists'] as List<dynamic>;
           userAnimeList.value = UserListsModel.fromJson(lists);
+          log("test: ${userAnimeList.value.completed.length.toString()}");
+
           // userAnimeList.assignAll(
           //   lists
           //       .expand((list) => (list['entries'] as List<dynamic>)
           //           .map((entry) => UserAnime.fromJson(entry)))
           //       .toList(),
           // );
-          // log("test: ${lists.toString()}");
         } else {
           log('Unexpected response structure: ${response.body}');
         }
@@ -649,11 +651,6 @@ class AnilistService extends GetxController
                   ]),
             ),
     ).obs;
-  }
-
-  @override
-  Future<void> autoLogin() {
-    throw UnimplementedError();
   }
 
   @override
