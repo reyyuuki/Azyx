@@ -23,7 +23,7 @@ class CustomNavBar extends StatelessWidget {
     Broken.element_4,
     Icons.movie_filter,
     Broken.book,
-    Icons.book,
+    // Icons.book,
   ];
 
   @override

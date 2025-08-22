@@ -1,4 +1,4 @@
-// ignore_for_file: non_constant_identifier_names, use_build_context_synchronously, file_names
+// ignore_for_file: non_constant_identifier_names, use_build_context_synchronously, file_names, invalid_use_of_protected_member
 
 import 'dart:developer';
 
@@ -7,15 +7,10 @@ import 'package:azyx/Widgets/AlertDialogBuilder.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/functions.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dartotsu_extension_bridge/ExtensionManager.dart';
 import 'package:dartotsu_extension_bridge/Models/Source.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
-import 'package:get/instance_manager.dart';
 import 'package:icons_plus/icons_plus.dart';
-
-import '../../main.dart';
 
 class ExtensionListTileWidget extends StatefulWidget {
   final Source source;

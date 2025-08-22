@@ -29,6 +29,7 @@ class _BrowseScreenState extends State<ExtensionScreen>
   void initState() {
     super.initState();
     _checkPermission();
+    _fetchdata();
     _tabBarController = TabController(length: 4, vsync: this);
     _tabBarController.animateTo(0);
     _tabBarController.addListener(() {
@@ -36,6 +37,11 @@ class _BrowseScreenState extends State<ExtensionScreen>
         _textEditingController.clear();
       });
     });
+  }
+
+  Future<void> _fetchdata() async {
+    await sourceController.fetchRepos();
+    setState(() {});
   }
 
   _checkPermission() async {

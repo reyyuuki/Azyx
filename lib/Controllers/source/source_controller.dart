@@ -36,7 +36,6 @@ class SourceController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-
     _initialize();
   }
 
@@ -111,6 +110,7 @@ class SourceController extends GetxController {
   }
 
   Future<void> sortExtensions() async {
+    log('ext: ${_activeAnimeRepo.value}');
     final extenionTypes = ExtensionType.values.where((e) {
       if (!Platform.isAndroid && e == ExtensionType.aniyomi) return false;
       return true;
@@ -137,6 +137,8 @@ class SourceController extends GetxController {
       newAvailableNovelExtensions
           .addAll(manager.availableNovelExtensions.value);
     }
+
+    log('ext: ${newAvailableExtensions.length}');
 
     installedExtensions.value = newInstalledExtensions;
     installedMangaExtensions.value = newInstalledMangaExtensions;

@@ -88,7 +88,7 @@ class ThemeProvider with ChangeNotifier {
         ),
       );
     }
-    syncStatusBar();
+    // syncStatusBar();
     updateBox();
     notifyListeners();
   }
@@ -111,14 +111,16 @@ class ThemeProvider with ChangeNotifier {
     updateTheme();
   }
 
-  void syncStatusBar() {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        systemNavigationBarColor: Colors.transparent,
-        statusBarColor: Colors.transparent,
-        statusBarBrightness: _isLightMode! ? Brightness.dark : Brightness.light,
-        statusBarIconBrightness:
-            _isLightMode! ? Brightness.dark : Brightness.light));
-  }
+  // void syncStatusBar() {
+  //   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  //   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+  //       systemNavigationBarColor: Colors.transparent,
+  //       statusBarColor: Colors.transparent,
+  //       statusBarBrightness:
+  //           !_isLightMode! ? Brightness.dark : Brightness.light,
+  //       statusBarIconBrightness:
+  //           !_isLightMode! ? Brightness.dark : Brightness.light));
+  // }
 
   void updateSeedColor(String newColor) {
     _colorName = newColor;

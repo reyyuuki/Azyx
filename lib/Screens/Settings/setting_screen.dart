@@ -124,14 +124,14 @@ class SettingScreen extends StatelessWidget {
             child: settingTile(context, "About", "Discover More: About Us",
                 const Icon(Broken.information)),
           ),
-          const SizedBox(
-            height: 20,
-          ),
-          ElevatedButton(
-              onPressed: () async {
-                anilistAuthController.fetchUserAnimeList();
-              },
-              child: Text("Testing"))
+          // const SizedBox(
+          //   height: 20,
+          // ),
+          // ElevatedButton(
+          //     onPressed: () async {
+          //       anilistAuthController.fetchUserAnimeList();
+          //     },
+          //     child: Text("Testing"))
         ],
       )),
     );

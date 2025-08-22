@@ -20,13 +20,12 @@ import 'package:azyx/Screens/Novel/novel_screen.dart';
 import 'package:azyx/storage_provider.dart';
 import 'package:azyx/Widgets/common/custom_nav_bar.dart';
 import 'package:azyx/Controllers/local_history_controller.dart';
+import 'package:azyx/utils/update_notifier.dart';
 import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -46,7 +45,7 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.transparent,
       statusBarColor: Colors.transparent));
@@ -58,11 +57,8 @@ void main() async {
   await Hive.openBox('app-data');
   await Hive.openBox('ui-settings');
   await Hive.openBox("offline-data");
-
   await Hive.openBox("auth");
   await dotenv.load(fileName: ".env");
-  await StorageProvider().requestPermission();
-  await PrefManager.init();
   initializeDateFormatting();
   Get.put(AnilistService());
   Get.put(AnilistDataController());
@@ -76,9 +72,7 @@ void main() async {
   Get.put(SourceController());
   runApp(MultiProvider(
     providers: [ChangeNotifierProvider(create: (_) => ThemeProvider())],
-    child: const ProviderScope(
-      child: MainApp(),
-    ),
+    child: const MainApp(),
   ));
 }
 
@@ -97,15 +91,26 @@ class MainApp extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    UpdateNotifier.checkUpdate(context);
+  }
 
   final List<Widget> _screens = [
     const HomeScreen(),
     const LibraryScreen(),
     const AnimeScreen(),
     const MangaScreen(),
-    const NovelScreen(),
+    // const NovelScreen(),
   ];
 
   Rx<int> index = 2.obs;

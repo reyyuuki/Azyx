@@ -1,7 +1,7 @@
 name: azyx
 description: "A new Flutter project."
 publish_to: "none"
-version: 0.1.0
+version: 2.6.4
 
 environment:
   sdk: ^3.5.0
@@ -36,18 +36,18 @@ dependencies:
   #   git:
   #     url: https://github.com/MrLittleWhite/isar_flutter_libs.git
   #     ref: main
-  http_interceptor: ^2.0.0
-  share_plus: ^10.1.3
-  js_packer: ^0.0.5
-  flutter_riverpod: ^2.6.1
-  riverpod_annotation: ^2.6.1
-  flutter_gen: ^5.8.0
-  go_router: ^14.6.2
-  json_path: ^0.7.4
-  bot_toast: ^4.1.3
-  freezed_annotation: ^2.0.0
-  flutter_rust_bridge: ^2.3.0
-  xpath_selector_html_parser: ^3.0.1
+  # http_interceptor: ^2.0.0
+  # share_plus: ^10.1.3
+  # js_packer: ^0.0.5
+  # flutter_riverpod: ^2.6.1
+  # riverpod_annotation: ^2.6.1
+  # flutter_gen: ^5.8.0
+  # go_router: ^14.6.2
+  # json_path: ^0.7.4
+  # bot_toast: ^4.1.3
+  # freezed_annotation: ^2.0.0
+  # flutter_rust_bridge: ^2.3.0
+  # xpath_selector_html_parser: ^3.0.1
   # flutter_qjs:
   #   git:
   #     url: https://github.com/kodjodevf/flutter_qjs.git
@@ -65,19 +65,17 @@ dependencies:
   shimmer: ^3.0.0
   ionicons: ^0.2.2
   carousel_slider: ^5.0.0
-  flutter_inappwebview: ^6.1.5
-  scrollable_positioned_list: ^0.3.8
-  manga_page_view:
-    git: https://github.com/reyyuuki/manga_page_view
+  # manga_page_view:
+  #   git: https://github.com/reyyuuki/manga_page_view
   path_provider: ^2.1.5
   expandable_page_view: ^1.0.17
+  manga_page_view: ^1.0.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   # hive_generator: ^2.0.1
-  flutter_lints: ^4.0.0
-  build_runner: ^2.4.11
+  # flutter_lints: ^4.0.0
   flutter_launcher_icons: ^0.14.0
 
 flutter_launcher_icons:
