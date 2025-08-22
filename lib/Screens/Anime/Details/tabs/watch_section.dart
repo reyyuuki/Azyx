@@ -108,6 +108,8 @@ class _WatchSectionState extends State<WatchSection> {
             CustomSourceDropdown(
               items: sourceController.installedExtensions,
               sourceController: sourceController,
+              selectedSource: sourceController.activeSource.value ??
+                  sourceController.installedExtensions.first,
               labelText: 'Choose Source',
               onChanged: (value) {
                 if (value != null) {

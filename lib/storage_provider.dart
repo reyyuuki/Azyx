@@ -30,7 +30,7 @@ class StorageProvider {
     if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
       return dir;
     } else {
-      String dbDir = path.join(dir.path, 'AnymeX', 'databases');
+      String dbDir = path.join(dir.path, 'AzyX', 'databases');
       await Directory(dbDir).create(recursive: true);
       return Directory(dbDir);
     }
@@ -49,7 +49,7 @@ class StorageProvider {
       SourcePreferenceSchema,
       SourcePreferenceStringValueSchema,
       BridgeSettingsSchema
-    ], directory: dir!.path, name: "AnymeX", inspector: inspector);
+    ], directory: dir!.path, name: "AzyX", inspector: inspector);
 
     return isar;
   }

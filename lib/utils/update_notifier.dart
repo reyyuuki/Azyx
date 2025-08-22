@@ -1,3 +1,5 @@
+// ignore_for_file: depend_on_referenced_packages
+
 import 'dart:convert';
 import 'dart:developer';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';

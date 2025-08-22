@@ -6,7 +6,6 @@ import 'package:azyx/Widgets/language.dart';
 import 'package:dartotsu_extension_bridge/ExtensionManager.dart';
 import 'package:dartotsu_extension_bridge/Models/Source.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:grouped_list/sliver_grouped_list.dart';
 
@@ -375,8 +374,8 @@ class _ExtensionScreenState extends State<Extension> {
                 .toLowerCase()
                 .contains(_currentSearchQuery.toLowerCase()))
         .where((element) =>
-            PrefManager.getVal(PrefName.NSFWExtensions) ||
-            element.isNsfw == false)
+            widget.query.isEmpty ||
+            element.name!.toLowerCase().contains(widget.query.toLowerCase()))
         .toList();
   }
 

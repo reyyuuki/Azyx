@@ -58,12 +58,12 @@ class _ReadPageState extends State<ReadPage> {
     loadPages();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     updateEntry();
-    pageViewController.addPageChangeListener((e) {
-      Utils.log(
-          'DX => ${pageViewController.getCurrentOffset()?.dx.toString()}');
-      Utils.log(
-          'DY => ${pageViewController.getCurrentOffset()?.dy.toString()}');
-    });
+    // pageViewController.addPageChangeListener((e) {
+    //   Utils.log(
+    //       'DX => ${pageViewController.getCurrentOffset()?.dx.toString()}');
+    //   Utils.log(
+    //       'DY => ${pageViewController.getCurrentOffset()?.dy.toString()}');
+    // });
     // pageViewController.addPageChangeListener((i) {
     //   Utils.log(i.toString());
     //   _currentPage.value = i;
@@ -148,7 +148,7 @@ class _ReadPageState extends State<ReadPage> {
                     },
                     maxZoomLevel: 8.0,
                     // initialOffset: Offset(200, 0),
-                    initialPageIndex: 10,
+                    // initialPageIndex: 10,
 
                     // spacing: spacedPages.value ? 20 : 0,
                     pageWidthLimit: Platform.isAndroid || Platform.isIOS
