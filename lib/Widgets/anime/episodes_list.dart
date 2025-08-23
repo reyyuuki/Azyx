@@ -69,7 +69,7 @@ class EpisodesList extends StatelessWidget {
                     number: number,
                     image: image,
                     id: id,
-                    episodeUrls: epiosdeUrls.value,
+                    episodeUrls: epiosdeUrls,
                     episodeList: episodeList),
               ),
             ));
