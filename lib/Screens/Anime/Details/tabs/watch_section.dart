@@ -3,6 +3,7 @@
 import 'dart:developer';
 
 import 'package:azyx/Controllers/source/source_controller.dart';
+import 'package:azyx/Models/anify_episodes.dart';
 import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Models/wrong_title_search.dart';
@@ -10,6 +11,7 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
+import 'package:azyx/Widgets/anime/anify_episodes_list.dart';
 import 'package:azyx/Widgets/anime/episodes_list.dart';
 import 'package:azyx/Widgets/anime/mapped_title.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_normal_card.dart';
@@ -105,22 +107,25 @@ class _WatchSectionState extends State<WatchSection> {
           shrinkWrap: true,
           physics: const BouncingScrollPhysics(),
           children: [
-            CustomSourceDropdown(
-              items: sourceController.installedExtensions,
-              sourceController: sourceController,
-              selectedSource: sourceController.activeSource.value ??
-                  sourceController.installedExtensions.first,
-              labelText: 'Choose Source',
-              onChanged: (value) {
-                if (value != null) {
-                  final matched = sourceController.installedExtensions
-                      .firstWhere(
-                          (i) => "${i.name}_${i.extensionType}" == value);
-                  widget.onSourceChanged(value);
-                  sourceController.activeSource.value = matched;
-                  sourceController.setActiveSource(matched);
-                }
-              },
+            Obx(
+              () => CustomSourceDropdown(
+                items: sourceController.installedExtensions,
+                sourceController: sourceController,
+                selectedSource: sourceController.activeSource.value ??
+                    sourceController.installedExtensions.first,
+                labelText: 'Choose Source',
+                onChanged: (value) {
+                  if (value != null) {
+                    final matched = sourceController.installedExtensions
+                        .firstWhere(
+                            (i) => "${i.name}_${i.extensionType}" == value);
+                    widget.onSourceChanged(value);
+                    sourceController.activeSource.value = matched;
+                    sourceController.setActiveSource(matched);
+                    log('current: ${sourceController.activeSource.value?.name}');
+                  }
+                },
+              ),
             ),
             const SizedBox(
               height: 20,
@@ -212,12 +217,20 @@ class _WatchSectionState extends State<WatchSection> {
                         alignment: Alignment.center,
                         child: const CircularProgressIndicator(),
                       )
-                    : EpisodesList(
-                        episodeList: widget.episodelist,
-                        image: widget.image,
-                        title: widget.animeTitle.value,
-                        id: widget.id,
-                      ))
+                    : widget.episodelist.first.desc.isNotEmpty
+                        ? AnifyEpisodesWidget(
+                            title: widget.animeTitle.value,
+                            id: widget.id,
+                            image: widget.image,
+                            data: widget.mediaData,
+                            anifyEpisodes: widget.episodelist,
+                          )
+                        : EpisodesList(
+                            episodeList: widget.episodelist,
+                            image: widget.image,
+                            title: widget.animeTitle.value,
+                            id: widget.id,
+                          ))
           ],
         ),
         // FloaterWidget(

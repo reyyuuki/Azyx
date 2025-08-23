@@ -2,6 +2,7 @@
 
 import 'dart:developer';
 
+import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Models/anime_all_data.dart';
@@ -11,27 +12,29 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/anime/episode_bottom_sheet.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
+import 'package:azyx/utils/utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dartotsu_extension_bridge/Models/DEpisode.dart';
 import 'package:dartotsu_extension_bridge/Models/Source.dart';
 import 'package:dartotsu_extension_bridge/Models/Video.dart';
+import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AnifyEpisodesWidget extends StatelessWidget {
   final RxList<Episode> anifyEpisodes;
-  final Source selectedSource;
   final String title;
   final int id;
   final String image;
   final AnilistMediaData data;
-  AnifyEpisodesWidget(
-      {super.key,
-      required this.title,
-      required this.id,
-      required this.anifyEpisodes,
-      required this.image,
-      required this.data,
-      required this.selectedSource});
+  AnifyEpisodesWidget({
+    super.key,
+    required this.title,
+    required this.id,
+    required this.anifyEpisodes,
+    required this.image,
+    required this.data,
+  });
 
   final RxList<Video> episodeUrls = RxList();
   final Rx<String> episodeTitle = ''.obs;
@@ -40,14 +43,16 @@ class AnifyEpisodesWidget extends StatelessWidget {
 
   Future<void> fetchEpisodeLink(
       String url, String number, String setTitle, context) async {
+    Utils.log('start');
     try {
-      // final response = await getVideo(source: selectedSource, url: url);
-      // if (response.isNotEmpty) {
-      //   episodeUrls.value = response;
-      //   episodeTitle.value = setTitle;
-      // } else {
-      //   hasError.value = true;
-      // }
+      final response = await sourceController.activeSource.value!.methods
+          .getVideoList(DEpisode(episodeNumber: number, url: url));
+      if (response.isNotEmpty) {
+        episodeUrls.value = response;
+        episodeTitle.value = setTitle;
+      } else {
+        hasError.value = true;
+      }
     } catch (e) {
       hasError.value = true;
       log("Error while fetching episode url: $e");
@@ -74,7 +79,7 @@ class AnifyEpisodesWidget extends StatelessWidget {
                     id: id,
                     image: image,
                     // source: selectedSource,
-                    // episodeUrls: episodeUrls,
+                    episodeUrls: episodeUrls,
                     episodeList: anifyEpisodes),
               ),
             ));
@@ -123,6 +128,7 @@ class AnifyEpisodesWidget extends StatelessWidget {
               (context, name, url, number) =>
                   serverAzyXContainer(context, name, url, number),
             );
+            Utils.log('${entry.url} ?? ${entry.number} ?? ${entry.title}');
             fetchEpisodeLink(entry.url!, entry.number, entry.title!, context);
           }
         },

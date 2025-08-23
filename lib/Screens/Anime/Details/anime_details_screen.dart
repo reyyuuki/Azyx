@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:azyx/Controllers/services/service_handler.dart';
@@ -25,6 +26,7 @@ import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:expandable_page_view/expandable_page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart';
 
 class AnimeDetailsScreen extends StatefulWidget {
   final String tagg;
@@ -97,7 +99,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
       coverImage.value = mediaData.value.coverImage ?? image.value;
     } catch (e) {
       _anilistError.value = e.toString();
-      log("Error while getting data for details: $e");
+      Utils.log("Error while getting data for details: $e");
     }
     _syncMedia();
     loadDetails();
@@ -137,6 +139,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
   }
 
   Future<void> getEpisodes(String link) async {
+    Utils.log('ext: ${sourceController.activeSource.value?.name}');
     final episodeResult = await sourceController.activeSource.value!.methods
         .getDetail(DMedia.withUrl(link));
     final data = episodeResult.episodes!.reversed.toList();
@@ -145,6 +148,37 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
     }).toList();
     episodesList.value = mappedList;
     totalEpisodes.value = episodesList.length.toString();
+
+    final resp = await get(Uri.parse(
+        "https://api.ani.zip/mappings?${serviceHandler.serviceType.value == ServicesType.anilist ? 'anilist_id' : 'mal_id'}=${id.value}"));
+
+    final check = jsonDecode(resp.body);
+    Utils.log('youho: ${check['episodes']['1']}');
+    episodesList.value =
+        (check['episodes'] as Map<String, dynamic>).entries.map((entry) {
+      final data = entry.value;
+      final number = entry.key;
+      Utils.log(number);
+      final epNum =
+          (data['absoluteEpisodeNumber'] ?? data['episodeNumber'] ?? '')
+              .toString();
+
+      // find matching episode in mappedList
+      final matched = mappedList.firstWhere(
+        (e) => e.number.toString() == epNum,
+        orElse: () =>
+            Episode(number: epNum, url: '', desc: '', thumbnail: '', title: ''),
+      );
+
+      return Episode(
+          url: matched.url ?? '',
+          number: (data['absoluteEpisodeNumber'] ?? data['episodeNumber'] ?? '')
+              .toString(),
+          desc: data['overview'] ?? '',
+          thumbnail: data['image'] ?? '',
+          title: data['title']['en'] ?? '');
+    }).toList();
+    setState(() {});
   }
 
   Future<void> loadDetails() async {
@@ -155,11 +189,11 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
         getEpisodes(result.url!);
         animeTitle.value = result.title ?? '';
       } else {
-        log("error");
+        Utils.log("error");
         _extenstionError.value = true;
       }
     } catch (e, stackTrace) {
-      log("Error while loading episode data: $e / $stackTrace");
+      Utils.log("Error while loading episode data: $e / $stackTrace");
     }
   }
 
