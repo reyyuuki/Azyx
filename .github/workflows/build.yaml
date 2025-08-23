@@ -22,7 +22,37 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.24.4"
+          flutter-version: "3.27.4"
+
+      - name: Download keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE_BASE64" | base64 --decode > android/app/azyx.jks
+
+      - name: Set up signing variables
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          echo "storePassword=$KEYSTORE_PASSWORD" > android/key.properties
+          echo "keyPassword=$KEY_PASSWORD" >> android/key.properties
+          echo "keyAlias=$KEY_ALIAS" >> android/key.properties
+          echo "storeFile=azyx.jks" >> android/key.properties
+      
+      - name: Setup .env File
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
+          MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
+          REDIRECT_URL: ${{ secrets.REDIRECT_URL }}
+        run: |
+          echo "CLIENT_ID=$CLIENT_ID" > .env
+          echo "CLIENT_SECRET=$CLIENT_SECRET" >> .env
+          echo "MAL_CLIENT_ID=$MAL_CLIENT_ID" >> .env
+          echo "MAL_CLIENT_SECRET=$MAL_CLIENT_SECRET" >> .env
+          echo "REDIRECT_URL=$REDIRECT_URL" >> .env
 
       - name: Get Dependencies
         run: flutter pub get
@@ -59,8 +89,21 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.24.4"
-
+          flutter-version: "3.27.4"
+        
+      - name: Setup .env File
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
+          MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
+          REDIRECT_URL: ${{ secrets.REDIRECT_URL }}
+        run: |
+          echo "CLIENT_ID=$CLIENT_ID" > .env
+          echo "CLIENT_SECRET=$CLIENT_SECRET" >> .env
+          echo "MAL_CLIENT_ID=$MAL_CLIENT_ID" >> .env
+          echo "MAL_CLIENT_SECRET=$MAL_CLIENT_SECRET" >> .env
+          echo "REDIRECT_URL=$REDIRECT_URL" >> .env
       - name: Get Dependencies
         run: flutter pub get
 
@@ -97,7 +140,21 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.24.4"
+          flutter-version: "3.27.4"
+
+      - name: Setup .env File
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
+          MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
+          REDIRECT_URL: ${{ secrets.REDIRECT_URL }}
+        run: |
+          echo "CLIENT_ID=$CLIENT_ID" > .env
+          echo "CLIENT_SECRET=$CLIENT_SECRET" >> .env
+          echo "MAL_CLIENT_ID=$MAL_CLIENT_ID" >> .env
+          echo "MAL_CLIENT_SECRET=$MAL_CLIENT_SECRET" >> .env
+          echo "REDIRECT_URL=$REDIRECT_URL" >> .env
 
       - name: Get Dependencies
         run: flutter pub get
@@ -120,7 +177,6 @@ jobs:
           tag: ${{ github.ref_name }}
 
   build-windows:
-    if: false  # This will skip the Windows build
     runs-on: windows-latest
     steps:
       - name: Checkout Code
@@ -129,8 +185,22 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.24.4"
+          flutter-version: "3.27.4"
 
+      - name: Setup .env File
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
+          MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
+          REDIRECT_URL: ${{ secrets.REDIRECT_URL }}
+        run: |
+          echo "CLIENT_ID=$CLIENT_ID" > .env
+          echo "CLIENT_SECRET=$CLIENT_SECRET" >> .env
+          echo "MAL_CLIENT_ID=$MAL_CLIENT_ID" >> .env
+          echo "MAL_CLIENT_SECRET=$MAL_CLIENT_SECRET" >> .env
+          echo "REDIRECT_URL=$REDIRECT_URL" >> .env
+        
       - name: Get Dependencies
         run: flutter pub get
 
@@ -151,7 +221,6 @@ jobs:
           tag: ${{ github.ref_name }}
 
   build-macos:
-    if: false  # This will skip the Macos build
     runs-on: macos-latest
     steps:
       - name: Checkout Code
@@ -160,7 +229,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.24.4"
+          flutter-version: "3.27.4"
 
       - name: Replace auth provider 
         run: |
