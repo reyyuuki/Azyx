@@ -3,7 +3,7 @@ name: changelog
 on:
   workflow_run:
     workflows:
-      - "Build and Release AzyX"
+      - "Build and Release Azyx"
     types:
       - completed
   workflow_dispatch:
@@ -211,7 +211,7 @@ jobs:
 
           # Add download badges
           CURRENT_TAG_SAFE=$(echo "${{ env.current_tag }}" | sed 's/[^a-zA-Z0-9.-]//g')
-          echo "![Total Downloads](https://img.shields.io/github/downloads/reyyuuki/AzyX/total?style=for-the-badge&label=TOTAL%20DOWNLOADS&labelColor=black&color=white) ![Current Release](https://img.shields.io/github/downloads/reyyuuki/AzyX/${CURRENT_TAG_SAFE}/total?style=for-the-badge&label=CURRENT%20RELEASE&labelColor=black&color=white)" >> CHANGELOG.md
+          echo "![Total Downloads](https://img.shields.io/github/downloads/RyanYuuki/AnymeX/total?style=for-the-badge&label=TOTAL%20DOWNLOADS&labelColor=black&color=white) ![Current Release](https://img.shields.io/github/downloads/RyanYuuki/AnymeX/${CURRENT_TAG_SAFE}/total?style=for-the-badge&label=CURRENT%20RELEASE&labelColor=black&color=white)" >> CHANGELOG.md
           
           # Clean up temporary file
           rm -f commits.tmp
