@@ -163,7 +163,6 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
           (data['absoluteEpisodeNumber'] ?? data['episodeNumber'] ?? '')
               .toString();
 
-      // find matching episode in mappedList
       final matched = mappedList.firstWhere(
         (e) => e.number.toString() == epNum,
         orElse: () =>
