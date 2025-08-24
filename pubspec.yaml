@@ -1,7 +1,7 @@
 name: azyx
 description: "AzyX"
 publish_to: "none"
-version: 2.6.4-beta+3
+version: 2.6.4-beta+4
 
 environment:
   sdk: ^3.8.1
