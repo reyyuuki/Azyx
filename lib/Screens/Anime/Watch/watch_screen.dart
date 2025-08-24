@@ -14,13 +14,10 @@ class WatchScreen extends StatefulWidget {
 }
 
 class _WatchScreenState extends State<WatchScreen> {
-  late WatchController controller;
-
   @override
   void initState() {
     super.initState();
-    controller = Get.put(WatchController());
-    controller.initializePlayer(widget.playerData);
+    watchController.initializePlayer(widget.playerData);
   }
 
   @override
@@ -34,57 +31,56 @@ class _WatchScreenState extends State<WatchScreen> {
     return Scaffold(
       body: GestureDetector(
         onDoubleTapDown: (t) {
-          controller.isControlsLocked.value
+          watchController.isControlsLocked.value
               ? null
-              : controller.doubleTap(t, context);
+              : watchController.doubleTap(t, context);
         },
         onLongPressStart: (d) async {
-          controller.isPressed.value = true;
-          controller.player.setRate(2.0);
+          watchController.isPressed.value = true;
+          watchController.player.setRate(2.0);
         },
         onLongPressEnd: (d) {
-          controller.player.setRate(controller.selectedSpeed.value);
-          controller.isPressed.value = false;
+          watchController.player.setRate(watchController.selectedSpeed.value);
+          watchController.isPressed.value = false;
         },
         onTap: () {
-          controller.handleControlsTap();
+          watchController.handleControlsTap();
         },
         onVerticalDragUpdate: (e) async {
-          controller.handleVerticalDrag(e, context);
+          watchController.handleVerticalDrag(e, context);
         },
         child: Stack(
           alignment: Alignment.center,
           children: [
             Obx(
               () => Video(
-                fit: controller.getMode(controller.currentMode),
-                controller: controller.controller,
+                fit: watchController.getMode(watchController.currentMode),
+                controller: watchController.controller,
                 filterQuality: FilterQuality.low,
               ),
             ),
             Positioned.fill(
               child: Obx(
                 () => AnimatedOpacity(
-                  opacity: controller.showControls.value ? 0.2 : 0.0,
+                  opacity: watchController.showControls.value ? 0.2 : 0.0,
                   duration: const Duration(milliseconds: 300),
-                  child: const AzyXContainer(
-                    color: Colors.black,
-                  ),
+                  child: const AzyXContainer(color: Colors.black),
                 ),
               ),
             ),
-            controller.buildRippleEffect(context),
+            watchController.buildRippleEffect(context),
             Positioned.fill(
-                child: Obx(
-              () => IgnorePointer(
-                ignoring: !controller.showControls.value,
-                child: controller.customControls(context),
+              child: Obx(
+                () => IgnorePointer(
+                  ignoring: !watchController.showControls.value,
+                  child: watchController.customControls(context),
+                ),
               ),
-            )),
-            controller.episodeListDrawer(),
-            controller.volumeIndicator(),
-            controller.brightnessIndicator(),
-            controller.preesedBar()
+            ),
+            watchController.episodeListDrawer(),
+            watchController.volumeIndicator(),
+            watchController.brightnessIndicator(),
+            watchController.preesedBar(),
           ],
         ),
       ),
