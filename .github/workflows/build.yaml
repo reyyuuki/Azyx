@@ -187,10 +187,19 @@ jobs:
       - name: Build Linux
         run: flutter build linux --release
 
+    
+      - name: Debug directory structure
+        run: |
+          pwd
+          ls -la .
+          ls -la ../../../
+        working-directory: build/linux/x64/release
+
       - name: Zip Linux Artifacts
         run: |
           cd build/linux/x64/release
-          cp ../../../../linux-fix/* bundle/lib/
+          mkdir -p bundle/lib
+          cp ../../../linux-fix/* bundle/lib/ || true
           zip -r ../../../../Azyx-Linux.zip .
 
       - name: Release Linux Build
@@ -256,10 +265,24 @@ jobs:
         with:
           flutter-version: "3.32.8"
 
-      - name: Replace auth provider 
+      - name: Setup .env File
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
+          MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
+          REDIRECT_URL: ${{ secrets.REDIRECT_URL }}
         run: |
-          mv lib/auth/auth_provider_macos.dart lib/auth/auth_provider.dart
-          mv pubspec_macos.yaml pubspec.yaml
+          echo "CLIENT_ID=$CLIENT_ID" > .env
+          echo "CLIENT_SECRET=$CLIENT_SECRET" >> .env
+          echo "MAL_CLIENT_ID=$MAL_CLIENT_ID" >> .env
+          echo "MAL_CLIENT_SECRET=$MAL_CLIENT_SECRET" >> .env
+          echo "REDIRECT_URL=$REDIRECT_URL" >> .env
+      
+      # - name: Replace auth provider 
+      #   run: |
+      #     mv lib/auth/auth_provider_macos.dart lib/auth/auth_provider.dart
+      #     mv pubspec_macos.yaml pubspec.yaml
 
       - name: Get Dependencies
         run: flutter pub get
@@ -267,11 +290,64 @@ jobs:
       - name: Build macOS
         run: flutter build macos --release
 
+      - name: Verify Build Output
+        run: |
+          echo "Checking build output..."
+          ls -la build/macos/Build/Products/Release/ || echo "Release directory not found"
+          find build/macos -name "*.app" -type d || echo "No .app files found"
+
       - name: Create DMG file for macOS Build
         run: |
-          mkdir -p build/macos/Release
-          hdiutil create -volname "Azyx" -srcfolder build/macos/Build/Products/Release/Azyx.app -ov -format UDZO build/macos/Release/Azyx.dmg
+          set -e  # Exit on any error
 
+          # Check if the .app file exists
+          APP_PATH="build/macos/Build/Products/Release/azyx.app"
+          if [ ! -d "$APP_PATH" ]; then
+            echo "Error: azyx.app not found at $APP_PATH"
+            echo "Available files in Release directory:"
+            ls -la build/macos/Build/Products/Release/ || echo "Release directory doesn't exist"
+            exit 1
+          fi
+
+          # Create necessary directories
+          mkdir -p build/macos/Release
+          mkdir -p temp_dir
+
+          # Copy the app bundle
+          echo "Copying app bundle..."
+          cp -r "$APP_PATH" temp_dir/
+
+          # Create Applications symlink
+          echo "Creating Applications symlink..."
+          ln -s /Applications temp_dir/Applications
+
+          # Create DMG
+          echo "Creating DMG file..."
+          hdiutil create \
+            -volname "AzyX" \
+            -srcfolder temp_dir \
+            -ov \
+            -format UDZO \
+            build/macos/Release/AzyX.dmg
+
+          # Cleanup
+          echo "Cleaning up temporary directory..."
+          rm -rf temp_dir
+
+          # Verify DMG was created
+          if [ -f "build/macos/Release/AzyX.dmg" ]; then
+            echo "DMG created successfully!"
+            ls -lh build/macos/Release/AzyX.dmg
+          else
+            echo "Error: DMG file was not created"
+            exit 1
+          fi
+      - name: Upload DMG as Artifact (for debugging)
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: build/macos/Release/AzyX.dmg
+          if-no-files-found: error
       - name: Release macOS Builds
         uses: ncipollo/release-action@v1
         with:
