@@ -296,12 +296,7 @@ jobs:
             🔹 ${{ env.apk_universal_message }} | **APK (universal)**
             🔹 ${{ env.apk_x86_64_message }} | **APK (x86 & x64)**
             🔹 ${{ env.windows_message }} | **Windows Zip**
-            🔹 ${{ env.setup_message }} | **Windows EXE**
-            🔹 ${{ env.linuximg_message }} | **Linux appimage**
-            🔹 ${{ env.linuxrmp_message }} | **Linux rmp**
-            🔹 ${{ env.linux_message }} | **Linux**
-            🔹 ${{ env.ios_message }} | **iOS**
-            🔹 ${{ env.macos_message }} | **macOS**"
+            🔹 ${{ env.linux_message }} | **Linux**"
           curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -H "Content-Type: application/json" \
             -d '{
@@ -371,12 +366,7 @@ jobs:
             🔹 ${{ env.apk_universal_message }} | **APK (universal)**
             🔹 ${{ env.apk_x86_64_message }} | **APK (x86 & x64)**
             🔹 ${{ env.windows_message }} | **Windows Zip**
-            🔹 ${{ env.setup_message }} | **Windows EXE**
-            🔹 ${{ env.linuximg_message }} | **Linux appimage**
-            🔹 ${{ env.linuxrmp_message }} | **Linux rmp**
-            🔹 ${{ env.linux_message }} | **Linux**
-            🔹 ${{ env.ios_message }} | **iOS**
-            🔹 ${{ env.macos_message }} | **macOS**"
+            🔹 ${{ env.linux_message }} | **Linux**"
           PAYLOAD=$(jq -n --arg content "$MESSAGE" '{ content: $content }')
           curl -X POST "${{ env.DISCORD_WEBHOOK_URL }}" \
             -H "Content-Type: application/json" \
