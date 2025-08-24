@@ -16,19 +16,20 @@ class LocalHistory {
   Source? source;
   List<Chapter>? chapterList;
 
-  LocalHistory(
-      {this.animeData,
-      this.mediaId,
-      this.chapterList,
-      this.image,
-      this.link,
-      this.progress,
-      this.source,
-      this.currentPage,
-      this.currentTime,
-      this.totalDuration,
-      this.lastTime,
-      this.title});
+  LocalHistory({
+    this.animeData,
+    this.mediaId,
+    this.chapterList,
+    this.image,
+    this.link,
+    this.progress,
+    this.source,
+    this.currentPage,
+    this.currentTime,
+    this.totalDuration,
+    this.lastTime,
+    this.title,
+  });
 
   factory LocalHistory.fromJson(Map<dynamic, dynamic> json) {
     return LocalHistory(
@@ -55,8 +56,8 @@ class LocalHistory {
           : null,
       chapterList: json['chapterList'] != null
           ? (json['chapterList'] as List<dynamic>)
-              .map((e) => Chapter.fromJson(e as Map<dynamic, dynamic>))
-              .toList()
+                .map((e) => Chapter.fromJson(e as Map<dynamic, dynamic>))
+                .toList()
           : null,
     );
   }

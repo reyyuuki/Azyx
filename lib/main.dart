@@ -11,6 +11,7 @@ import 'package:azyx/Controllers/ui_setting_controller.dart';
 import 'package:azyx/HiveClass/theme_data.dart';
 import 'package:azyx/HiveClass/ui_setting_class.dart';
 import 'package:azyx/Providers/theme_provider.dart';
+import 'package:azyx/Screens/Anime/Watch/controller/watch_controller.dart';
 import 'package:azyx/Screens/Anime/anime_screen.dart';
 import 'package:azyx/Screens/Library/library_screen.dart';
 import 'package:azyx/Screens/Home/home_screen.dart';
@@ -30,19 +31,22 @@ import 'package:provider/provider.dart';
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   @override
   Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-        PointerDeviceKind.trackpad,
-        PointerDeviceKind.stylus
-      };
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.trackpad,
+    PointerDeviceKind.stylus,
+  };
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.transparent,
-      statusBarColor: Colors.transparent));
+      statusBarColor: Colors.transparent,
+    ),
+  );
   MediaKit.ensureInitialized();
   await Hive.initFlutter();
   Hive.registerAdapter(ThemeClassAdapter());
@@ -54,6 +58,7 @@ void main() async {
   await Hive.openBox("auth");
   await dotenv.load(fileName: ".env");
   initializeDateFormatting();
+  Get.put(UpdateNotifier());
   Get.put(AnilistService());
   Get.put(AnilistDataController());
   Get.put(OfflineController());
@@ -64,11 +69,15 @@ void main() async {
   Get.put(MalService());
   Get.put(ServiceHandler());
   Get.put(SourceController());
-  runApp(MultiProvider(
-    providers: [ChangeNotifierProvider(create: (_) => ThemeProvider())],
-    child: const MainApp(),
-  ));
+  runApp(
+    MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => ThemeProvider())],
+      child: const MainApp(),
+    ),
+  );
 }
+
+void getControllerIntialized() {}
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -96,7 +105,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    UpdateNotifier.checkUpdate(context);
   }
 
   final List<Widget> _screens = [
@@ -112,14 +120,17 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        extendBody: true,
-        body: Obx(() => _screens[index.value]),
-        bottomNavigationBar: Obx(() => CustomNavBar(
-              screens: _screens,
-              index: index.value,
-              onChanged: (newIndex) {
-                index.value = newIndex;
-              },
-            )));
+      extendBody: true,
+      body: Obx(() => _screens[index.value]),
+      bottomNavigationBar: Obx(
+        () => CustomNavBar(
+          screens: _screens,
+          index: index.value,
+          onChanged: (newIndex) {
+            index.value = newIndex;
+          },
+        ),
+      ),
+    );
   }
 }

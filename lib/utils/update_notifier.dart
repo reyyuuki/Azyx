@@ -1,51 +1,60 @@
 // ignore_for_file: depend_on_referenced_packages
 
 import 'dart:convert';
-import 'dart:developer';
-import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
+import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_navigation/get_navigation.dart';
+import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:get/utils.dart';
 import "package:http/http.dart" as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class UpdateNotifier {
+class UpdateNotifier extends GetxController {
+  @override
+  void onInit() {
+    super.onInit();
+    checkUpdate();
+  }
+
   String fileName = '';
   String downloadLink = '';
 
   static Future<void> downloadFile() async {
     if (await Permission.storage.request().isGranted) {
       final directory = await getExternalStorageDirectory();
-      log('permission success: ${directory.toString()}');
+      Utils.log('permission success: ${directory.toString()}');
     } else {
-      log('no permission');
+      Utils.log('no permission');
     }
   }
 
-  static Future<void> checkUpdate(context) async {
+  static Future<void> checkUpdate() async {
     const url = "https://api.github.com/repos/reyyuuki/AzyX/releases/latest";
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        log(data.toString());
-        String latestVersion =
-            data['tag_name'].toString().replaceFirst("v", "");
+        String latestVersion = data['tag_name'].toString().replaceFirst(
+          "v",
+          "",
+        );
         String changelog = data['body'];
         String releaseTitle = data['name'];
 
         PackageInfo packageInfo = await PackageInfo.fromPlatform();
         String currentVersion = packageInfo.version;
-        log("$latestVersion == $currentVersion");
+        Utils.log("$latestVersion == $currentVersion");
         if (latestVersion != currentVersion) {
-          _showUpdateBottomSheet(context, changelog, releaseTitle);
+          _showUpdateBottomSheet(Get.context!, changelog, releaseTitle);
         } else {
-          azyxSnackBar("U are on latest");
+          Utils.log("You are on latest update");
         }
       }
     } catch (e) {
-      log("error when checking update: $e");
+      Utils.log("error when checking update: $e");
     }
   }
 
@@ -55,41 +64,48 @@ class UpdateNotifier {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        String latestVersion =
-            data['tag_name'].toString().replaceFirst("v", "");
+        String latestVersion = data['tag_name'].toString().replaceFirst(
+          "v",
+          "",
+        );
         String changelog = data['body'];
         String releaseTitle = data['name'];
 
         PackageInfo packageInfo = await PackageInfo.fromPlatform();
         String currentVersion = packageInfo.version;
-        log("$latestVersion == $currentVersion");
+        Utils.log("$latestVersion == $currentVersion");
         if (latestVersion != currentVersion) {
           _showUpdateBottomSheet(context, changelog, releaseTitle);
         }
       }
     } catch (e) {
-      log("error when checking update: $e");
+      Utils.log("error when checking update: $e");
     }
   }
 
   static Map<String, List<String>> _parseChangelog(String changelog) {
     Map<String, List<String>> parsedChanges = {};
-    List<String> sections =
-        changelog.split(RegExp(r'(?<=\r\n)\*\*[^*]+(?=\*\*)'));
+    List<String> sections = changelog.split(
+      RegExp(r'(?<=\r\n)\*\*[^*]+(?=\*\*)'),
+    );
 
     for (var section in sections) {
       if (section.trim().isEmpty) continue;
 
-      List<String> lines =
-          section.split('\r\n').where((line) => line.isNotEmpty).toList();
+      List<String> lines = section
+          .split('\r\n')
+          .where((line) => line.isNotEmpty)
+          .toList();
       String header = lines.first.trim();
 
       List<String> body = lines
           .sublist(1)
-          .map((line) => line
-              .replaceAll(RegExp(r'https?:\/\/\S+'), '')
-              .replaceAll(RegExp(r'[#*`\[\]]'), '')
-              .trim())
+          .map(
+            (line) => line
+                .replaceAll(RegExp(r'https?:\/\/\S+'), '')
+                .replaceAll(RegExp(r'[#*`\[\]]'), '')
+                .trim(),
+          )
           .where((line) => line.isNotEmpty)
           .toList();
 
@@ -130,9 +146,10 @@ class UpdateNotifier {
               const Text(
                 'Update Available',
                 style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: "Poppins-Bold"),
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: "Poppins-Bold",
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
@@ -180,15 +197,19 @@ class UpdateNotifier {
                               itemBuilder: (context, index) {
                                 final change = parsedChanges[header]![index];
                                 return Padding(
-                                  padding:
-                                      const EdgeInsets.only(left: 20, top: 5),
+                                  padding: const EdgeInsets.only(
+                                    left: 20,
+                                    top: 5,
+                                  ),
                                   child: Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
                                       const Padding(
-                                        padding:
-                                            EdgeInsets.only(top: 5, right: 8),
+                                        padding: EdgeInsets.only(
+                                          top: 5,
+                                          right: 8,
+                                        ),
                                         child: Icon(
                                           Icons.circle,
                                           size: 6,
@@ -198,9 +219,7 @@ class UpdateNotifier {
                                       Expanded(
                                         child: Text(
                                           change.split(':').last,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                          ),
+                                          style: const TextStyle(fontSize: 14),
                                         ),
                                       ),
                                     ],
@@ -226,32 +245,36 @@ class UpdateNotifier {
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          backgroundColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              side: BorderSide(
-                                  color:
-                                      Theme.of(context).colorScheme.primary))),
-                      child: const Text(
-                        'Cancel',
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        backgroundColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
                       ),
+                      child: const Text('Cancel'),
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        launchUrl(Uri.parse(
-                            'https://github.com/reyyuuki/AzyX/releases/latest'));
+                        launchUrl(
+                          Uri.parse(
+                            'https://github.com/reyyuuki/AzyX/releases/latest',
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20)),
-                          backgroundColor:
-                              Theme.of(context).colorScheme.primary,
-                          foregroundColor: Colors.black),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Colors.black,
+                      ),
                       child: const Text('Update'),
                     ),
                   ),

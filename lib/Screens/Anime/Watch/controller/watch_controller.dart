@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as max;
+import 'package:azyx/Controllers/online_subtitles_controller.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Models/episode_class.dart';
@@ -33,11 +34,9 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:volume_controller/volume_controller.dart';
 
-enum ResizeModes {
-  contain,
-  cover,
-  fill,
-}
+enum ResizeModes { contain, cover, fill }
+
+final WatchController watchController = Get.put(WatchController());
 
 class WatchController extends GetxController with WidgetsBindingObserver {
   late Player player;
@@ -89,25 +88,33 @@ class WatchController extends GetxController with WidgetsBindingObserver {
 
     updateEntry();
     player = Player();
-    controller = VideoController(player,
-        configuration: const VideoControllerConfiguration(
-            androidAttachSurfaceAfterVideoParameters: true));
+    controller = VideoController(
+      player,
+      configuration: const VideoControllerConfiguration(
+        androidAttachSurfaceAfterVideoParameters: true,
+      ),
+    );
 
     intializeData(playerData);
 
     for (var element in playerData.episodeUrls) {
-      log("Headers: ${element.headers} / ${sourceController.activeSource.value!.baseUrl!}");
+      log(
+        "Headers: ${element.headers} / ${sourceController.activeSource.value!.baseUrl!}",
+      );
     }
 
     player.open(
       Media(
         playerData.url!,
         httpHeaders: {
-          'Referer': playerData.episodeUrls.first.headers?['Referer'] ??
+          'Referer':
+              playerData.episodeUrls.first.headers?['Referer'] ??
               sourceController.activeSource.value!.baseUrl!,
-          'Origin': playerData.episodeUrls.first.headers?['Origin'] ??
+          'Origin':
+              playerData.episodeUrls.first.headers?['Origin'] ??
               sourceController.activeSource.value!.baseUrl!,
-          'User-Agent': playerData.episodeUrls.first.headers?['user-agent'] ??
+          'User-Agent':
+              playerData.episodeUrls.first.headers?['user-agent'] ??
               'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         },
       ),
@@ -116,7 +123,9 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     _handleVolumeAndBrightness();
     _setupPlayerListeners();
     updateTimer = Timer.periodic(
-        const Duration(minutes: 1), (timer) => localHistoryEntry());
+      const Duration(minutes: 1),
+      (timer) => localHistoryEntry(),
+    );
   }
 
   void _setupPlayerListeners() {
@@ -150,8 +159,10 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   void localHistoryEntry() {}
 
   void updateEntry() async {
-    await serviceHandler.updateListEntry(anilistAddToListController.anime.value,
-        isAnime: true);
+    await serviceHandler.updateListEntry(
+      anilistAddToListController.anime.value,
+      isAnime: true,
+    );
   }
 
   Future<void> _handleVolumeAndBrightness() async {
@@ -180,8 +191,8 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   }
 
   void changeResizeMode() {
-    currentMode.value = ResizeModes.values[
-        (ResizeModes.values.indexOf(currentMode.value) + 1) %
+    currentMode.value =
+        ResizeModes.values[(ResizeModes.values.indexOf(currentMode.value) + 1) %
             ResizeModes.values.length];
   }
 
@@ -214,11 +225,14 @@ class WatchController extends GetxController with WidgetsBindingObserver {
           .getVideoList(DEpisode(episodeNumber: episodeNumber.value, url: url));
       if (response.isNotEmpty) {
         final quality = animeData.value.episodeUrls.firstWhere(
-            (i) => i.url == animeData.value.url,
-            orElse: () => animeData.value.episodeUrls.first);
+          (i) => i.url == animeData.value.url,
+          orElse: () => animeData.value.episodeUrls.first,
+        );
         log("Quality: ${quality.quality}");
-        final result = response.firstWhere((i) => i.quality == quality.quality,
-            orElse: () => response.first);
+        final result = response.firstWhere(
+          (i) => i.quality == quality.quality,
+          orElse: () => response.first,
+        );
         animeData.value.episodeUrls = response;
         animeData.value.url = result.url;
         localHistoryEntry();
@@ -231,8 +245,10 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  void applySavedProfile() => ColorProfileManager()
-      .applyColorProfile(currentVisualProfile.value, player);
+  void applySavedProfile() => ColorProfileManager().applyColorProfile(
+    currentVisualProfile.value,
+    player,
+  );
 
   void showColorProfileSheet(BuildContext context) {
     showModalBottomSheet(
@@ -270,16 +286,20 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     final newPosition = isLeft
         ? max.max(0, position.value.inSeconds - skipDuration.value).seconds
         : max
-            .min(totalDuration.value.inSeconds,
-                position.value.inSeconds + skipDuration.value)
-            .seconds;
+              .min(
+                totalDuration.value.inSeconds,
+                position.value.inSeconds + skipDuration.value,
+              )
+              .seconds;
 
     position.value = newPosition;
     player.seek(Duration(seconds: newPosition.inSeconds));
     player.play();
     doubleTapTimer?.cancel();
     Future.delayed(
-        const Duration(milliseconds: 700), () => isSeeking.value = false);
+      const Duration(milliseconds: 700),
+      () => isSeeking.value = false,
+    );
     doubleTapTimer = Timer(const Duration(milliseconds: 1000), () {
       isSeeking.value = false;
       doubleTapLable.value = 0;
@@ -321,7 +341,9 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     hideControlsTimer?.cancel();
     if (showControls.value) {
       hideControlsTimer = Timer(
-          const Duration(milliseconds: 5000), () => showControls.value = false);
+        const Duration(milliseconds: 5000),
+        () => showControls.value = false,
+      );
     }
   }
 
@@ -344,11 +366,14 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   void changeEpisode(bool isNext) {
     if (anilistAuthController.userData.value.name != null) {
       anilistAddToListController.updateAnimeProgress(
-          animeData.value, (episodeNumber.value.toInt()));
+        animeData.value,
+        (episodeNumber.value.toInt()),
+      );
       azyxSnackBar("Tracking Episode $episodeNumber");
     }
-    final index =
-        filteredEpisodes.indexWhere((i) => i.number == episodeNumber.value);
+    final index = filteredEpisodes.indexWhere(
+      (i) => i.number == episodeNumber.value,
+    );
     if (isNext && filteredEpisodes.length > index) {
       log("Next");
       player.open(Media(""));
@@ -373,7 +398,9 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   void onEpisodeSelected(Episode item) {
     if (anilistAuthController.userData.value.name != null) {
       anilistAddToListController.updateAnimeProgress(
-          animeData.value, (episodeNumber.value.toInt()));
+        animeData.value,
+        (episodeNumber.value.toInt()),
+      );
       azyxSnackBar("Tracking Episode $episodeNumber");
     }
     player.open(Media(""));
@@ -407,14 +434,11 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       child: AzyXContainer(
         padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.6),
-            border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
-            borderRadius: BorderRadius.circular(40)),
-        child: const Icon(
-          Broken.arrow_left_2,
-          color: Colors.white,
-          size: 35,
+          color: Colors.black.withOpacity(0.6),
+          border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
+          borderRadius: BorderRadius.circular(40),
         ),
+        child: const Icon(Broken.arrow_left_2, color: Colors.white, size: 35),
       ),
     );
   }
@@ -422,48 +446,46 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   Widget topRightControls(BuildContext context) {
     return AzyXContainer(
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(40),
-          border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
-          color: Colors.black.withOpacity(0.6)),
+        borderRadius: BorderRadius.circular(40),
+        border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
+        color: Colors.black.withOpacity(0.6),
+      ),
       child: Row(
         children: [
           IconButton(
             onPressed: () {
               showEpisodesBox.value = true;
             },
-            icon: const Icon(
-              Broken.video,
-              color: Colors.white,
-            ),
+            icon: const Icon(Broken.video, color: Colors.white),
           ),
           IconButton(
             onPressed: () {
               showColorProfileSheet(context);
             },
-            icon: const Icon(
-              Broken.blur,
-              color: Colors.white,
-            ),
+            icon: const Icon(Broken.blur, color: Colors.white),
           ),
           IconButton(
             onPressed: () {
-              showSubtitleSheet(animeData, selectedSbt, context,
-                  player: player);
+              showEnhancedSubtitleSheet(
+                animeData,
+                selectedSbt,
+                context,
+                player: player,
+              );
             },
-            icon: const Icon(
-              Iconsax.subtitle_bold,
-              color: Colors.white,
-            ),
+            icon: const Icon(Iconsax.subtitle_bold, color: Colors.white),
           ),
           IconButton(
             onPressed: () {
               showQualitySheet(
-                  context, animeData, player, position, isPotraitOrientaion);
+                context,
+                animeData,
+                player,
+                position,
+                isPotraitOrientaion,
+              );
             },
-            icon: const Icon(
-              Icons.high_quality,
-              color: Colors.white,
-            ),
+            icon: const Icon(Icons.high_quality, color: Colors.white),
           ),
         ],
       ),
@@ -517,9 +539,10 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   Widget bottomRightControls() {
     return AzyXContainer(
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(40),
-          border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
-          color: Colors.black.withOpacity(0.6)),
+        borderRadius: BorderRadius.circular(40),
+        border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
+        color: Colors.black.withOpacity(0.6),
+      ),
       child: Row(
         children: [
           IconButton(
@@ -539,8 +562,9 @@ class WatchController extends GetxController with WidgetsBindingObserver {
                 : IconButton(
                     onPressed: () {
                       isPotraitOrientaion.value = false;
-                      SystemChrome.setPreferredOrientations(
-                          [DeviceOrientation.landscapeLeft]);
+                      SystemChrome.setPreferredOrientations([
+                        DeviceOrientation.landscapeLeft,
+                      ]);
                     },
                     icon: const Icon(
                       Icons.screen_rotation,
@@ -553,13 +577,11 @@ class WatchController extends GetxController with WidgetsBindingObserver {
                 : IconButton(
                     onPressed: () {
                       isPotraitOrientaion.value = true;
-                      SystemChrome.setPreferredOrientations(
-                          [DeviceOrientation.portraitUp]);
+                      SystemChrome.setPreferredOrientations([
+                        DeviceOrientation.portraitUp,
+                      ]);
                     },
-                    icon: const Icon(
-                      Icons.phone_android,
-                      color: Colors.white,
-                    ),
+                    icon: const Icon(Icons.phone_android, color: Colors.white),
                   ),
           isControlsLocked.value
               ? const SizedBox.shrink()
@@ -569,10 +591,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
                     azyxSnackBar(currentMode.value.name);
                   },
                   icon: Obx(
-                    () => Icon(
-                      getModeIcon(currentMode),
-                      color: Colors.white,
-                    ),
+                    () => Icon(getModeIcon(currentMode), color: Colors.white),
                   ),
                 ),
         ],
@@ -584,27 +603,22 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     return AzyXContainer(
       margin: const EdgeInsets.only(right: 10),
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(40),
-          color: Colors.black.withOpacity(0.6)),
+        borderRadius: BorderRadius.circular(40),
+        color: Colors.black.withOpacity(0.6),
+      ),
       child: Row(
         children: [
           IconButton(
             onPressed: () {
               seek10Seconds(true);
             },
-            icon: const Icon(
-              Broken.backward_10_seconds,
-              color: Colors.white,
-            ),
+            icon: const Icon(Broken.backward_10_seconds, color: Colors.white),
           ),
           IconButton(
             onPressed: () {
               seek10Seconds(false);
             },
-            icon: const Icon(
-              Broken.forward_10_seconds,
-              color: Colors.white,
-            ),
+            icon: const Icon(Broken.forward_10_seconds, color: Colors.white),
           ),
         ],
       ),
@@ -615,18 +629,21 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     return AzyXContainer(
       margin: const EdgeInsets.only(right: 10),
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(40),
-          border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
-          color: Colors.black.withOpacity(0.6)),
+        borderRadius: BorderRadius.circular(40),
+        border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
+        color: Colors.black.withOpacity(0.6),
+      ),
       child: IconButton(
         onPressed: () {
           showSpeedBottomList(
-              context, speedList, selectedSpeed, player, isPotraitOrientaion);
+            context,
+            speedList,
+            selectedSpeed,
+            player,
+            isPotraitOrientaion,
+          );
         },
-        icon: const Icon(
-          Iconsax.speedometer_bold,
-          color: Colors.white,
-        ),
+        icon: const Icon(Iconsax.speedometer_bold, color: Colors.white),
       ),
     );
   }
@@ -636,9 +653,10 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       margin: const EdgeInsets.only(right: 10),
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(40),
-          border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
-          color: Colors.black.withOpacity(0.6)),
+        borderRadius: BorderRadius.circular(40),
+        border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
+        color: Colors.black.withOpacity(0.6),
+      ),
       child: IconButton(
         onPressed: () {
           player.pause();
@@ -651,15 +669,12 @@ class WatchController extends GetxController with WidgetsBindingObserver {
         icon: isLeft
             ? const Row(
                 children: [
-                  Icon(
-                    Broken.backward,
-                    color: Colors.white,
-                  ),
+                  Icon(Broken.backward, color: Colors.white),
                   AzyXText(
                     text: " -85",
                     color: Colors.white,
                     fontVariant: FontVariant.bold,
-                  )
+                  ),
                 ],
               )
             : const Row(
@@ -669,10 +684,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
                     fontVariant: FontVariant.bold,
                     color: Colors.white,
                   ),
-                  Icon(
-                    Broken.forward,
-                    color: Colors.white,
-                  ),
+                  Icon(Broken.forward, color: Colors.white),
                 ],
               ),
       ),
@@ -692,9 +704,9 @@ class WatchController extends GetxController with WidgetsBindingObserver {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             isControlsLocked.value ? const SizedBox.shrink() : seek10Widget(),
-            bottomRightControls()
+            bottomRightControls(),
           ],
-        )
+        ),
       ],
     );
   }
@@ -702,12 +714,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   Widget bottomLeftControls(BuildContext context) {
     return isControlsLocked.value
         ? const SizedBox.shrink()
-        : Row(
-            children: [
-              seek85(true),
-              speedButton(context),
-            ],
-          );
+        : Row(children: [seek85(true), speedButton(context)]);
   }
 
   Widget bottomControls(BuildContext context) {
@@ -730,24 +737,23 @@ class WatchController extends GetxController with WidgetsBindingObserver {
           );
   }
 
-  Widget buildIconButton(
-      {required VoidCallback ontap, required IconData icon}) {
+  Widget buildIconButton({
+    required VoidCallback ontap,
+    required IconData icon,
+  }) {
     return InkWell(
-        onTap: ontap,
-        child: AzyXContainer(
-          padding: const EdgeInsets.all(10),
-          margin: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.6),
-              border:
-                  Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
-              borderRadius: BorderRadius.circular(50)),
-          child: Icon(
-            icon,
-            color: Colors.white,
-            size: 35,
-          ),
-        ));
+      onTap: ontap,
+      child: AzyXContainer(
+        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.6),
+          border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
+          borderRadius: BorderRadius.circular(50),
+        ),
+        child: Icon(icon, color: Colors.white, size: 35),
+      ),
+    );
   }
 
   Widget centerControls(BuildContext context) {
@@ -756,28 +762,33 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         buildIconButton(
-            ontap: () {
-              changeEpisode(false);
-            },
-            icon: Broken.previous),
+          ontap: () {
+            changeEpisode(false);
+          },
+          icon: Broken.previous,
+        ),
         20.width,
-        Obx(() => isBuffering.value
-            ? const CircularProgressIndicator()
-            : GestureDetector(
-                onTap: () => player.playOrPause(),
-                child: Icon(
-                  isPlaying.value
-                      ? Icons.pause_rounded
-                      : Icons.play_arrow_rounded,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 60,
-                ))),
+        Obx(
+          () => isBuffering.value
+              ? const CircularProgressIndicator()
+              : GestureDetector(
+                  onTap: () => player.playOrPause(),
+                  child: Icon(
+                    isPlaying.value
+                        ? Icons.pause_rounded
+                        : Icons.play_arrow_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 60,
+                  ),
+                ),
+        ),
         20.width,
         buildIconButton(
-            ontap: () {
-              changeEpisode(true);
-            },
-            icon: Broken.next)
+          ontap: () {
+            changeEpisode(true);
+          },
+          icon: Broken.next,
+        ),
       ],
     );
   }
@@ -794,84 +805,97 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   Widget customControls(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(
-          vertical: isPotraitOrientaion.value ? 20 : 12,
-          horizontal: isPotraitOrientaion.value ? 20 : 35),
+        vertical: isPotraitOrientaion.value ? 20 : 12,
+        horizontal: isPotraitOrientaion.value ? 20 : 35,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Obx(() => isControlsLocked.value
-              ? const SizedBox.shrink()
-              : AnimatedContainer(
-                  height: isPotraitOrientaion.value ? 150 : 101,
-                  alignment: Alignment.center,
-                  transform: Matrix4.translationValues(
-                      0, showControls.value ? 0 : -Get.height, 0),
-                  duration: const Duration(milliseconds: 1000),
-                  curve: Curves.easeInOutCubicEmphasized,
-                  child: topControls(context))),
+          Obx(
+            () => isControlsLocked.value
+                ? const SizedBox.shrink()
+                : AnimatedContainer(
+                    height: isPotraitOrientaion.value ? 150 : 101,
+                    alignment: Alignment.center,
+                    transform: Matrix4.translationValues(
+                      0,
+                      showControls.value ? 0 : -Get.height,
+                      0,
+                    ),
+                    duration: const Duration(milliseconds: 1000),
+                    curve: Curves.easeInOutCubicEmphasized,
+                    child: topControls(context),
+                  ),
+          ),
           Obx(
             () => Expanded(
-                child: AnimatedOpacity(
-              opacity: showControls.value ? 1 : 0,
-              duration: const Duration(milliseconds: 500),
-              child: isControlsLocked.value
-                  ? lockedCenterControls()
-                  : centerControls(context),
-            )),
+              child: AnimatedOpacity(
+                opacity: showControls.value ? 1 : 0,
+                duration: const Duration(milliseconds: 500),
+                child: isControlsLocked.value
+                    ? lockedCenterControls()
+                    : centerControls(context),
+              ),
+            ),
           ),
           AnimatedContainer(
             height: isPotraitOrientaion.value ? 150 : 101,
             transform: Matrix4.translationValues(
-                0, showControls.value ? 0 : Get.height, 0),
+              0,
+              showControls.value ? 0 : Get.height,
+              0,
+            ),
             duration: const Duration(milliseconds: 1000),
             curve: Curves.easeInOutCubicEmphasized,
             child: Column(
               children: [
                 Row(
                   children: [
-                    Obx(() => AzyXText(
-                          text: getFormattedTime(position.value.inSeconds),
-                          fontVariant: FontVariant.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        )),
-                    const AzyXText(
-                      text: ' / ',
-                      fontVariant: FontVariant.bold,
+                    Obx(
+                      () => AzyXText(
+                        text: getFormattedTime(position.value.inSeconds),
+                        fontVariant: FontVariant.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
-                    Obx(() => AzyXText(
-                          text: getFormattedTime(totalDuration.value.inSeconds),
-                          fontVariant: FontVariant.bold,
-                        ))
+                    const AzyXText(text: ' / ', fontVariant: FontVariant.bold),
+                    Obx(
+                      () => AzyXText(
+                        text: getFormattedTime(totalDuration.value.inSeconds),
+                        fontVariant: FontVariant.bold,
+                      ),
+                    ),
                   ],
                 ),
                 Obx(
                   () => Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: CustomSlider(
-                        min: 0.0,
-                        max: totalDuration.value.inSeconds > 0
-                            ? totalDuration.value.inSeconds.toDouble()
-                            : 0.0,
-                        secondaryTrackValue: totalDuration.value.inSeconds > 0
-                            ? buffered.value.inSeconds.toDouble()
-                            : 0.0,
-                        indiactorTime:
-                            getFormattedTime(position.value.inSeconds),
-                        value: totalDuration.value.inSeconds > 0.0
-                            ? double.parse(
-                                position.value.inSeconds.toStringAsFixed(2))
-                            : 0.0,
-                        onDragEnd: (value) {
-                          player.seek(Duration(seconds: value.toInt()));
-                          player.play();
-                        },
-                        isLocked: isControlsLocked.value,
-                        onChanged: (value) {
-                          position.value = Duration(seconds: value.toInt());
-                        }),
+                      min: 0.0,
+                      max: totalDuration.value.inSeconds > 0
+                          ? totalDuration.value.inSeconds.toDouble()
+                          : 0.0,
+                      secondaryTrackValue: totalDuration.value.inSeconds > 0
+                          ? buffered.value.inSeconds.toDouble()
+                          : 0.0,
+                      indiactorTime: getFormattedTime(position.value.inSeconds),
+                      value: totalDuration.value.inSeconds > 0.0
+                          ? double.parse(
+                              position.value.inSeconds.toStringAsFixed(2),
+                            )
+                          : 0.0,
+                      onDragEnd: (value) {
+                        player.seek(Duration(seconds: value.toInt()));
+                        player.play();
+                      },
+                      isLocked: isControlsLocked.value,
+                      onChanged: (value) {
+                        position.value = Duration(seconds: value.toInt());
+                      },
+                    ),
                   ),
                 ),
-                bottomControls(context)
+                bottomControls(context),
               ],
             ),
           ),
@@ -896,10 +920,11 @@ class WatchController extends GetxController with WidgetsBindingObserver {
             alignment: Alignment.center,
             curve: Curves.bounceOut,
             decoration: BoxDecoration(
-                borderRadius: isLeftSide.value
-                    ? const BorderRadius.horizontal(right: Radius.circular(200))
-                    : const BorderRadius.horizontal(left: Radius.circular(200)),
-                color: Colors.white.withOpacity(0.5)),
+              borderRadius: isLeftSide.value
+                  ? const BorderRadius.horizontal(right: Radius.circular(200))
+                  : const BorderRadius.horizontal(left: Radius.circular(200)),
+              color: Colors.white.withOpacity(0.5),
+            ),
             child: Obx(
               () => Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -930,30 +955,29 @@ class WatchController extends GetxController with WidgetsBindingObserver {
 
   Widget preesedBar() {
     return AnimatedPositioned(
-        top: isPotraitOrientaion.value ? 100 : 40,
-        duration: const Duration(milliseconds: 300),
-        child: Obx(
-          () => AnimatedOpacity(
+      top: isPotraitOrientaion.value ? 100 : 40,
+      duration: const Duration(milliseconds: 300),
+      child: Obx(
+        () => AnimatedOpacity(
+          duration: const Duration(milliseconds: 300),
+          opacity: isPressed.value ? 1.0 : 0.0,
+          child: AnimatedContainer(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(20),
+            ),
             duration: const Duration(milliseconds: 300),
-            opacity: isPressed.value ? 1.0 : 0.0,
-            child: AnimatedContainer(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
-                  borderRadius: BorderRadius.circular(20)),
-              duration: const Duration(milliseconds: 300),
-              child: const Row(
-                children: [
-                  AzyXText(
-                    text: "2.0x ",
-                    fontVariant: FontVariant.bold,
-                  ),
-                  Icon(Broken.forward)
-                ],
-              ),
+            child: const Row(
+              children: [
+                AzyXText(text: "2.0x ", fontVariant: FontVariant.bold),
+                Icon(Broken.forward),
+              ],
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   Widget volumeIndicator() {
@@ -1011,8 +1035,10 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    SystemChrome.setPreferredOrientations(
-        [DeviceOrientation.portraitDown, DeviceOrientation.portraitUp]);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.portraitUp,
+    ]);
     player.dispose();
     localHistoryEntry();
     updateTimer?.cancel();
