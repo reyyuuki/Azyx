@@ -1,10 +1,10 @@
 name: azyx
 description: "AzyX"
 publish_to: "none"
-version: 2.6.4-beta+2
+version: 2.6.4-beta+3
 
 environment:
-  sdk: ">=3.4.4 <4.0.0"
+  sdk: ^3.8.1
 
 dependencies:
   flutter:
