@@ -1,23 +1,29 @@
 // ignore_for_file: must_be_immutable, depend_on_referenced_packages
+import 'dart:async';
+
+import 'package:app_links/app_links.dart';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
 import 'package:azyx/Controllers/services/mal_service.dart';
 import 'package:azyx/Controllers/offline_controller.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
+import 'package:azyx/Controllers/services/simkl_service.dart';
 import 'package:azyx/Controllers/settings_controller.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Controllers/ui_setting_controller.dart';
 import 'package:azyx/HiveClass/theme_data.dart';
 import 'package:azyx/HiveClass/ui_setting_class.dart';
 import 'package:azyx/Providers/theme_provider.dart';
-import 'package:azyx/Screens/Anime/Watch/controller/watch_controller.dart';
 import 'package:azyx/Screens/Anime/anime_screen.dart';
 import 'package:azyx/Screens/Library/library_screen.dart';
 import 'package:azyx/Screens/Home/home_screen.dart';
 import 'package:azyx/Screens/Manga/manga_screen.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/common/custom_nav_bar.dart';
+import 'package:azyx/utils/deeplink.dart';
 import 'package:azyx/utils/update_notifier.dart';
+import 'package:azyx/utils/utils.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -38,46 +44,69 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
   };
 }
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      systemNavigationBarColor: Colors.transparent,
-      statusBarColor: Colors.transparent,
-    ),
-  );
-  MediaKit.ensureInitialized();
-  await Hive.initFlutter();
-  Hive.registerAdapter(ThemeClassAdapter());
-  Hive.registerAdapter(UiSettingClassAdapter());
-  await Hive.openBox('theme-data');
-  await Hive.openBox('app-data');
-  await Hive.openBox('ui-settings');
-  await Hive.openBox("offline-data");
-  await Hive.openBox("auth");
-  await dotenv.load(fileName: ".env");
-  initializeDateFormatting();
-  Get.put(UpdateNotifier());
-  Get.put(AnilistService());
-  Get.put(AnilistDataController());
-  Get.put(OfflineController());
-  Get.put(UiSettingController());
-  Get.put(AnilistAddToListController());
-  // Get.put(LocalHistoryController());
-  Get.put(SettingsController());
-  Get.put(MalService());
-  Get.put(ServiceHandler());
-  Get.put(SourceController());
-  runApp(
-    MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => ThemeProvider())],
-      child: const MainApp(),
-    ),
+void main(List<String> args) async {
+  runZonedGuarded(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          systemNavigationBarColor: Colors.transparent,
+          statusBarColor: Colors.transparent,
+        ),
+      );
+      deepLink();
+      MediaKit.ensureInitialized();
+      await Hive.initFlutter();
+      Hive.registerAdapter(ThemeClassAdapter());
+      Hive.registerAdapter(UiSettingClassAdapter());
+      await Hive.openBox('theme-data');
+      await Hive.openBox('app-data');
+      await Hive.openBox('ui-settings');
+      await Hive.openBox("offline-data");
+      await Hive.openBox("auth");
+      await dotenv.load(fileName: ".env");
+      initializeDateFormatting();
+      Get.put(UpdateNotifier());
+      Get.put(AnilistService());
+      Get.put(MalService());
+      Get.put(SimklService());
+      Get.put(ServiceHandler());
+      Get.put(AnilistDataController());
+      Get.put(OfflineController());
+      Get.put(UiSettingController());
+      Get.put(AnilistAddToListController());
+      // Get.put(LocalHistoryController());
+      Get.put(SettingsController());
+      Get.put(SourceController());
+      runApp(
+        MultiProvider(
+          providers: [ChangeNotifierProvider(create: (_) => ThemeProvider())],
+          child: const MainApp(),
+        ),
+      );
+    },
+    (error, stack) {
+      Utils.log("Unhandled error: $error");
+    },
   );
 }
 
-void getControllerIntialized() {}
+void deepLink() async {
+  final appLink = AppLinks();
+  try {
+    final initLink = await appLink.getInitialLink();
+    if (initLink != null) Deeplink.useDeepLink(initLink);
+  } catch (e) {
+    azyxSnackBar('Error while getting link: $e');
+  }
+  appLink.uriLinkStream.listen(
+    (uri) => Deeplink.useDeepLink(uri),
+    onError: (err) => azyxSnackBar('Error Opening link: $err'),
+  );
+}
+
+Rx<int> index = 2.obs;
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -114,8 +143,6 @@ class _HomePageState extends State<HomePage> {
     const MangaScreen(),
     // const NovelScreen(),
   ];
-
-  Rx<int> index = 2.obs;
 
   @override
   Widget build(BuildContext context) {
