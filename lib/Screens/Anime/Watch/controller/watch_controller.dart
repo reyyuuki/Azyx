@@ -159,8 +159,9 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   void localHistoryEntry() {}
 
   void updateEntry() async {
+    Utils.log(serviceHandler.currentMedia.value.id ?? '');
     await serviceHandler.updateListEntry(
-      anilistAddToListController.anime.value,
+      serviceHandler.currentMedia.value,
       isAnime: true,
     );
   }
