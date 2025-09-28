@@ -70,6 +70,8 @@ dependencies:
   path_provider: ^2.1.5
   expandable_page_view: ^1.0.17
   manga_page_view: ^1.0.5
+  lottie: ^3.3.1
+  app_links: ^6.4.1
 
 dev_dependencies:
   flutter_test:
@@ -103,6 +105,7 @@ flutter:
     - assets/images/sticker.png
     - assets/images/icon.jpg
     - assets/images/
+    - assets/animations/
   fonts:
     - family: broken
       fonts:
