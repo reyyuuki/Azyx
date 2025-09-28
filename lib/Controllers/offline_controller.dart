@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:azyx/Functions/string_extensions.dart';
 import 'package:azyx/Models/offline_item.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
@@ -12,11 +13,16 @@ class OfflineController extends GetxController {
   final RxList<Category> offlineAnimeCategories = RxList();
   final RxList<Category> offlineMangaCategories = RxList();
 
- 
- 
+  @override
+  void onInit() {
+    super.onInit();
+    loadOfflineData();
+  }
+
   void addOfflineItem(OfflineItem data, String categoryName) {
-    final index =
-        offlineAnimeList.indexWhere((i) => i.mediaData.id == data.mediaData.id);
+    final index = offlineAnimeList.indexWhere(
+      (i) => i.mediaData.id == data.mediaData.id,
+    );
     if (index != -1) {
       offlineAnimeList[index] = data;
     } else {
@@ -26,8 +32,9 @@ class OfflineController extends GetxController {
   }
 
   void addMangaOfflineItem(OfflineItem data, String categoryName) {
-    final index =
-        offlineMangaList.indexWhere((i) => i.mediaData.id == data.mediaData.id);
+    final index = offlineMangaList.indexWhere(
+      (i) => i.mediaData.id == data.mediaData.id,
+    );
     if (index != -1) {
       offlineMangaList[index] = data;
     } else {
@@ -39,13 +46,21 @@ class OfflineController extends GetxController {
   void persistOfflineData() async {
     final box = Hive.box('offline-data');
     await box.put(
-        'animeList', offlineAnimeList.map((e) => e.toJson()).toList());
+      'animeList',
+      offlineAnimeList.map((e) => e.toJson()).toList(),
+    );
     await box.put(
-        'categories', offlineAnimeCategories.map((e) => e.toJson()).toList());
+      'categories',
+      offlineAnimeCategories.map((e) => e.toJson()).toList(),
+    );
     await box.put(
-        "mangaList", offlineMangaList.map((e) => e.toJson()).toList());
-    await box.put('mangaCategories',
-        offlineMangaCategories.map((e) => e.toJson()).toList());
+      "mangaList",
+      offlineMangaList.map((e) => e.toJson()).toList(),
+    );
+    await box.put(
+      'mangaCategories',
+      offlineMangaCategories.map((e) => e.toJson()).toList(),
+    );
   }
 
   void loadOfflineData() {
@@ -57,7 +72,9 @@ class OfflineController extends GetxController {
 
     if (storedAnimeList != null) {
       offlineAnimeList.assignAll(
-        (storedAnimeList as List).map((e) => OfflineItem.fromJson(e)).toList(),
+        (storedAnimeList as List)
+            .map((e) => OfflineItem.fromJson(e, false))
+            .toList(),
       );
     }
 
@@ -69,7 +86,9 @@ class OfflineController extends GetxController {
 
     if (storedMangaList != null) {
       offlineMangaList.assignAll(
-        (storedMangaList as List).map((e) => OfflineItem.fromJson(e)).toList(),
+        (storedMangaList as List)
+            .map((e) => OfflineItem.fromJson(e, true))
+            .toList(),
       );
     }
 
@@ -84,17 +103,19 @@ class OfflineController extends GetxController {
   }
 
   void removeOfflineItem(OfflineItem data, String categoryName) {
-    final index =
-        offlineAnimeList.indexWhere((i) => i.mediaData.id == data.mediaData.id);
+    final index = offlineAnimeList.indexWhere(
+      (i) => i.mediaData.id == data.mediaData.id,
+    );
     offlineAnimeList.removeAt(index);
-    removeFromCategory(categoryName, data.mediaData.id!);
+    removeFromCategory(categoryName, data.mediaData.id!.toInt());
   }
 
   void removeMangaOfflineItem(OfflineItem data, String categoryName) {
-    final index =
-        offlineMangaList.indexWhere((i) => i.mediaData.id == data.mediaData.id);
+    final index = offlineMangaList.indexWhere(
+      (i) => i.mediaData.id == data.mediaData.id,
+    );
     offlineMangaList.removeAt(index);
-    removeFromMangaCategory(categoryName, data.mediaData.id!);
+    removeFromMangaCategory(categoryName, data.mediaData.id!.toInt());
   }
 
   void createCategory(String categoryName) {
@@ -108,37 +129,45 @@ class OfflineController extends GetxController {
   }
 
   void deleteCategory(String categoryName) {
-    final index =
-        offlineAnimeCategories.indexWhere((i) => i.name == categoryName);
+    final index = offlineAnimeCategories.indexWhere(
+      (i) => i.name == categoryName,
+    );
     offlineAnimeCategories.removeAt(index);
     persistOfflineData();
   }
 
   void deleteMangaCategory(String categoryName) {
-    final index =
-        offlineMangaCategories.indexWhere((i) => i.name == categoryName);
+    final index = offlineMangaCategories.indexWhere(
+      (i) => i.name == categoryName,
+    );
     offlineMangaCategories.removeAt(index);
     persistOfflineData();
   }
 
-  void addToCategory(String categoryName, int mediaId) {
-    final index =
-        offlineAnimeCategories.indexWhere((i) => i.name == categoryName);
+  void addToCategory(String categoryName, String mediaId) {
+    final index = offlineAnimeCategories.indexWhere(
+      (i) => i.name == categoryName,
+    );
     if (index != -1) {
       offlineAnimeCategories[index].anilistIds.add(mediaId);
-      log("Added to category '${offlineAnimeCategories[index].name}': $mediaId");
+      log(
+        "Added to category '${offlineAnimeCategories[index].name}': $mediaId",
+      );
     } else {
       log("Error: Category '$categoryName' not found.");
     }
     persistOfflineData();
   }
 
-  void addToMangaCategory(String categoryName, int mediaId) {
-    final index =
-        offlineMangaCategories.indexWhere((i) => i.name == categoryName);
+  void addToMangaCategory(String categoryName, String mediaId) {
+    final index = offlineMangaCategories.indexWhere(
+      (i) => i.name == categoryName,
+    );
     if (index != -1) {
       offlineMangaCategories[index].anilistIds.add(mediaId);
-      log("Added to category '${offlineMangaCategories[index].name}': $mediaId");
+      log(
+        "Added to category '${offlineMangaCategories[index].name}': $mediaId",
+      );
     } else {
       log("Error: Category '$categoryName' not found.");
     }
@@ -146,11 +175,14 @@ class OfflineController extends GetxController {
   }
 
   void removeFromCategory(String categoryName, int mediaId) {
-    final index =
-        offlineAnimeCategories.indexWhere((i) => i.name == categoryName);
+    final index = offlineAnimeCategories.indexWhere(
+      (i) => i.name == categoryName,
+    );
     if (index != -1) {
       offlineAnimeCategories[index].anilistIds.remove(mediaId);
-      log("Removed from category '${offlineAnimeCategories[index].name}': $mediaId");
+      log(
+        "Removed from category '${offlineAnimeCategories[index].name}': $mediaId",
+      );
     } else {
       log("Error: Category '$categoryName' not found.");
     }
@@ -158,11 +190,14 @@ class OfflineController extends GetxController {
   }
 
   void removeFromMangaCategory(String categoryName, int mediaId) {
-    final index =
-        offlineMangaCategories.indexWhere((i) => i.name == categoryName);
+    final index = offlineMangaCategories.indexWhere(
+      (i) => i.name == categoryName,
+    );
     if (index != -1) {
       offlineMangaCategories[index].anilistIds.remove(mediaId);
-      log("Removed from category '${offlineMangaCategories[index].name}': $mediaId");
+      log(
+        "Removed from category '${offlineMangaCategories[index].name}': $mediaId",
+      );
     } else {
       log("Error: Category '$categoryName' not found.");
     }
