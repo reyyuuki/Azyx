@@ -1,8 +1,9 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:convert';
-import 'dart:developer';
+import 'dart:ui';
 
+import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Controllers/source/source_mapper.dart';
@@ -11,10 +12,10 @@ import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Models/offline_item.dart';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
+import 'package:azyx/Models/user_anime.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/add_to_list_floater.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/details_section.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/watch_section.dart';
-import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/scrollable_app_bar.dart';
 import 'package:azyx/Widgets/helper/platform_builder.dart';
@@ -33,12 +34,13 @@ class AnimeDetailsScreen extends StatefulWidget {
   final CarousaleData? smallMedia;
   final OfflineItem? allData;
   final bool isOffline;
-  const AnimeDetailsScreen(
-      {super.key,
-      required this.tagg,
-      this.isOffline = false,
-      this.smallMedia,
-      this.allData});
+  const AnimeDetailsScreen({
+    super.key,
+    required this.tagg,
+    this.isOffline = false,
+    this.smallMedia,
+    this.allData,
+  });
 
   @override
   State<AnimeDetailsScreen> createState() => _DetailsScreenState();
@@ -49,7 +51,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
   final RxString title = ''.obs;
   final Rx<String> image = ''.obs;
   final Rx<String> coverImage = ''.obs;
-  final Rx<int> id = 0.obs;
+  final Rx<String> id = ''.obs;
   final Rx<AnilistMediaData> mediaData = AnilistMediaData().obs;
   final Rx<bool> isLoading = true.obs;
   final Rx<Source> selectedSource = Source().obs;
@@ -80,8 +82,8 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
         );
       }
     });
-
     convertData();
+    getMediaStatus();
   }
 
   @override
@@ -91,15 +93,25 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
     super.dispose();
   }
 
+  void getMediaStatus() {
+    if (serviceHandler.isLoggedIn.value) {
+      serviceHandler.currentMedia.value = serviceHandler.userAnimeList
+          .firstWhere((e) => e.id == id.value, orElse: UserAnime().obs);
+    }
+    Utils.log('st; ${serviceHandler.currentMedia.value.status} / $id');
+  }
+
   Future<void> loadData() async {
     try {
-      final response = await serviceHandler.fetchAnimeDetails(id.value);
+      final response = await serviceHandler.fetchAnimeDetails(
+        FetchDetailsParams(id: id.value),
+      );
       mediaData.value = response;
       isLoading.value = false;
       coverImage.value = mediaData.value.coverImage ?? image.value;
     } catch (e) {
       _anilistError.value = e.toString();
-      Utils.log("Error while getting data for details: $e");
+      Utils.log("Error while getting data for details for anime: $e");
     }
     _syncMedia();
     loadDetails();
@@ -127,10 +139,13 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
       totalEpisodes.value = episodesList.length.toString();
       isLoading.value = false;
     } else {
-      anilistAddToListController.findAnime(AnilistMediaData(
+      anilistAddToListController.findAnime(
+        AnilistMediaData(
           id: widget.smallMedia?.id,
           title: widget.smallMedia?.title,
-          episodes: widget.allData?.episodesList?.length ?? 0));
+          episodes: widget.allData?.episodesList?.length ?? 0,
+        ),
+      );
       image.value = widget.smallMedia!.image;
       title.value = widget.smallMedia!.title;
       id.value = widget.smallMedia!.id;
@@ -149,35 +164,48 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
     episodesList.value = mappedList;
     totalEpisodes.value = episodesList.length.toString();
 
-    final resp = await get(Uri.parse(
-        "https://api.ani.zip/mappings?${serviceHandler.serviceType.value == ServicesType.anilist ? 'anilist_id' : 'mal_id'}=${id.value}"));
+    final resp = await get(
+      Uri.parse(
+        "https://api.ani.zip/mappings?${serviceHandler.serviceType.value == ServicesType.anilist ? 'anilist_id' : 'mal_id'}=${id.value}",
+      ),
+    );
 
     final check = jsonDecode(resp.body);
-    Utils.log('youho: ${check['episodes']['1']}');
-    episodesList.value =
-        (check['episodes'] as Map<String, dynamic>).entries.map((entry) {
-      final data = entry.value;
-      final number = entry.key;
-      Utils.log(number);
-      final epNum =
-          (data['absoluteEpisodeNumber'] ?? data['episodeNumber'] ?? '')
-              .toString();
+    final ep = (check['episodes'] as Map<String, dynamic>).entries
+        .map((entry) {
+          final data = entry.value;
+          final number = entry.key;
 
-      final matched = mappedList.firstWhere(
-        (e) => e.number.toString() == epNum,
-        orElse: () =>
-            Episode(number: epNum, url: '', desc: '', thumbnail: '', title: ''),
-      );
+          if (data['absoluteEpisodeNumber'] == null) {
+            Utils.log('no ep');
+            return null;
+          }
 
-      return Episode(
-          url: matched.url ?? '',
-          number: (data['absoluteEpisodeNumber'] ?? data['episodeNumber'] ?? '')
-              .toString(),
-          desc: data['overview'] ?? '',
-          thumbnail: data['image'] ?? '',
-          title: data['title']['en'] ?? '');
-    }).toList();
-    setState(() {});
+          Utils.log(number);
+
+          final epNum = (data['absoluteEpisodeNumber']).toString();
+
+          final matched = mappedList.firstWhere(
+            (e) => e.number.toString() == epNum,
+            orElse: () => Episode(url: '', number: epNum, desc: ''),
+          );
+
+          return Episode(
+            url: matched.url ?? '',
+            number: epNum,
+            desc: data['overview'] ?? '',
+            thumbnail: data['image'] ?? '',
+            title: (data['title']?['en']) ?? '',
+          );
+        })
+        .whereType<Episode>()
+        .toList();
+    if (ep.first.number.isNotEmpty) {
+      episodesList.value = ep;
+    }
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> loadDetails() async {
@@ -197,7 +225,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
   }
 
   List<String> formatTitles(AnilistMediaData media) {
-    return ['${media.title}*ANIME', media.title!];
+    return ['${media.title}*ANIME', media.title ?? ''];
   }
 
   void _onPageChanged(int index) {
@@ -209,109 +237,285 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
+      extendBody: true,
       bottomNavigationBar: Container(
         height: 90,
         margin: const EdgeInsets.only(bottom: 10),
         child: Obx(
           () => AddToListFloater(
-              data: OfflineItem(
-                  mediaData: mediaData.value,
-                  number: '1',
-                  animeTitle: title.value,
-                  chaptersList: []),
-              mediaData: mediaData.value),
+            data: OfflineItem(
+              mediaData: mediaData.value,
+              number: '1',
+              animeTitle: title.value,
+              episodesList: episodesList,
+            ),
+            mediaData: mediaData.value,
+          ),
         ),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             ScrollableAppBar(
-                mediaData: mediaData, image: image.value, tagg: widget.tagg),
-            if (sourceController.installedMangaExtensions.isNotEmpty)
-              if (sourceController.installedExtensions.isNotEmpty)
-                AzyXContainer(
-                  padding: const EdgeInsets.all(8),
-                  margin: EdgeInsets.fromLTRB(
-                      getResponsiveSize(context,
-                          mobileSize: 15, dektopSize: Get.width * 0.2),
-                      40,
-                      getResponsiveSize(context,
-                          mobileSize: 15, dektopSize: Get.width * 0.2),
-                      0),
-                  decoration: BoxDecoration(
-                      color:
-                          Theme.of(context).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerLowest
-                                .withOpacity(1.glowMultiplier()),
-                            spreadRadius: 2.spreadMultiplier(),
-                            offset: const Offset(0, 7),
-                            blurRadius: 20.blurMultiplier())
-                      ]),
-                  child: SizedBox(
-                    height: 52,
-                    child: TabBar(
-                      controller: _tabBarController,
-                      splashBorderRadius: BorderRadius.circular(8),
-                      tabs: const [
-                        Tab(
-                          icon: Icon(Broken.information, size: 24),
-                          text: 'Details',
+              mediaData: mediaData,
+              image: image.value,
+              tagg: widget.tagg,
+            ),
+            if (sourceController.installedExtensions.isNotEmpty)
+              Container(
+                margin: EdgeInsets.fromLTRB(
+                  getResponsiveSize(
+                    context,
+                    mobileSize: 15,
+                    dektopSize: Get.width * 0.2,
+                  ),
+                  40,
+                  getResponsiveSize(
+                    context,
+                    mobileSize: 15,
+                    dektopSize: Get.width * 0.2,
+                  ),
+                  0,
+                ),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: Theme.of(context).brightness == Brightness.dark
+                        ? [
+                            Colors.white.withOpacity(0.08),
+                            Colors.white.withOpacity(0.03),
+                            Colors.white.withOpacity(0.12),
+                          ]
+                        : [Colors.white, Colors.white],
+                  ),
+                  border: Border.all(
+                    width: 1,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white.withOpacity(0.15)
+                        : Colors.white.withOpacity(0.6),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.black.withOpacity(0.3)
+                          : Colors.grey.withOpacity(0.2),
+                      blurRadius: 20,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 8),
+                    ),
+                    BoxShadow(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white.withOpacity(0.05)
+                          : Colors.white.withOpacity(0.8),
+                      blurRadius: 12,
+                      spreadRadius: -5,
+                      offset: const Offset(0, -2),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(22),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      height: 56,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(22),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors:
+                              Theme.of(context).brightness == Brightness.dark
+                              ? [
+                                  Colors.white.withOpacity(0.05),
+                                  Colors.white.withOpacity(0.02),
+                                ]
+                              : [Colors.white, Colors.white],
                         ),
-                        Tab(
-                          icon: Icon(Icons.movie_filter, size: 24),
-                          text: 'Watch',
+                      ),
+                      child: TabBar(
+                        controller: _tabBarController,
+                        splashBorderRadius: BorderRadius.circular(20),
+                        indicator: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.9),
+                              Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.7),
+                              Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.8),
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.4),
+                              blurRadius: 12,
+                              spreadRadius: 0,
+                              offset: const Offset(0, 3),
+                            ),
+                            BoxShadow(
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white.withOpacity(0.1)
+                                  : Colors.white.withOpacity(0.8),
+                              blurRadius: 8,
+                              spreadRadius: -2,
+                              offset: const Offset(0, -1),
+                            ),
+                          ],
                         ),
-                      ],
-                      labelStyle: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: "Poppins-Bold",
-                          color: Colors.black),
-                      unselectedLabelStyle: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.normal,
-                        fontFamily: "Poppins-Bold",
-                        color: Colors.grey,
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        dividerColor: Colors.transparent,
+                        tabs: [
+                          Tab(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Broken.information,
+                                    size: 20,
+                                    color: _currentIndex.value == 0
+                                        ? Colors.white
+                                        : Theme.of(context).brightness ==
+                                              Brightness.dark
+                                        ? Colors.white.withOpacity(0.7)
+                                        : Colors.black.withOpacity(0.7),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  AzyXText(
+                                    text: 'Details',
+                                    fontVariant: FontVariant.bold,
+                                    fontSize: 14,
+                                    color: _currentIndex.value == 0
+                                        ? Colors.white
+                                        : Theme.of(context).brightness ==
+                                              Brightness.dark
+                                        ? Colors.white.withOpacity(0.7)
+                                        : Colors.black.withOpacity(0.7),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Tab(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.movie_filter,
+                                    size: 20,
+                                    color: _currentIndex.value == 1
+                                        ? Colors.white
+                                        : Theme.of(context).brightness ==
+                                              Brightness.dark
+                                        ? Colors.white.withOpacity(0.7)
+                                        : Colors.black.withOpacity(0.7),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Watch',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: "Poppins-Bold",
+                                      color: _currentIndex.value == 1
+                                          ? Colors.white
+                                          : Theme.of(context).brightness ==
+                                                Brightness.dark
+                                          ? Colors.white.withOpacity(0.7)
+                                          : Colors.black.withOpacity(0.7),
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      indicator: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      indicatorSize: TabBarIndicatorSize.tab,
-                      dividerColor: Colors.transparent,
                     ),
                   ),
                 ),
+              ),
             const SizedBox(height: 20),
             ExpandablePageView(
               controller: _pageController,
               onPageChanged: _onPageChanged,
               children: [
-                Obx(() => isLoading.value || _anilistError.value.isNotEmpty
-                    ? SizedBox(
-                        height: 400,
-                        child: Center(
-                          child: _anilistError.value.isNotEmpty
-                              ? AzyXText(
-                                  text: _anilistError.value,
-                                  textAlign: TextAlign.center,
-                                  fontSize: 20,
-                                )
-                              : const CircularProgressIndicator(),
+                Obx(
+                  () => isLoading.value || _anilistError.value.isNotEmpty
+                      ? Container(
+                          height: 400,
+                          margin: const EdgeInsets.symmetric(horizontal: 20),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Colors.white.withOpacity(0.1),
+                                Colors.white.withOpacity(0.03),
+                                Colors.white.withOpacity(0.06),
+                              ],
+                            ),
+                            border: Border.all(
+                              width: 1,
+                              color: Colors.white.withOpacity(0.15),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.shadow.withOpacity(0.1),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: _anilistError.value.isNotEmpty
+                                ? AzyXText(
+                                    text: _anilistError.value,
+                                    textAlign: TextAlign.center,
+                                    fontSize: 16,
+                                    color: Theme.of(context).colorScheme.error,
+                                  )
+                                : CircularProgressIndicator(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                          ),
+                        )
+                      : DetailsSection(
+                          animeTitle: animeTitle.value,
+                          episodesList: episodesList,
+                          mediaData: mediaData,
+                          index: 0,
+                          isManga: false,
                         ),
-                      )
-                    : DetailsSection(
-                        animeTitle: animeTitle.value,
-                        episodesList: episodesList,
-                        mediaData: mediaData,
-                        index: 0,
-                        isManga: false,
-                      )),
+                ),
                 Obx(
                   () => sourceController.installedExtensions.isEmpty
                       ? const SizedBox.shrink()
@@ -344,6 +548,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
                 ),
               ],
             ),
+            100.height,
           ],
         ),
       ),

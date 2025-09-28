@@ -11,6 +11,7 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/helper/platform_builder.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
+import 'package:azyx/utils/utils.dart';
 import 'package:checkmark/checkmark.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,13 +21,18 @@ class AddToListFloater extends StatelessWidget {
   final int? index;
   final OfflineItem data;
   final AnilistMediaData mediaData;
-  const AddToListFloater(
-      {super.key, this.index, required this.data, required this.mediaData});
+  const AddToListFloater({
+    super.key,
+    this.index,
+    required this.data,
+    required this.mediaData,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final double opacity =
-        (index != null) ? (1.0 - index! * 0.1).clamp(0.0, 1.0) : 1.0;
+    final double opacity = (index != null)
+        ? (1.0 - index! * 0.1).clamp(0.0, 1.0)
+        : 1.0;
 
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 1000),
@@ -34,16 +40,42 @@ class AddToListFloater extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 1000),
         margin: EdgeInsets.fromLTRB(
-            getResponsiveSize(context,
-                mobileSize: 10, dektopSize: Get.width * 0.3),
-            0,
-            getResponsiveSize(context,
-                mobileSize: 10, dektopSize: Get.width * 0.3),
-            20),
+          getResponsiveSize(
+            context,
+            mobileSize: 10,
+            dektopSize: Get.width * 0.3,
+          ),
+          0,
+          getResponsiveSize(
+            context,
+            mobileSize: 10,
+            dektopSize: Get.width * 0.3,
+          ),
+          20,
+        ),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.4),
-            borderRadius: BorderRadius.circular(10)),
+          borderRadius: BorderRadius.circular(10),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: context.theme.brightness == Brightness.dark
+                ? [
+                    Colors.white.withOpacity(0.12),
+                    Colors.white.withOpacity(0.04),
+                    Colors.white.withOpacity(0.08),
+                  ]
+                : [Colors.white, Colors.white],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+          border: Border.all(width: 1.5, color: Colors.white.withOpacity(0.2)),
+        ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: BackdropFilter(
@@ -52,73 +84,84 @@ class AddToListFloater extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.0),
-                  borderRadius: BorderRadius.circular(10)),
+                color: Colors.white.withOpacity(0.0),
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: Row(
                 children: [
                   serviceHandler.userData.value.name != null
                       ? Expanded(
                           child: GestureDetector(
                             onTap: () {
+                              Utils.log('aaa: ${mediaData.id}');
                               anilistAddToListController.addToListSheet(
-                                  context,
-                                  mediaData.image ?? '',
-                                  mediaData.title ?? 'Unknown',
-                                  mediaData.episodes ?? 24);
+                                context,
+                                mediaData.image ?? '',
+                                mediaData.title ?? 'Unknown',
+                                mediaData.episodes ?? 24,
+                                mediaData.id!,
+                              );
                               log(mediaData.episodes.toString());
                             },
                             child: Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(10),
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Colors.black
-                                            .withOpacity(1.glowMultiplier()),
-                                        blurRadius: 10.blurMultiplier(),
-                                        spreadRadius: 2.spreadMultiplier())
-                                  ]),
+                                color: Colors.black,
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(
+                                      1.glowMultiplier(),
+                                    ),
+                                    blurRadius: 10.blurMultiplier(),
+                                    spreadRadius: 2.spreadMultiplier(),
+                                  ),
+                                ],
+                              ),
                               child: Obx(
                                 () => Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    anilistAddToListController
-                                            .animeStatus.value.isEmpty
+                                    serviceHandler.currentMedia.value.status ==
+                                            null
                                         ? Icon(
                                             Broken.add,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
                                             shadows: [
                                               BoxShadow(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .primary,
-                                                  blurRadius:
-                                                      10.blurMultiplier(),
-                                                  spreadRadius:
-                                                      2.spreadMultiplier())
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
+                                                blurRadius: 10.blurMultiplier(),
+                                                spreadRadius: 2
+                                                    .spreadMultiplier(),
+                                              ),
                                             ],
                                           )
                                         : const SizedBox(),
-                                    const SizedBox(
-                                      width: 5,
-                                    ),
+                                    const SizedBox(width: 5),
                                     Obx(
                                       () => Text(
-                                        anilistAddToListController
-                                                .animeStatus.value.isEmpty
+                                        serviceHandler
+                                                    .currentMedia
+                                                    .value
+                                                    .status ==
+                                                null
                                             ? "Add to list"
-                                            : anilistAddToListController
-                                                .animeStatus.value,
+                                            : serviceHandler
+                                                  .currentMedia
+                                                  .value
+                                                  .status!,
                                         style: TextStyle(
-                                            fontFamily: "Poppins-Bold",
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary),
+                                          fontFamily: "Poppins-Bold",
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
+                                        ),
                                       ),
-                                    )
+                                    ),
                                   ],
                                 ),
                               ),
@@ -126,20 +169,22 @@ class AddToListFloater extends StatelessWidget {
                           ),
                         )
                       : const SizedBox.shrink(),
-                  const SizedBox(
-                    width: 10,
-                  ),
+                  const SizedBox(width: 10),
                   GestureDetector(
                     onTap: () {
                       addToLibrary(context);
                     },
                     child: serviceHandler.userData.value.name == null
-                        ? libraryButton(context,
-                            width: getResponsiveSize(context,
-                                mobileSize: Get.width - 50,
-                                dektopSize: Get.width - Get.width * 0.625))
+                        ? libraryButton(
+                            context,
+                            width: getResponsiveSize(
+                              context,
+                              mobileSize: Get.width - 50,
+                              dektopSize: Get.width - Get.width * 0.625,
+                            ),
+                          )
                         : libraryButton(context),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -154,25 +199,27 @@ class AddToListFloater extends StatelessWidget {
       width: width,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(50),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.black.withOpacity(1.glowMultiplier()),
-                blurRadius: 10.blurMultiplier(),
-                spreadRadius: 2.spreadMultiplier())
-          ]),
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(50),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(1.glowMultiplier()),
+            blurRadius: 10.blurMultiplier(),
+            spreadRadius: 2.spreadMultiplier(),
+          ),
+        ],
+      ),
       child: Icon(
         IonIcons.albums,
         color: Theme.of(context).colorScheme.primary,
         shadows: [
           BoxShadow(
-              color: Theme.of(context)
-                  .colorScheme
-                  .primary
-                  .withOpacity(1.glowMultiplier()),
-              blurRadius: 10.blurMultiplier(),
-              spreadRadius: 2.spreadMultiplier())
+            color: Theme.of(
+              context,
+            ).colorScheme.primary.withOpacity(1.glowMultiplier()),
+            blurRadius: 10.blurMultiplier(),
+            spreadRadius: 2.spreadMultiplier(),
+          ),
         ],
       ),
     );
@@ -187,136 +234,145 @@ class AddToListFloater extends StatelessWidget {
           color: Theme.of(context).colorScheme.primary,
           shadows: [
             BoxShadow(
-                color: Theme.of(context).colorScheme.primary,
-                blurRadius: 10.blurMultiplier(),
-                spreadRadius: 2.spreadMultiplier())
+              color: Theme.of(context).colorScheme.primary,
+              blurRadius: 10.blurMultiplier(),
+              spreadRadius: 2.spreadMultiplier(),
+            ),
           ],
         ),
-        const SizedBox(
-          width: 5,
-        ),
+        const SizedBox(width: 5),
         Text(
           title,
           style: TextStyle(
-              fontFamily: "Poppins-Bold",
-              color: Theme.of(context).colorScheme.primary),
-        )
+            fontFamily: "Poppins-Bold",
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
       ],
     );
   }
 
   void addToLibrary(BuildContext context) {
     showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return AzyXGradientContainer(
-              padding: const EdgeInsets.all(10),
-              child: ListView(
-                children: [
-                  AzyXText(
-                    text: "Set Categories",
-                    textAlign: TextAlign.center,
-                    fontVariant: FontVariant.bold,
-                    fontSize: 20,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Obx(() => offlineController
-                          .offlineAnimeCategories.value.isEmpty
-                      ? const SizedBox.shrink()
-                      : Column(
-                          children:
-                              offlineController.offlineAnimeCategories.map((i) {
-                            final Rx<bool> isSelected =
-                                i.anilistIds.contains(data.mediaData.id).obs;
-                            return Container(
-                              padding: const EdgeInsets.all(10),
-                              margin: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerLowest,
-                                  borderRadius: BorderRadius.circular(10),
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .surfaceContainerLowest
-                                            .withOpacity(1.glowMultiplier()),
-                                        blurRadius: 10.blurMultiplier(),
-                                        spreadRadius: 2.spreadMultiplier())
-                                  ]),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  AzyXText(
-                                    text: i.name!,
-                                    fontVariant: FontVariant.bold,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      isSelected.value = !isSelected.value;
-                                      isSelected.value
-                                          ? offlineController.addOfflineItem(
-                                              data, i.name!)
-                                          : offlineController.removeOfflineItem(
-                                              data, i.name!);
-                                    },
-                                    child: SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: Obx(
-                                        () => CheckMark(
-                                          strokeWidth: 2,
-                                          activeColor: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                          inactiveColor: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                          duration:
-                                              const Duration(milliseconds: 400),
-                                          active: isSelected.value,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                        )),
-                  GestureDetector(
-                    onTap: () {
-                      dialogBox(context);
-                    },
-                    child: Container(
-                        padding: const EdgeInsets.all(10),
-                        margin: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerLowest,
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
+      context: context,
+      builder: (context) {
+        return AzyXGradientContainer(
+          padding: const EdgeInsets.all(10),
+          child: ListView(
+            children: [
+              AzyXText(
+                text: "Set Categories",
+                textAlign: TextAlign.center,
+                fontVariant: FontVariant.bold,
+                fontSize: 20,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(height: 10),
+              Obx(
+                () => offlineController.offlineAnimeCategories.value.isEmpty
+                    ? const SizedBox.shrink()
+                    : Column(
+                        children: offlineController.offlineAnimeCategories.map((
+                          i,
+                        ) {
+                          final Rx<bool> isSelected = i.anilistIds
+                              .contains(data.mediaData.id)
+                              .obs;
+                          return Container(
+                            padding: const EdgeInsets.all(10),
+                            margin: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerLowest,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
                                   color: Theme.of(context)
                                       .colorScheme
                                       .surfaceContainerLowest
                                       .withOpacity(1.glowMultiplier()),
                                   blurRadius: 10.blurMultiplier(),
-                                  spreadRadius: 2.spreadMultiplier())
-                            ]),
-                        child: addButtonText(context, "Create new category")),
+                                  spreadRadius: 2.spreadMultiplier(),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                AzyXText(
+                                  text: i.name!,
+                                  fontVariant: FontVariant.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    isSelected.value = !isSelected.value;
+                                    isSelected.value
+                                        ? offlineController.addOfflineItem(
+                                            data,
+                                            i.name!,
+                                          )
+                                        : offlineController.removeOfflineItem(
+                                            data,
+                                            i.name!,
+                                          );
+                                  },
+                                  child: SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: Obx(
+                                      () => CheckMark(
+                                        strokeWidth: 2,
+                                        activeColor: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                        inactiveColor: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                        duration: const Duration(
+                                          milliseconds: 400,
+                                        ),
+                                        active: isSelected.value,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  dialogBox(context);
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  margin: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerLowest,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerLowest
+                            .withOpacity(1.glowMultiplier()),
+                        blurRadius: 10.blurMultiplier(),
+                        spreadRadius: 2.spreadMultiplier(),
+                      ),
+                    ],
                   ),
-                ],
-              ));
-        });
+                  child: addButtonText(context, "Create new category"),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void dialogBox(BuildContext context) {
@@ -337,10 +393,10 @@ class AddToListFloater extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                    color:
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
-                    blurRadius: 10.blurMultiplier(),
-                    spreadRadius: 2.spreadMultiplier())
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  blurRadius: 10.blurMultiplier(),
+                  spreadRadius: 2.spreadMultiplier(),
+                ),
               ],
             ),
             child: Column(
@@ -367,7 +423,9 @@ class AddToListFloater extends StatelessWidget {
                       borderSide: BorderSide(color: Colors.grey.shade300),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 15, vertical: 10),
+                      horizontal: 15,
+                      vertical: 10,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -388,14 +446,17 @@ class AddToListFloater extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        offlineController
-                            .createCategory(textEditingController.text);
+                        offlineController.createCategory(
+                          textEditingController.text,
+                        );
                         Navigator.of(context).pop(textEditingController.text);
                       },
                       style: TextButton.styleFrom(
                         backgroundColor: Colors.black,
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 10),
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -403,7 +464,7 @@ class AddToListFloater extends StatelessWidget {
                       child: const Text('OK'),
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ),

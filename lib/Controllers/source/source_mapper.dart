@@ -89,8 +89,9 @@ AnimeMatchResult matchAnimeTitle(
     return AnimeMatchResult(
       isMatch: true,
       score: 1.0,
-      matchedTitle:
-          normalizedEnglish == normalizedTarget ? 'english' : 'romaji',
+      matchedTitle: normalizedEnglish == normalizedTarget
+          ? 'english'
+          : 'romaji',
       englishScore: normalizedEnglish == normalizedTarget ? 1.0 : 0.0,
       romajiScore: normalizedRomaji == normalizedTarget ? 1.0 : 0.0,
       details: AnimeMatchDetails(
@@ -174,8 +175,9 @@ AnimeMatchResult matchAnimeTitle(
     // Find matches
     for (int i = 0; i < s1.length; i++) {
       final int start = i - matchDistance > 0 ? i - matchDistance : 0;
-      final int end =
-          i + matchDistance + 1 < s2.length ? i + matchDistance + 1 : s2.length;
+      final int end = i + matchDistance + 1 < s2.length
+          ? i + matchDistance + 1
+          : s2.length;
 
       for (int j = start; j < end; j++) {
         if (!s2Matches[j] && s1[i] == s2[j]) {
@@ -203,7 +205,8 @@ AnimeMatchResult matchAnimeTitle(
       }
     }
 
-    final double jaro = (1 / 3) *
+    final double jaro =
+        (1 / 3) *
         (matches / s1.length +
             matches / s2.length +
             (matches - transpositions / 2) / matches);
@@ -243,16 +246,21 @@ AnimeMatchResult matchAnimeTitle(
       );
     }
 
-    final double levRatio = 1 -
+    final double levRatio =
+        1 -
         levenshtein(source, target) /
             (source.length > target.length ? source.length : target.length);
     final double jw = jaroWinkler(source, target);
 
     // Word level matching (for handling word order differences)
-    final List<String> sourceWords =
-        source.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
-    final List<String> targetWords =
-        target.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    final List<String> sourceWords = source
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .toList();
+    final List<String> targetWords = target
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .toList();
 
     int wordMatches = 0;
     for (final String sWord in sourceWords) {
@@ -261,11 +269,11 @@ AnimeMatchResult matchAnimeTitle(
 
     final double wordMatchRatio =
         sourceWords.isNotEmpty && targetWords.isNotEmpty
-            ? wordMatches /
-                (sourceWords.length > targetWords.length
-                    ? sourceWords.length
-                    : targetWords.length)
-            : 0;
+        ? wordMatches /
+              (sourceWords.length > targetWords.length
+                  ? sourceWords.length
+                  : targetWords.length)
+        : 0;
 
     // Season number matching bonus
     double seasonBonus = 0;
@@ -309,15 +317,16 @@ AnimeMatchResult matchAnimeTitle(
   // Determine the best match
   final double bestScore =
       englishSimilarity.finalScore > romajiSimilarity.finalScore
-          ? englishSimilarity.finalScore
-          : romajiSimilarity.finalScore;
+      ? englishSimilarity.finalScore
+      : romajiSimilarity.finalScore;
   final String matchedTitle =
       englishSimilarity.finalScore >= romajiSimilarity.finalScore
-          ? 'english'
-          : 'romaji';
+      ? 'english'
+      : 'romaji';
 
-  final _SimilarityResult bestSimilarity =
-      matchedTitle == 'english' ? englishSimilarity : romajiSimilarity;
+  final _SimilarityResult bestSimilarity = matchedTitle == 'english'
+      ? englishSimilarity
+      : romajiSimilarity;
 
   return AnimeMatchResult(
     isMatch: bestScore >= threshold,
@@ -389,9 +398,11 @@ Future<Anime?> mapMedia(List<String> animeId, RxString searchedTitle) async {
       );
 
       Utils.log(
-          "Match score: ${matchResult.score.toStringAsFixed(3)} for '$resultTitle'");
+        "Match score: ${matchResult.score.toStringAsFixed(3)} for '$resultTitle'",
+      );
       Utils.log(
-          "Match details: English(${matchResult.englishScore.toStringAsFixed(3)}) Romaji(${matchResult.romajiScore.toStringAsFixed(3)})");
+        "Match details: English(${matchResult.englishScore.toStringAsFixed(3)}) Romaji(${matchResult.romajiScore.toStringAsFixed(3)})",
+      );
 
       // Perfect match check
       if (matchResult.score >= 0.95) {
@@ -410,7 +421,8 @@ Future<Anime?> mapMedia(List<String> animeId, RxString searchedTitle) async {
         bestMatchResult = result;
         searchResults = results;
         Utils.log(
-            "New best match: $resultTitle with score ${matchResult.score.toStringAsFixed(3)}");
+          "New best match: $resultTitle with score ${matchResult.score.toStringAsFixed(3)}",
+        );
       }
     }
   }
@@ -429,15 +441,18 @@ Future<Anime?> mapMedia(List<String> animeId, RxString searchedTitle) async {
       bestMatchResult != null) {
     searchedTitle.value = bestMatch!.toUpperCase();
     Utils.log(
-        "Final match selected: $bestMatch with score ${highestSimilarity.toStringAsFixed(3)}");
+      "Final match selected: $bestMatch with score ${highestSimilarity.toStringAsFixed(3)}",
+    );
     return Anime.froDMedia(bestMatchResult, type);
   }
 
   // If no good match was found, return the first result or an empty Anime object
   Utils.log(
-      "No good match found. Highest similarity: ${highestSimilarity.toStringAsFixed(3)}");
-  searchedTitle.value =
-      searchResults.isNotEmpty ? searchResults.first.name : "No match found";
+    "No good match found. Highest similarity: ${highestSimilarity.toStringAsFixed(3)}",
+  );
+  searchedTitle.value = searchResults.isNotEmpty
+      ? searchResults.first.title
+      : "No match found";
   return searchResults.isNotEmpty
       ? Anime.froDMedia(searchResults.first, type)
       : Anime();

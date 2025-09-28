@@ -24,13 +24,15 @@ final List<double> scoresItems = [
   8.5,
   9.0,
   9.5,
-  10.0
+  10.0,
 ];
 BoxShadow glowingShadow(context) {
   return BoxShadow(
-      color:
-          Theme.of(context).colorScheme.primary.withOpacity(1.glowMultiplier()),
-      blurRadius: 10.blurMultiplier());
+    color: Theme.of(
+      context,
+    ).colorScheme.primary.withOpacity(1.glowMultiplier()),
+    blurRadius: 10.blurMultiplier(),
+  );
 }
 
 final List<String> items = [
@@ -39,82 +41,82 @@ final List<String> items = [
   "COMPLETED",
   "REPEATING",
   "PAUSED",
-  "DROPPED"
+  "DROPPED",
 ];
 
-List<Map<String, dynamic>> get animeCategories {
-  final list = serviceHandler.userAnimeList.value;
+// List<Map<String, dynamic>> get animeCategories {
+//   final list = serviceHandler.userAnimeList.value;
 
-  return [
-    {
-      "name": "All",
-      "data": list.allList,
-      "isManga": false,
-    },
-    {
-      "name": "Completed",
-      "data": list.completed,
-      "isManga": false,
-    },
-    {
-      "name": "Planning",
-      "data": list.planning,
-      "isManga": false,
-    },
-    {
-      "name": "Watching",
-      "data": list.currentlyWatching,
-      "isManga": false,
-    },
-    {
-      "name": list.repeating.isEmpty ? "Dropped" : "Repeating",
-      "data": list.repeating.isEmpty ? list.dropped : list.repeating,
-      "isManga": false,
-    },
-    {
-      "name": "Paused",
-      "data": list.paused,
-      "isManga": false,
-    },
-  ];
-}
+//   return [
+//     {
+//       "name": "All",
+//       "data": list.allList,
+//       "isManga": false,
+//     },
+//     {
+//       "name": "Completed",
+//       "data": list.completed,
+//       "isManga": false,
+//     },
+//     {
+//       "name": "Planning",
+//       "data": list.planning,
+//       "isManga": false,
+//     },
+//     {
+//       "name": "Watching",
+//       "data": list.currentlyWatching,
+//       "isManga": false,
+//     },
+//     {
+//       "name": list.repeating.isEmpty ? "Dropped" : "Repeating",
+//       "data": list.repeating.isEmpty ? list.dropped : list.repeating,
+//       "isManga": false,
+//     },
+//     {
+//       "name": "Paused",
+//       "data": list.paused,
+//       "isManga": false,
+//     },
+//   ];
+// }
 
-List<Map<String, dynamic>> get mangaCategories {
-  final list = serviceHandler.userMangaList.value;
+// List<Map<String, dynamic>> get mangaCategories {
+//   final list = serviceHandler.userMangaList.value;
 
-  return [
-    {
-      "name": "All",
-      "data": list.allList,
-      "isManga": true,
-    },
-    {
-      "name": "Completed",
-      "data": list.completed,
-      "isManga": true,
-    },
-    {
-      "name": "Planning",
-      "data": list.planning,
-      "isManga": true,
-    },
-    {
-      "name": "Reading",
-      "data": list.currentlyWatching,
-      "isManga": true,
-    },
-    {
-      "name": list.repeating.isEmpty ? "Dropped" : "Repeating",
-      "data": list.repeating.isEmpty ? list.dropped : list.repeating,
-      "isManga": true,
-    },
-    {
-      "name": "Paused",
-      "data": list.paused,
-      "isManga": true,
-    },
-  ];
-}
+//   return [
+//     {
+//       "name": "All",
+//       "data": list.allList,
+//       "isManga": true,
+//     },
+//     {
+//       "name": "Completed",
+//       "data": list.completed,
+//       "isManga": true,
+//     },
+//     {
+//       "name": "Planning",
+//       "data": list.planning,
+//       "isManga": true,
+//     },
+//     {
+//       "name": "Reading",
+//       "data": list.currentlyWatching,
+//       "isManga": true,
+//     },
+//     {
+//       "name": list.repeating.isEmpty ? "Dropped" : "Repeating",
+//       "data": list.repeating.isEmpty ? list.dropped : list.repeating,
+//       "isManga": true,
+//     },
+//     {
+//       "name": "Paused",
+//       "data": list.paused,
+//       "isManga": true,
+//     },
+//   ];
+// }
 
 String getAniListStatusEquivalent(String status) {
   switch (status.toLowerCase()) {

@@ -1,4 +1,5 @@
 import 'package:azyx/Controllers/services/service_handler.dart';
+import 'package:azyx/Widgets/Animation/drop_animation.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/header.dart';
@@ -12,17 +13,19 @@ class AnimeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AzyXGradientContainer(
-      child: ListView(
-        children: [
-          const Header(),
-          Obx(() => serviceHandler.animeWidgets(context).value)
-        ],
+      child: BouncePageAnimation(
+        child: ListView(
+          children: [
+            const Header(),
+            Obx(() => serviceHandler.animeWidgets(context).value),
+          ],
+        ),
       ),
     );
   }
 }
 
-Widget buildSearchButton(BuildContext context, Function() ontap, bool isManga) {
+Widget buildSearchButton(BuildContext context, Function() ontap, String title) {
   return Material(
     color: Colors.transparent,
     child: InkWell(
@@ -66,7 +69,7 @@ Widget buildSearchButton(BuildContext context, Function() ontap, bool isManga) {
             const SizedBox(width: 16),
             Expanded(
               child: AzyXText(
-                text: isManga ? "Search for manga..." : "Search for anime...",
+                text: "Search for $title...",
                 fontSize: 15,
                 color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                 fontVariant: FontVariant.bold,
@@ -76,10 +79,9 @@ Widget buildSearchButton(BuildContext context, Function() ontap, bool isManga) {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .primaryContainer
-                    .withOpacity(0.8),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primaryContainer.withOpacity(0.8),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(

@@ -301,7 +301,7 @@ void showQualitySheet(
 
 void showSpeedBottomList(
   context,
-  RxList<double> speedList,
+  List<double> speedList,
   Rx<double> selectedSpeed,
   Player player,
   Rx<bool> isPotraitOrientaion,

@@ -23,13 +23,14 @@ class ReadPage extends StatefulWidget {
   final Source source;
   final List<Chapter> chapterList;
   final String? syncId;
-  const ReadPage(
-      {super.key,
-      required this.source,
-      required this.link,
-      required this.chapterList,
-      required this.mangaTitle,
-      this.syncId});
+  const ReadPage({
+    super.key,
+    required this.source,
+    required this.link,
+    required this.chapterList,
+    required this.mangaTitle,
+    this.syncId,
+  });
 
   @override
   State<ReadPage> createState() => _ReadPageState();
@@ -72,11 +73,11 @@ class _ReadPageState extends State<ReadPage> {
 
   void updateEntry() async {
     if (serviceHandler.userData.value.name != null) {
-      log(anilistAddToListController.manga.value.status!);
       await serviceHandler.updateListEntry(
-          anilistAddToListController.manga.value,
-          isAnime: false,
-          syncId: widget.syncId);
+        serviceHandler.currentMedia.value,
+        isAnime: false,
+        syncId: widget.syncId,
+      );
     }
   }
 
@@ -84,17 +85,20 @@ class _ReadPageState extends State<ReadPage> {
     try {
       pagesList.value = [];
       final pages = await sourceController.activeMangaSource.value!.methods
-          .getPageList(DEpisode(
-              episodeNumber: chapterTitle.value, url: chapterUrl.value));
+          .getPageList(
+            DEpisode(episodeNumber: chapterTitle.value, url: chapterUrl.value),
+          );
       pagesList.value = pages;
       totalImages.value = pages.length;
-      final index =
-          widget.chapterList.indexWhere((i) => i.link == chapterUrl.value);
+      final index = widget.chapterList.indexWhere(
+        (i) => i.link == chapterUrl.value,
+      );
       chapterTitle.value = widget.chapterList[index].title!;
       hasPreviousChapter.value = index < widget.chapterList.length - 1;
       hasNextChapter.value = index > 0;
       Utils.log(
-          "next: ${hasNextChapter.value} / previous: ${hasPreviousChapter.value} ${index.toString()}");
+        "next: ${hasNextChapter.value} / previous: ${hasPreviousChapter.value} ${index.toString()}",
+      );
     } catch (e) {
       log("Error: $e");
       azyxSnackBar(e.toString());
@@ -102,11 +106,13 @@ class _ReadPageState extends State<ReadPage> {
   }
 
   void navigateChapter(bool isNext) {
-    final index =
-        widget.chapterList.indexWhere((i) => i.link == chapterUrl.value);
+    final index = widget.chapterList.indexWhere(
+      (i) => i.link == chapterUrl.value,
+    );
 
     Utils.log(
-        "next: ${hasNextChapter.value} / previous: ${hasPreviousChapter.value} ");
+      "next: ${hasNextChapter.value} / previous: ${hasPreviousChapter.value} ",
+    );
     if (index == -1) return;
     if (isNext && index > 0) {
       chapterUrl.value = widget.chapterList[index - 1].link!;
@@ -132,125 +138,131 @@ class _ReadPageState extends State<ReadPage> {
               return const Center(child: CircularProgressIndicator());
             }
             return GestureDetector(
-                onTap: () => isShowed.value = !isShowed.value,
-                behavior: HitTestBehavior.translucent,
-                child: MangaPageView(
-                  pageCount: pagesList.length,
-                  controller: pageViewController,
-                  mode: readingLayout.value,
-                  options: MangaPageViewOptions(
-                    // padding: MediaQuery.paddingOf(context),
-                    mainAxisOverscroll: false,
-                    crossAxisOverscroll: false,
-                    minZoomLevel: switch (readingLayout.value) {
-                      MangaPageViewMode.continuous => 0.75,
-                      MangaPageViewMode.paged => 1.0
-                    },
-                    maxZoomLevel: 8.0,
-                    // initialOffset: Offset(200, 0),
-                    // initialPageIndex: 10,
+              onTap: () => isShowed.value = !isShowed.value,
+              behavior: HitTestBehavior.translucent,
+              child: MangaPageView(
+                pageCount: pagesList.length,
+                controller: pageViewController,
+                mode: readingLayout.value,
+                options: MangaPageViewOptions(
+                  // padding: MediaQuery.paddingOf(context),
+                  mainAxisOverscroll: false,
+                  crossAxisOverscroll: false,
+                  minZoomLevel: switch (readingLayout.value) {
+                    MangaPageViewMode.continuous => 0.75,
+                    MangaPageViewMode.paged => 1.0,
+                  },
+                  maxZoomLevel: 8.0,
+                  // initialOffset: Offset(200, 0),
+                  // initialPageIndex: 10,
 
-                    // spacing: spacedPages.value ? 20 : 0,
-                    pageWidthLimit: Platform.isAndroid || Platform.isIOS
-                        ? double.infinity
-                        : pageWidth.value,
-                    edgeIndicatorContainerSize: 240,
-                    zoomOvershoot: true,
-                    initialPageSize: const Size(300, 300),
-                    precacheAhead:
-                        readingLayout.value == MangaPageViewMode.paged ? 2 : 0,
-                    precacheBehind:
-                        readingLayout.value == MangaPageViewMode.paged ? 2 : 0,
-                  ),
-                  onPageChange: (index) {
-                    _currentPage.value = index;
-                    Utils.log('page: ${_currentPage.value}/$index');
+                  // spacing: spacedPages.value ? 20 : 0,
+                  pageWidthLimit: Platform.isAndroid || Platform.isIOS
+                      ? double.infinity
+                      : pageWidth.value,
+                  edgeIndicatorContainerSize: 240,
+                  zoomOvershoot: true,
+                  initialPageSize: const Size(300, 300),
+                  precacheAhead: readingLayout.value == MangaPageViewMode.paged
+                      ? 2
+                      : 0,
+                  precacheBehind: readingLayout.value == MangaPageViewMode.paged
+                      ? 2
+                      : 0,
+                ),
+                onPageChange: (index) {
+                  _currentPage.value = index;
+                  Utils.log('page: ${_currentPage.value}/$index');
+                },
+                direction: readingDirection.value,
+                pageBuilder: (context, index) => CachedNetworkImage(
+                  imageUrl: pagesList[index].url,
+                  fit: BoxFit.cover,
+                  httpHeaders: {
+                    'Referer':
+                        sourceController.activeMangaSource.value?.baseUrl ??
+                        'AzyX',
                   },
-                  direction: readingDirection.value,
-                  pageBuilder: (context, index) => CachedNetworkImage(
-                    imageUrl: pagesList[index].url,
-                    fit: BoxFit.cover,
-                    httpHeaders: {
-                      'Referer':
-                          sourceController.activeMangaSource.value?.baseUrl ??
-                              'AzyX',
-                    },
-                    placeholder: (context, _) => Container(
-                      alignment: Alignment.center,
-                      height: 300,
-                      child: const CircularProgressIndicator(),
-                    ),
+                  placeholder: (context, _) => Container(
+                    alignment: Alignment.center,
+                    height: 300,
+                    child: const CircularProgressIndicator(),
                   ),
-                  startEdgeDragIndicatorBuilder: (context, info) {
-                    return Column(
-                      spacing: 16,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AnimatedScale(
-                          scale: info.isTriggered ? 1.6 : 1,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.elasticOut,
-                          child: Icon(
-                            hasPreviousChapter.value
-                                ? Icons.skip_previous_rounded
-                                : Icons.block_rounded,
-                            color: info.isTriggered
-                                ? Colors.white
-                                : Colors.white54,
-                            size: 36,
-                          ),
-                        ),
-                        Text(
+                ),
+                startEdgeDragIndicatorBuilder: (context, info) {
+                  return Column(
+                    spacing: 16,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AnimatedScale(
+                        scale: info.isTriggered ? 1.6 : 1,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.elasticOut,
+                        child: Icon(
                           hasPreviousChapter.value
-                              ? 'Previous chapter'
-                              : "No previous chapter",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: info.isTriggered
-                                  ? Colors.white
-                                  : Colors.white54),
-                        )
-                      ],
-                    );
-                  },
-                  endEdgeDragIndicatorBuilder: (context, info) {
-                    return Column(
-                      spacing: 16,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        AnimatedScale(
-                          scale: info.isTriggered ? 1.6 : 1,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.elasticOut,
-                          child: Icon(
-                            hasNextChapter.value
-                                ? Icons.skip_next_rounded
-                                : Icons.block_rounded,
-                            color: info.isTriggered
-                                ? Colors.white
-                                : Colors.white54,
-                            size: 36,
-                          ),
+                              ? Icons.skip_previous_rounded
+                              : Icons.block_rounded,
+                          color: info.isTriggered
+                              ? Colors.white
+                              : Colors.white54,
+                          size: 36,
                         ),
-                        Text(
+                      ),
+                      Text(
+                        hasPreviousChapter.value
+                            ? 'Previous chapter'
+                            : "No previous chapter",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: info.isTriggered
+                              ? Colors.white
+                              : Colors.white54,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+                endEdgeDragIndicatorBuilder: (context, info) {
+                  return Column(
+                    spacing: 16,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AnimatedScale(
+                        scale: info.isTriggered ? 1.6 : 1,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.elasticOut,
+                        child: Icon(
                           hasNextChapter.value
-                              ? 'Next chapter'
-                              : "No next chapter",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: info.isTriggered
-                                  ? Colors.white
-                                  : Colors.white54),
-                        )
-                      ],
-                    );
-                  },
-                  onStartEdgeDrag: hasPreviousChapter.value
-                      ? () => navigateChapter(false)
-                      : null,
-                  onEndEdgeDrag:
-                      hasNextChapter.value ? () => navigateChapter(true) : null,
-                ));
+                              ? Icons.skip_next_rounded
+                              : Icons.block_rounded,
+                          color: info.isTriggered
+                              ? Colors.white
+                              : Colors.white54,
+                          size: 36,
+                        ),
+                      ),
+                      Text(
+                        hasNextChapter.value
+                            ? 'Next chapter'
+                            : "No next chapter",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: info.isTriggered
+                              ? Colors.white
+                              : Colors.white54,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+                onStartEdgeDrag: hasPreviousChapter.value
+                    ? () => navigateChapter(false)
+                    : null,
+                onEndEdgeDrag: hasNextChapter.value
+                    ? () => navigateChapter(true)
+                    : null,
+              ),
+            );
           }),
           ReaderControls(
             controller: pageViewController,
@@ -272,12 +284,16 @@ class _ReadPageState extends State<ReadPage> {
           Positioned(
             bottom: 8,
             width: Get.width,
-            child: Obx(() => Text(
-                  "${_currentPage.value} / ${totalImages.value}",
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: Colors.white, fontFamily: "Poppins-Bold"),
-                )),
+            child: Obx(
+              () => Text(
+                "${_currentPage.value} / ${totalImages.value}",
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: "Poppins-Bold",
+                ),
+              ),
+            ),
           ),
         ],
       ),

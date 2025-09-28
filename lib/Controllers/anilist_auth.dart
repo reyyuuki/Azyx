@@ -5,17 +5,22 @@ import 'dart:developer';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/models/online_service.dart';
+import 'package:azyx/Functions/string_extensions.dart';
 import 'package:azyx/Models/anilist_anime_data.dart';
 import 'package:azyx/Models/anilist_user_data.dart';
 import 'package:azyx/Models/anime_class.dart';
 import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Models/params.dart';
 import 'package:azyx/Models/user_anime.dart';
-import 'package:azyx/Models/user_lists_model.dart';
 import 'package:azyx/Screens/Anime/anime_screen.dart';
 import 'package:azyx/Screens/search/search_screen.dart';
 import 'package:azyx/Widgets/anime/anime_scrollable_list.dart';
 import 'package:azyx/Widgets/anime/main_carousale.dart';
+import 'package:azyx/Widgets/common_cards.dart';
+import 'package:azyx/Widgets/header.dart';
+import 'package:azyx/utils/Functions/multiplier_extension.dart';
+import 'package:azyx/utils/functions.dart';
+import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
@@ -32,9 +37,9 @@ class AnilistService extends GetxController
   Rx<MediaData> animeData = Rx(MediaData());
   Rx<MediaData> mangaData = Rx(MediaData());
   @override
-  Rx<UserListsModel> userAnimeList = UserListsModel().obs;
+  RxList<UserAnime> userAnimeList = RxList();
   @override
-  Rx<UserListsModel> userMangaList = UserListsModel().obs;
+  RxList<UserAnime> userMangaList = RxList();
 
   RxList<Anime> spotlight = RxList();
   RxList<Anime> popular = RxList();
@@ -47,11 +52,11 @@ class AnilistService extends GetxController
   RxList<Anime> trendingM = RxList();
   RxList<Anime> topUpcomingM = RxList();
 
-  // @override
-  // void onInit() {
-  //   super.onInit();
-  //   tryAutoLogin();
-  // }
+  @override
+  Rx<UserAnime> currentMedia = UserAnime().obs;
+
+  @override
+  RxBool isLoggedIn = false.obs;
 
   @override
   Future<void> autoLogin() async {
@@ -59,7 +64,6 @@ class AnilistService extends GetxController
     if (token != null) {
       await fetchUserProfile();
     }
-
     return log('Auth token not available!');
   }
 
@@ -87,13 +91,15 @@ class AnilistService extends GetxController
     }
   }
 
-  Future<void> _exchangeCodeForToken(String code, String clientId,
-      String clientSecret, String redirectUri) async {
+  Future<void> _exchangeCodeForToken(
+    String code,
+    String clientId,
+    String clientSecret,
+    String redirectUri,
+  ) async {
     final response = await http.post(
       Uri.parse('https://anilist.co/api/v2/oauth/token'),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body: {
         'grant_type': 'authorization_code',
         'client_id': clientId,
@@ -157,6 +163,7 @@ class AnilistService extends GetxController
       final data = json.decode(response.body);
       userData.value = User.fromJson(data['data']['Viewer']);
       log('User profile fetched ${data['data']['Viewer']}');
+      isLoggedIn.value = true;
     } else {
       throw Exception('Failed to load user profile');
     }
@@ -221,9 +228,7 @@ class AnilistService extends GetxController
         },
         body: json.encode({
           'query': query,
-          'variables': {
-            'userId': userId,
-          },
+          'variables': {'userId': userId},
         }),
       );
 
@@ -233,8 +238,14 @@ class AnilistService extends GetxController
             data['data']['MediaListCollection'] != null) {
           final lists =
               data['data']['MediaListCollection']['lists'] as List<dynamic>;
-          userAnimeList.value = UserListsModel.fromJson(lists);
-          log("test: ${userAnimeList.value.completed.length.toString()}");
+          userAnimeList.value = lists
+              .expand(
+                (e) => (e['entries'] as List<dynamic>).map(
+                  (item) => UserAnime.fromJson(item),
+                ),
+              )
+              .toList();
+          log("test: ${lists.toString()}");
 
           // userAnimeList.assignAll(
           //   lists
@@ -310,9 +321,7 @@ class AnilistService extends GetxController
         },
         body: json.encode({
           'query': query,
-          'variables': {
-            'userId': userId,
-          },
+          'variables': {'userId': userId},
         }),
       );
 
@@ -322,12 +331,16 @@ class AnilistService extends GetxController
             data['data']['MediaListCollection'] != null) {
           final lists =
               data['data']['MediaListCollection']['lists'] as List<dynamic>;
-          userMangaList.value = UserListsModel.fromJson(lists);
-          // userMangaList.assignAll(lists
-          //     .expand((list) => (list['entries'] as List<dynamic>)
-          //         .map((item) => UserAnime.fromJson(item)))
-          //     .toList());
-          // log("manga data: $lists");
+          // userMangaList.value = UserListsModel.fromJson(lists);
+          userMangaList.assignAll(
+            lists
+                .expand(
+                  (list) => (list['entries'] as List<dynamic>).map(
+                    (item) => UserAnime.fromJson(item),
+                  ),
+                )
+                .toList(),
+          );
         } else {
           log('Unexpected response structure: ${response.body}');
         }
@@ -344,8 +357,9 @@ class AnilistService extends GetxController
   Future<void> logout() async {
     await Hive.box("app-data").put("auth_token", '');
     userData.value = User();
-    userAnimeList.value.allList.clear();
-    userMangaList.value.allList.clear();
+    isLoggedIn.value = false;
+    userAnimeList.value.clear();
+    userMangaList.value.clear();
   }
 
   Future<void> fetchAnilistAnimes() async {
@@ -553,8 +567,11 @@ class AnilistService extends GetxController
   }
 
   @override
-  Future<void> updateEntry(UserAnime anime,
-      {required bool isAnime, String? syncId}) async {
+  Future<void> updateEntry(
+    UserAnime anime, {
+    required bool isAnime,
+    String? syncId,
+  }) async {
     const String url = 'https://graphql.anilist.co';
     final accessToken = await Hive.box("app-data").get("auth_token");
     final Map<String, String> headers = {
@@ -579,9 +596,9 @@ class AnilistService extends GetxController
       }
     }
   ''';
-
+    Utils.log('hasID: ${anime.id}');
     final Map<String, dynamic> variables = {
-      'mediaId': anime.id,
+      'mediaId': anime.id?.toInt(),
       'status': anime.status ?? "CURRENT",
       if (anime.score != null) 'score': anime.score,
       if (anime.progress != null) 'progress': anime.progress,
@@ -596,6 +613,11 @@ class AnilistService extends GetxController
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       log('Successfully added to list: ${data['data']['SaveMediaListEntry']}');
+      final newMedia = currentMedia.value
+        ..progress = anime.progress
+        ..status = anime.status
+        ..score = anime.score;
+      currentMedia.value = newMedia;
     } else {
       final error = jsonDecode(response.body);
       log('Error adding to list: ${error['errors']}');
@@ -607,7 +629,8 @@ class AnilistService extends GetxController
   @override
   Rx<Widget> animeWidgets(BuildContext context) {
     return Obx(
-      () => spotlight.isEmpty ||
+      () =>
+          spotlight.isEmpty ||
               popular.isEmpty ||
               trending.isEmpty ||
               topUpcoming.isEmpty
@@ -618,37 +641,37 @@ class AnilistService extends GetxController
             )
           : SingleChildScrollView(
               child: ListView(
-                  padding: const EdgeInsets.all(10),
-                  physics: const BouncingScrollPhysics(),
-                  shrinkWrap: true,
-                  children: [
-                    buildSearchButton(
-                        context,
-                        () => Get.to(() => const SearchScreen(isManga: false)),
-                        false),
-                    const SizedBox(height: 10),
-                    MainCarousale(isManga: false, data: spotlight),
-                    const SizedBox(height: 20),
-                    AnimeScrollableList(
-                      animeList: popular,
-                      isManga: false,
-                      title: "Popular Animes",
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    AnimeScrollableList(
-                      animeList: topUpcoming,
-                      isManga: false,
-                      title: "TopUpcoming Animes",
-                    ),
-                    const SizedBox(height: 10),
-                    AnimeScrollableList(
-                      animeList: trending,
-                      isManga: false,
-                      title: "Completed Animes",
-                    ),
-                  ]),
+                padding: const EdgeInsets.all(10),
+                physics: const BouncingScrollPhysics(),
+                shrinkWrap: true,
+                children: [
+                  buildSearchButton(
+                    context,
+                    () => Get.to(() => const SearchScreen(isManga: false)),
+                    'anime',
+                  ),
+                  const SizedBox(height: 10),
+                  MainCarousale(isManga: false, data: spotlight),
+                  const SizedBox(height: 20),
+                  AnimeScrollableList(
+                    animeList: popular,
+                    isManga: false,
+                    title: "Popular Animes",
+                  ),
+                  const SizedBox(height: 10),
+                  AnimeScrollableList(
+                    animeList: topUpcoming,
+                    isManga: false,
+                    title: "TopUpcoming Animes",
+                  ),
+                  const SizedBox(height: 10),
+                  AnimeScrollableList(
+                    animeList: trending,
+                    isManga: false,
+                    title: "Completed Animes",
+                  ),
+                ],
+              ),
             ),
     ).obs;
   }
@@ -659,14 +682,11 @@ class AnilistService extends GetxController
   }
 
   @override
-  Future<AnilistMediaData> fetchAnimeDetails(int id) async {
-    final data = await anilistDataController.fetchAnilistAnimeDetails(id);
-    return data;
-  }
-
-  @override
-  Future<AnilistMediaData> fetchMangaDetails(int id) async {
-    final data = await anilistDataController.fetchAnilistMangaDetails(id);
+  Future<AnilistMediaData> fetchDetails(FetchDetailsParams params) async {
+    final id = int.parse(params.id);
+    final data = params.isManga
+        ? await anilistDataController.fetchAnilistMangaDetails(id)
+        : await anilistDataController.fetchAnilistAnimeDetails(id);
     return data;
   }
 
@@ -682,71 +702,103 @@ class AnilistService extends GetxController
   }
 
   @override
-  RxList<Widget> homeWidgets(BuildContext context) => [
-        topUpcoming.value.isEmpty
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : AnimeScrollableList(
-                animeList: topUpcoming,
-                isManga: false,
-                title: "Upcoming Animes",
-              ),
-        trendingM.value.isEmpty
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : AnimeScrollableList(
-                animeList: trendingM,
-                isManga: true,
-                title: "Trending Manga",
-              ),
-      ].obs;
+  Rx<Widget> homeWidgets(BuildContext context) => CustomScrollView(
+    physics: const BouncingScrollPhysics(),
+    slivers: [
+      const SliverToBoxAdapter(child: Header()),
+      AiSuggestionsCard(userData: userData),
+      UserListsCard(userData: userData),
+      CalenderCard(userData: userData),
+      SliverToBoxAdapter(
+        child: Obx(() {
+          return Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (userAnimeList.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: AnimeScrollableList(
+                      varient: CarousaleVarient.userList,
+                      isManga: false,
+                      animeList: userAnimeList,
+                      title: "Currently Watching",
+                    ),
+                  ),
+                topUpcoming.value.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : AnimeScrollableList(
+                        animeList: topUpcoming,
+                        isManga: false,
+                        title: "Upcoming Animes",
+                      ),
+                trendingM.value.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : AnimeScrollableList(
+                        animeList: trendingM,
+                        isManga: true,
+                        title: "Trending Manga",
+                      ),
+
+                100.height,
+              ],
+            ),
+          );
+        }),
+      ),
+    ],
+  ).obs;
 
   @override
-  RxList<Widget> mangaWidgets(BuildContext context) => [
-        buildSearchButton(context, () {
-          Get.to(() => const SearchScreen(
-                isManga: true,
-              ));
-        }, true),
-        const SizedBox(
-          height: 10,
-        ),
-        MainCarousale(isManga: true, data: spotlightM),
-        const SizedBox(
-          height: 20,
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        AnimeScrollableList(
-          animeList: popularM,
-          isManga: true,
-          title: "Popular Manga",
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        AnimeScrollableList(
-          animeList: topUpcomingM,
-          isManga: true,
-          title: "TopUpcoming Manga",
-        ),
-        const SizedBox(height: 10),
-        AnimeScrollableList(
-          animeList: trendingM,
-          isManga: true,
-          title: "Completed Manga",
-        ),
-      ].obs;
+  Rx<Widget> mangaWidgets(BuildContext context) => Obx(
+    () =>
+        spotlightM.isEmpty ||
+            popularM.isEmpty ||
+            trendingM.isEmpty ||
+            topUpcomingM.isEmpty
+        ? Container(
+            alignment: Alignment.center,
+            height: Get.height * 0.8,
+            child: const CircularProgressIndicator(),
+          )
+        : SingleChildScrollView(
+            child: ListView(
+              padding: const EdgeInsets.all(10),
+              physics: const BouncingScrollPhysics(),
+              shrinkWrap: true,
+              children: [
+                buildSearchButton(context, () {
+                  Get.to(() => const SearchScreen(isManga: true));
+                }, 'manga'),
+                const SizedBox(height: 10),
+                MainCarousale(isManga: true, data: spotlightM),
+                const SizedBox(height: 20),
+                const SizedBox(height: 10),
+                AnimeScrollableList(
+                  animeList: popularM,
+                  isManga: true,
+                  title: "Popular Manga",
+                ),
+                const SizedBox(height: 10),
+                AnimeScrollableList(
+                  animeList: topUpcomingM,
+                  isManga: true,
+                  title: "TopUpcoming Manga",
+                ),
+                const SizedBox(height: 10),
+                AnimeScrollableList(
+                  animeList: trendingM,
+                  isManga: true,
+                  title: "Completed Manga",
+                ),
+              ],
+            ),
+          ),
+  ).obs;
 
   @override
   Future<void> refresh() async {
-    Future.wait([
-      fetchhomeData(),
-      fetchUserAnimeList(),
-      fetchUserMangaList(),
-    ]);
+    Future.wait([fetchhomeData(), fetchUserAnimeList(), fetchUserMangaList()]);
   }
 }

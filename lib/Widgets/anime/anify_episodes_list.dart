@@ -24,7 +24,7 @@ import 'package:get/get.dart';
 class AnifyEpisodesWidget extends StatelessWidget {
   final RxList<Episode> anifyEpisodes;
   final String title;
-  final int id;
+  final String id;
   final String image;
   final AnilistMediaData data;
   AnifyEpisodesWidget({
@@ -42,7 +42,11 @@ class AnifyEpisodesWidget extends StatelessWidget {
   final Rx<bool> hasError = false.obs;
 
   Future<void> fetchEpisodeLink(
-      String url, String number, String setTitle, context) async {
+    String url,
+    String number,
+    String setTitle,
+    context,
+  ) async {
     Utils.log('start');
     try {
       final response = await sourceController.activeSource.value!.methods
@@ -68,30 +72,34 @@ class AnifyEpisodesWidget extends StatelessWidget {
     return GestureDetector(
       onTap: () async {
         Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => WatchScreen(
-                playerData: AnimeAllData(
-                    url: url,
-                    episodeTitle: episodeTitle.value,
-                    title: title,
-                    number: number,
-                    id: id,
-                    image: image,
-                    // source: selectedSource,
-                    episodeUrls: episodeUrls,
-                    episodeList: anifyEpisodes),
+          context,
+          MaterialPageRoute(
+            builder: (context) => WatchScreen(
+              playerData: AnimeAllData(
+                url: url,
+                episodeTitle: episodeTitle.value,
+                title: title,
+                number: number,
+                id: id,
+                image: image,
+                episodeUrls: episodeUrls,
+                episodeList: anifyEpisodes,
               ),
-            ));
+            ),
+          ),
+        );
       },
       child: AzyXContainer(
         margin: const EdgeInsets.all(10),
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-                width: 1, color: Theme.of(context).colorScheme.inversePrimary)),
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            width: 1,
+            color: Theme.of(context).colorScheme.inversePrimary,
+          ),
+        ),
         child: Center(
           child: AzyXText(
             text: name,
@@ -106,42 +114,45 @@ class AnifyEpisodesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-        children: anifyEpisodes.map((entry) {
-      return GestureDetector(
-        onTap: () {
-          if (episodeTitle.value == entry.title) {
-            showEpisodeBottomSheet(
-              context,
-              entry.number,
-              episodeUrls,
-              hasError,
-              (context, name, url, number) =>
-                  serverAzyXContainer(context, name, url, number),
-            );
-          } else {
-            episodeUrls.value = [];
-            showEpisodeBottomSheet(
-              context,
-              entry.number,
-              episodeUrls,
-              hasError,
-              (context, name, url, number) =>
-                  serverAzyXContainer(context, name, url, number),
-            );
-            Utils.log('${entry.url} ?? ${entry.number} ?? ${entry.title}');
-            fetchEpisodeLink(entry.url!, entry.number, entry.title!, context);
-          }
-        },
-        child: AzyXContainer(
+      children: anifyEpisodes.map((entry) {
+        return GestureDetector(
+          onTap: () {
+            if (episodeTitle.value == entry.title) {
+              showEpisodeBottomSheet(
+                context,
+                entry.number,
+                episodeUrls,
+                hasError,
+                (context, name, url, number) =>
+                    serverAzyXContainer(context, name, url, number),
+              );
+            } else {
+              hasError.value = false;
+              episodeUrls.value = [];
+              showEpisodeBottomSheet(
+                context,
+                entry.number,
+                episodeUrls,
+                hasError,
+                (context, name, url, number) =>
+                    serverAzyXContainer(context, name, url, number),
+              );
+              Utils.log('${entry.url} ?? ${entry.number} ?? ${entry.title}');
+              fetchEpisodeLink(entry.url!, entry.number, entry.title!, context);
+            }
+          },
+          child: AzyXContainer(
             margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black.withOpacity(0.5),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2))
-                ]),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
             child: Column(
               children: [
                 Stack(
@@ -151,55 +162,63 @@ class AnifyEpisodesWidget extends StatelessWidget {
                       width: MediaQuery.of(context).size.width,
                       child: ClipRRect(
                         borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(20)),
+                          top: Radius.circular(20),
+                        ),
                         child: CachedNetworkImage(
                           imageUrl: entry.thumbnail ?? image,
                           fit: BoxFit.cover,
                           filterQuality: FilterQuality.high,
                           placeholder: (context, url) => ShimmerEffect(
-                              height: 150,
-                              width: MediaQuery.of(context).size.width),
+                            height: 150,
+                            width: MediaQuery.of(context).size.width,
+                          ),
                         ),
                       ),
                     ),
                     Positioned(
-                        top: 0,
-                        left: 0,
-                        child: AzyXContainer(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            borderRadius: const BorderRadius.only(
-                                bottomRight: Radius.circular(10),
-                                topLeft: Radius.circular(10)),
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withOpacity(1.glowMultiplier()),
-                                  blurRadius: 10.blurMultiplier(),
-                                  spreadRadius: 2.spreadMultiplier())
-                            ],
+                      top: 0,
+                      left: 0,
+                      child: AzyXContainer(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          borderRadius: const BorderRadius.only(
+                            bottomRight: Radius.circular(10),
+                            topLeft: Radius.circular(10),
                           ),
-                          child: AzyXText(
-                            text: entry.number.toString(),
-                            fontVariant: FontVariant.bold,
-                            fontSize: 20,
-                            color: Theme.of(context).colorScheme.inversePrimary,
-                          ),
-                        ))
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(context).colorScheme.primary
+                                  .withOpacity(1.glowMultiplier()),
+                              blurRadius: 10.blurMultiplier(),
+                              spreadRadius: 2.spreadMultiplier(),
+                            ),
+                          ],
+                        ),
+                        child: AzyXText(
+                          text: entry.number.toString(),
+                          fontVariant: FontVariant.bold,
+                          fontSize: 20,
+                          color: Theme.of(context).colorScheme.inversePrimary,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 AzyXContainer(
                   padding: const EdgeInsets.all(10),
                   width: Get.width,
                   decoration: BoxDecoration(
-                      color:
-                          Theme.of(context).colorScheme.surfaceContainerHighest,
-                      borderRadius: const BorderRadius.vertical(
-                          bottom: Radius.circular(20))),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(20),
+                    ),
+                  ),
                   child: Column(
                     children: [
                       AzyXText(
@@ -209,20 +228,16 @@ class AnifyEpisodesWidget extends StatelessWidget {
                         color: Theme.of(context).colorScheme.primary,
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      AzyXText(
-                        text: entry.desc,
-                        fontSize: 12,
-                        maxLines: 3,
-                      )
+                      const SizedBox(height: 10),
+                      AzyXText(text: entry.desc, fontSize: 12, maxLines: 3),
                     ],
                   ),
-                )
+                ),
               ],
-            )),
-      );
-    }).toList());
+            ),
+          ),
+        );
+      }).toList(),
+    );
   }
 }

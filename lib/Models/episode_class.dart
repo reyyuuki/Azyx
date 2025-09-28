@@ -13,24 +13,26 @@ class Episode {
   String desc;
   bool? filler;
 
-  Episode(
-      {this.date,
-      this.title,
-      this.url,
-      required this.number,
-      this.thumbnail,
-      required this.desc,
-      this.filler});
+  Episode({
+    this.date,
+    this.title,
+    this.url,
+    required this.number,
+    this.thumbnail,
+    required this.desc,
+    this.filler,
+  });
 
   factory Episode.fromJson(Map<dynamic, dynamic> data, String? number) {
     return Episode(
-        title: data['name'] ?? "",
-        url: data['url'] ?? "",
-        number: number ?? data['number'],
-        desc: data['desc'] ?? '',
-        date: data['dateUpload'] != null
-            ? formatDate(int.tryParse(data['dateUpload'] ?? 12) ?? 1)
-            : data['dateUpload'] ?? "??");
+      title: data['name'] ?? "",
+      url: data['url'] ?? "",
+      number: number ?? data['number'],
+      desc: data['desc'] ?? '',
+      date: data['dateUpload'] != null
+          ? formatDate(int.tryParse(data['dateUpload'] ?? 12) ?? 1)
+          : data['dateUpload'] ?? "??",
+    );
   }
   Map<dynamic, dynamic> toJson() {
     return {
@@ -40,7 +42,7 @@ class Episode {
       'number': number,
       'thumbnail': thumbnail ?? '',
       'desc': desc,
-      'filler': filler
+      'filler': filler,
     };
   }
 }
@@ -48,8 +50,9 @@ class Episode {
 class ChapterRecognition {
   static const _numberPattern = r"([0-9]+)(\.[0-9]+)?(\.?[a-z]+)?";
 
-  static final _unwanted =
-      RegExp(r"\b(?:v|ver|vol|version|volume|season|s)[^a-z]?[0-9]+");
+  static final _unwanted = RegExp(
+    r"\b(?:v|ver|vol|version|volume|season|s)[^a-z]?[0-9]+",
+  );
 
   static final _unwantedWhiteSpace = RegExp(r"\s(?=extra|special|omake)");
 
@@ -129,7 +132,9 @@ class ChapterRecognition {
 
 Episode mChapterToEpisode(DEpisode chapter, DMedia? selectedMedia) {
   var episodeNumber = ChapterRecognition.parseChapterNumber(
-      selectedMedia?.title ?? '', chapter.name ?? '');
+    selectedMedia?.title ?? '',
+    chapter.name ?? '',
+  );
   return Episode(
     number: episodeNumber != -1 ? episodeNumber.toString() : chapter.name ?? '',
     url: chapter.url,
@@ -147,8 +152,13 @@ class Chapter {
   double? number;
   String? releaseDate;
 
-  Chapter(
-      {this.link, this.number, this.releaseDate, this.scanlator, this.title});
+  Chapter({
+    this.link,
+    this.number,
+    this.releaseDate,
+    this.scanlator,
+    this.title,
+  });
   factory Chapter.fromJson(Map<dynamic, dynamic> json) {
     return Chapter(
       title: json['title'],
@@ -173,12 +183,12 @@ class Chapter {
 List<Chapter> mChapterToChapter(List<DEpisode> chapters, String title) {
   return chapters.map((e) {
     return Chapter(
-        title: e.name,
-        link: e.url,
-        scanlator: e.scanlator,
-        number:
-            ChapterRecognition.parseChapterNumber(title, e.name!).toDouble(),
-        releaseDate: calcTime(e.dateUpload ?? ''));
+      title: e.name,
+      link: e.url,
+      scanlator: e.scanlator,
+      number: ChapterRecognition.parseChapterNumber(title, e.name!).toDouble(),
+      releaseDate: calcTime(e.dateUpload ?? ''),
+    );
   }).toList();
 }
 

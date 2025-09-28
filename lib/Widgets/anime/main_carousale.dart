@@ -81,7 +81,6 @@ class _MainCarousaleState extends State<MainCarousale>
       );
     }
 
-    // Dynamic height based on screen size
     double carouselHeight = isDesktop ? 600 : (isTablet ? 550 : 500);
     double viewportFraction = isDesktop ? 0.8 : (isTablet ? 0.9 : 1.0);
     double horizontalMargin = isDesktop ? 40 : (isTablet ? 30 : 20);
@@ -92,7 +91,6 @@ class _MainCarousaleState extends State<MainCarousale>
         margin: EdgeInsets.symmetric(vertical: isDesktop ? 30 : 20),
         child: Column(
           children: [
-            // Enhanced carousel with responsive design
             ConstrainedBox(
               constraints: BoxConstraints(maxHeight: carouselHeight),
               child: CarouselSlider(
@@ -117,61 +115,64 @@ class _MainCarousaleState extends State<MainCarousale>
                   },
                 ),
                 items: widget.data.map<Widget>((anime) {
-                  return _buildCarouselItem(anime, isDarkMode, isDesktop,
-                      isTablet, isMobile, horizontalMargin);
+                  return _buildCarouselItem(
+                    anime,
+                    isDarkMode,
+                    isDesktop,
+                    isTablet,
+                    isMobile,
+                    horizontalMargin,
+                  );
                 }).toList(),
               ),
             ),
 
-            // Enhanced dot indicator with animation
-            if (widget.data.length > 1) ...[
-              const SizedBox(height: 20),
-              _buildDotIndicator(),
-            ],
+            // if (widget.data.length > 1) ...[
+            //   const SizedBox(height: 20),
+            //   _buildDotIndicator(),
+            // ],
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCarouselItem(Anime anime, bool isDarkMode, bool isDesktop,
-      bool isTablet, bool isMobile, double horizontalMargin) {
+  Widget _buildCarouselItem(
+    Anime anime,
+    bool isDarkMode,
+    bool isDesktop,
+    bool isTablet,
+    bool isMobile,
+    double horizontalMargin,
+  ) {
+    final backgroundTag = "${anime.id}_background_${UniqueKey().toString()}";
+    final posterTag = "${anime.id}_poster_${UniqueKey().toString()}";
+
     return GestureDetector(
       onTap: () => _navigateToDetails(anime),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         width: MediaQuery.of(context).size.width,
         margin: EdgeInsets.symmetric(
-            horizontal: horizontalMargin * 0.5, vertical: 10),
+          horizontal: horizontalMargin * 0.5,
+          vertical: 10,
+        ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(isDesktop ? 32 : 24),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(isDarkMode ? 0.3 : 0.15),
-              blurRadius: isDesktop ? 30 : 20,
-              offset: const Offset(0, 10),
-              spreadRadius: 2,
-            ),
-            if (isDesktop)
-              BoxShadow(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                blurRadius: 40,
-                offset: const Offset(0, 20),
-              ),
-          ],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(isDesktop ? 32 : 24),
           child: Stack(
             children: [
-              // Background image with parallax effect
-              _buildBackgroundImage(anime, isDesktop),
-
-              // Gradient overlay with improved blending
+              _buildBackgroundImage(anime, isDesktop, backgroundTag),
               _buildGradientOverlay(isDarkMode, isDesktop),
-
-              // Content layout - responsive
-              _buildContentLayout(anime, isDesktop, isTablet, isMobile),
+              _buildContentLayout(
+                anime,
+                isDesktop,
+                isTablet,
+                isMobile,
+                posterTag,
+              ),
             ],
           ),
         ),
@@ -179,10 +180,10 @@ class _MainCarousaleState extends State<MainCarousale>
     );
   }
 
-  Widget _buildBackgroundImage(Anime anime, bool isDesktop) {
+  Widget _buildBackgroundImage(Anime anime, bool isDesktop, String tagg) {
     return Positioned.fill(
       child: Hero(
-        tag: "${anime.id}MainCarousaleBackground",
+        tag: tagg,
         child: CachedNetworkImage(
           imageUrl: anime.bannerImage ?? anime.image ?? '',
           fit: BoxFit.cover,
@@ -249,30 +250,34 @@ class _MainCarousaleState extends State<MainCarousale>
   }
 
   Widget _buildContentLayout(
-      Anime anime, bool isDesktop, bool isTablet, bool isMobile) {
+    Anime anime,
+    bool isDesktop,
+    bool isTablet,
+    bool isMobile,
+    String tagg,
+  ) {
     if (isDesktop) {
-      return _buildDesktopLayout(anime);
+      return _buildDesktopLayout(anime, tagg);
     } else if (isTablet) {
-      return _buildTabletLayout(anime);
+      return _buildTabletLayout(anime, tagg);
     } else {
-      return _buildMobileLayout(anime);
+      return _buildMobileLayout(anime, tagg);
     }
   }
 
-  Widget _buildDesktopLayout(Anime anime) {
+  Widget _buildDesktopLayout(Anime anime, String tagg) {
     return Positioned.fill(
       child: Padding(
         padding: const EdgeInsets.all(40),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Left side - Poster image
             SizedBox(
               width: 250,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildPosterImage(anime, 220, 330),
+                  _buildPosterImage(anime, 220, 330, tagg),
                   const SizedBox(height: 20),
                   _buildRatingStars(anime.rating, isDesktop: true),
                 ],
@@ -281,7 +286,6 @@ class _MainCarousaleState extends State<MainCarousale>
 
             const SizedBox(width: 40),
 
-            // Right side - Content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -302,14 +306,14 @@ class _MainCarousaleState extends State<MainCarousale>
     );
   }
 
-  Widget _buildTabletLayout(Anime anime) {
+  Widget _buildTabletLayout(Anime anime, String tagg) {
     return Positioned.fill(
       child: Padding(
         padding: const EdgeInsets.all(30),
         child: Column(
           children: [
             const SizedBox(height: 20),
-            _buildPosterImage(anime, 180, 270),
+            _buildPosterImage(anime, 180, 270, tagg),
             const SizedBox(height: 20),
             _buildRatingStars(anime.rating),
             const SizedBox(height: 20),
@@ -334,14 +338,14 @@ class _MainCarousaleState extends State<MainCarousale>
     );
   }
 
-  Widget _buildMobileLayout(Anime anime) {
+  Widget _buildMobileLayout(Anime anime, String tagg) {
     return Positioned.fill(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             const SizedBox(height: 15),
-            _buildPosterImage(anime, 140, 200),
+            _buildPosterImage(anime, 140, 200, tagg),
             const SizedBox(height: 15),
             _buildRatingStars(anime.rating),
             const SizedBox(height: 15),
@@ -364,7 +368,12 @@ class _MainCarousaleState extends State<MainCarousale>
     );
   }
 
-  Widget _buildPosterImage(Anime anime, double width, double height) {
+  Widget _buildPosterImage(
+    Anime anime,
+    double width,
+    double height,
+    String tagg,
+  ) {
     return Container(
       width: width,
       height: height,
@@ -379,7 +388,7 @@ class _MainCarousaleState extends State<MainCarousale>
         ],
       ),
       child: Hero(
-        tag: "${anime.id}MainCarousale",
+        tag: tagg,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(20),
           child: CachedNetworkImage(
@@ -436,8 +445,9 @@ class _MainCarousaleState extends State<MainCarousale>
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color:
-                (widget.isManga ? Colors.purple : Colors.blue).withOpacity(0.4),
+            color: (widget.isManga ? Colors.purple : Colors.blue).withOpacity(
+              0.4,
+            ),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -463,8 +473,11 @@ class _MainCarousaleState extends State<MainCarousale>
     );
   }
 
-  Widget _buildTitle(Anime anime,
-      {required double fontSize, bool isDesktop = false}) {
+  Widget _buildTitle(
+    Anime anime, {
+    required double fontSize,
+    bool isDesktop = false,
+  }) {
     return AzyXText(
       text: anime.title ?? "Unknown Title",
       maxLines: isDesktop ? 3 : 2,
@@ -476,8 +489,11 @@ class _MainCarousaleState extends State<MainCarousale>
     );
   }
 
-  Widget _buildDescription(Anime anime,
-      {required int maxLines, required double fontSize}) {
+  Widget _buildDescription(
+    Anime anime, {
+    required int maxLines,
+    required double fontSize,
+  }) {
     return AzyXText(
       text: anime.description ?? "No description available",
       fontSize: fontSize,
@@ -520,11 +536,7 @@ class _MainCarousaleState extends State<MainCarousale>
 
             return Padding(
               padding: const EdgeInsets.only(right: 4),
-              child: Icon(
-                icon,
-                color: Colors.amber,
-                size: isDesktop ? 22 : 18,
-              ),
+              child: Icon(icon, color: Colors.amber, size: isDesktop ? 22 : 18),
             );
           }),
         ),
@@ -554,34 +566,6 @@ class _MainCarousaleState extends State<MainCarousale>
           ),
         ],
       ],
-    );
-  }
-
-  Widget _buildDotIndicator() {
-    int visibleDots = widget.data.length > 12 ? 12 : widget.data.length;
-
-    int displayedIndex = _currentIndex;
-    if (widget.data.length > 12) {
-      double ratio = _currentIndex / (widget.data.length - 1);
-      displayedIndex = (ratio * (visibleDots - 1)).round();
-    }
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(visibleDots, (index) {
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          width: displayedIndex == index ? 24 : 8,
-          height: 8,
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          decoration: BoxDecoration(
-            color: displayedIndex == index
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.primary.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(4),
-          ),
-        );
-      }),
     );
   }
 
