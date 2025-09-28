@@ -45,6 +45,7 @@ class _WatchScreenState extends State<WatchScreen> {
         },
         onTap: () {
           watchController.handleControlsTap();
+          watchController.updateEntry();
         },
         onVerticalDragUpdate: (e) async {
           watchController.handleVerticalDrag(e, context);
@@ -57,6 +58,7 @@ class _WatchScreenState extends State<WatchScreen> {
                 fit: watchController.getMode(watchController.currentMode),
                 controller: watchController.controller,
                 filterQuality: FilterQuality.low,
+                controls: null,
               ),
             ),
             Positioned.fill(
