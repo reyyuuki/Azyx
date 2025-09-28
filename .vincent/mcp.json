@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "Vincent": {
+      "url": "https://vincent.bespo.ai/api/v1/mcp/",
+      "transport": "http"
+    }
+  }
+}
