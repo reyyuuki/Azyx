@@ -11,10 +11,14 @@ import 'package:flutter/material.dart';
 class GridList extends StatelessWidget {
   final String tagg;
   final List<OfflineItem> data;
-  
+
   final void Function(OfflineItem, String) ontap;
-  const GridList(
-      {super.key, required this.data, required this.tagg, required this.ontap});
+  const GridList({
+    super.key,
+    required this.data,
+    required this.tagg,
+    required this.ontap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,102 +48,111 @@ class GridList extends StatelessWidget {
           return GestureDetector(
             onTap: () => ontap(data[index], taggname),
             child: SizedBox(
-                child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Stack(
-                  children: [
-                    AzyXContainer(
-                      height: Platform.isAndroid || Platform.isIOS ? 150 : 230,
-                      width: Platform.isAndroid || Platform.isIOS ? 103 : 160,
-                      margin: const EdgeInsets.only(right: 10),
-                      decoration: BoxDecoration(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Stack(
+                    children: [
+                      AzyXContainer(
+                        // height: Platform.isAndroid || Platform.isIOS ? 150 : 230,
+                        width: Platform.isAndroid || Platform.isIOS ? 103 : 160,
+                        margin: const EdgeInsets.only(right: 10),
+                        decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(45),
                           boxShadow: [
                             BoxShadow(
-                                color: Colors.black.withOpacity(0.5),
-                                blurRadius: 10,
-                                offset: const Offset(2, 2))
-                          ]),
-                      child: Hero(
-                        tag: taggname,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
-                          child: CachedNetworkImage(
-                            imageUrl: item.image!,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => ShimmerEffect(
-                              height: Platform.isAndroid || Platform.isIOS
-                                  ? 150
-                                  : 230,
-                              width: Platform.isAndroid || Platform.isIOS
-                                  ? 103
-                                  : 160,
+                              color: Colors.black.withOpacity(0.5),
+                              blurRadius: 10,
+                              offset: const Offset(2, 2),
                             ),
-                            errorWidget: (context, url, error) =>
-                                const Icon(Icons.error),
+                          ],
+                        ),
+                        child: Hero(
+                          tag: taggname,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: CachedNetworkImage(
+                              imageUrl: item.image!,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => ShimmerEffect(
+                                height: Platform.isAndroid || Platform.isIOS
+                                    ? 150
+                                    : 230,
+                                width: Platform.isAndroid || Platform.isIOS
+                                    ? 103
+                                    : 160,
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    item.rating != null
-                        ? Positioned(
-                            top: 0,
-                            left: 0,
-                            child: AzyXContainer(
-                              height: 22,
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
+                      item.rating != null
+                          ? Positioned(
+                              top: 0,
+                              left: 0,
+                              child: AzyXContainer(
+                                height: 22,
+                                decoration: BoxDecoration(
+                                  boxShadow: [
+                                    BoxShadow(
                                       color: Theme.of(context)
                                           .colorScheme
                                           .surfaceBright
                                           .withOpacity(0.6),
-                                      blurRadius: 10)
-                                ],
-                                color: Theme.of(context).colorScheme.primary,
-                                borderRadius: const BorderRadius.only(
-                                    bottomRight: Radius.circular(20),
-                                    topLeft: Radius.circular(15)),
-                              ),
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    AzyXText(
-                                      text: item.rating!,
-                                      fontSize: 12,
-                                      color: Colors.black,
-                                      fontVariant: FontVariant.bold,
-                                    ),
-                                    const Icon(
-                                      Icons.star_half,
-                                      size: 16,
-                                      color: Colors.black,
+                                      blurRadius: 10,
                                     ),
                                   ],
+                                  color: Theme.of(context).colorScheme.primary,
+                                  borderRadius: const BorderRadius.only(
+                                    bottomRight: Radius.circular(20),
+                                    topLeft: Radius.circular(15),
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      AzyXText(
+                                        text: item.rating!,
+                                        fontSize: 12,
+                                        color: Colors.black,
+                                        fontVariant: FontVariant.bold,
+                                      ),
+                                      const Icon(
+                                        Icons.star_half,
+                                        size: 16,
+                                        color: Colors.black,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                    Positioned(
+                            )
+                          : const SizedBox.shrink(),
+                      Positioned(
                         bottom: 0,
                         right: 10,
                         child: AzyXContainer(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 3),
+                            horizontal: 10,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
-                              color: isStatus
-                                  ? const Color.fromARGB(255, 124, 247, 128)
-                                  : Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHigh,
-                              borderRadius: const BorderRadius.only(
-                                  bottomRight: Radius.circular(15),
-                                  topLeft: Radius.circular(20))),
+                            color: isStatus
+                                ? const Color.fromARGB(255, 124, 247, 128)
+                                : Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainerHigh,
+                            borderRadius: const BorderRadius.only(
+                              bottomRight: Radius.circular(15),
+                              topLeft: Radius.circular(20),
+                            ),
+                          ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -148,9 +161,9 @@ class GridList extends StatelessWidget {
                                 fontSize: 12,
                                 color: isStatus
                                     ? Colors.black
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .inverseSurface,
+                                    : Theme.of(
+                                        context,
+                                      ).colorScheme.inverseSurface,
                                 fontVariant: FontVariant.bold,
                               ),
                               10.width,
@@ -159,9 +172,9 @@ class GridList extends StatelessWidget {
                                 size: 5,
                                 color: isStatus
                                     ? Colors.black
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .inverseSurface,
+                                    : Theme.of(
+                                        context,
+                                      ).colorScheme.inverseSurface,
                               ),
                               10.width,
                               AzyXText(
@@ -169,29 +182,31 @@ class GridList extends StatelessWidget {
                                 fontSize: 12,
                                 color: isStatus
                                     ? Colors.black
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .inverseSurface,
+                                    : Theme.of(
+                                        context,
+                                      ).colorScheme.inverseSurface,
                                 fontVariant: FontVariant.bold,
-                              )
+                              ),
                             ],
                           ),
-                        ))
-                  ],
-                ),
-                const SizedBox(height: 10),
-                AzyXText(
-                  text: Platform.isAndroid || Platform.isIOS
-                      ? (item.title!.length > 12
-                          ? '${item.title!.substring(0, 10)}...'
-                          : item.title!)
-                      : (item.title!.length > 20
-                          ? '${item.title!.substring(0, 17)}...'
-                          : item.title!),
-                  fontVariant: FontVariant.bold,
-                ),
-              ],
-            )),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  AzyXText(
+                    text: Platform.isAndroid || Platform.isIOS
+                        ? (item.title!.length > 12
+                              ? '${item.title!.substring(0, 10)}...'
+                              : item.title!)
+                        : (item.title!.length > 20
+                              ? '${item.title!.substring(0, 17)}...'
+                              : item.title!),
+                    fontVariant: FontVariant.bold,
+                  ),
+                ],
+              ),
+            ),
           );
         },
       ),
