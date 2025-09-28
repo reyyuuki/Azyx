@@ -1,6 +1,6 @@
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_mapper.dart';
-import 'package:azyx/Functions/string_extensions.dart';
+import 'package:azyx/utils/utils.dart';
 import 'package:dartotsu_extension_bridge/Models/DMedia.dart';
 
 class Anime {
@@ -11,32 +11,33 @@ class Anime {
   String? description;
   String? rating;
   String? status;
-  int? id;
+  String? id;
   String? type;
   int? episodes;
   List<String>? genres;
   MediaType? mediaType;
   ServicesType? servicesType;
-  Anime(
-      {this.id,
-      this.image,
-      this.url,
-      this.title,
-      this.description,
-      this.rating,
-      this.bannerImage,
-      this.episodes,
-      this.type,
-      this.status,
-      this.mediaType,
-      this.servicesType,
-      this.genres});
+  Anime({
+    this.id,
+    this.image,
+    this.url,
+    this.title,
+    this.description,
+    this.rating,
+    this.bannerImage,
+    this.episodes,
+    this.type,
+    this.status,
+    this.mediaType,
+    this.servicesType,
+    this.genres,
+  });
 
   factory Anime.fromJson(Map<dynamic, dynamic> data) {
     return Anime(
       id: serviceHandler.serviceType.value == ServicesType.mal
-          ? data['idMal']
-          : data['id'],
+          ? (data['idMal'] != null ? data['idMal'] : data['id']).toString()
+          : data['id'].toString(),
       title: data['title']?['english'] ?? data['title']?['romaji'] ?? "Unknown",
       image: data['coverImage']?['large'] ?? "N/A",
       bannerImage: data['bannerImage'] ?? data['coverImage']?['large'] ?? '',
@@ -50,6 +51,28 @@ class Anime {
     );
   }
 
+  factory Anime.fromSmallSimkl(Map<String?, dynamic> json, bool isMovie) {
+    MediaType type = MediaType.anime;
+    Utils.log(
+      'ids: $isMovie ${json['ids']?['simkl_id']?.toString()}*${isMovie ? "MOVIE" : "SERIES"}',
+    );
+    return Anime(
+      id: '${json['ids']?['simkl_id']?.toString()}*${isMovie ? "MOVIE" : "SERIES"}',
+      title: json['title'] ?? 'Unknown Title',
+      image: json['poster'] != null
+          ? 'https://simkl.in/posters/${json['poster']}_m.jpg'
+          : '',
+      type: isMovie ? 'MOVIE' : 'SERIES',
+      rating:
+          json['ratings']?['imdb']?['rating'].toString() ??
+          json['ratings']?['simkl']?['rating'].toString() ??
+          '0.0',
+      mediaType: type,
+      servicesType: ServicesType.simkl,
+      description: json['overview'],
+      // aired: json['year']?.toString() ?? 'Unknown air date',
+    );
+  }
   factory Anime.fromJsonToHive(Map<String, dynamic> data) {
     return Anime(
       id: data['id'],
@@ -78,16 +101,11 @@ class Anime {
       servicesType: serviceHandler.serviceType.value,
     );
   }
-  Map<String, dynamic> toJson() {
+  Map<dynamic, dynamic> toJson() {
     return {
       'id': id,
-      'title': {
-        'english': title,
-        'romaji': title,
-      },
-      'coverImage': {
-        'large': image,
-      },
+      'title': {'english': title, 'romaji': title},
+      'coverImage': {'large': image},
       'description': description,
       'bannerImage': bannerImage,
       'status': status,
@@ -101,7 +119,7 @@ class Anime {
     final node = json['node'] ?? {};
 
     return Anime(
-      id: node['id'] ?? 0,
+      id: node['id']?.toString() ?? '0',
       title: node['title'] ?? node['alternative_titles']?['en'] ?? '??',
       description: node['synopsis'] ?? '??',
       image: node['main_picture']?['medium'] ?? '??',
@@ -111,13 +129,14 @@ class Anime {
       // sea: node['start_season']?['season'] ?? '??',
       // premiered: node['start_date'] ?? '??',
       // duration: node['average_episode_duration']?.toString() ?? '??',
-      status: node['status'] ?? '??',
+      status: node['status'],
       rating: node['mean']?.toString() ?? '??',
       // popularity: node['popularity']?.toString() ?? '??',
       // format: node['media_type'] ?? '??',
       // aired: node['start_date'] ?? '??',
       // totalChapters: node['num_chapters']?.toString() ?? '??',
-      genres: (node['genres'] as List<dynamic>?)
+      genres:
+          (node['genres'] as List<dynamic>?)
               ?.map((genre) => genre['name']?.toString() ?? '??')
               .toList() ??
           [],

@@ -51,6 +51,18 @@ class ThemeProvider with ChangeNotifier {
     Hive.box('theme-data').put("themeClass", theme);
   }
 
+  // void resetSettings() {
+  //   theme.isDarkMode = true;
+  //   Hive.box('theme-data').clear();
+  //   theme = ThemeClass(
+  //     isDarkMode: true,
+  //     isLightMode: false,
+  //     isMaterial: true,
+  //     seedColor: 'Purple',
+  //     varient: 'Vibrant',
+  //   );
+  // }
+
   Future<void> loadDynamicColors() async {
     final corePalette = await DynamicColorPlugin.getCorePalette();
     _seedColor = corePalette != null

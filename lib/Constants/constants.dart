@@ -1,10 +1,6 @@
 import 'package:azyx/Screens/Anime/Watch/controller/watch_controller.dart';
-import 'package:azyx/core/icons/icons_broken.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:icons_plus/icons_plus.dart';
 
-final RxList<double> speedList = [
+final List<double> speedList = [
   0.25,
   0.50,
   0.75,
@@ -20,29 +16,11 @@ final RxList<double> speedList = [
   3.25,
   3.50,
   3.75,
-  4.00
-].obs;
-final RxList<ResizeModes> resizeModes =
-    [ResizeModes.contain, ResizeModes.cover, ResizeModes.fill].obs;
+  4.00,
+];
 
-BoxFit getMode(Rx<ResizeModes> mode) {
-  switch (mode.value) {
-    case ResizeModes.contain:
-      return BoxFit.contain;
-    case ResizeModes.cover:
-      return BoxFit.cover;
-    case ResizeModes.fill:
-      return BoxFit.fill;
-  }
-}
-
-IconData getModeIcon(Rx<ResizeModes> mode) {
-  switch (mode.value) {
-    case ResizeModes.contain:
-      return Icons.fullscreen;
-    case ResizeModes.cover:
-      return Broken.size;
-    case ResizeModes.fill:
-      return Iconsax.size_bold;
-  }
-}
+final List<ResizeModes> resizeModes = [
+  ResizeModes.contain,
+  ResizeModes.cover,
+  ResizeModes.fill,
+];

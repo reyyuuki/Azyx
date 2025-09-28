@@ -2,6 +2,7 @@ import 'package:azyx/Screens/search/controller/search_controller.dart' as show;
 import 'package:azyx/Screens/search/widgets/filter_bottom_sheet.dart';
 import 'package:azyx/Screens/search/widgets/gridview_list.dart';
 import 'package:azyx/Screens/search/widgets/search_list.dart';
+import 'package:azyx/Widgets/Animation/animation.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
@@ -44,21 +45,19 @@ class _SearchScreenState extends State<SearchScreen>
       vsync: this,
     );
 
-    _searchBarScale = Tween<double>(
-      begin: 1.0,
-      end: 1.02,
-    ).animate(CurvedAnimation(
-      parent: _searchAnimationController,
-      curve: Curves.easeInOut,
-    ));
+    _searchBarScale = Tween<double>(begin: 1.0, end: 1.02).animate(
+      CurvedAnimation(
+        parent: _searchAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeAnimationController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _fadeAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
 
     _searchFocusNode.addListener(() {
       if (mounted) {
@@ -101,9 +100,7 @@ class _SearchScreenState extends State<SearchScreen>
               _buildModernAppBar(context),
               _buildSearchSection(context),
               _buildFilterChips(context), // Add filter chips here
-              Expanded(
-                child: _buildSearchResults(context),
-              ),
+              Expanded(child: _buildSearchResults(context)),
             ],
           ),
         ),
@@ -199,14 +196,17 @@ class _SearchScreenState extends State<SearchScreen>
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
       child: Column(
         children: [
-          AnimatedBuilder(
-            animation: _searchBarScale,
-            builder: (context, child) {
-              return Transform.scale(
-                scale: _searchBarScale.value,
-                child: _buildModernSearchBar(context),
-              );
-            },
+          AnimatedItemWrapper(
+            duration: Duration(milliseconds: 1000),
+            child: AnimatedBuilder(
+              animation: _searchBarScale,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: _searchBarScale.value,
+                  child: _buildModernSearchBar(context),
+                );
+              },
+            ),
           ),
           16.height,
           _buildSearchActions(context),
@@ -363,18 +363,15 @@ class _SearchScreenState extends State<SearchScreen>
           child: Obx(() {
             return GestureDetector(
               onTap: () {
-                showFilterBottomSheet(
-                  context,
-                  widget.isManga,
-                  (v) {
-                    controller.updateFilters(v);
-                  },
-                  initialFilters: controller.activeFilters,
-                );
+                showFilterBottomSheet(context, widget.isManga, (v) {
+                  controller.updateFilters(v);
+                }, initialFilters: controller.activeFilters);
               },
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: controller.hasActiveFilters
                       ? colorScheme.primary.withOpacity(0.1)
@@ -515,8 +512,10 @@ class _SearchScreenState extends State<SearchScreen>
                     controller.clearFilters();
                   },
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: colorScheme.error.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -557,27 +556,35 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   List<Widget> _buildFilterChipsList(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    // final colorScheme = Theme.of(context).colorScheme;
     List<Widget> chips = [];
 
     // Format filter
     if (controller.activeFilters['format'] != null) {
-      chips.add(_buildFilterChip(
-        context,
-        label:
-            controller.activeFilters['format'].toString().replaceAll('_', ' '),
-        onRemove: () => controller.removeFilter('format'),
-      ));
+      chips.add(
+        _buildFilterChip(
+          context,
+          label: controller.activeFilters['format'].toString().replaceAll(
+            '_',
+            ' ',
+          ),
+          onRemove: () => controller.removeFilter('format'),
+        ),
+      );
     }
 
     // Status filter
     if (controller.activeFilters['status'] != null) {
-      chips.add(_buildFilterChip(
-        context,
-        label:
-            controller.activeFilters['status'].toString().replaceAll('_', ' '),
-        onRemove: () => controller.removeFilter('status'),
-      ));
+      chips.add(
+        _buildFilterChip(
+          context,
+          label: controller.activeFilters['status'].toString().replaceAll(
+            '_',
+            ' ',
+          ),
+          onRemove: () => controller.removeFilter('status'),
+        ),
+      );
     }
 
     // Season filter (only for anime)
@@ -586,14 +593,16 @@ class _SearchScreenState extends State<SearchScreen>
       if (controller.activeFilters['seasonYear'] != null) {
         seasonText += ' ${controller.activeFilters['seasonYear']}';
       }
-      chips.add(_buildFilterChip(
-        context,
-        label: seasonText,
-        onRemove: () {
-          controller.removeFilter('season');
-          controller.removeFilter('seasonYear');
-        },
-      ));
+      chips.add(
+        _buildFilterChip(
+          context,
+          label: seasonText,
+          onRemove: () {
+            controller.removeFilter('season');
+            controller.removeFilter('seasonYear');
+          },
+        ),
+      );
     }
 
     // Genres filter
@@ -601,12 +610,14 @@ class _SearchScreenState extends State<SearchScreen>
         (controller.activeFilters['genres'] as List).isNotEmpty) {
       final genres = controller.activeFilters['genres'] as List;
       for (int i = 0; i < genres.length; i++) {
-        chips.add(_buildFilterChip(
-          context,
-          label: genres[i].toString(),
-          onRemove: () => controller.removeGenre(genres[i]),
-          icon: Icons.category_outlined,
-        ));
+        chips.add(
+          _buildFilterChip(
+            context,
+            label: genres[i].toString(),
+            onRemove: () => controller.removeGenre(genres[i]),
+            icon: Icons.category_outlined,
+          ),
+        );
       }
     }
 
@@ -615,12 +626,14 @@ class _SearchScreenState extends State<SearchScreen>
         (controller.activeFilters['tags'] as List).isNotEmpty) {
       final tags = controller.activeFilters['tags'] as List;
       for (int i = 0; i < tags.length; i++) {
-        chips.add(_buildFilterChip(
-          context,
-          label: tags[i].toString(),
-          onRemove: () => controller.removeTag(tags[i]),
-          icon: Icons.tag,
-        ));
+        chips.add(
+          _buildFilterChip(
+            context,
+            label: tags[i].toString(),
+            onRemove: () => controller.removeTag(tags[i]),
+            icon: Icons.tag,
+          ),
+        );
       }
     }
 
@@ -661,11 +674,7 @@ class _SearchScreenState extends State<SearchScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (icon != null) ...[
-                  Icon(
-                    icon,
-                    size: 14,
-                    color: colorScheme.primary,
-                  ),
+                  Icon(icon, size: 14, color: colorScheme.primary),
                   4.width,
                 ],
                 Text(

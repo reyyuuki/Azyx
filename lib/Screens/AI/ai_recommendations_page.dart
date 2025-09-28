@@ -14,6 +14,7 @@ import 'package:azyx/Widgets/anime/item_card.dart';
 import 'package:azyx/Widgets/common/custom_app_bar.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
+import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -35,8 +36,12 @@ class _AiRecommendationsPageState extends State<AiRecommendationsPage> {
   }
 
   void loadData(bool isAdult) async {
-    recommendationsList.value = await getAiRecommendations(widget.isManga, 1,
-        username: anilistAuthController.userData.value.name, isAdult: isAdult);
+    recommendationsList.value = await getAiRecommendations(
+      widget.isManga,
+      1,
+      username: anilistAuthController.userData.value.name,
+      isAdult: isAdult,
+    );
   }
 
   @override
@@ -49,77 +54,68 @@ class _AiRecommendationsPageState extends State<AiRecommendationsPage> {
     double gridHeight = min(gridWidth * 1.9, maxHeight);
     return Scaffold(
       body: AzyXGradientContainer(
-          child: Column(
-        children: [
-          30.height,
-          CustomAppBar(
-            title: "AI Recommendations",
-            icon: Broken.setting_2,
-            size: 22,
-            ontap: () => settingsBottomSheet(),
-          ),
-          Expanded(
-            child: Obx(
-              () => recommendationsList.value.isEmpty
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : GridView.builder(
-                      padding: const EdgeInsets.all(10),
-                      physics: const BouncingScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        child: Column(
+          children: [
+            30.height,
+            CustomAppBar(
+              title: "AI Recommendations",
+              icon: Broken.setting_2,
+              size: 22,
+              ontap: () => settingsBottomSheet(),
+            ),
+            Expanded(
+              child: Obx(
+                () => recommendationsList.value.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : GridView.builder(
+                        padding: const EdgeInsets.all(10),
+                        physics: const BouncingScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: max(itemCount, minCount),
                           childAspectRatio: gridWidth / gridHeight,
-                          crossAxisSpacing: 5),
-                      itemCount: recommendationsList.value.length,
-                      itemBuilder: (context, index) {
-                        final tagg = recommendationsList.value[index].id;
-                        final item = recommendationsList.value[index];
-                        final CarousaleData data = CarousaleData(
+                          crossAxisSpacing: 5,
+                        ),
+                        itemCount: recommendationsList.value.length,
+                        itemBuilder: (context, index) {
+                          final tagg = recommendationsList.value[index].id;
+                          final item = recommendationsList.value[index];
+                          final CarousaleData data = CarousaleData(
                             id: item.id!,
                             image: item.image!,
-                            title: item.title!);
-                        return GestureDetector(
-                          onTap: () {
-                            widget.isManga
-                                ? Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            MangaDetailsScreen(
-                                              smallMedia: data,
-                                              tagg: item.title! +
-                                                  item.id.toString(),
-                                              isOffline: false,
-                                            )))
-                                : Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            AnimeDetailsScreen(
-                                              smallMedia: data,
-                                              tagg: item.title! +
-                                                  item.id.toString(),
-                                              isOffline: false,
-                                            )));
-                          },
-                          child: ItemCard(item: data, tagg: tagg.toString()),
-                        );
-                      },
-                    ),
+                            title: item.title!,
+                          );
+                          return GestureDetector(
+                            onTap: () {
+                              widget.isManga
+                                  ? MangaDetailsScreen(
+                                      smallMedia: data,
+                                      tagg: item.title! + item.id.toString(),
+                                      isOffline: false,
+                                    ).navigate(context)
+                                  : AnimeDetailsScreen(
+                                      smallMedia: data,
+                                      tagg: item.title! + item.id.toString(),
+                                      isOffline: false,
+                                    ).navigate(context);
+                            },
+                            child: ItemCard(item: data, tagg: tagg.toString()),
+                          );
+                        },
+                      ),
+              ),
             ),
-          )
-        ],
-      )),
+          ],
+        ),
+      ),
     );
   }
 
   void settingsBottomSheet() {
     showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return AzyXGradientContainer(
-              child: Padding(
+      context: context,
+      builder: (context) {
+        return AzyXGradientContainer(
+          child: Padding(
             padding: const EdgeInsets.all(10),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -137,10 +133,7 @@ class _AiRecommendationsPageState extends State<AiRecommendationsPage> {
                 ),
                 const SizedBox(height: 20),
                 ListTile(
-                  leading: const Icon(
-                    Icons.eighteen_up_rating,
-                    size: 28,
-                  ),
+                  leading: const Icon(Icons.eighteen_up_rating, size: 28),
                   title: const AzyXText(
                     text: "18+ content",
                     fontVariant: FontVariant.bold,
@@ -152,16 +145,19 @@ class _AiRecommendationsPageState extends State<AiRecommendationsPage> {
                   ),
                   trailing: Obx(
                     () => Switch(
-                        value: isAdult.value,
-                        onChanged: (bool isTrue) async {
-                          isAdult.value = isTrue;
-                          loadData(isTrue);
-                        }),
+                      value: isAdult.value,
+                      onChanged: (bool isTrue) async {
+                        isAdult.value = isTrue;
+                        loadData(isTrue);
+                      },
+                    ),
                   ),
                 ),
               ],
             ),
-          ));
-        });
+          ),
+        );
+      },
+    );
   }
 }

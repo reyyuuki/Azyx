@@ -4,6 +4,7 @@ import 'package:azyx/Models/anime_class.dart';
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
 import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
+import 'package:azyx/Widgets/Animation/animation.dart';
 import 'package:azyx/Widgets/anime/item_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -25,9 +26,10 @@ class GridviewList extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       physics: const BouncingScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: max(itemCount, minCount),
-          childAspectRatio: gridWidth / gridHeight,
-          crossAxisSpacing: 5),
+        crossAxisCount: max(itemCount, minCount),
+        childAspectRatio: gridWidth / gridHeight,
+        crossAxisSpacing: 5,
+      ),
       itemCount: data.length,
       itemBuilder: (context, index) {
         final tagg = data[index].id.toString();
@@ -35,29 +37,40 @@ class GridviewList extends StatelessWidget {
         return GestureDetector(
           onTap: () {
             isManga
-                ? Get.to(() => MangaDetailsScreen(
+                ? Get.to(
+                    () => MangaDetailsScreen(
                       tagg: tagg,
                       smallMedia: CarousaleData(
-                          id: item.id ?? 1,
-                          image: item.image ?? '',
-                          title: item.title!),
-                    ))
-                : Get.to(() => AnimeDetailsScreen(
+                        id: item.id ?? '1',
+                        image: item.image ?? '',
+                        title: item.title!,
+                      ),
+                    ),
+                  )
+                : Get.to(
+                    () => AnimeDetailsScreen(
                       tagg: tagg,
                       smallMedia: CarousaleData(
-                          id: item.id ?? 1,
-                          image: item.image ?? '',
-                          title: item.title!),
-                    ));
+                        id: item.id ?? '1',
+                        image: item.image ?? '',
+                        title: item.title!,
+                      ),
+                    ),
+                  );
           },
-          child: ItemCard(
+          child: StaggeredAnimatedItemWrapper(
+            baseDuration: Duration(milliseconds: 1000),
+            child: ItemCard(
               item: CarousaleData(
-                  id: item.id ?? 1,
-                  image: item.image ?? '',
-                  title: item.title ?? 'Unkown',
-                  extraData: item.rating,
-                  other: item.status),
-              tagg: tagg.toString()),
+                id: item.id ?? '1',
+                image: item.image ?? '',
+                title: item.title ?? 'Unkown',
+                extraData: item.rating,
+                other: item.status,
+              ),
+              tagg: tagg.toString(),
+            ),
+          ),
         );
       },
     );

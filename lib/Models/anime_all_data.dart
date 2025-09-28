@@ -9,21 +9,22 @@ class AnimeAllData {
   String? title;
   String? image;
   String? number;
-  int? id;
+  String? id;
   List<Video> episodeUrls;
   List<Episode>? episodeList;
   String? source;
 
-  AnimeAllData(
-      {this.episodeList,
-      this.episodeTitle,
-      this.episodeUrls = const <Video>[],
-      this.number,
-      this.id,
-      this.source,
-      this.title,
-      this.image,
-      this.url});
+  AnimeAllData({
+    this.episodeList,
+    this.episodeTitle,
+    this.episodeUrls = const <Video>[],
+    this.number,
+    this.id,
+    this.source,
+    this.title,
+    this.image,
+    this.url,
+  });
 
   factory AnimeAllData.fromJson(Map<String, dynamic> json) {
     return AnimeAllData(
@@ -32,8 +33,9 @@ class AnimeAllData {
       title: json['title'] as String?,
       image: json['image'] as String?,
       number: json['number'] as String?,
-      id: json['id'] as int?,
-      episodeUrls: (json['episodeUrls'] as List<dynamic>?)
+      id: json['id'],
+      episodeUrls:
+          (json['episodeUrls'] as List<dynamic>?)
               ?.map((e) => Video.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
