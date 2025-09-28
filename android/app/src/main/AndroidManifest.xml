@@ -1,34 +1,30 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" /> 
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" tools:ignore="ProtectedPermissions"/>
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-<!-- Install/delete permissions, only granted to system apps -->
+    <!-- Install/delete permissions, only granted to system apps -->
     <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.DELETE_PACKAGES" />
-
-     <!-- New permissions for downloading and installing APKs -->
+    <!-- New permissions for downloading and installing APKs -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES"/>
     <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION"/>
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
-
     <application
         android:label="azyx"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
-
         <!-- Main Activity -->
         <activity
             android:name=".MainActivity"
@@ -39,18 +35,51 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
-
             <!-- Specifies an Android theme to apply to this Activity -->
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter android:label="Add Repo">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="anymex" android:host="add-repo" />
+            </intent-filter>
+            <intent-filter android:label="Add Repo">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="dar" android:host="add-repo" />
+            </intent-filter>
+            <intent-filter android:label="Add Repo">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="sugoireads" android:host="add-repo" />
+            </intent-filter>
+            <intent-filter android:label="Add Repo">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="mangayomi" android:host="add-repo" />
+            </intent-filter>
+            <intent-filter android:label="Add Repo">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="tachiyomi" android:host="add-repo" />
+            </intent-filter>
+            <intent-filter android:label="Add Repo">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="aniyomi" android:host="add-repo" />
+            </intent-filter>
         </activity>
-
         <!-- Web Auth Callback Activity -->
         <activity
             android:name="com.linusu.flutter_web_auth_2.CallbackActivity"
@@ -62,13 +91,10 @@
                 <data android:scheme="azyx" android:host="callback" />
             </intent-filter>
         </activity>
-
         <!-- Flutter Metadata -->
         <meta-data android:name="flutterEmbedding" android:value="2" />
         <meta-data android:name="flutter.deeplinking.enabled" android:value="true" />
-
     </application>
-
     <!-- Intent Queries -->
     <queries>
         <intent>
@@ -80,5 +106,4 @@
             <data android:mimeType="text/plain" />
         </intent>
     </queries>
-
 </manifest>

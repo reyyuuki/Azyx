@@ -18,8 +18,10 @@ class AnilistDataController extends GetxController {
     await fetchCalendarData(anilistSchedules);
   }
 
-  Future<AnilistMediaData> fetchAnilistAnimeDetails(int animeId,
-      {dynamic offlineData}) async {
+  Future<AnilistMediaData> fetchAnilistAnimeDetails(
+    int animeId, {
+    dynamic offlineData,
+  }) async {
     const String query = '''
     query (\$id: Int) {
       Media(id: \$id) {
@@ -350,10 +352,7 @@ class AnilistDataController extends GetxController {
           "Content-Type": "application/json",
           "Accept": "application/json",
         },
-        body: json.encode({
-          "query": searchQuery,
-          "variables": variables,
-        }),
+        body: json.encode({"query": searchQuery, "variables": variables}),
       );
 
       log('Request to AniList: statusCode=${response.statusCode}');
@@ -379,7 +378,8 @@ class AnilistDataController extends GetxController {
       } else {
         log('Error response: ${response.body}');
         throw Exception(
-            'Failed to search anime: ${response.statusCode} - ${response.body}');
+          'Failed to search anime: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (error) {
       log('Exception in searchAnilistAnime: $error');
@@ -387,7 +387,7 @@ class AnilistDataController extends GetxController {
     }
   }
 
-// Similar method for manga search
+  // Similar method for manga search
   Future<List<Anime>> searchAnilistManga({
     String? query,
     String? type = "MANGA",
@@ -480,10 +480,7 @@ class AnilistDataController extends GetxController {
           "Content-Type": "application/json",
           "Accept": "application/json",
         },
-        body: json.encode({
-          "query": searchQuery,
-          "variables": variables,
-        }),
+        body: json.encode({"query": searchQuery, "variables": variables}),
       );
 
       log('Request to AniList: statusCode=${response.statusCode}');
@@ -504,7 +501,8 @@ class AnilistDataController extends GetxController {
       } else {
         log('Error response: ${response.body}');
         throw Exception(
-            'Failed to search manga: ${response.statusCode} - ${response.body}');
+          'Failed to search manga: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (error) {
       log('Exception in searchAnilistManga: $error');

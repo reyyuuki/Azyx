@@ -4,7 +4,6 @@ import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Models/anime_all_data.dart';
 import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Models/user_anime.dart';
-import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/custom_text_field.dart';
@@ -18,61 +17,67 @@ final AnilistAddToListController anilistAddToListController =
     Get.find<AnilistAddToListController>();
 
 class AnilistAddToListController extends GetxController {
-  final Rx<UserAnime> anime = UserAnime().obs;
-  final Rx<UserAnime> manga = UserAnime().obs;
-  final Rx<String> animeStatus = ''.obs;
-  final Rx<String> mangaStatus = ''.obs;
   TextEditingController? controller;
 
   void findAnime(AnilistMediaData data) {
-    for (var i in serviceHandler.userAnimeList.value.allList) {
+    for (var i in serviceHandler.userAnimeList) {
       Utils.log(i.id.toString());
     }
-    if (serviceHandler.userAnimeList.value.allList.isNotEmpty) {
-      log("id:${serviceHandler.userAnimeList.value.allList.first.id} / ${data.id}");
-      anime.value = serviceHandler.userAnimeList.value.allList.firstWhere(
-        (i) => i.id == data.id!,
-        orElse: () {
-          return UserAnime(
-              id: data.id,
-              progress: 1,
-              episodes: data.episodes,
-              title: data.title);
-        },
-      );
-      animeStatus.value = anime.value.status ?? '';
+    if (serviceHandler.userAnimeList.isNotEmpty) {
+      log("idddd:${serviceHandler.userAnimeList.first.id} / ${data.id}");
+      serviceHandler.currentMedia.value = serviceHandler.userAnimeList
+          .firstWhere(
+            (i) => i.id == data.id!,
+            orElse: () {
+              return UserAnime(
+                id: data.id,
+                progress: 1,
+                episodes: data.episodes,
+                title: data.title,
+              );
+            },
+          );
+      serviceHandler.currentMedia.value.status =
+          serviceHandler.currentMedia.value.status ?? '';
     }
-    log("status: ${anime.value.status}");
+    log("status: ${serviceHandler.currentMedia.value.id}");
   }
 
   void findManga(AnilistMediaData data) {
-    if (serviceHandler.userMangaList.value.allList.isNotEmpty) {
-      manga.value = serviceHandler.userMangaList.value.allList.firstWhere(
-        (i) => i.id == data.id,
-        orElse: () {
-          return UserAnime(
-              id: data.id,
-              progress: 0,
-              episodes: data.episodes,
-              title: data.title);
-        },
-      );
-      mangaStatus.value = manga.value.status ?? '';
-      log("status: ${manga.value.status}");
+    if (serviceHandler.userMangaList.isNotEmpty) {
+      serviceHandler.currentMedia.value = serviceHandler.userMangaList
+          .firstWhere(
+            (i) => i.id == data.id,
+            orElse: () {
+              return UserAnime(
+                id: data.id,
+                progress: 0,
+                episodes: data.episodes,
+                title: data.title,
+              );
+            },
+          );
+      serviceHandler.currentMedia.value.status =
+          serviceHandler.currentMedia.value.status ?? '';
+      log("status: ${serviceHandler.currentMedia.value.status}");
     } else {
       log("nothing found");
     }
   }
 
   void updateAnimeProgress(AnimeAllData data, int number) {
-    if (serviceHandler.userAnimeList.value.allList.isNotEmpty) {
+    if (serviceHandler.userAnimeList.isNotEmpty) {
       try {
-        anime.value = serviceHandler.userAnimeList.value.allList.firstWhere(
+        serviceHandler
+            .currentMedia
+            .value = serviceHandler.userAnimeList.firstWhere(
           (i) => i.title == data.title,
           orElse: () {
-            log("No existing anime found, creating new UserAnime entry.");
+            log(
+              "No existing serviceHandler.currentMedia found, creating new UserAnime entry.",
+            );
             return UserAnime(
-              id: data.id,
+              id: data.id.toString(),
               status: "CURRENT",
               score: 5,
               progress: number,
@@ -80,24 +85,30 @@ class AnilistAddToListController extends GetxController {
           },
         );
         serviceHandler.updateListEntry(
-            UserAnime(
-              id: anime.value.id!,
-              progress: number,
-              status: anime.value.status,
-            ),
-            isAnime: true);
+          UserAnime(
+            id: serviceHandler.currentMedia.value.id!,
+            progress: number,
+            status: serviceHandler.currentMedia.value.status,
+          ),
+          isAnime: true,
+        );
       } catch (e) {
         log("Error in updateAnimeProgress: $e");
       }
     } else {
-      log("User anime list is empty.");
+      log("User serviceHandler.currentMedia list is empty.");
     }
   }
 
   void addToListSheet(
-      BuildContext context, String image, String title, int totalEpisodes) {
+    BuildContext context,
+    String image,
+    String title,
+    int totalEpisodes,
+    String id,
+  ) {
     controller = TextEditingController(
-      text: anime.value.progress?.toString() ?? '1',
+      text: serviceHandler.currentMedia.value.progress?.toString() ?? '1',
     );
     showModalBottomSheet(
       context: context,
@@ -165,13 +176,13 @@ class AnilistAddToListController extends GetxController {
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
                                       Container(
-                                    color: theme.surfaceContainerHighest,
-                                    child: Icon(
-                                      Icons.image_not_supported,
-                                      color: theme.onSurfaceVariant,
-                                      size: 24,
-                                    ),
-                                  ),
+                                        color: theme.surfaceContainerHighest,
+                                        child: Icon(
+                                          Icons.image_not_supported,
+                                          color: theme.onSurfaceVariant,
+                                          size: 24,
+                                        ),
+                                      ),
                                 ),
                               ),
                             ),
@@ -224,21 +235,28 @@ class AnilistAddToListController extends GetxController {
                           color: theme.onSurface,
                         ),
                         const SizedBox(height: 8),
-                        Obx(() => CustomDropdown<String>(
-                              items: items,
-                              selectedValue: anime.value.status ?? "CURRENT",
-                              labelText: 'Watching Status',
-                              displayText: (value) => value,
-                              hintText: 'Select status...',
-                              onChanged: (String? newValue) {
-                                if (newValue != null) {
-                                  anime.update((val) {
-                                    val?.status = newValue;
-                                  });
-                                }
-                                log(anime.value.status.toString());
-                              },
-                            )),
+                        Obx(
+                          () => CustomDropdown<String>(
+                            items: items,
+                            selectedValue:
+                                serviceHandler.currentMedia.value.status ??
+                                "CURRENT",
+                            labelText: 'Watching Status',
+                            displayText: (value) => value,
+                            hintText: 'Select status...',
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                serviceHandler.currentMedia.update((val) {
+                                  val?.status = newValue;
+                                });
+                              }
+                              log(
+                                serviceHandler.currentMedia.value.status
+                                    .toString(),
+                              );
+                            },
+                          ),
+                        ),
                         const SizedBox(height: 24),
                         AzyXText(
                           text: 'Your Rating',
@@ -247,21 +265,25 @@ class AnilistAddToListController extends GetxController {
                           color: theme.onSurface,
                         ),
                         const SizedBox(height: 8),
-                        Obx(() => CustomDropdown<double>(
-                              items: scoresItems,
-                              selectedValue:
-                                  anime.value.score?.toDouble() ?? 5.0,
-                              labelText: 'Rating',
-                              displayText: (value) => '${value.toString()} ⭐',
-                              hintText: 'Select rating...',
-                              onChanged: (double? newValue) {
-                                if (newValue != null) {
-                                  anime.update((val) {
-                                    val?.score = newValue;
-                                  });
-                                }
-                              },
-                            )),
+                        Obx(
+                          () => CustomDropdown<double>(
+                            items: scoresItems,
+                            selectedValue:
+                                serviceHandler.currentMedia.value.score
+                                    ?.toDouble() ??
+                                5.0,
+                            labelText: 'Rating',
+                            displayText: (value) => '${value.toString()} ⭐',
+                            hintText: 'Select rating...',
+                            onChanged: (double? newValue) {
+                              if (newValue != null) {
+                                serviceHandler.currentMedia.update((val) {
+                                  val?.score = newValue;
+                                });
+                              }
+                            },
+                          ),
+                        ),
                         const SizedBox(height: 24),
                         AzyXText(
                           text: 'Progress',
@@ -277,7 +299,7 @@ class AnilistAddToListController extends GetxController {
                           maxValue: totalEpisodes,
                           suffixText: '/ $totalEpisodes',
                           onChanged: (value) {
-                            anime.update((val) {
+                            serviceHandler.currentMedia.update((val) {
                               val?.progress = value ?? 0;
                             });
                           },
@@ -313,19 +335,47 @@ class AnilistAddToListController extends GetxController {
                               flex: 2,
                               child: GestureDetector(
                                 onTap: () {
-                                  animeStatus.value =
-                                      anime.value.status ?? "CURRENT";
+                                  serviceHandler.currentMedia.value.status =
+                                      serviceHandler
+                                          .currentMedia
+                                          .value
+                                          .status ??
+                                      "CURRENT";
+                                  serviceHandler.currentMedia.value.id = id;
+                                  Utils.log(
+                                    'aando: ${serviceHandler.currentMedia.value.id}',
+                                  );
                                   serviceHandler.updateListEntry(
-                                      UserAnime(
-                                          id: anime.value.id!,
-                                          status: animeStatus.value,
-                                          score: anime.value.score ?? 5,
-                                          progress: anime.value.progress),
-                                      isAnime: true);
+                                    UserAnime(
+                                      id: serviceHandler.currentMedia.value.id!,
+                                      status: getMALStatusEquivalent(
+                                        serviceHandler
+                                                .currentMedia
+                                                .value
+                                                .status ??
+                                            '',
+                                      ),
+                                      score:
+                                          serviceHandler
+                                              .currentMedia
+                                              .value
+                                              .score ??
+                                          5,
+                                      progress: serviceHandler
+                                          .currentMedia
+                                          .value
+                                          .progress,
+                                    ),
+                                    isAnime: true,
+                                  );
                                   Navigator.pop(context);
-                                  log(anime.value.progress.toString());
+                                  log(
+                                    serviceHandler.currentMedia.value.progress
+                                        .toString(),
+                                  );
                                   azyxSnackBar(
-                                      "Successfully added ${anime.value.title}");
+                                    "Successfully added ${serviceHandler.currentMedia.value.title}",
+                                  );
                                 },
                                 child: Container(
                                   height: 48,
@@ -386,9 +436,13 @@ class AnilistAddToListController extends GetxController {
   }
 
   void addToMangaListSheet(
-      BuildContext context, String image, String title, int totalEpisodes) {
+    BuildContext context,
+    String image,
+    String title,
+    int totalEpisodes,
+  ) {
     controller = TextEditingController(
-      text: manga.value.progress?.toString() ?? '1',
+      text: serviceHandler.currentMedia.value.progress?.toString() ?? '1',
     );
     showModalBottomSheet(
       context: context,
@@ -456,13 +510,13 @@ class AnilistAddToListController extends GetxController {
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
                                       Container(
-                                    color: theme.surfaceContainerHighest,
-                                    child: Icon(
-                                      Icons.image_not_supported,
-                                      color: theme.onSurfaceVariant,
-                                      size: 24,
-                                    ),
-                                  ),
+                                        color: theme.surfaceContainerHighest,
+                                        child: Icon(
+                                          Icons.image_not_supported,
+                                          color: theme.onSurfaceVariant,
+                                          size: 24,
+                                        ),
+                                      ),
                                 ),
                               ),
                             ),
@@ -515,23 +569,27 @@ class AnilistAddToListController extends GetxController {
                           color: theme.onSurface,
                         ),
                         const SizedBox(height: 8),
-                        Obx(() => CustomDropdown<String>(
-                              items: items,
-                              selectedValue: mangaStatus.value.isEmpty
-                                  ? "CURRENT"
-                                  : mangaStatus.value,
-                              labelText: 'Reading Status',
-                              displayText: (value) => value,
-                              hintText: 'Select status...',
-                              onChanged: (String? newValue) {
-                                if (newValue != null) {
-                                  manga.update((val) {
-                                    val?.status = newValue;
-                                  });
-                                  mangaStatus.value = newValue;
-                                }
-                              },
-                            )),
+                        Obx(
+                          () => CustomDropdown<String>(
+                            items: items,
+                            selectedValue:
+                                serviceHandler.currentMedia.value.status == null
+                                ? "CURRENT"
+                                : serviceHandler.currentMedia.value.status,
+                            labelText: 'Reading Status',
+                            displayText: (value) => value,
+                            hintText: 'Select status...',
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                serviceHandler.currentMedia.update((val) {
+                                  val?.status = newValue;
+                                });
+                                serviceHandler.currentMedia.value.status =
+                                    newValue;
+                              }
+                            },
+                          ),
+                        ),
                         const SizedBox(height: 24),
                         AzyXText(
                           text: 'Your Rating',
@@ -540,21 +598,25 @@ class AnilistAddToListController extends GetxController {
                           color: theme.onSurface,
                         ),
                         const SizedBox(height: 8),
-                        Obx(() => CustomDropdown<double>(
-                              items: scoresItems,
-                              selectedValue:
-                                  manga.value.score?.toDouble() ?? 5.0,
-                              labelText: 'Rating',
-                              displayText: (value) => '${value.toString()} ⭐',
-                              hintText: 'Select rating...',
-                              onChanged: (double? newValue) {
-                                if (newValue != null) {
-                                  manga.update((val) {
-                                    val?.score = newValue;
-                                  });
-                                }
-                              },
-                            )),
+                        Obx(
+                          () => CustomDropdown<double>(
+                            items: scoresItems,
+                            selectedValue:
+                                serviceHandler.currentMedia.value.score
+                                    ?.toDouble() ??
+                                5.0,
+                            labelText: 'Rating',
+                            displayText: (value) => '${value.toString()} ⭐',
+                            hintText: 'Select rating...',
+                            onChanged: (double? newValue) {
+                              if (newValue != null) {
+                                serviceHandler.currentMedia.update((val) {
+                                  val?.score = newValue;
+                                });
+                              }
+                            },
+                          ),
+                        ),
                         const SizedBox(height: 24),
                         AzyXText(
                           text: 'Progress',
@@ -570,7 +632,7 @@ class AnilistAddToListController extends GetxController {
                           maxValue: totalEpisodes,
                           suffixText: '/ $totalEpisodes',
                           onChanged: (value) {
-                            manga.update((val) {
+                            serviceHandler.currentMedia.update((val) {
                               val?.progress = value ?? 0;
                             });
                           },
@@ -606,18 +668,38 @@ class AnilistAddToListController extends GetxController {
                               flex: 2,
                               child: GestureDetector(
                                 onTap: () {
-                                  mangaStatus.value =
-                                      manga.value.status ?? 'CURRENT';
+                                  serviceHandler.currentMedia.value.status =
+                                      serviceHandler
+                                          .currentMedia
+                                          .value
+                                          .status ??
+                                      'CURRENT';
                                   serviceHandler.updateListEntry(
-                                      UserAnime(
-                                          id: manga.value.id!,
-                                          status: manga.value.status,
-                                          score: manga.value.score ?? 5,
-                                          progress: manga.value.progress ?? 0),
-                                      isAnime: false);
+                                    UserAnime(
+                                      id: serviceHandler.currentMedia.value.id!,
+                                      status: serviceHandler
+                                          .currentMedia
+                                          .value
+                                          .status,
+                                      score:
+                                          serviceHandler
+                                              .currentMedia
+                                              .value
+                                              .score ??
+                                          5,
+                                      progress:
+                                          serviceHandler
+                                              .currentMedia
+                                              .value
+                                              .progress ??
+                                          0,
+                                    ),
+                                    isAnime: false,
+                                  );
                                   Navigator.pop(context);
                                   azyxSnackBar(
-                                      "Successfully added ${manga.value.title}");
+                                    "Successfully added ${serviceHandler.currentMedia.value.title}",
+                                  );
                                 },
                                 child: Container(
                                   height: 48,
@@ -684,7 +766,9 @@ class AnilistAddToListController extends GetxController {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLowest,
         border: Border.all(
-            width: 0.5, color: Theme.of(context).colorScheme.primary),
+          width: 0.5,
+          color: Theme.of(context).colorScheme.primary,
+        ),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
@@ -694,8 +778,13 @@ class AnilistAddToListController extends GetxController {
     );
   }
 
-  SizedBox inputbox(BuildContext context, controller, int max,
-      void Function(int value) onChanged, String label) {
+  SizedBox inputbox(
+    BuildContext context,
+    controller,
+    int max,
+    void Function(int value) onChanged,
+    String label,
+  ) {
     return SizedBox(
       height: 57,
       child: TextField(
@@ -707,15 +796,11 @@ class AnilistAddToListController extends GetxController {
             int number = int.tryParse(value) ?? 1;
             onChanged(number);
             if (number > max) {
-              controller.value = TextEditingValue(
-                text: max.toString(),
-              );
-              log(anime.value.progress.toString());
+              controller.value = TextEditingValue(text: max.toString());
+              log(serviceHandler.currentMedia.value.progress.toString());
             } else if (number < 0) {
-              controller.value = const TextEditingValue(
-                text: '0',
-              );
-              anime.value.progress = 1;
+              controller.value = const TextEditingValue(text: '0');
+              serviceHandler.currentMedia.value.progress = 1;
             }
           }
         },
@@ -734,16 +819,19 @@ class AnilistAddToListController extends GetxController {
           fillColor: Theme.of(context).colorScheme.surfaceContainerLowest,
           labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
           border: OutlineInputBorder(
-            borderSide:
-                BorderSide(color: Theme.of(context).colorScheme.primary),
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.onPrimaryFixedVariant),
+              color: Theme.of(context).colorScheme.onPrimaryFixedVariant,
+            ),
           ),
           focusedBorder: OutlineInputBorder(
-            borderSide:
-                BorderSide(color: Theme.of(context).colorScheme.primary),
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
         ),
       ),
