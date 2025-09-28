@@ -1,6 +1,6 @@
 class Category {
   String? name;
-  List<int> anilistIds;
+  List<String> anilistIds;
   Category({required this.anilistIds, this.name});
 
   Map<String, dynamic> toJson() {
@@ -9,7 +9,8 @@ class Category {
 
   factory Category.fromJson(Map<dynamic, dynamic> data) {
     return Category(
-        name: data['name'],
-        anilistIds: List<int>.from(data['anilistIds'] ?? []));
+      name: data['name'],
+      anilistIds: List<String>.from(data['anilistIds'] ?? []),
+    );
   }
 }

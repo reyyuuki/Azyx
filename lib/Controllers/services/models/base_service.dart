@@ -5,11 +5,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 
 abstract class BaseService {
-  RxList<Widget> homeWidgets(BuildContext context);
+  Rx<Widget> homeWidgets(BuildContext context);
   Rx<Widget> animeWidgets(BuildContext context);
-  RxList<Widget> mangaWidgets(BuildContext context);
-  Future<AnilistMediaData> fetchAnimeDetails(int id);
-  Future<AnilistMediaData> fetchMangaDetails(int id);
+  Rx<Widget> mangaWidgets(BuildContext context);
+  Future<AnilistMediaData> fetchDetails(FetchDetailsParams params);
   Future<void> fetchhomeData();
   Future<List<Anime>> fetchsearchData(SearchParams query);
+}
+
+class FetchDetailsParams {
+  dynamic id;
+  bool isManga;
+
+  FetchDetailsParams({required this.id, this.isManga = false});
 }
