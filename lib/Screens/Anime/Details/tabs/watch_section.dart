@@ -1,24 +1,19 @@
-// ignore_for_file: use_build_context_synchronously, must_be_immutable
-
-import 'dart:developer';
-
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Models/wrong_title_search.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_normal_card.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
-import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/anime/anify_episodes_list.dart';
 import 'package:azyx/Widgets/anime/episodes_list.dart';
 import 'package:azyx/Widgets/anime/mapped_title.dart';
-import 'package:azyx/Widgets/AzyXWidgets/azyx_normal_card.dart';
 import 'package:azyx/Widgets/common/search_widget.dart';
 import 'package:azyx/Widgets/custom_drop_down.dart';
-import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:dartotsu_extension_bridge/ExtensionManager.dart';
 import 'package:dartotsu_extension_bridge/Models/Source.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:icons_plus/icons_plus.dart';
 
 class WatchSection extends StatefulWidget {
   final String image;
@@ -29,11 +24,11 @@ class WatchSection extends StatefulWidget {
   final Rx<String> totalEpisodes;
   final RxList<Episode> episodelist;
   final Rx<bool> hasError;
-  Function(String link) onChanged;
-  Function(String) onTitleChanged;
-  Function(String) onSourceChanged;
+  final Function(String link) onChanged;
+  final Function(String) onTitleChanged;
+  final Function(String) onSourceChanged;
 
-  WatchSection({
+  const WatchSection({
     super.key,
     required this.id,
     required this.image,
@@ -56,7 +51,6 @@ class _WatchSectionState extends State<WatchSection> {
   final RxList<WrongTitleSearch> wrongTitleSearchData = RxList();
   final RxList<Episode> filteredList = RxList();
   TextEditingController wrongTitle = TextEditingController();
-  final Rx<int> searchNumber = 1.obs;
   final Rx<bool> searchError = false.obs;
 
   @override
@@ -70,8 +64,7 @@ class _WatchSectionState extends State<WatchSection> {
       final response = await sourceController.activeSource.value!.methods
           .search(query, 1, []);
       if (response.list.isNotEmpty) {
-        final data = response.list;
-        for (var item in data) {
+        for (var item in response.list) {
           wrongTitleSearchData.add(
             WrongTitleSearch(
               image: item.cover,
@@ -87,14 +80,13 @@ class _WatchSectionState extends State<WatchSection> {
     } catch (e) {
       searchError.value = true;
       azyxSnackBar("Something went wrong");
-      log("Error while searching for wrong title: $e");
     }
   }
 
   void handleEpisodes(String value) {
     if (value.isNotEmpty) {
       filteredList.value = widget.episodelist
-          .where((i) => i.title!.contains(value))
+          .where((i) => i.title!.toLowerCase().contains(value.toLowerCase()))
           .toList();
     } else {
       filteredList.value = widget.episodelist;
@@ -103,441 +95,346 @@ class _WatchSectionState extends State<WatchSection> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Stack(
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       children: [
-        ListView(
-          padding: const EdgeInsets.all(20),
-          shrinkWrap: true,
-          physics: const BouncingScrollPhysics(),
+        Obx(
+          () => CustomSourceDropdown(
+            items: sourceController.installedExtensions,
+            sourceController: sourceController,
+            selectedSource:
+                sourceController.activeSource.value ??
+                sourceController.installedExtensions.first,
+            labelText: 'Source',
+            onChanged: (value) {
+              if (value != null) {
+                final matched = sourceController.installedExtensions.firstWhere(
+                  (i) => "${i.name}_${i.extensionType}" == value,
+                );
+                widget.onSourceChanged(value);
+                sourceController.setActiveSource(matched);
+              }
+            },
+          ),
+        ),
+        const SizedBox(height: 18),
+        MappedTitle(
+          name: "Episode Count",
+          animeTitle: widget.animeTitle,
+          totalEpisodes: widget.totalEpisodes,
+        ),
+        const SizedBox(height: 26),
+        Row(
           children: [
-            Obx(
-              () => CustomSourceDropdown(
-                items: sourceController.installedExtensions,
-                sourceController: sourceController,
-                selectedSource:
-                    sourceController.activeSource.value ??
-                    sourceController.installedExtensions.first,
-                labelText: 'Choose Source',
-                onChanged: (value) {
-                  if (value != null) {
-                    final matched = sourceController.installedExtensions
-                        .firstWhere(
-                          (i) => "${i.name}_${i.extensionType}" == value,
-                        );
-                    widget.onSourceChanged(value);
-                    sourceController.activeSource.value = matched;
-                    sourceController.setActiveSource(matched);
-                    log(
-                      'current: ${sourceController.activeSource.value?.name}',
-                    );
-                  }
-                },
+            Expanded(
+              child: Text(
+                "Episodes",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: colorScheme.onSurface,
+                  letterSpacing: -0.3,
+                ),
               ),
             ),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: isDark
-                      ? [
-                          Colors.white.withOpacity(0.12),
-                          Colors.white.withOpacity(0.04),
-                          Colors.white.withOpacity(0.08),
-                        ]
-                      : [Colors.white, Colors.white],
-                ),
-                border: Border.all(
-                  width: 1.5,
-                  color: Colors.white.withOpacity(0.18),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.shadow.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: MappedTitle(
-                name: "Total Episodes",
-                animeTitle: widget.animeTitle,
-                totalEpisodes: widget.totalEpisodes,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: isDark
-                      ? [
-                          Colors.white.withOpacity(0.12),
-                          Colors.white.withOpacity(0.04),
-                          Colors.white.withOpacity(0.08),
-                        ]
-                      : [Colors.white, Colors.white],
-                ),
-                border: Border.all(
-                  width: 1.5,
-                  color: Colors.white.withOpacity(0.18),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.shadow.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const AzyXText(
-                    text: "Episodes",
-                    fontVariant: FontVariant.bold,
-                    fontSize: 24,
-                    textAlign: TextAlign.start,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      searchError.value = false;
-                      wrongTitleSearchData.value = [];
-                      wrongTitle.text = widget.animeTitle.value;
-                      wrongTitleSearch(wrongTitle.text, context);
-                      wrongTitleSheet(context);
-                    },
-                    child: Align(
-                      alignment: Alignment.bottomRight,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.white.withOpacity(0.1),
-                              Colors.white.withOpacity(0.05),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withOpacity(0.3),
-                            width: 1,
-                          ),
-                        ),
-                        child: Text(
-                          "Wrong Title?",
-                          style: TextStyle(
-                            fontFamily: "Poppins-Bold",
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            SearchBox(
-              onChanged: (value) {
-                handleEpisodes(value);
+            GestureDetector(
+              onTap: () {
+                searchError.value = false;
+                wrongTitleSearchData.value = [];
+                wrongTitle.text = widget.animeTitle.value;
+                wrongTitleSearch(wrongTitle.text, context);
+                _showWrongTitleSheet(context);
               },
-              ontap: () {},
-              name: "Search Episodes",
-            ),
-            const SizedBox(height: 24),
-            Obx(
-              () => widget.hasError.value
-                  ? Container(
-                      height: 300,
-                      padding: const EdgeInsets.all(40),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Colors.white.withOpacity(0.1),
-                            Colors.white.withOpacity(0.03),
-                            Colors.white.withOpacity(0.06),
-                          ],
-                        ),
-                        border: Border.all(
-                          width: 1,
-                          color: Colors.white.withOpacity(0.15),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.red.withOpacity(0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Image.asset(
-                          'assets/images/sticker.png',
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    )
-                  : widget.episodelist.isEmpty
-                  ? Container(
-                      height: Get.height * 0.4,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Colors.white.withOpacity(0.1),
-                            Colors.white.withOpacity(0.03),
-                            Colors.white.withOpacity(0.06),
-                          ],
-                        ),
-                        border: Border.all(
-                          width: 1,
-                          color: Colors.white.withOpacity(0.15),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withOpacity(0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                    )
-                  : widget.episodelist.first.desc.isNotEmpty
-                  ? AnifyEpisodesWidget(
-                      title: widget.animeTitle.value,
-                      id: widget.id,
-                      image: widget.image,
-                      data: widget.mediaData,
-                      anifyEpisodes: widget.episodelist,
-                    )
-                  : EpisodesList(
-                      episodeList: widget.episodelist,
-                      image: widget.image,
-                      title: widget.animeTitle.value,
-                      id: widget.id,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: colorScheme.secondaryContainer.withOpacity(0.35),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: colorScheme.outlineVariant.withOpacity(0.12),
+                    width: 0.5,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.edit_rounded,
+                      size: 14,
+                      color: colorScheme.onSecondaryContainer,
                     ),
+                    const SizedBox(width: 6),
+                    Text(
+                      "Wrong title?",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: colorScheme.onSecondaryContainer,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
+        ),
+        const SizedBox(height: 16),
+        SearchBox(
+          onChanged: handleEpisodes,
+          ontap: () {},
+          name: "Filter episodes...",
+        ),
+        const SizedBox(height: 20),
+        Obx(
+          () => widget.hasError.value
+              ? _buildErrorState(colorScheme)
+              : widget.episodelist.isEmpty
+              ? _buildLoadingState(colorScheme)
+              : widget.episodelist.first.desc.isNotEmpty
+              ? AnifyEpisodesWidget(
+                  title: widget.animeTitle.value,
+                  id: widget.id,
+                  image: widget.image,
+                  data: widget.mediaData,
+                  anifyEpisodes: widget.episodelist,
+                )
+              : EpisodesList(
+                  episodeList: widget.episodelist,
+                  image: widget.image,
+                  title: widget.animeTitle.value,
+                  id: widget.id,
+                ),
         ),
       ],
     );
   }
 
-  void wrongTitleSheet(context) {
+  Widget _buildErrorState(ColorScheme colorScheme) {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
+        decoration: BoxDecoration(
+          color: colorScheme.errorContainer.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: colorScheme.error.withOpacity(0.15),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline_rounded,
+              size: 40,
+              color: colorScheme.error.withOpacity(0.7),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              "Failed to load episodes",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: colorScheme.onErrorContainer,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              "Try changing the source or title",
+              style: TextStyle(
+                fontSize: 12,
+                color: colorScheme.onErrorContainer.withOpacity(0.7),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState(ColorScheme colorScheme) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 32,
+              height: 32,
+              child: CircularProgressIndicator(
+                color: colorScheme.primary,
+                strokeWidth: 2.5,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              "Fetching episodes...",
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showWrongTitleSheet(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     showModalBottomSheet(
       context: context,
-      enableDrag: true,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-      ),
       builder: (context) {
         return Container(
-          height: Get.height * 0.75,
+          height: MediaQuery.of(context).size.height * 0.8,
           decoration: BoxDecoration(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Theme.of(context).colorScheme.surface.withOpacity(0.95),
-                Theme.of(context).colorScheme.surface.withOpacity(0.98),
-              ],
-            ),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.2),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).colorScheme.shadow.withOpacity(0.2),
-                blurRadius: 30,
-                offset: const Offset(0, -10),
+            color: colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colorScheme.onSurfaceVariant.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-              BoxShadow(
-                color: Colors.white.withOpacity(0.1),
-                blurRadius: 20,
-                spreadRadius: -10,
-                offset: const Offset(0, 5),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  "Search Title",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest.withOpacity(
+                      0.45,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: colorScheme.outlineVariant.withOpacity(0.15),
+                      width: 0.5,
+                    ),
+                  ),
+                  child: TextField(
+                    controller: wrongTitle,
+                    style: TextStyle(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(
+                        EvaIcons.search,
+                        color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+                        size: 20,
+                      ),
+                      hintText: "Search title...",
+                      hintStyle: TextStyle(
+                        color: colorScheme.onSurfaceVariant.withOpacity(0.4),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 15,
+                      ),
+                    ),
+                    onSubmitted: (val) {
+                      searchError.value = false;
+                      wrongTitleSearchData.value = [];
+                      wrongTitleSearch(val, context);
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: Obx(
+                  () => wrongTitleSearchData.isEmpty
+                      ? Center(
+                          child: searchError.value
+                              ? Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.search_off_rounded,
+                                      size: 40,
+                                      color: colorScheme.onSurfaceVariant
+                                          .withOpacity(0.3),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      "No results found",
+                                      style: TextStyle(
+                                        color: colorScheme.onSurfaceVariant
+                                            .withOpacity(0.5),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : SizedBox(
+                                  width: 28,
+                                  height: 28,
+                                  child: CircularProgressIndicator(
+                                    color: colorScheme.primary,
+                                    strokeWidth: 2.5,
+                                  ),
+                                ),
+                        )
+                      : GridView.builder(
+                          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                childAspectRatio: 0.52,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                              ),
+                          itemCount: wrongTitleSearchData.length,
+                          itemBuilder: (ctx, index) {
+                            final item = wrongTitleSearchData[index];
+                            return GestureDetector(
+                              onTap: () {
+                                widget.episodelist.value = [];
+                                Navigator.pop(context);
+                                widget.onChanged(item.link!);
+                                widget.onTitleChanged(item.title!);
+                              },
+                              child: AzyXCard(item: item),
+                            );
+                          },
+                        ),
+                ),
               ),
             ],
-          ),
-          child: ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.2),
-                              Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.1),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withOpacity(0.3),
-                            width: 1,
-                          ),
-                        ),
-                        child: AzyXText(
-                          text: sourceController.activeSource.value?.name ?? '',
-                          fontVariant: FontVariant.bold,
-                          fontSize: 18,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.white.withOpacity(0.1),
-                              Colors.white.withOpacity(0.05),
-                            ],
-                          ),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.2),
-                            width: 1,
-                          ),
-                        ),
-                        child: TextField(
-                          onSubmitted: (value) async {
-                            searchError.value = false;
-                            wrongTitleSearchData.value = [];
-                            wrongTitleSearch(value, context);
-                          },
-                          controller: wrongTitle,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                          decoration: InputDecoration(
-                            labelText: "Search",
-                            labelStyle: TextStyle(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.8),
-                            ),
-                            prefixIcon: Icon(
-                              Broken.search_normal,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.8),
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.all(16),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Obx(
-                      () => searchError.value
-                          ? Center(
-                              child: Container(
-                                padding: const EdgeInsets.all(40),
-                                child: Image.asset(
-                                  'assets/images/sticker.png',
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                            )
-                          : wrongTitleSearchData.isEmpty
-                          ? Center(
-                              child: CircularProgressIndicator(
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            )
-                          : GridView(
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 3,
-                                    childAspectRatio: 0.52,
-                                    crossAxisSpacing: 8.0,
-                                    mainAxisSpacing: 8.0,
-                                  ),
-                              children: wrongTitleSearchData.map((item) {
-                                return GestureDetector(
-                                  onTap: () async {
-                                    widget.episodelist.value = [];
-                                    Navigator.pop(context);
-                                    widget.onChanged(item.link!);
-                                    widget.onTitleChanged(item.title!);
-                                  },
-                                  child: AzyXCard(item: item),
-                                );
-                              }).toList(),
-                            ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         );
       },

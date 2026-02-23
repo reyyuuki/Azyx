@@ -3,8 +3,8 @@
 import 'dart:developer';
 
 import 'package:azyx/Controllers/source/source_controller.dart';
-import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Models/anime_all_data.dart';
+import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Screens/Anime/Watch/watch_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
@@ -20,6 +20,7 @@ class EpisodesList extends StatelessWidget {
   final String image;
   final String title;
   final String id;
+
   EpisodesList({
     super.key,
     required this.episodeList,
@@ -105,6 +106,8 @@ class EpisodesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Column(
       children: episodeList.map((episode) {
         return GestureDetector(
@@ -132,80 +135,104 @@ class EpisodesList extends StatelessWidget {
               fetchEpisodeLink(episode.url!, episode.number, title, context);
             }
           },
-          child: AzyXContainer(
-            height: 100,
-            margin: const EdgeInsets.only(top: 10),
+          child: Container(
+            height: 105,
+            margin: const EdgeInsets.only(bottom: 10),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              color: colorScheme.surfaceContainer.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: colorScheme.outlineVariant.withOpacity(0.1),
+                width: 0.5,
+              ),
             ),
-            child: Stack(
+            child: Row(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    ClipRRect(
-                      borderRadius: const BorderRadius.horizontal(
-                        left: Radius.circular(10),
-                      ),
-                      child: SizedBox(
-                        height: 100,
-                        width: 150,
-                        child: CachedNetworkImage(
+                ClipRRect(
+                  borderRadius: const BorderRadius.horizontal(
+                    left: Radius.circular(16),
+                  ),
+                  child: SizedBox(
+                    width: 140,
+                    height: 105,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        CachedNetworkImage(
                           imageUrl: image,
                           fit: BoxFit.cover,
                           placeholder: (context, url) =>
-                              const ShimmerEffect(height: 100, width: 150),
+                              const ShimmerEffect(height: 105, width: 140),
                         ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: AzyXText(
-                          text: episode.title!.length > 25
-                              ? '${episode.title!.substring(0, 25)}...'
-                              : episode.title!,
-                          color: Theme.of(context).colorScheme.inverseSurface,
-                          fontVariant: FontVariant.bold,
+                        Container(color: Colors.black.withOpacity(0.25)),
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.45),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.play_arrow_rounded,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: AzyXText(
-                        text: 'Ep- ${episode.number}',
-                        fontSize: 14,
-                        color: Theme.of(context).colorScheme.inverseSurface,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-                // Positioned(
-                //   bottom:
-                //       0,
-                //   right:
-                //       0,
-                //   child:
-                //       GestureDetector(
-                //     onTap: () {
-                //       showloader();
-                //       fetchm3u8(episodeNumber);
-                //     },
-                //     child: AzyXContainer(
-                //       height: 27,
-                //       width: 45,
-                //       decoration: BoxDecoration(
-                //         color: Theme.of(context).colorScheme.secondary,
-                //         borderRadius: const BorderRadius.only(
-                //           topLeft: Radius.circular(20),
-                //           bottomRight: Radius.circular(10),
-                //         ),
-                //       ),
-                //       child: Icon(Icons.download_for_offline, color: Theme.of(context).colorScheme.inversePrimary),
-                //     ),
-                //   ),
-                // ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primaryContainer.withOpacity(
+                              0.4,
+                            ),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            'Episode ${episode.number}',
+                            style: TextStyle(
+                              color: colorScheme.primary,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        AzyXText(
+                          text: episode.title ?? 'Episode ${episode.number}',
+                          fontVariant: FontVariant.bold,
+                          fontSize: 14,
+                          maxLines: 2,
+                          color: colorScheme.onSurface,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: Icon(
+                    Icons.chevron_right_rounded,
+                    color: colorScheme.onSurfaceVariant.withOpacity(0.35),
+                    size: 22,
+                  ),
+                ),
               ],
             ),
           ),

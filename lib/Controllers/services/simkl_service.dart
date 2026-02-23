@@ -432,14 +432,16 @@ class SimklService extends GetxController
             )
           : SingleChildScrollView(
               child: ListView(
-                padding: const EdgeInsets.all(10),
                 physics: const BouncingScrollPhysics(),
                 shrinkWrap: true,
                 children: [
-                  buildSearchButton(
-                    context,
-                    () => Get.to(() => const SearchScreen(isManga: false)),
-                    'movies',
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: buildSearchButton(
+                      context,
+                      () => Get.to(() => const SearchScreen(isManga: false)),
+                      'movies',
+                    ),
                   ),
                   const SizedBox(height: 10),
                   MainCarousale(isManga: false, data: trendingMovies),
@@ -456,10 +458,13 @@ class SimklService extends GetxController
                   //   title: "TopUpcoming Animes",
                   // ),
                   const SizedBox(height: 10),
-                  AnimeScrollableList(
-                    animeList: trendingMovies,
-                    isManga: false,
-                    title: "Trending Movies",
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: AnimeScrollableList(
+                      animeList: trendingMovies,
+                      isManga: false,
+                      title: "Trending Movies",
+                    ),
                   ),
                 ],
               ),
@@ -478,7 +483,6 @@ class SimklService extends GetxController
       physics: const BouncingScrollPhysics(),
       slivers: [
         const SliverToBoxAdapter(child: Header()),
-
         SliverToBoxAdapter(
           child: Obx(
             () => userData.value.name == null || userData.value.name!.isEmpty

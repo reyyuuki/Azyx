@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:math' as show;
 
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
@@ -27,7 +28,6 @@ import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart';
-import 'dart:math' as show;
 
 final MalService malService = Get.find<MalService>();
 
@@ -272,34 +272,45 @@ class MalService extends GetxController implements BaseService, OnlineService {
             )
           : SingleChildScrollView(
               child: ListView(
-                padding: const EdgeInsets.all(10),
                 physics: const BouncingScrollPhysics(),
                 shrinkWrap: true,
                 children: [
-                  buildSearchButton(
-                    context,
-                    () => Get.to(() => const SearchScreen(isManga: false)),
-                    'anime',
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: buildSearchButton(
+                      context,
+                      () => Get.to(() => const SearchScreen(isManga: false)),
+                      'anime',
+                    ),
                   ),
                   const SizedBox(height: 10),
                   MainCarousale(isManga: false, data: spotlight),
                   const SizedBox(height: 20),
-                  AnimeScrollableList(
-                    animeList: popular,
-                    isManga: false,
-                    title: "Popular Animes",
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: AnimeScrollableList(
+                      animeList: popular,
+                      isManga: false,
+                      title: "Popular Animes",
+                    ),
                   ),
                   const SizedBox(height: 10),
-                  AnimeScrollableList(
-                    animeList: topUpcoming,
-                    isManga: false,
-                    title: "TopUpcoming Animes",
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: AnimeScrollableList(
+                      animeList: topUpcoming,
+                      isManga: false,
+                      title: "TopUpcoming Animes",
+                    ),
                   ),
                   const SizedBox(height: 10),
-                  AnimeScrollableList(
-                    animeList: trending,
-                    isManga: false,
-                    title: "Completed Animes",
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: AnimeScrollableList(
+                      animeList: trending,
+                      isManga: false,
+                      title: "Completed Animes",
+                    ),
                   ),
                 ],
               ),

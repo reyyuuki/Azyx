@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:azyx/Models/anime_details_data.dart';
@@ -22,38 +23,43 @@ class ScrollableAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode =
-        Provider.of<ThemeProvider>(context, listen: false).isDarkMode!;
-    return Stack(children: [
-      Obx(
-        () => CachedNetworkImage(
-          height: 400,
-          width: MediaQuery.of(context).size.width,
-          fit: BoxFit.cover,
-          imageUrl: mediaData.value.coverImage ?? image,
+    final isDarkMode = Provider.of<ThemeProvider>(
+      context,
+      listen: false,
+    ).isDarkMode!;
+    return Stack(
+      children: [
+        Obx(
+          () => CachedNetworkImage(
+            height: 400,
+            width: MediaQuery.of(context).size.width,
+            fit: BoxFit.cover,
+            imageUrl: mediaData.value.coverImage ?? image,
+          ),
         ),
-      ),
-      BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: 5,
-          sigmaY: 5,
-        ),
-        child: AzyXContainer(
-          color: isDarkMode
-              ? Colors.black.withOpacity(0.3)
-              : Colors.white.withOpacity(0.2),
-        ),
-      ),
-      Positioned.fill(
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           child: AzyXContainer(
-        margin: const EdgeInsets.only(top: 270),
-        decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(50))),
-      )),
-      Positioned(
-          top: MediaQuery.of(context).padding.top + 10,
+            color: isDarkMode
+                ? Colors.black.withOpacity(0.3)
+                : Colors.white.withOpacity(0.2),
+          ),
+        ),
+        Positioned.fill(
+          child: AzyXContainer(
+            margin: const EdgeInsets.only(top: 270),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(50),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top:
+              MediaQuery.of(context).padding.top +
+              (Platform.isIOS || Platform.isAndroid ? 10 : 30),
           left: 10,
           child: Container(
             decoration: BoxDecoration(
@@ -61,8 +67,9 @@ class ScrollableAppBar extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: const CustomBackButton(),
-          )),
-      Positioned(
+          ),
+        ),
+        Positioned(
           top: 115,
           left: 0,
           right: 0,
@@ -73,10 +80,14 @@ class ScrollableAppBar extends StatelessWidget {
               child: Column(
                 children: [
                   AzyXContainer(
-                    decoration: BoxDecoration(boxShadow: [
-                      BoxShadow(
-                          color: Colors.black.withOpacity(0.6), blurRadius: 10)
-                    ]),
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.6),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
                     child: Hero(
                       tag: tagg,
                       child: ClipRRect(
@@ -90,13 +101,13 @@ class ScrollableAppBar extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
-          ))
-    ]);
+          ),
+        ),
+      ],
+    );
   }
 }

@@ -4,12 +4,14 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
+  bitsdojo_window_windows
   dartotsu_extension_bridge
   desktop_webview_window
   dynamic_color
+  flutter_acrylic
   flutter_inappwebview_windows
   flutter_qjs
-  isar_flutter_libs
+  isar_community_flutter_libs
   media_kit_libs_windows_video
   media_kit_video
   permission_handler_windows

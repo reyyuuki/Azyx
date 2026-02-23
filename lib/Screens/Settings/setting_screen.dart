@@ -1,13 +1,10 @@
-import 'package:azyx/Controllers/offline_controller.dart';
-import 'package:azyx/Controllers/services/mal_service.dart';
-import 'package:azyx/Controllers/services/simkl_service.dart';
+
 import 'package:azyx/Screens/Settings/Pages/theme_setting.dart';
 import 'package:azyx/Screens/Settings/Pages/ui_settings.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
-import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import '../../Widgets/common/custom_app_bar.dart';
 
@@ -136,14 +133,12 @@ class SettingScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                Utils.log(
-                  'aando: ${offlineController.offlineAnimeCategories.first.anilistIds.first}',
-                );
-              },
-              child: Text("Testing"),
-            ),
+            // ElevatedButton(
+            //   onPressed: () async {
+            //     AcrylicTestScreen().navigate(context);
+            //   },
+            //   child: Text("Testing"),
+            // ),
           ],
         ),
       ),

@@ -11,10 +11,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AzyXGradientContainer(
       child: BouncePageAnimation(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 20),
-          child: Obx(() => serviceHandler.homeWidgets(context).value),
-        ),
+        child: Obx(() => serviceHandler.homeWidgets(context).value),
       ),
     );
   }

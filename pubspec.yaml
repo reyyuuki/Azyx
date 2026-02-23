@@ -30,8 +30,8 @@ dependencies:
   # dart_eval: ^0.7.10
   dartotsu_extension_bridge:
     git:
-     url: https://github.com/RyanYuuki/DartotsuExtensionBridge.git
-     ref: master
+     url: https://github.com/aayush2622/DartotsuExtensionBridge.git
+     ref: 239ef59
   # isar_flutter_libs:
   #   git:
   #     url: https://github.com/MrLittleWhite/isar_flutter_libs.git
@@ -54,10 +54,14 @@ dependencies:
   #     ref: main
   # pseudom: ^1.0.1
   # intl: ^0.18.1
+  isar_community: ^3.3.0-dev.3
+  isar_community_flutter_libs: ^3.3.0-dev.3
+  isar_community_generator: ^3.3.0-dev.3
   icons_plus: ^5.0.0
   grouped_list: ^6.0.0
   volume_controller: ^3.4.0
   screen_brightness: ^2.1.5
+  path: ^1.9.0
   # encrypt: ^5.0.3
   cached_network_image: ^3.4.1
   flutter_dotenv: ^5.2.1
@@ -72,6 +76,9 @@ dependencies:
   manga_page_view: ^1.0.5
   lottie: ^3.3.1
   app_links: ^6.4.1
+  flutter_acrylic: ^1.1.4
+  bitsdojo_window: ^0.1.6
+  readmore: ^3.0.0
 
 dev_dependencies:
   flutter_test:
