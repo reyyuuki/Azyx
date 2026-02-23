@@ -1,8 +1,8 @@
 // ignore_for_file: deprecated_member_use, invalid_use_of_protected_member
 
 import 'dart:developer';
-import 'dart:ui';
 
+import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
@@ -11,7 +11,6 @@ import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Models/episode_class.dart';
 import 'package:azyx/Models/offline_item.dart';
-import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Models/user_anime.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/details_section.dart';
 import 'package:azyx/Screens/Manga/Details/tabs/read_section.dart';
@@ -19,8 +18,6 @@ import 'package:azyx/Screens/Manga/Details/tabs/widgets/manga_add_to_list.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/scrollable_app_bar.dart';
-import 'package:azyx/Widgets/helper/platform_builder.dart';
-import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/mapper.dart';
 import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:expandable_page_view/expandable_page_view.dart';
@@ -183,6 +180,8 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       bottomNavigationBar: Container(
@@ -210,203 +209,49 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
             ),
             if (sourceController.installedMangaExtensions.isNotEmpty)
               Container(
-                margin: EdgeInsets.fromLTRB(
-                  getResponsiveSize(
-                    context,
-                    mobileSize: 15,
-                    dektopSize: Get.width * 0.2,
-                  ),
-                  40,
-                  getResponsiveSize(
-                    context,
-                    mobileSize: 15,
-                    dektopSize: Get.width * 0.2,
-                  ),
-                  0,
-                ),
-                padding: const EdgeInsets.all(10),
+                margin: const EdgeInsets.fromLTRB(24, 32, 24, 16),
+                height: 52,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: Theme.of(context).brightness == Brightness.dark
-                        ? [
-                            Colors.white.withOpacity(0.08),
-                            Colors.white.withOpacity(0.03),
-                            Colors.white.withOpacity(0.12),
-                          ]
-                        : [Colors.white, Colors.white],
-                  ),
+                  color: colorScheme.surfaceContainerHighest.withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(26),
                   border: Border.all(
-                    width: 1,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white.withOpacity(0.15)
-                        : Colors.white.withOpacity(0.6),
+                    color: colorScheme.outlineVariant.withOpacity(0.3),
+                    width: 0.5,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.black.withOpacity(0.3)
-                          : Colors.grey.withOpacity(0.2),
-                      blurRadius: 20,
-                      spreadRadius: 0,
-                      offset: const Offset(0, 8),
-                    ),
-                    BoxShadow(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white.withOpacity(0.05)
-                          : Colors.white.withOpacity(0.8),
-                      blurRadius: 12,
-                      spreadRadius: -5,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(22),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Container(
-                      height: 56,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(22),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors:
-                              Theme.of(context).brightness == Brightness.dark
-                              ? [
-                                  Colors.white.withOpacity(0.05),
-                                  Colors.white.withOpacity(0.02),
-                                ]
-                              : [Colors.white, Colors.white],
-                        ),
+                child: TabBar(
+                  controller: _tabBarController,
+                  splashBorderRadius: BorderRadius.circular(26),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  dividerColor: Colors.transparent,
+                  indicatorPadding: const EdgeInsets.all(4),
+                  indicator: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
                       ),
-                      child: TabBar(
-                        controller: _tabBarController,
-                        splashBorderRadius: BorderRadius.circular(20),
-                        indicator: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.9),
-                              Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.7),
-                              Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.8),
-                            ],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.4),
-                              blurRadius: 12,
-                              spreadRadius: 0,
-                              offset: const Offset(0, 3),
-                            ),
-                            BoxShadow(
-                              color:
-                                  Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Colors.white.withOpacity(0.1)
-                                  : Colors.white.withOpacity(0.8),
-                              blurRadius: 8,
-                              spreadRadius: -2,
-                              offset: const Offset(0, -1),
-                            ),
-                          ],
-                        ),
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        dividerColor: Colors.transparent,
-                        tabs: [
-                          Tab(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Broken.information,
-                                    size: 20,
-                                    color: _currentIndex.value == 0
-                                        ? Colors.white
-                                        : Theme.of(context).brightness ==
-                                              Brightness.dark
-                                        ? Colors.white.withOpacity(0.7)
-                                        : Colors.black.withOpacity(0.7),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Details',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: "Poppins-Bold",
-                                      color: _currentIndex.value == 0
-                                          ? Colors.white
-                                          : Theme.of(context).brightness ==
-                                                Brightness.dark
-                                          ? Colors.white.withOpacity(0.7)
-                                          : Colors.black.withOpacity(0.7),
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Tab(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Broken.book,
-                                    size: 20,
-                                    color: _currentIndex.value == 1
-                                        ? Colors.white
-                                        : Theme.of(context).brightness ==
-                                              Brightness.dark
-                                        ? Colors.white.withOpacity(0.7)
-                                        : Colors.black.withOpacity(0.7),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Read',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: "Poppins-Bold",
-                                      color: _currentIndex.value == 1
-                                          ? Colors.white
-                                          : Theme.of(context).brightness ==
-                                                Brightness.dark
-                                          ? Colors.white.withOpacity(0.7)
-                                          : Colors.black.withOpacity(0.7),
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    ],
                   ),
+                  labelColor: colorScheme.primary,
+                  unselectedLabelColor: colorScheme.onSurfaceVariant,
+                  labelStyle: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    fontFamily: theme.textTheme.titleMedium?.fontFamily,
+                  ),
+                  unselectedLabelStyle: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    fontFamily: theme.textTheme.titleMedium?.fontFamily,
+                  ),
+                  tabs: const [
+                    Tab(text: "Overview"),
+                    Tab(text: "Chapters"),
+                  ],
                 ),
               ),
             const SizedBox(height: 20),

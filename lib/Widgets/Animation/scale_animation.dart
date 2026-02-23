@@ -36,21 +36,27 @@ class SlideAndScaleAnimationState extends State<SlideAndScaleAnimation>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(
-      begin: widget.initialScale,
-      end: widget.finalScale,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation =
+        Tween<double>(
+          begin: widget.initialScale,
+          end: widget.finalScale,
+        ).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeInOut,
+          ),
+        );
 
-    _slideAnimation = Tween<Offset>(
-      begin: widget.initialOffset,
-      end: widget.finalOffset,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _slideAnimation =
+        Tween<Offset>(
+          begin: widget.initialOffset,
+          end: widget.finalOffset,
+        ).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeInOut,
+          ),
+        );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -72,10 +78,7 @@ class SlideAndScaleAnimationState extends State<SlideAndScaleAnimation>
       builder: (context, child) {
         return SlideTransition(
           position: _slideAnimation,
-          child: ScaleTransition(
-            scale: _scaleAnimation,
-            child: widget.child,
-          ),
+          child: ScaleTransition(scale: _scaleAnimation, child: widget.child),
         );
       },
     );

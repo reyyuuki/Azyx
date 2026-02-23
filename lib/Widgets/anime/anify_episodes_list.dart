@@ -3,20 +3,16 @@
 import 'dart:developer';
 
 import 'package:azyx/Controllers/source/source_controller.dart';
+import 'package:azyx/Models/anime_all_data.dart';
 import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Models/episode_class.dart';
-import 'package:azyx/Models/anime_all_data.dart';
 import 'package:azyx/Screens/Anime/Watch/watch_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/anime/episode_bottom_sheet.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';
-import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dartotsu_extension_bridge/Models/DEpisode.dart';
-import 'package:dartotsu_extension_bridge/Models/Source.dart';
-import 'package:dartotsu_extension_bridge/Models/Video.dart';
 import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -27,6 +23,7 @@ class AnifyEpisodesWidget extends StatelessWidget {
   final String id;
   final String image;
   final AnilistMediaData data;
+
   AnifyEpisodesWidget({
     super.key,
     required this.title,
@@ -113,6 +110,8 @@ class AnifyEpisodesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Column(
       children: anifyEpisodes.map((entry) {
         return GestureDetector(
@@ -141,95 +140,131 @@ class AnifyEpisodesWidget extends StatelessWidget {
               fetchEpisodeLink(entry.url!, entry.number, entry.title!, context);
             }
           },
-          child: AzyXContainer(
-            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 14),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
+              color: colorScheme.surfaceContainer.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: colorScheme.outlineVariant.withOpacity(0.1),
+                width: 0.5,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.5),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
+                  color: Colors.black.withOpacity(0.06),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Stack(
-                  children: [
-                    SizedBox(
-                      height: 150,
-                      width: MediaQuery.of(context).size.width,
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(20),
-                        ),
-                        child: CachedNetworkImage(
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(18),
+                  ),
+                  child: SizedBox(
+                    height: 160,
+                    width: double.infinity,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        CachedNetworkImage(
                           imageUrl: entry.thumbnail ?? image,
                           fit: BoxFit.cover,
                           filterQuality: FilterQuality.high,
                           placeholder: (context, url) => ShimmerEffect(
-                            height: 150,
+                            height: 160,
                             width: MediaQuery.of(context).size.width,
                           ),
                         ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      child: AzyXContainer(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          borderRadius: const BorderRadius.only(
-                            bottomRight: Radius.circular(10),
-                            topLeft: Radius.circular(10),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Theme.of(context).colorScheme.primary
-                                  .withOpacity(1.glowMultiplier()),
-                              blurRadius: 10.blurMultiplier(),
-                              spreadRadius: 2.spreadMultiplier(),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.55),
+                              ],
+                              stops: const [0.4, 1.0],
                             ),
-                          ],
+                          ),
                         ),
-                        child: AzyXText(
-                          text: entry.number.toString(),
-                          fontVariant: FontVariant.bold,
-                          fontSize: 20,
-                          color: Theme.of(context).colorScheme.inversePrimary,
+                        Positioned(
+                          top: 10,
+                          left: 10,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary,
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colorScheme.primary.withOpacity(0.4),
+                                  blurRadius: 8,
+                                  spreadRadius: 0,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              'EP ${entry.number}',
+                              style: TextStyle(
+                                color: colorScheme.onPrimary,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-                AzyXContainer(
-                  padding: const EdgeInsets.all(10),
-                  width: Get.width,
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(20),
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.35),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.25),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.play_arrow_rounded,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       AzyXText(
-                        text: entry.title!,
+                        text: entry.title ?? 'Episode ${entry.number}',
                         fontVariant: FontVariant.bold,
-                        fontSize: 16,
-                        color: Theme.of(context).colorScheme.primary,
-                        textAlign: TextAlign.center,
+                        fontSize: 15,
+                        maxLines: 2,
+                        color: colorScheme.onSurface,
                       ),
-                      const SizedBox(height: 10),
-                      AzyXText(text: entry.desc, fontSize: 12, maxLines: 3),
+                      if (entry.desc.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        AzyXText(
+                          text: entry.desc,
+                          fontSize: 12,
+                          maxLines: 3,
+                          color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                        ),
+                      ],
                     ],
                   ),
                 ),

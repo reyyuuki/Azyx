@@ -1,15 +1,10 @@
-// ignore_for_file: inva, invalid_use_of_protected_member
 import 'dart:ui';
+
+import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
+import 'package:azyx/Controllers/offline_controller.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Models/anime_details_data.dart';
 import 'package:azyx/Models/offline_item.dart';
-import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
-import 'package:azyx/Controllers/offline_controller.dart';
-import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
-import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
-import 'package:azyx/core/icons/icons_broken.dart';
-import 'package:azyx/utils/Functions/multiplier_extension.dart';
-import 'package:azyx/utils/utils.dart';
 import 'package:checkmark/checkmark.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -28,300 +23,207 @@ class MangaAddToList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double opacity = (index != null)
-        ? (1.0 - index! * 0.1).clamp(0.0, 1.0)
-        : 1.0;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 1000),
-      opacity: opacity,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 1000),
-        margin: const EdgeInsets.fromLTRB(10, 0, 10, 20),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.4),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.0),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  serviceHandler.userData.value.name != null
-                      ? Expanded(
-                          child: GestureDetector(
-                            onTap: () =>
-                                anilistAddToListController.addToMangaListSheet(
-                                  context,
-                                  mediaData.image ?? '',
-                                  mediaData.title ?? 'Unknown',
-                                  mediaData.episodes ?? 24,
-                                ),
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.black,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(
-                                      1.glowMultiplier(),
-                                    ),
-                                    blurRadius: 10.blurMultiplier(),
-                                    spreadRadius: 2.spreadMultiplier(),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  serviceHandler.currentMedia.value.status ==
-                                          null
-                                      ? Icon(
-                                          Broken.add,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primary,
-                                          shadows: [
-                                            BoxShadow(
-                                              color: Theme.of(
-                                                context,
-                                              ).colorScheme.primary,
-                                              blurRadius: 10.blurMultiplier(),
-                                              spreadRadius: 2
-                                                  .spreadMultiplier(),
-                                            ),
-                                          ],
-                                        )
-                                      : const SizedBox(),
-                                  const SizedBox(width: 5),
-                                  Obx(
-                                    () => AzyXText(
-                                      text:
-                                          serviceHandler
-                                                  .currentMedia
-                                                  .value
-                                                  .status ==
-                                              null
-                                          ? "Add to list"
-                                          : serviceHandler
-                                                .currentMedia
-                                                .value
-                                                .status!,
-                                      fontVariant: FontVariant.bold,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        )
-                      : const SizedBox.shrink(),
-                  const SizedBox(width: 10),
-                  GestureDetector(
-                    onTap: () {
-                      Utils.log('aajTak: ${data.mediaData.id}');
-                      addToLibrary(context);
-                    },
-                    child: serviceHandler.userData.value.name == null
-                        ? libraryButton(context, width: Get.width - 50)
-                        : libraryButton(context),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Container libraryButton(BuildContext context, {double? width}) {
     return Container(
-      width: width,
-      padding: const EdgeInsets.all(10),
+      margin: const EdgeInsets.only(bottom: 25, left: 20, right: 20),
+      height: 70,
       decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(50),
+        color: const Color(0xFF121212).withOpacity(0.9),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.1),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(1.glowMultiplier()),
-            blurRadius: 10.blurMultiplier(),
-            spreadRadius: 2.spreadMultiplier(),
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 20,
+            spreadRadius: 0,
+            offset: const Offset(0, 10),
           ),
-        ],
-      ),
-      child: Icon(
-        IonIcons.albums,
-        color: Theme.of(context).colorScheme.primary,
-        shadows: [
           BoxShadow(
-            color: Theme.of(
-              context,
-            ).colorScheme.primary.withOpacity(1.glowMultiplier()),
-            blurRadius: 10.blurMultiplier(),
-            spreadRadius: 2.spreadMultiplier(),
+            color: colorScheme.primary.withOpacity(0.1),
+            blurRadius: 15,
+            spreadRadius: -5,
+            offset: const Offset(0, 0),
           ),
         ],
       ),
-    );
-  }
-
-  Row addButtonText(BuildContext context, String title) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          Broken.add,
-          color: Theme.of(context).colorScheme.primary,
-          shadows: [
-            BoxShadow(
-              color: Theme.of(context).colorScheme.primary,
-              blurRadius: 10.blurMultiplier(),
-              spreadRadius: 2.spreadMultiplier(),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: Row(
+              children: [
+                if (serviceHandler.userData.value.name != null)
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        anilistAddToListController.addToMangaListSheet(
+                          context,
+                          mediaData.image ?? '',
+                          mediaData.title ?? 'Unknown',
+                          mediaData.episodes ?? 24,
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary,
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: colorScheme.primary.withOpacity(0.4),
+                              blurRadius: 12,
+                              spreadRadius: 0,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        alignment: Alignment.center,
+                        child: Obx(
+                          () => Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (serviceHandler.currentMedia.value.status ==
+                                  null)
+                                Icon(
+                                  Icons.add_rounded,
+                                  color: colorScheme.onPrimary,
+                                  size: 22,
+                                ),
+                              if (serviceHandler.currentMedia.value.status ==
+                                  null)
+                                const SizedBox(width: 8),
+                              Text(
+                                (serviceHandler.currentMedia.value.status ??
+                                        "Add to List")
+                                    .toUpperCase(),
+                                style: TextStyle(
+                                  color: colorScheme.onPrimary,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.5,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                const SizedBox(width: 10),
+                GestureDetector(
+                  onTap: () => addToLibrary(context),
+                  child: Container(
+                    width: 54,
+                    height: 54,
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Icon(
+                      IonIcons.albums,
+                      color: colorScheme.onSurfaceVariant,
+                      size: 22,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        const SizedBox(width: 5),
-        Text(
-          title,
-          style: TextStyle(
-            fontFamily: "Poppins-Bold",
-            color: Theme.of(context).colorScheme.primary,
           ),
         ),
-      ],
+      ),
     );
   }
 
   void addToLibrary(BuildContext context) {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
+      backgroundColor: theme.colorScheme.surface,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
       builder: (context) {
-        return AzyXGradientContainer(
-          padding: const EdgeInsets.all(10),
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
           child: ListView(
+            shrinkWrap: true,
             children: [
-              AzyXText(
-                text: "Set Categories",
-                textAlign: TextAlign.center,
-                fontVariant: FontVariant.bold,
-                fontSize: 20,
-                color: Theme.of(context).colorScheme.primary,
+              Text(
+                "LIBRARY COLLECTIONS",
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 2.0,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Obx(
+                () => Column(
+                  children: offlineController.offlineMangaCategories.map((i) {
+                    final Rx<bool> isSelected = i.anilistIds
+                        .contains(data.mediaData.id)
+                        .obs;
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainer,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: ListTile(
+                        onTap: () {
+                          isSelected.value = !isSelected.value;
+                          isSelected.value
+                              ? offlineController.addMangaOfflineItem(
+                                  data,
+                                  i.name!,
+                                )
+                              : offlineController.removeMangaOfflineItem(
+                                  data,
+                                  i.name!,
+                                );
+                        },
+                        leading: Icon(
+                          EvaIcons.folder,
+                          color: theme.colorScheme.primary,
+                        ),
+                        title: Text(
+                          i.name!,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        trailing: Obx(
+                          () => SizedBox(
+                            width: 20,
+                            child: CheckMark(
+                              active: isSelected.value,
+                              activeColor: theme.colorScheme.primary,
+                              strokeWidth: 3,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
               ),
               const SizedBox(height: 10),
-              Obx(
-                () => offlineController.offlineMangaCategories.value.isEmpty
-                    ? const SizedBox.shrink()
-                    : Column(
-                        children: offlineController.offlineMangaCategories.map((
-                          i,
-                        ) {
-                          final Rx<bool> isSelected = i.anilistIds
-                              .contains(data.mediaData.id)
-                              .obs;
-                          return Container(
-                            padding: const EdgeInsets.all(10),
-                            margin: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.surfaceContainerLowest,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerLowest
-                                      .withOpacity(1.glowMultiplier()),
-                                  blurRadius: 10.blurMultiplier(),
-                                  spreadRadius: 2.spreadMultiplier(),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                AzyXText(
-                                  text: i.name!,
-                                  fontVariant: FontVariant.bold,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    Utils.log('aajTak: ${data.mediaData.id}');
-                                    isSelected.value = !isSelected.value;
-                                    isSelected.value
-                                        ? offlineController.addMangaOfflineItem(
-                                            data,
-                                            i.name!,
-                                          )
-                                        : offlineController
-                                              .removeMangaOfflineItem(
-                                                data,
-                                                i.name!,
-                                              );
-                                  },
-                                  child: SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: Obx(
-                                      () => CheckMark(
-                                        strokeWidth: 2,
-                                        activeColor: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
-                                        inactiveColor: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
-                                        duration: const Duration(
-                                          milliseconds: 400,
-                                        ),
-                                        active: isSelected.value,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                      ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  dialogBox(context);
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  margin: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerLowest,
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerLowest
-                            .withOpacity(1.glowMultiplier()),
-                        blurRadius: 10.blurMultiplier(),
-                        spreadRadius: 2.spreadMultiplier(),
-                      ),
-                    ],
-                  ),
-                  child: addButtonText(context, "Create new category"),
+              ListTile(
+                onTap: () => dialogBox(context),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(color: theme.colorScheme.outline, width: 1),
+                ),
+                leading: const Icon(EvaIcons.plus_circle),
+                title: const Text(
+                  "CREATE NEW COLLECTION",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                 ),
               ),
             ],
@@ -332,100 +234,48 @@ class MangaAddToList extends StatelessWidget {
   }
 
   void dialogBox(BuildContext context) {
+    final controller = TextEditingController();
     showDialog(
       context: context,
-      builder: (context) {
-        TextEditingController textEditingController = TextEditingController();
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 10,
-          backgroundColor: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  blurRadius: 10.blurMultiplier(),
-                  spreadRadius: 2.spreadMultiplier(),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Add New Category",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontFamily: "Poppins-Bold",
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                TextField(
-                  controller: textEditingController,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    labelText: "Enter something...",
-                    hintText: 'Enter something...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 15,
-                      vertical: 10,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        offlineController.createMangaCategory(
-                          textEditingController.text,
-                        );
-                        Navigator.of(context).pop(textEditingController.text);
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: const Text('OK'),
-                    ),
-                  ],
-                ),
-              ],
+      builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+        title: const Text(
+          "New Collection",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+          decoration: const InputDecoration(
+            hintText: "Collection Name",
+            filled: true,
+            border: OutlineInputBorder(
+              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.all(Radius.circular(12)),
             ),
           ),
-        );
-      },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              "CANCEL",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          FilledButton(
+            onPressed: () {
+              offlineController.createMangaCategory(controller.text);
+              Navigator.pop(context);
+            },
+            child: const Text(
+              "CREATE",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

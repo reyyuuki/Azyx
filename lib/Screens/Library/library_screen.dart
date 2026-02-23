@@ -1,16 +1,14 @@
+import 'dart:io';
+
 import 'package:azyx/Controllers/offline_controller.dart';
-import 'package:azyx/Functions/string_extensions.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
 import 'package:azyx/Screens/Library/widgets/grid_list.dart';
 import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
 import 'package:azyx/Widgets/Animation/drop_animation.dart';
-import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
-import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/main.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
-import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionicons/ionicons.dart';
@@ -102,8 +100,10 @@ class _FavoriteScreenState extends State<LibraryScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Aesthetic Header with integrated design
               Container(
+                padding: EdgeInsets.only(
+                  top: Platform.isAndroid || Platform.isIOS ? 0 : 10,
+                ),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,

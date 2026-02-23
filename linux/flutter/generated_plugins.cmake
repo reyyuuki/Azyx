@@ -3,12 +3,14 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  bitsdojo_window_linux
   dartotsu_extension_bridge
   desktop_webview_window
   dynamic_color
+  flutter_acrylic
   flutter_qjs
   gtk
-  isar_flutter_libs
+  isar_community_flutter_libs
   media_kit_libs_linux
   media_kit_video
   url_launcher_linux
