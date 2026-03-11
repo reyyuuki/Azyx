@@ -168,7 +168,7 @@ class MangaAddToList extends StatelessWidget {
               Obx(
                 () => Column(
                   children: offlineController.offlineMangaCategories.map((i) {
-                    final Rx<bool> isSelected = i.anilistIds
+                    final Rx<bool> isSelected = i.anilistIds!
                         .contains(data.mediaData.id)
                         .obs;
                     return Container(

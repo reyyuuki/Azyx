@@ -476,7 +476,7 @@ class _FavoriteScreenState extends State<LibraryScreen>
                                           final data = offlineController
                                               .offlineAnimeList
                                               .where((item) {
-                                                return i.anilistIds.contains(
+                                                return i.anilistIds!.contains(
                                                   item.mediaData.id,
                                                 );
                                               })
@@ -513,7 +513,7 @@ class _FavoriteScreenState extends State<LibraryScreen>
                                           final data = offlineController
                                               .offlineMangaList
                                               .where((item) {
-                                                return i.anilistIds.contains(
+                                                return i.anilistIds!.contains(
                                                   item.mediaData.id,
                                                 );
                                               })

@@ -13,8 +13,7 @@ import 'package:azyx/Controllers/services/simkl_service.dart';
 import 'package:azyx/Controllers/settings_controller.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Controllers/ui_setting_controller.dart';
-import 'package:azyx/HiveClass/theme_data.dart';
-import 'package:azyx/HiveClass/ui_setting_class.dart';
+import 'package:azyx/Database/database.dart';
 import 'package:azyx/Providers/theme_provider.dart';
 import 'package:azyx/Screens/Anime/anime_screen.dart';
 import 'package:azyx/Screens/Home/home_screen.dart';
@@ -33,8 +32,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:isar_community/isar.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:provider/provider.dart';
+
+late Isar isar;
 
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   @override
@@ -59,14 +61,9 @@ void main(List<String> args) async {
       );
       deepLink();
       MediaKit.ensureInitialized();
+      await Database().init();
       await Hive.initFlutter();
-      Hive.registerAdapter(ThemeClassAdapter());
-      Hive.registerAdapter(UiSettingClassAdapter());
-      await Hive.openBox('theme-data');
-      await Hive.openBox('app-data');
-      await Hive.openBox('ui-settings');
       await Hive.openBox("offline-data");
-      await Hive.openBox("auth");
       await dotenv.load(fileName: ".env");
       initializeDateFormatting();
       Get.put(UpdateNotifier());

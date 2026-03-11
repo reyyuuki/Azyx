@@ -1,9 +1,8 @@
-import 'package:azyx/HiveClass/theme_data.dart';
+import 'package:azyx/Database/keys/data_keys.dart';
+import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Providers/theme.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 class ThemeProvider with ChangeNotifier {
   late ThemeData _themeData;
@@ -13,7 +12,6 @@ class ThemeProvider with ChangeNotifier {
   Color? _seedColor;
   bool? _isMaterial;
   String? _colorName;
-  ThemeClass theme = ThemeClass();
 
   DynamicSchemeVariant palette = DynamicSchemeVariant.tonalSpot;
 
@@ -26,13 +24,11 @@ class ThemeProvider with ChangeNotifier {
   bool? get isLightMode => _isLightMode;
 
   ThemeProvider() {
-    var box = Hive.box('theme-data');
-    theme = box.get('themeClass', defaultValue: ThemeClass());
-    _isMaterial = theme.isMaterial;
-    _isLightMode = theme.isLightMode;
-    _isDarkMode = theme.isDarkMode;
-    _variant = theme.varient;
-    _colorName = theme.seedColor;
+    _isMaterial = ThemeKeys.isMaterial.get<bool>(true);
+    _isLightMode = ThemeKeys.isLightMode.get<bool>(false);
+    _isDarkMode = ThemeKeys.isDarkMode.get<bool>(true);
+    _variant = ThemeKeys.varient.get<String>("TonalSpot");
+    _colorName = ThemeKeys.seedColor.get<String>("Purple");
     setPaletteColor(_variant!);
     if (_isMaterial!) {
       loadDynamicColors();
@@ -43,12 +39,11 @@ class ThemeProvider with ChangeNotifier {
   }
 
   void updateBox() {
-    theme.isDarkMode = _isDarkMode;
-    theme.seedColor = _colorName;
-    theme.varient = _variant;
-    theme.isLightMode = _isLightMode;
-    theme.isMaterial = _isMaterial;
-    Hive.box('theme-data').put("themeClass", theme);
+    ThemeKeys.isDarkMode.set(_isDarkMode);
+    ThemeKeys.seedColor.set(_colorName);
+    ThemeKeys.varient.set(_variant);
+    ThemeKeys.isLightMode.set(_isLightMode);
+    ThemeKeys.isMaterial.set(_isMaterial);
   }
 
   // void resetSettings() {

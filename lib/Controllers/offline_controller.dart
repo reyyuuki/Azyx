@@ -1,9 +1,12 @@
 import 'dart:developer';
+
+import 'package:azyx/Database/isar_models/category.dart';
 import 'package:azyx/Functions/string_extensions.dart';
 import 'package:azyx/Models/offline_item.dart';
+import 'package:azyx/main.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import '../Models/category_class.dart';
+import 'package:isar_community/isar.dart';
 
 final OfflineController offlineController = Get.find();
 
@@ -17,6 +20,10 @@ class OfflineController extends GetxController {
   void onInit() {
     super.onInit();
     loadOfflineData();
+  }
+
+  Stream<List<Category>> getAnimeCategories() {
+    return isar.categorys.where().watch(fireImmediately: true);
   }
 
   void addOfflineItem(OfflineItem data, String categoryName) {
@@ -149,7 +156,7 @@ class OfflineController extends GetxController {
       (i) => i.name == categoryName,
     );
     if (index != -1) {
-      offlineAnimeCategories[index].anilistIds.add(mediaId);
+      offlineAnimeCategories[index].anilistIds?.add(mediaId);
       log(
         "Added to category '${offlineAnimeCategories[index].name}': $mediaId",
       );
@@ -164,7 +171,7 @@ class OfflineController extends GetxController {
       (i) => i.name == categoryName,
     );
     if (index != -1) {
-      offlineMangaCategories[index].anilistIds.add(mediaId);
+      offlineMangaCategories[index].anilistIds?.add(mediaId);
       log(
         "Added to category '${offlineMangaCategories[index].name}': $mediaId",
       );
@@ -179,7 +186,7 @@ class OfflineController extends GetxController {
       (i) => i.name == categoryName,
     );
     if (index != -1) {
-      offlineAnimeCategories[index].anilistIds.remove(mediaId);
+      offlineAnimeCategories[index].anilistIds?.remove(mediaId);
       log(
         "Removed from category '${offlineAnimeCategories[index].name}': $mediaId",
       );
@@ -194,7 +201,7 @@ class OfflineController extends GetxController {
       (i) => i.name == categoryName,
     );
     if (index != -1) {
-      offlineMangaCategories[index].anilistIds.remove(mediaId);
+      offlineMangaCategories[index].anilistIds?.remove(mediaId);
       log(
         "Removed from category '${offlineMangaCategories[index].name}': $mediaId",
       );

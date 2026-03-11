@@ -7,6 +7,8 @@ import 'dart:math' as show;
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/models/online_service.dart';
+import 'package:azyx/Database/keys/data_keys.dart';
+import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Models/anilist_user_data.dart';
 import 'package:azyx/Models/anime_class.dart';
 import 'package:azyx/Models/anime_details_data.dart';
@@ -26,14 +28,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
 import 'package:http/http.dart';
 
 final MalService malService = Get.find<MalService>();
 
 class MalService extends GetxController implements BaseService, OnlineService {
-  final storage = Hive.box('auth');
-
   // Anime
   RxList<Anime> spotlight = RxList();
   RxList<Anime> popular = RxList();
@@ -55,10 +54,10 @@ class MalService extends GetxController implements BaseService, OnlineService {
   @override
   Future<void> autoLogin() async {
     try {
-      final token = await storage.get('mal_auth_token');
-      final refreshToken = await storage.get('mal_refresh_token');
+      final token = AuthKeys.malAuthToken.get<String>('');
+      final refreshToken = AuthKeys.malRefreshToken.get<String>('');
 
-      if (token != null) {
+      if (token.isNotEmpty) {
         final isValid = await _validateToken(token);
         if (isValid) {
           log(
@@ -69,7 +68,7 @@ class MalService extends GetxController implements BaseService, OnlineService {
         }
       }
 
-      if (refreshToken != null) {
+      if (refreshToken.isNotEmpty) {
         await _refreshTokenWithMAL(refreshToken);
       } else {
         log("No valid tokens found. User needs to log in again.");
@@ -113,9 +112,9 @@ class MalService extends GetxController implements BaseService, OnlineService {
       final newToken = data['access_token'];
       final newRefreshToken = data['refresh_token'];
 
-      await storage.put('mal_auth_token', newToken);
+      AuthKeys.malAuthToken.set(newToken);
       if (newRefreshToken != null) {
-        await storage.put('mal_refresh_token', newRefreshToken);
+        AuthKeys.malRefreshToken.set(newRefreshToken);
       }
 
       log("Token refreshed successfully.");
@@ -177,9 +176,9 @@ class MalService extends GetxController implements BaseService, OnlineService {
       final token = data['access_token'];
       final refreshToken = data['refresh_token'];
 
-      await storage.put('mal_auth_token', token);
+      AuthKeys.malAuthToken.set(token);
       if (refreshToken != null) {
-        await storage.put('mal_refresh_token', refreshToken);
+        AuthKeys.malRefreshToken.set(refreshToken);
       }
 
       log("MAL Access token: $token");
@@ -203,7 +202,7 @@ class MalService extends GetxController implements BaseService, OnlineService {
       if (clientId == null || clientId.isEmpty) {
         throw Exception('MAL_CLIENT_ID is not set in .env file.');
       }
-      final tokenn = token ?? await storage.get('mal_auth_token');
+      final tokenn = token ?? AuthKeys.malAuthToken.get<String>('');
       final response = await get(
         Uri.parse(url),
         headers: useAuthHeader
@@ -422,8 +421,8 @@ class MalService extends GetxController implements BaseService, OnlineService {
 
   @override
   Future<void> logout() async {
-    await storage.put("mal_auth_token", '');
-    await storage.put('mal_refresh_token', '');
+    AuthKeys.malAuthToken.set('');
+    AuthKeys.malRefreshToken.set('');
     userData.value = User();
     isLoggedIn.value = false;
     userAnimeList.value.clear();
@@ -494,7 +493,7 @@ class MalService extends GetxController implements BaseService, OnlineService {
     final score = params.score;
     final status = params.status;
     final progress = params.progress;
-    final token = await storage.get('mal_auth_token');
+    final token = AuthKeys.malAuthToken.get<String>('');
     Utils.log(status ?? '');
     final url = Uri.parse(
       'https://api.myanimelist.net/v2/${isAnime ? 'anime' : 'manga'}/$listId/my_list_status',
@@ -550,7 +549,7 @@ class MalService extends GetxController implements BaseService, OnlineService {
 
   @override
   Future<void> deleteEntry(String listId, {bool isAnime = true}) async {
-    final token = await storage.get('mal_auth_token');
+    final token = AuthKeys.malAuthToken.get<String>('');
 
     final url = Uri.parse(
       'https://api.myanimelist.net/v2/${isAnime ? 'anime' : 'manga'}/$listId/my_list_status',
@@ -615,7 +614,7 @@ class MalService extends GetxController implements BaseService, OnlineService {
   }
 
   Future<void> fetchUserInfo({String? token}) async {
-    final tokenn = token ?? storage.get('mal_auth_token');
+    final tokenn = token ?? AuthKeys.malAuthToken.get<String>('');
     final data = await fetchMAL(
       'https://api.myanimelist.net/v2/users/@me',
       auth: true,

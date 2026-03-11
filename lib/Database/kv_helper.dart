@@ -5,6 +5,12 @@ import 'package:azyx/Database/isar_models/key_value.dart';
 import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:isar_community/isar.dart';
 
+extension KvpExtension on Enum {
+  T get<T>(T defaultValue) => KvHelper.get<T>(name, defaultValue);
+  void set<T>(T value) => KvHelper.set<T>(name, value);
+  void remove() => KvHelper.remove(name);
+}
+
 class KvHelper {
   static T get<T>(String key, T defaultValue) {
     final col = isar.collection<KeyValue>();
@@ -39,7 +45,7 @@ class KvHelper {
     final data = KeyValue()
       ..key = key
       ..value = jsonEncode({'val': value});
-    isar.writeTxnSync(() => isar.collection<KeyValue>().put(data));
+    isar.writeTxnSync(() => isar.collection<KeyValue>().putSync(data));
   }
 
   static void remove(String key) {

@@ -205,7 +205,7 @@ class AddToListFloater extends StatelessWidget {
 
                       final category =
                           offlineController.offlineAnimeCategories[index];
-                      final isSelected = category.anilistIds
+                      final isSelected = category.anilistIds!
                           .contains(data.mediaData.id)
                           .obs;
 

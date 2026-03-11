@@ -1,6 +1,7 @@
+import 'package:azyx/Database/keys/data_keys.dart';
+import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
 
 final SettingsController settingsController = Get.find();
 
@@ -14,13 +15,12 @@ class SettingsController extends GetxController {
   }
 
   void loadSettings() {
-    final box = Hive.box("app-data");
-    isGradient.value = box.get("gradient", defaultValue: true);
+    isGradient.value = AppKeys.gradient.get<bool>(true);
   }
 
   void gradientToggler(bool value) {
     isGradient.value = value;
     Utils.log(value.toString());
-    Hive.box('app-data').put("gradient", isGradient.value);
+    AppKeys.gradient.set(value);
   }
 }

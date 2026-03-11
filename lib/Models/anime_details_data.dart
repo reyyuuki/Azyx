@@ -4,7 +4,6 @@ import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_mapper.dart';
 import 'package:azyx/Models/anime_class.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
-import 'package:azyx/utils/utils.dart';
 
 class AnilistMediaData {
   String? id;

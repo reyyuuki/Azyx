@@ -1,6 +1,4 @@
 import 'package:azyx/utils/time_formater.dart';
-import 'package:dartotsu_extension_bridge/Mangayomi/Eval/dart/model/m_chapter.dart';
-import 'package:dartotsu_extension_bridge/Mangayomi/Eval/dart/model/m_manga.dart';
 import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:intl/intl.dart';
 

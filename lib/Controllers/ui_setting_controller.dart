@@ -1,11 +1,14 @@
-import 'package:azyx/HiveClass/ui_setting_class.dart';
+import 'package:azyx/Database/keys/data_keys.dart';
+import 'package:azyx/Database/kv_helper.dart';
 import 'package:get/get.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 final UiSettingController uiSettingController = Get.find();
 
 class UiSettingController extends GetxController {
-  Rx<UiSettingClass> uiSettings = UiSettingClass().obs;
+  final _glowMultiplier = 0.6.obs;
+  final _blurMultiplier = 1.0.obs;
+  final _radiusMultiplier = 1.0.obs;
+  final _spreadMultiplier = 1.0.obs;
   @override
   void onInit() {
     super.onInit();
@@ -13,44 +16,33 @@ class UiSettingController extends GetxController {
   }
 
   void _loadInitialSettings() {
-    final box = Hive.box('ui-settings');
-    uiSettings.value = box.get("settings", defaultValue: UiSettingClass());
+    _glowMultiplier.value = UiKeys.glowMultiplier.get<double>(0.6);
+    _blurMultiplier.value = UiKeys.blurMultiplier.get<double>(1.0);
+    _radiusMultiplier.value = UiKeys.radiusMultiplier.get<double>(1.0);
+    _spreadMultiplier.value = UiKeys.spreadMultiplier.get<double>(1.0);
   }
 
-  double get glowMultiplier => uiSettings.value.glowMultiplier!;
+  double get glowMultiplier => _glowMultiplier.value;
   set glowMultiplier(double value) {
-    uiSettings.update((settings) {
-      settings?.glowMultiplier = value;
-    });
-    updateBox();
+    _glowMultiplier.value = value;
+    UiKeys.glowMultiplier.set(value);
   }
 
-  double get radiusMultiplier => uiSettings.value.radiusMultiplier!;
+  double get radiusMultiplier => _radiusMultiplier.value;
   set radiusMultiplier(double value) {
-    uiSettings.update((settings) {
-      settings?.radiusMultiplier = value;
-    });
-    updateBox();
+    _radiusMultiplier.value = value;
+    UiKeys.radiusMultiplier.set(value);
   }
 
-  double get blurMultiplier => uiSettings.value.blurMultiplier!;
+  double get blurMultiplier => _blurMultiplier.value;
   set blurMultiplier(double value) {
-    uiSettings.update((settings) {
-      settings?.blurMultiplier = value;
-    });
-    updateBox();
+    _blurMultiplier.value = value;
+    UiKeys.blurMultiplier.set(value);
   }
 
-  double get spreadMultiplier => uiSettings.value.spreadMultiplier!;
+  double get spreadMultiplier => _spreadMultiplier.value;
   set spreadMultiplier(double value) {
-    uiSettings.update((settings) {
-      settings?.spreadMultiplier = value;
-    });
-    updateBox();
-  }
-
-  void updateBox() {
-    final box = Hive.box('ui-settings');
-    box.put("settings", uiSettings.value);
+    _spreadMultiplier.value = value;
+    UiKeys.spreadMultiplier.set(value);
   }
 }

@@ -3,6 +3,8 @@ import 'package:azyx/Controllers/services/mal_service.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/models/online_service.dart';
 import 'package:azyx/Controllers/services/simkl_service.dart';
+import 'package:azyx/Database/keys/data_keys.dart';
+import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Models/anilist_user_data.dart';
 import 'package:azyx/Models/anime_class.dart';
 import 'package:azyx/Models/anime_details_data.dart';
@@ -10,7 +12,6 @@ import 'package:azyx/Models/params.dart';
 import 'package:azyx/Models/user_anime.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
 
 enum ServicesType { anilist, mal, simkl }
 
@@ -81,9 +82,7 @@ class ServiceHandler extends GetxController {
   }
 
   Future<void> _initServices() async {
-    final box = Hive.box('auth');
-    serviceType.value =
-        ServicesType.values[box.get("serviceType", defaultValue: 0)];
+    serviceType.value = ServicesType.values[AuthKeys.serviceType.get<int>(0)];
     await fetchHomePage();
     await autoLogin();
   }
@@ -98,8 +97,7 @@ class ServiceHandler extends GetxController {
       service.fetchsearchData(params);
 
   void changeService(ServicesType type) {
-    final box = Hive.box('auth');
-    box.put("serviceType", type.index);
+    AuthKeys.serviceType.set(type.index);
     serviceType.value = type;
     fetchHomePage();
   }

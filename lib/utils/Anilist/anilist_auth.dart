@@ -2,10 +2,12 @@
 
 import 'dart:convert';
 import 'dart:developer';
+
+import 'package:azyx/Database/keys/data_keys.dart';
+import 'package:azyx/Database/kv_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
 class AniListProvider with ChangeNotifier {
@@ -24,8 +26,8 @@ class AniListProvider with ChangeNotifier {
   Future<void> tryAutoLogin() async {
     _anilistData = await fetchAnilistAnimes();
     _mangalistData = await fetchAnilistManga();
-    final token = await Hive.box("app-data").get("auth_token");
-    if (token != null) {
+    final token = AuthKeys.anilistToken.get<String>('');
+    if (token.isNotEmpty) {
       await fetchUserProfile();
       await fetchUserAnimeList();
       await fetchUserMangaList();
@@ -52,20 +54,28 @@ class AniListProvider with ChangeNotifier {
       final code = Uri.parse(result).queryParameters['code'];
       if (code != null) {
         await _exchangeCodeForToken(
-            code, clientId, clientSecret, redirectUri, context);
+          code,
+          clientId,
+          clientSecret,
+          redirectUri,
+          context,
+        );
       }
     } catch (e) {
       log('Error during login: $e');
     }
   }
 
-  Future<void> _exchangeCodeForToken(String code, String clientId,
-      String clientSecret, String redirectUri, BuildContext context) async {
+  Future<void> _exchangeCodeForToken(
+    String code,
+    String clientId,
+    String clientSecret,
+    String redirectUri,
+    BuildContext context,
+  ) async {
     final response = await http.post(
       Uri.parse('https://anilist.co/api/v2/oauth/token'),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body: {
         'grant_type': 'authorization_code',
         'client_id': clientId,
@@ -78,7 +88,7 @@ class AniListProvider with ChangeNotifier {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final token = data['access_token'];
-      Hive.box('app-data').put("auth_token",token);
+      AuthKeys.anilistToken.set(token);
       log(token);
       await fetchUserProfile();
     } else {
@@ -90,8 +100,8 @@ class AniListProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final token = await Hive.box("app-data").get("auth_token");
-    if (token == null) {
+    final token = AuthKeys.anilistToken.get<String>('');
+    if (token.isEmpty) {
       _isLoading = false;
       notifyListeners();
       return;
@@ -145,8 +155,8 @@ class AniListProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final token = await Hive.box("app-data").get("auth_token");
-    if (token == null) {
+    final token = AuthKeys.anilistToken.get<String>('');
+    if (token.isEmpty) {
       _isLoading = false;
       notifyListeners();
       return;
@@ -202,9 +212,7 @@ class AniListProvider with ChangeNotifier {
         },
         body: json.encode({
           'query': query,
-          'variables': {
-            'userId': userId,
-          },
+          'variables': {'userId': userId},
         }),
       );
 
@@ -214,8 +222,9 @@ class AniListProvider with ChangeNotifier {
             data['data']['MediaListCollection'] != null) {
           final lists =
               data['data']['MediaListCollection']['lists'] as List<dynamic>;
-          _userData['animeList'] =
-              lists.expand((list) => list['entries'] as List<dynamic>).toList();
+          _userData['animeList'] = lists
+              .expand((list) => list['entries'] as List<dynamic>)
+              .toList();
         } else {
           log('Unexpected response structure: ${response.body}');
         }
@@ -235,8 +244,8 @@ class AniListProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final token = await Hive.box("app-data").get("auth_token");
-    if (token == null) {
+    final token = AuthKeys.anilistToken.get<String>('');
+    if (token.isEmpty) {
       _isLoading = false;
       notifyListeners();
       return;
@@ -293,9 +302,7 @@ class AniListProvider with ChangeNotifier {
         },
         body: json.encode({
           'query': query,
-          'variables': {
-            'userId': userId,
-          },
+          'variables': {'userId': userId},
         }),
       );
 
@@ -305,8 +312,9 @@ class AniListProvider with ChangeNotifier {
             data['data']['MediaListCollection'] != null) {
           final lists =
               data['data']['MediaListCollection']['lists'] as List<dynamic>;
-          _userData['mangaList'] =
-              lists.expand((list) => list['entries'] as List<dynamic>).toList();
+          _userData['mangaList'] = lists
+              .expand((list) => list['entries'] as List<dynamic>)
+              .toList();
         } else {
           log('Unexpected response structure: ${response.body}');
         }
@@ -322,7 +330,7 @@ class AniListProvider with ChangeNotifier {
   }
 
   Future<void> logout(BuildContext context) async {
-    await Hive.box("app-data").put("auth_token",'');
+    AuthKeys.anilistToken.set('');
     _userData = {};
     notifyListeners();
   }
@@ -333,7 +341,7 @@ class AniListProvider with ChangeNotifier {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
-   String query = r'''
+    String query = r'''
   query {
     trending: Page {
       media(type: ANIME, sort: TRENDING_DESC) {
@@ -444,87 +452,91 @@ class AniListProvider with ChangeNotifier {
       // Extract sections into a map
       Map<String, List<Map<String, dynamic>>> sections = {
         'trending': (data['data']['trending']['media'] as List)
-            .map((anime) => {
-                  'id': anime['id'].toString(),
-                  'title': {
-                    'english': anime['title']['english'] ?? "Unknown Title",
-                    'romaji': anime['title']['romaji'] ?? "Unknown Title",
-                    'native': anime['title']['native'] ?? "Unknown Title",
-                  },
-                  'bannerImage': anime['bannerImage'],
-                  'episodes':
-                      anime['episodes']?.toString() ?? 'Unknown episodes',
-                  'coverImage': {'large': anime['coverImage']['large']},
-                  'studio': (anime['studios']['nodes'] as List).isNotEmpty
-                      ? anime['studios']['nodes'][0]['name']
-                      : 'Unknown studio',
-                  'genres': (anime['genres'] as List).join(', '),
-                  'averageScore': anime['averageScore'],
-                  'type': anime['format'] ?? 'Unknown format',
-                  'status': anime['status'] ?? 'Unknown status',
-                  'description':
-                      anime['description'] ?? 'No description available'
-                })
+            .map(
+              (anime) => {
+                'id': anime['id'].toString(),
+                'title': {
+                  'english': anime['title']['english'] ?? "Unknown Title",
+                  'romaji': anime['title']['romaji'] ?? "Unknown Title",
+                  'native': anime['title']['native'] ?? "Unknown Title",
+                },
+                'bannerImage': anime['bannerImage'],
+                'episodes': anime['episodes']?.toString() ?? 'Unknown episodes',
+                'coverImage': {'large': anime['coverImage']['large']},
+                'studio': (anime['studios']['nodes'] as List).isNotEmpty
+                    ? anime['studios']['nodes'][0]['name']
+                    : 'Unknown studio',
+                'genres': (anime['genres'] as List).join(', '),
+                'averageScore': anime['averageScore'],
+                'type': anime['format'] ?? 'Unknown format',
+                'status': anime['status'] ?? 'Unknown status',
+                'description':
+                    anime['description'] ?? 'No description available',
+              },
+            )
             .toList(),
         'popular': (data['data']['popular']['media'] as List)
-            .map((anime) => {
-                  'id': anime['id'].toString(),
-                  'title': {
-                    'english': anime['title']['english'] ?? "Unknown Title",
-                    'romaji': anime['title']['romaji'] ?? "Unknown Title",
-                    'native': anime['title']['native'] ?? "Unknown Title",
-                  },
-                  'episodes':
-                      anime['episodes']?.toString() ?? 'Unknown episodes',
-                  'coverImage': {'large': anime['coverImage']['large']},
-                  'studio': (anime['studios']['nodes'] as List).isNotEmpty
-                      ? anime['studios']['nodes'][0]['name']
-                      : 'Unknown studio',
-                  'genres': (anime['genres'] as List).join(', '),
-                  'averageScore': anime['averageScore'],
-                  'type': anime['format'] ?? 'Unknown format',
-                  'status': anime['status'] ?? 'Unknown status',
-                })
+            .map(
+              (anime) => {
+                'id': anime['id'].toString(),
+                'title': {
+                  'english': anime['title']['english'] ?? "Unknown Title",
+                  'romaji': anime['title']['romaji'] ?? "Unknown Title",
+                  'native': anime['title']['native'] ?? "Unknown Title",
+                },
+                'episodes': anime['episodes']?.toString() ?? 'Unknown episodes',
+                'coverImage': {'large': anime['coverImage']['large']},
+                'studio': (anime['studios']['nodes'] as List).isNotEmpty
+                    ? anime['studios']['nodes'][0]['name']
+                    : 'Unknown studio',
+                'genres': (anime['genres'] as List).join(', '),
+                'averageScore': anime['averageScore'],
+                'type': anime['format'] ?? 'Unknown format',
+                'status': anime['status'] ?? 'Unknown status',
+              },
+            )
             .toList(),
         'latest': (data['data']['latestReleasing']['media'] as List)
-            .map((anime) => {
-                  'id': anime['id'].toString(),
-                  'title': {
-                    'english': anime['title']['english'] ?? "Unknown Title",
-                    'romaji': anime['title']['romaji'] ?? "Unknown Title",
-                    'native': anime['title']['native'] ?? "Unknown Title",
-                  },
-                  'episodes':
-                      anime['episodes']?.toString() ?? 'Unknown episodes',
-                  'coverImage': {'large': anime['coverImage']['large']},
-                  'studio': (anime['studios']['nodes'] as List).isNotEmpty
-                      ? anime['studios']['nodes'][0]['name']
-                      : 'Unknown studio',
-                  'genres': (anime['genres'] as List).join(', '),
-                  'averageScore': anime['averageScore'],
-                  'type': anime['format'] ?? 'Unknown format',
-                  'status': anime['status'] ?? 'Unknown status',
-                })
+            .map(
+              (anime) => {
+                'id': anime['id'].toString(),
+                'title': {
+                  'english': anime['title']['english'] ?? "Unknown Title",
+                  'romaji': anime['title']['romaji'] ?? "Unknown Title",
+                  'native': anime['title']['native'] ?? "Unknown Title",
+                },
+                'episodes': anime['episodes']?.toString() ?? 'Unknown episodes',
+                'coverImage': {'large': anime['coverImage']['large']},
+                'studio': (anime['studios']['nodes'] as List).isNotEmpty
+                    ? anime['studios']['nodes'][0]['name']
+                    : 'Unknown studio',
+                'genres': (anime['genres'] as List).join(', '),
+                'averageScore': anime['averageScore'],
+                'type': anime['format'] ?? 'Unknown format',
+                'status': anime['status'] ?? 'Unknown status',
+              },
+            )
             .toList(),
         'completed': (data['data']['recentlyCompleted']['media'] as List)
-            .map((anime) => {
-                  'id': anime['id'].toString(),
-                  'title': {
-                    'english': anime['title']['english'] ?? "Unknown Title",
-                    'romaji': anime['title']['romaji'] ?? "Unknown Title",
-                    'native': anime['title']['native'] ?? "Unknown Title",
-                  },
-                  'episodes':
-                      anime['episodes']?.toString() ?? 'Unknown episodes',
-                  'coverImage': {'large': anime['coverImage']['large']},
-                  'studio': (anime['studios']['nodes'] as List).isNotEmpty
-                      ? anime['studios']['nodes'][0]['name']
-                      : 'Unknown studio',
-                  'genres': (anime['genres'] as List).join(', '),
-                  'averageScore': anime['averageScore'],
-                  'type': anime['format'] ?? 'Unknown format',
-                  'status': anime['status'] ?? 'Unknown status',
-                })
+            .map(
+              (anime) => {
+                'id': anime['id'].toString(),
+                'title': {
+                  'english': anime['title']['english'] ?? "Unknown Title",
+                  'romaji': anime['title']['romaji'] ?? "Unknown Title",
+                  'native': anime['title']['native'] ?? "Unknown Title",
+                },
+                'episodes': anime['episodes']?.toString() ?? 'Unknown episodes',
+                'coverImage': {'large': anime['coverImage']['large']},
+                'studio': (anime['studios']['nodes'] as List).isNotEmpty
+                    ? anime['studios']['nodes'][0]['name']
+                    : 'Unknown studio',
+                'genres': (anime['genres'] as List).join(', '),
+                'averageScore': anime['averageScore'],
+                'type': anime['format'] ?? 'Unknown format',
+                'status': anime['status'] ?? 'Unknown status',
+              },
+            )
             .toList(),
       };
 
@@ -659,85 +671,89 @@ class AniListProvider with ChangeNotifier {
 
       Map<String, List<Map<String, dynamic>>> sections = {
         'trending': (data['data']['trending']['media'] as List)
-            .map((manga) => {
-                  'id': manga['id'].toString(),
-                  'title': {
-                    'english': manga['title']['english'] ?? "Unknown Title",
-                    'romaji': manga['title']['romaji'] ?? "Unknown Title",
-                    'native': manga['title']['native'] ?? "Unknown Title",
-                  },
-                  'description': manga['ddescription'] ?? "N/A",
-                  'chapters':
-                      manga['chapters']?.toString() ?? 'Unknown chapters',
-                  'coverImage': {'large': manga['coverImage']['large']},
-                  'author': (manga['staff']['nodes'] as List).isNotEmpty
-                      ? manga['staff']['nodes'][0]['name']['full']
-                      : 'Unknown author',
-                  'genres': (manga['genres'] as List).join(', '),
-                  'averageScore': manga['averageScore'],
-                  'type': manga['format'] ?? 'Unknown format',
-                  'status': manga['status'] ?? 'Unknown status',
-                })
+            .map(
+              (manga) => {
+                'id': manga['id'].toString(),
+                'title': {
+                  'english': manga['title']['english'] ?? "Unknown Title",
+                  'romaji': manga['title']['romaji'] ?? "Unknown Title",
+                  'native': manga['title']['native'] ?? "Unknown Title",
+                },
+                'description': manga['ddescription'] ?? "N/A",
+                'chapters': manga['chapters']?.toString() ?? 'Unknown chapters',
+                'coverImage': {'large': manga['coverImage']['large']},
+                'author': (manga['staff']['nodes'] as List).isNotEmpty
+                    ? manga['staff']['nodes'][0]['name']['full']
+                    : 'Unknown author',
+                'genres': (manga['genres'] as List).join(', '),
+                'averageScore': manga['averageScore'],
+                'type': manga['format'] ?? 'Unknown format',
+                'status': manga['status'] ?? 'Unknown status',
+              },
+            )
             .toList(),
         'popular': (data['data']['popular']['media'] as List)
-            .map((manga) => {
-                  'id': manga['id'].toString(),
-                  'title': {
-                    'english': manga['title']['english'] ?? "Unknown Title",
-                    'romaji': manga['title']['romaji'] ?? "Unknown Title",
-                    'native': manga['title']['native'] ?? "Unknown Title",
-                  },
-                  'chapters':
-                      manga['chapters']?.toString() ?? 'Unknown chapters',
-                  'coverImage': {'large': manga['coverImage']['large']},
-                  'author': (manga['staff']['nodes'] as List).isNotEmpty
-                      ? manga['staff']['nodes'][0]['name']['full']
-                      : 'Unknown author',
-                  'genres': (manga['genres'] as List).join(', '),
-                  'averageScore': manga['averageScore'],
-                  'type': manga['format'] ?? 'Unknown',
-                  'status': manga['status'] ?? 'Unknown',
-                })
+            .map(
+              (manga) => {
+                'id': manga['id'].toString(),
+                'title': {
+                  'english': manga['title']['english'] ?? "Unknown Title",
+                  'romaji': manga['title']['romaji'] ?? "Unknown Title",
+                  'native': manga['title']['native'] ?? "Unknown Title",
+                },
+                'chapters': manga['chapters']?.toString() ?? 'Unknown chapters',
+                'coverImage': {'large': manga['coverImage']['large']},
+                'author': (manga['staff']['nodes'] as List).isNotEmpty
+                    ? manga['staff']['nodes'][0]['name']['full']
+                    : 'Unknown author',
+                'genres': (manga['genres'] as List).join(', '),
+                'averageScore': manga['averageScore'],
+                'type': manga['format'] ?? 'Unknown',
+                'status': manga['status'] ?? 'Unknown',
+              },
+            )
             .toList(),
         'latest': (data['data']['latest']['media'] as List)
-            .map((manga) => {
-                  'id': manga['id'].toString(),
-                  'title': {
-                    'english': manga['title']['english'] ?? "Unknown Title",
-                    'romaji': manga['title']['romaji'] ?? "Unknown Title",
-                    'native': manga['title']['native'] ?? "Unknown Title",
-                  },
-                  'chapters':
-                      manga['chapters']?.toString() ?? 'Unknown chapters',
-                  'coverImage': {'large': manga['coverImage']['large']},
-                  'author': (manga['staff']['nodes'] as List).isNotEmpty
-                      ? manga['staff']['nodes'][0]['name']['full']
-                      : 'Unknown author',
-                  'genres': (manga['genres'] as List).join(', '),
-                  'averageScore': manga['averageScore'],
-                  'type': manga['format'] ?? 'Unknown',
-                  'status': manga['status'] ?? 'Unknown',
-                })
+            .map(
+              (manga) => {
+                'id': manga['id'].toString(),
+                'title': {
+                  'english': manga['title']['english'] ?? "Unknown Title",
+                  'romaji': manga['title']['romaji'] ?? "Unknown Title",
+                  'native': manga['title']['native'] ?? "Unknown Title",
+                },
+                'chapters': manga['chapters']?.toString() ?? 'Unknown chapters',
+                'coverImage': {'large': manga['coverImage']['large']},
+                'author': (manga['staff']['nodes'] as List).isNotEmpty
+                    ? manga['staff']['nodes'][0]['name']['full']
+                    : 'Unknown author',
+                'genres': (manga['genres'] as List).join(', '),
+                'averageScore': manga['averageScore'],
+                'type': manga['format'] ?? 'Unknown',
+                'status': manga['status'] ?? 'Unknown',
+              },
+            )
             .toList(),
         'completed': (data['data']['completed']['media'] as List)
-            .map((manga) => {
-                  'id': manga['id'].toString(),
-                  'title': {
-                    'english': manga['title']['english'] ?? "Unknown Title",
-                    'romaji': manga['title']['romaji'] ?? "Unknown Title",
-                    'native': manga['title']['native'] ?? "Unknown Title",
-                  },
-                  'chapters':
-                      manga['chapters']?.toString() ?? 'Unknown chapters',
-                  'coverImage': {'large': manga['coverImage']['large']},
-                  'author': (manga['staff']['nodes'] as List).isNotEmpty
-                      ? manga['staff']['nodes'][0]['name']['full']
-                      : 'Unknown author',
-                  'genres': (manga['genres'] as List).join(', '),
-                  'averageScore': manga['averageScore'],
-                  'type': manga['format'] ?? 'Unknown',
-                  'status': manga['status'] ?? 'Unknown',
-                })
+            .map(
+              (manga) => {
+                'id': manga['id'].toString(),
+                'title': {
+                  'english': manga['title']['english'] ?? "Unknown Title",
+                  'romaji': manga['title']['romaji'] ?? "Unknown Title",
+                  'native': manga['title']['native'] ?? "Unknown Title",
+                },
+                'chapters': manga['chapters']?.toString() ?? 'Unknown chapters',
+                'coverImage': {'large': manga['coverImage']['large']},
+                'author': (manga['staff']['nodes'] as List).isNotEmpty
+                    ? manga['staff']['nodes'][0]['name']['full']
+                    : 'Unknown author',
+                'genres': (manga['genres'] as List).join(', '),
+                'averageScore': manga['averageScore'],
+                'type': manga['format'] ?? 'Unknown',
+                'status': manga['status'] ?? 'Unknown',
+              },
+            )
             .toList(),
       };
       notifyListeners();
@@ -754,7 +770,7 @@ class AniListProvider with ChangeNotifier {
     int? progress,
   }) async {
     const String url = 'https://graphql.anilist.co';
-    final accessToken = await Hive.box("app-data").get("auth_token");
+    final accessToken = AuthKeys.anilistToken.get<String>('');
     final Map<String, String> headers = {
       'Authorization': 'Bearer $accessToken',
       'Content-Type': 'application/json',
@@ -846,7 +862,7 @@ class AniListProvider with ChangeNotifier {
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         "query": query,
-        "variables": {"username": username}
+        "variables": {"username": username},
       }),
     );
 
@@ -858,20 +874,22 @@ class AniListProvider with ChangeNotifier {
         'userId': data['data']['User']['id'],
         'anime': (data['data']['User']['favourites']['anime']['nodes'] as List)
             .map((anime) {
-          return {
-            'id': anime['id'],
-            'title': anime['title']['english'] ?? anime['title']['romaji'],
-            'image': anime['coverImage']['large'],
-          };
-        }).toList(),
+              return {
+                'id': anime['id'],
+                'title': anime['title']['english'] ?? anime['title']['romaji'],
+                'image': anime['coverImage']['large'],
+              };
+            })
+            .toList(),
         'manga': (data['data']['User']['favourites']['manga']['nodes'] as List)
             .map((manga) {
-          return {
-            'id': manga['id'],
-            'title': manga['title']['english'] ?? manga['title']['romaji'],
-            'image': manga['coverImage']['large'],
-          };
-        }).toList(),
+              return {
+                'id': manga['id'],
+                'title': manga['title']['english'] ?? manga['title']['romaji'],
+                'image': manga['coverImage']['large'],
+              };
+            })
+            .toList(),
       };
     } else {
       throw Exception('Failed to load favorites');
@@ -879,39 +897,40 @@ class AniListProvider with ChangeNotifier {
     notifyListeners();
   }
 
-Future<bool> addFavorite(int mediaId, String type) async {
-  const String url = 'https://api.anilist.co/v2/user/6611206/favorites';
+  Future<bool> addFavorite(int mediaId, String type) async {
+    const String url = 'https://api.anilist.co/v2/user/6611206/favorites';
 
-  log('Adding to favorites: $url');  // Debug log
-  log('Media ID: $mediaId, Type: $type');  // Log details
+    log('Adding to favorites: $url'); // Debug log
+    log('Media ID: $mediaId, Type: $type'); // Log details
 
-  try {
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json',
-        // Add any additional headers (e.g., authentication token) if needed
-      },
-      body: jsonEncode({
-        'mediaId': mediaId,
-        'type': type == 'anime' ? 'anime' : 'manga',
-      }),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any additional headers (e.g., authentication token) if needed
+        },
+        body: jsonEncode({
+          'mediaId': mediaId,
+          'type': type == 'anime' ? 'anime' : 'manga',
+        }),
+      );
 
-    log('Response status: ${response.statusCode}');
-    log('Response body: ${response.body}');
+      log('Response status: ${response.statusCode}');
+      log('Response body: ${response.body}');
 
-    if (response.statusCode == 200) {
-      return true;
-    } else {
-      throw Exception('Failed to add to favorites. Status: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Exception(
+          'Failed to add to favorites. Status: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      log('Error: $e');
+      throw Exception('Network request failed');
     }
-  } catch (e) {
-    log('Error: $e');
-    throw Exception('Network request failed');
   }
-}
-
 
   // void migratefavoritesdata(BuildContext context) {
   //   final dataProvider = Provider.of<Data>(context, listen: false);
@@ -923,5 +942,4 @@ Future<bool> addFavorite(int mediaId, String type) async {
   //   log(dataProvider.favoriteManga.toString());
   //   notifyListeners();
   // }
-
 }

@@ -6,6 +6,8 @@ import 'dart:developer';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/models/online_service.dart';
+import 'package:azyx/Database/keys/data_keys.dart';
+import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Functions/string_extensions.dart';
 import 'package:azyx/Models/anilist_anime_data.dart';
 import 'package:azyx/Models/anilist_user_data.dart';
@@ -26,7 +28,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
 final AnilistService anilistAuthController = Get.find();
@@ -61,8 +62,8 @@ class AnilistService extends GetxController
 
   @override
   Future<void> autoLogin() async {
-    final token = await Hive.box("app-data").get("auth_token");
-    if (token != null) {
+    final token = AuthKeys.anilistToken.get<String>('');
+    if (token.isNotEmpty) {
       await fetchUserProfile();
     }
     return log('Auth token not available!');
@@ -113,7 +114,7 @@ class AnilistService extends GetxController
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final token = data['access_token'];
-      Hive.box('app-data').put("auth_token", token);
+      AuthKeys.anilistToken.set(token);
       log(token);
       await fetchUserProfile();
     } else {
@@ -122,8 +123,8 @@ class AnilistService extends GetxController
   }
 
   Future<void> fetchUserProfile() async {
-    final token = await Hive.box("app-data").get("auth_token");
-    if (token == null) {
+    final token = AuthKeys.anilistToken.get<String>('');
+    if (token.isEmpty) {
       return;
     }
 
@@ -173,8 +174,8 @@ class AnilistService extends GetxController
   }
 
   Future<void> fetchUserAnimeList() async {
-    final token = await Hive.box("app-data").get("auth_token");
-    if (token == null) {
+    final token = AuthKeys.anilistToken.get<String>('');
+    if (token.isEmpty) {
       return;
     }
 
@@ -267,8 +268,8 @@ class AnilistService extends GetxController
   }
 
   Future<void> fetchUserMangaList() async {
-    final token = await Hive.box("app-data").get("auth_token");
-    if (token == null) {
+    final token = AuthKeys.anilistToken.get<String>('');
+    if (token.isEmpty) {
       return;
     }
     const query = '''
@@ -356,7 +357,7 @@ class AnilistService extends GetxController
 
   @override
   Future<void> logout() async {
-    await Hive.box("app-data").put("auth_token", '');
+    AuthKeys.anilistToken.set('');
     userData.value = User();
     isLoggedIn.value = false;
     userAnimeList.value.clear();
@@ -574,7 +575,7 @@ class AnilistService extends GetxController
     String? syncId,
   }) async {
     const String url = 'https://graphql.anilist.co';
-    final accessToken = await Hive.box("app-data").get("auth_token");
+    final accessToken = AuthKeys.anilistToken.get<String>('');
     final Map<String, String> headers = {
       'Authorization': 'Bearer $accessToken',
       'Content-Type': 'application/json',
