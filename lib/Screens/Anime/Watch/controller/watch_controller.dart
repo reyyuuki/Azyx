@@ -5,7 +5,7 @@ import 'dart:math' as max;
 import 'package:azyx/Controllers/online_subtitles_controller.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
-import 'package:azyx/Models/episode_class.dart';
+import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Models/anime_all_data.dart';
 import 'package:azyx/Models/local_history.dart';
 import 'package:azyx/Constants/constants.dart';

@@ -1,6 +1,6 @@
 // // ignore_for_file: must_be_immutable
 
-// import 'package:azyx/Models/anime_class.dart';
+// import 'package:azyx/Models/media.dart';
 // import 'package:azyx/Providers/theme_provider.dart';
 // import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
 // import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
@@ -12,7 +12,7 @@
 // import 'package:provider/provider.dart';
 
 // class MangaMainCarousale extends StatelessWidget {
-//   final List<Anime> data;
+//   final List<Media> data;
 //   final bool? isManga;
 //   const MangaMainCarousale({super.key, required this.data, this.isManga});
 

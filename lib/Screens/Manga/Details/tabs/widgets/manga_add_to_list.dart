@@ -3,8 +3,9 @@ import 'dart:ui';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/offline_controller.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
-import 'package:azyx/Models/anime_details_data.dart';
-import 'package:azyx/Models/offline_item.dart';
+import 'package:azyx/Database/isar_models/anime_details_data.dart';
+import 'package:azyx/Database/isar_models/category.dart';
+import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:checkmark/checkmark.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -165,53 +166,66 @@ class MangaAddToList extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              Obx(
-                () => Column(
-                  children: offlineController.offlineMangaCategories.map((i) {
-                    final Rx<bool> isSelected = i.anilistIds!
-                        .contains(data.mediaData.id)
-                        .obs;
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainer,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: ListTile(
-                        onTap: () {
-                          isSelected.value = !isSelected.value;
-                          isSelected.value
-                              ? offlineController.addMangaOfflineItem(
-                                  data,
-                                  i.name!,
-                                )
-                              : offlineController.removeMangaOfflineItem(
-                                  data,
-                                  i.name!,
-                                );
-                        },
-                        leading: Icon(
-                          EvaIcons.folder,
-                          color: theme.colorScheme.primary,
+              StreamBuilder<List<Category>>(
+                stream: offlineController.getMangaCategoriesStream(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final categories = snapshot.data ?? [];
+                  return Column(
+                    children: categories.map((category) {
+                      final isSelected =
+                          (category.anilistIds?.contains(
+                                    data.mediaData?.id?.toString(),
+                                  ) ??
+                                  false)
+                              .obs;
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainer,
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        title: Text(
-                          i.name!,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        trailing: Obx(
-                          () => SizedBox(
-                            width: 20,
-                            child: CheckMark(
-                              active: isSelected.value,
-                              activeColor: theme.colorScheme.primary,
-                              strokeWidth: 3,
+                        child: ListTile(
+                          onTap: () {
+                            isSelected.value = !isSelected.value;
+                            if (isSelected.value) {
+                              offlineController.addMangaOfflineItem(
+                                data,
+                                category,
+                              );
+                            } else {
+                              offlineController.removeMangaOfflineItem(
+                                data,
+                                category,
+                              );
+                            }
+                          },
+                          leading: Icon(
+                            EvaIcons.folder,
+                            color: theme.colorScheme.primary,
+                          ),
+                          title: Text(
+                            category.name ?? 'Unknown',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          trailing: Obx(
+                            () => SizedBox(
+                              width: 20,
+                              child: CheckMark(
+                                active: isSelected.value,
+                                activeColor: theme.colorScheme.primary,
+                                strokeWidth: 3,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  }).toList(),
-                ),
+                      );
+                    }).toList(),
+                  );
+                },
               ),
               const SizedBox(height: 10),
               ListTile(

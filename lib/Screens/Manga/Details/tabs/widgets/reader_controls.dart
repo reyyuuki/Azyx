@@ -2,7 +2,7 @@
 
 import 'dart:io';
 
-import 'package:azyx/Models/episode_class.dart';
+import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Screens/Manga/Details/tabs/widgets/chapter_item.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';

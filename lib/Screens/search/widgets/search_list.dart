@@ -1,5 +1,5 @@
 import 'dart:ui';
-import 'package:azyx/Models/anime_class.dart';
+import 'package:azyx/Models/media.dart';
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
 import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class SearchList extends StatelessWidget {
-  final List<Anime> data;
+  final List<Media> data;
   final bool isManga;
   const SearchList({super.key, required this.data, required this.isManga});
 
@@ -31,7 +31,7 @@ class SearchList extends StatelessWidget {
     );
   }
 
-  Widget _buildAnimeCard(BuildContext context, Anime item, int index) {
+  Widget _buildAnimeCard(BuildContext context, Media item, int index) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
@@ -88,7 +88,7 @@ class SearchList extends StatelessWidget {
     );
   }
 
-  Widget _buildBackgroundImage(Anime item, ColorScheme colorScheme) {
+  Widget _buildBackgroundImage(Media item, ColorScheme colorScheme) {
     return Positioned.fill(
       child: item.bannerImage != null
           ? ImageFiltered(
@@ -146,7 +146,7 @@ class SearchList extends StatelessWidget {
   }
 
   Widget _buildContent(
-      BuildContext context, Anime item, ColorScheme colorScheme) {
+      BuildContext context, Media item, ColorScheme colorScheme) {
     return Positioned.fill(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -163,7 +163,7 @@ class SearchList extends StatelessWidget {
     );
   }
 
-  Widget _buildPosterImage(Anime item) {
+  Widget _buildPosterImage(Media item) {
     return Hero(
       tag: 'anime_${item.id}',
       child: Container(
@@ -209,7 +209,7 @@ class SearchList extends StatelessWidget {
     );
   }
 
-  Widget _buildAnimeInfo(Anime item, ColorScheme colorScheme) {
+  Widget _buildAnimeInfo(Media item, ColorScheme colorScheme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -321,7 +321,7 @@ class SearchList extends StatelessWidget {
     );
   }
 
-  Widget _buildRatingBadge(Anime item, ColorScheme colorScheme) {
+  Widget _buildRatingBadge(Media item, ColorScheme colorScheme) {
     if (item.rating == null) return const SizedBox.shrink();
 
     return Positioned(

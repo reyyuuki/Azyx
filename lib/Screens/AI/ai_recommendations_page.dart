@@ -4,7 +4,7 @@ import 'dart:math';
 
 import 'package:azyx/AI/ai_pics.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';
-import 'package:azyx/Models/anime_class.dart';
+import 'package:azyx/Models/media.dart';
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
 import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
@@ -27,7 +27,7 @@ class AiRecommendationsPage extends StatefulWidget {
 }
 
 class _AiRecommendationsPageState extends State<AiRecommendationsPage> {
-  final RxList<Anime> recommendationsList = RxList();
+  final RxList<Media> recommendationsList = RxList();
   final RxBool isAdult = false.obs;
   @override
   void initState() {

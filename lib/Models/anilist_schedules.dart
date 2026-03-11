@@ -1,8 +1,8 @@
-import 'package:azyx/Models/anime_class.dart';
+import 'package:azyx/Models/media.dart';
 
 class AnilistSchedules {
   String date;
-  List<Anime> animeList;
+  List<Media> animeList;
 
   AnilistSchedules({required this.animeList, required this.date});
 }

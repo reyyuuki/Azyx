@@ -1,5 +1,5 @@
 import 'package:azyx/Models/anime_all_data.dart';
-import 'package:azyx/Models/episode_class.dart';
+import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:dartotsu_extension_bridge/Models/Source.dart';
 
 class LocalHistory {

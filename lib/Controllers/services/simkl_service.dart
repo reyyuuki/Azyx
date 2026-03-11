@@ -7,11 +7,11 @@ import 'package:azyx/Controllers/services/models/online_service.dart';
 import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Models/anilist_user_data.dart';
-import 'package:azyx/Models/anime_class.dart';
-import 'package:azyx/Models/anime_details_data.dart';
+import 'package:azyx/Models/media.dart';
+import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Models/params.dart';
 import 'package:azyx/Models/simkl.dart';
-import 'package:azyx/Models/user_anime.dart';
+import 'package:azyx/Models/user_media.dart';
 import 'package:azyx/Screens/Anime/anime_screen.dart';
 import 'package:azyx/Screens/Home/UserLists/user_lists.dart';
 import 'package:azyx/Screens/search/search_screen.dart';
@@ -34,11 +34,11 @@ final SimklService simklService = Get.find();
 
 class SimklService extends GetxController
     implements BaseService, OnlineService {
-  RxList<Anime> spotlight = RxList();
-  RxList<Anime> popular = RxList();
-  RxList<Anime> trendingMovies = RxList();
-  RxList<Anime> trendingSeries = RxList();
-  RxList<Anime> topUpcoming = RxList();
+  RxList<Media> spotlight = RxList();
+  RxList<Media> popular = RxList();
+  RxList<Media> trendingMovies = RxList();
+  RxList<Media> trendingSeries = RxList();
+  RxList<Media> topUpcoming = RxList();
 
   @override
   Future<AnilistMediaData> fetchDetails(FetchDetailsParams params) async {
@@ -69,7 +69,7 @@ class SimklService extends GetxController
     if (resp.statusCode == 200) {
       final data = jsonDecode(resp.body) as List<dynamic>;
       final list = data.map((e) {
-        return Anime.fromSmallSimkl(e, true);
+        return Media.fromSmallSimkl(e, true);
       }).toList();
       trendingMovies.value = list;
     } else {
@@ -90,7 +90,7 @@ class SimklService extends GetxController
       final data = jsonDecode(resp.body) as List<dynamic>;
       Utils.log('aando: $data');
       final list = data.map((e) {
-        return Anime.fromSmallSimkl(e, false);
+        return Media.fromSmallSimkl(e, false);
       }).toList();
       trendingSeries.value = list;
     } else {
@@ -102,30 +102,30 @@ class SimklService extends GetxController
   Future<void> fetchhomeData() async =>
       Future.wait([fetchMovies(), fetchSeries()]);
 
-  Future<List<Anime>> searchMovies(String query) async {
+  Future<List<Media>> searchMovies(String query) async {
     final movieUrl = Uri.parse(
       'https://api.simkl.com/search/movie?q=$query&extended=full&client_id=${dotenv.env['SIMKL_CLIENT_ID']}',
     );
     final resp = await get(movieUrl);
     if (resp.statusCode == 200) {
       final data = jsonDecode(resp.body) as List<dynamic>;
-      List<Anime> list = data
-          .map((e) => Anime.fromSmallSimkl(e, true))
+      List<Media> list = data
+          .map((e) => Media.fromSmallSimkl(e, true))
           .toList();
       return list;
     }
     return [];
   }
 
-  Future<List<Anime>> searchSeries(String query) async {
+  Future<List<Media>> searchSeries(String query) async {
     final movieUrl = Uri.parse(
       'https://api.simkl.com/search/tv?q=$query&extended=full&client_id=${dotenv.env['SIMKL_CLIENT_ID']}',
     );
     final resp = await get(movieUrl);
     if (resp.statusCode == 200) {
       final data = jsonDecode(resp.body) as List<dynamic>;
-      List<Anime> list = data
-          .map((e) => Anime.fromSmallSimkl(e, true))
+      List<Media> list = data
+          .map((e) => Media.fromSmallSimkl(e, true))
           .toList();
 
       return list;
@@ -139,10 +139,10 @@ class SimklService extends GetxController
   @override
   Rx<User> userData = User().obs;
 
-  Rx<UserAnime> currentMedia = UserAnime().obs;
+  Rx<UserMedia> currentMedia = UserMedia().obs;
 
   @override
-  Future<void> updateEntry(UserAnime params, {required bool isAnime}) async {
+  Future<void> updateEntry(UserMedia params, {required bool isAnime}) async {
     final listId = params.id;
     final status = params.status;
     final progress = params.progress;
@@ -347,10 +347,10 @@ class SimklService extends GetxController
   }
 
   @override
-  RxList<UserAnime> userAnimeList = RxList();
+  RxList<UserMedia> userAnimeList = RxList();
 
   @override
-  RxList<UserAnime> userMangaList = RxList();
+  RxList<UserMedia> userMangaList = RxList();
 
   Future<void> fetchUserMovieList() async {
     final token = AuthKeys.simklAuthToken.get<String>('');
@@ -367,7 +367,7 @@ class SimklService extends GetxController
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       userAnimeList.value = (data['movies'] as List<dynamic>)
-          .map((e) => UserAnime.fromSimklMovie(e))
+          .map((e) => UserMedia.fromSimklMovie(e))
           .toList();
       Utils.log('movies: ${data['movies']}');
     } else {
@@ -391,7 +391,7 @@ class SimklService extends GetxController
       final data = jsonDecode(response.body);
       Utils.log('shows: ${data['shows']}');
       userMangaList.value = (data['shows'] as List<dynamic>)
-          .map((e) => UserAnime.fromSimklShow(e))
+          .map((e) => UserMedia.fromSimklShow(e))
           .toList();
       Utils.log('stay away: ${userMangaList.first.episodes}');
     } else {
@@ -473,7 +473,7 @@ class SimklService extends GetxController
   }
 
   @override
-  Future<List<Anime>> fetchsearchData(SearchParams query) {
+  Future<List<Media>> fetchsearchData(SearchParams query) {
     throw UnimplementedError();
   }
 

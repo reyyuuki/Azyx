@@ -1,5 +1,5 @@
 import 'package:azyx/Controllers/services/service_handler.dart';
-import 'package:azyx/Models/user_anime.dart';
+import 'package:azyx/Models/user_media.dart';
 import 'package:azyx/Screens/Home/UserLists/widgets/grid_list.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
@@ -24,7 +24,7 @@ class _UserListScreenState extends State<UserListPage>
   TabController? tabController;
   RxList<Map<String, dynamic>> filterCategories = RxList();
   Set<String> statusList = {'All'};
-  RxList<UserAnime> list = RxList();
+  RxList<UserMedia> list = RxList();
 
   @override
   void initState() {
@@ -155,10 +155,10 @@ class _UserListScreenState extends State<UserListPage>
                 () => TabBarView(
                   controller: tabController,
                   children: filterCategories.map((i) {
-                    return (i['data'] as List<UserAnime>).isEmpty
+                    return (i['data'] as List<UserMedia>).isEmpty
                         ? buildEmpty(context)
                         : UserGridList(
-                            data: (i['data'] as List<UserAnime>),
+                            data: (i['data'] as List<UserMedia>),
                             isManga:
                                 serviceHandler.serviceType.value ==
                                     ServicesType.simkl

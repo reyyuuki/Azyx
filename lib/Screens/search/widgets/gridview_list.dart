@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:azyx/Models/anime_class.dart';
+import 'package:azyx/Models/media.dart';
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
 import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class GridviewList extends StatelessWidget {
-  final List<Anime> data;
+  final List<Media> data;
   final bool isManga;
   const GridviewList({super.key, required this.data, required this.isManga});
 

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:isar_community/isar.dart';
 
 import 'anime_details_data.dart';
@@ -12,6 +14,9 @@ class OfflineItem {
   @Index()
   late String number;
 
+  @Index()
+  int? mediaType;
+
   String? animeTitle;
 
   AnilistMediaData? mediaData;
@@ -22,6 +27,7 @@ class OfflineItem {
 
   OfflineItem({
     required this.number,
+    this.mediaType,
     this.animeTitle,
     this.mediaData,
     this.episodesList,
@@ -31,6 +37,7 @@ class OfflineItem {
   Map<String, dynamic> toJson() {
     return {
       'number': number,
+      'mediaType': mediaType,
       'animeTitle': animeTitle,
       'mediaData': mediaData?.toJson(),
       'episodesList': episodesList?.map((e) => e.toJson()).toList(),
@@ -39,8 +46,10 @@ class OfflineItem {
   }
 
   factory OfflineItem.fromJson(Map<String, dynamic> json) {
+    log('offline: ${json['mediaType']}');
     return OfflineItem(
       number: json['number'],
+      mediaType: json['mediaType'],
       animeTitle: json['animeTitle'],
       mediaData: json['mediaData'] != null
           ? AnilistMediaData.fromJson(json['mediaData'])

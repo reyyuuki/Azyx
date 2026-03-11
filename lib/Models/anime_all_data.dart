@@ -1,4 +1,4 @@
-import 'package:azyx/Models/episode_class.dart';
+import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
 // import 'package:azyx/api/Mangayomi/Eval/dart/model/video.dart';
 // import 'package:azyx/api/Mangayomi/Model/Source.dart';
@@ -40,7 +40,7 @@ class AnimeAllData {
               .toList() ??
           [],
       episodeList: (json['episodeList'] as List<dynamic>?)
-          ?.map((e) => Episode.fromJson(e as Map<dynamic, dynamic>, ""))
+          ?.map((e) => Episode.fromJson(e as Map<dynamic, dynamic>))
           .toList(),
       source: json['source'] ?? '',
     );
@@ -54,7 +54,7 @@ class AnimeAllData {
       'image': image,
       'number': number,
       'id': id,
-      'episodeUrls': episodeUrls?.map((e) => e.toJson()).toList(),
+      'episodeUrls': episodeUrls.map((e) => e.toJson()).toList(),
       'episodeList': episodeList?.map((e) => e.toJson()).toList(),
       'source': source,
     };

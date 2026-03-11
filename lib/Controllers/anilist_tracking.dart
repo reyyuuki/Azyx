@@ -1,15 +1,15 @@
-import 'package:azyx/Models/user_anime.dart';
+import 'package:azyx/Models/user_media.dart';
 import 'package:get/get.dart';
 
 class AnilistTracking extends GetxController {
-  final Rx<UserAnime> anime = UserAnime().obs;
-  final Rx<UserAnime> manga = UserAnime().obs;
+  final Rx<UserMedia> anime = UserMedia().obs;
+  final Rx<UserMedia> manga = UserMedia().obs;
 
   // void updateAnimeProgress(AnimeAllData data) {
   //   if (anilistAuthController.userAnimeList.isNotEmpty) {
   //     anime.value = anilistAuthController.userAnimeList.firstWhere(
   //       (i) => i.title == data.title,
-  //       orElse: () => UserAnime(
+  //       orElse: () => UserMedia(
   //         id: data.id,
   //         progress: data.number?.toInt(),
   //         status: "CURRENT",

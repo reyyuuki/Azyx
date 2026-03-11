@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:azyx/Models/episode_class.dart';
+import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:dartotsu_extension_bridge/Models/Page.dart';
 import 'package:dartotsu_extension_bridge/Models/Source.dart';

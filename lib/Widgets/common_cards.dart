@@ -383,7 +383,7 @@ class AiSuggestionsCard extends StatelessWidget {
                               ),
                               const SizedBox(height: 12),
                               const AzyXText(
-                                text: "Your Anime Journey",
+                                text: "Your Media Journey",
                                 fontSize: 22,
                                 color: Colors.white,
                                 fontVariant: FontVariant.bold,

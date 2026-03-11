@@ -3,8 +3,9 @@ import 'dart:ui';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/offline_controller.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
-import 'package:azyx/Models/anime_details_data.dart';
-import 'package:azyx/Models/offline_item.dart';
+import 'package:azyx/Database/isar_models/anime_details_data.dart';
+import 'package:azyx/Database/isar_models/category.dart';
+import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:checkmark/checkmark.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -64,7 +65,6 @@ class AddToListFloater extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // ── Library / Bookmark Button ──
                   _LibraryButton(
                     isCompact: isLoggedIn,
                     onTap: () => _openLibrarySheet(context),
@@ -73,7 +73,6 @@ class AddToListFloater extends StatelessWidget {
                   if (isLoggedIn) ...[
                     const SizedBox(width: 8),
 
-                    // ── Add-to-List Button ──
                     Expanded(
                       child: _AddToListButton(
                         mediaData: mediaData,
@@ -99,8 +98,6 @@ class AddToListFloater extends StatelessWidget {
     });
   }
 
-  // ─── Library Bottom Sheet ──────────────────────────────────────────
-
   void _openLibrarySheet(BuildContext context) {
     HapticFeedback.mediumImpact();
     final theme = Theme.of(context);
@@ -122,7 +119,6 @@ class AddToListFloater extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // ── Handle ──
               const SizedBox(height: 12),
               Container(
                 width: 40,
@@ -134,7 +130,6 @@ class AddToListFloater extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-              // ── Header ──
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Row(
@@ -187,49 +182,55 @@ class AddToListFloater extends StatelessWidget {
               ),
               const SizedBox(height: 8),
 
-              // ── Collections List ──
               Flexible(
-                child: Obx(
-                  () => ListView.builder(
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount:
-                        offlineController.offlineAnimeCategories.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index ==
-                          offlineController.offlineAnimeCategories.length) {
-                        return _CreateCollectionTile(
-                          onTap: () => _showCreateDialog(context),
+                child: StreamBuilder<List<Category>>(
+                  stream: offlineController.getAnimeCategories(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    final categories = snapshot.data ?? [];
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: categories.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == categories.length) {
+                          return _CreateCollectionTile(
+                            onTap: () {
+                              _showCreateDialog(context);
+                            },
+                          );
+                        }
+
+                        final category = categories[index];
+                        final isSelected =
+                            (category.anilistIds?.contains(
+                                      data.mediaData?.id?.toString(),
+                                    ) ??
+                                    false)
+                                .obs;
+
+                        return _CollectionTile(
+                          name: category.name ?? 'Unknown',
+                          isSelected: isSelected,
+                          onTap: () async {
+                            HapticFeedback.selectionClick();
+                            isSelected.value = !isSelected.value;
+                            if (isSelected.value) {
+                              offlineController.addOfflineItem(data, category);
+                            } else {
+                              offlineController.removeOfflineItem(
+                                data,
+                                category,
+                              );
+                            }
+                          },
                         );
-                      }
-
-                      final category =
-                          offlineController.offlineAnimeCategories[index];
-                      final isSelected = category.anilistIds!
-                          .contains(data.mediaData.id)
-                          .obs;
-
-                      return _CollectionTile(
-                        name: category.name!,
-                        isSelected: isSelected,
-                        onTap: () {
-                          HapticFeedback.selectionClick();
-                          isSelected.value = !isSelected.value;
-                          if (isSelected.value) {
-                            offlineController.addOfflineItem(
-                              data,
-                              category.name!,
-                            );
-                          } else {
-                            offlineController.removeOfflineItem(
-                              data,
-                              category.name!,
-                            );
-                          }
-                        },
-                      );
-                    },
-                  ),
+                      },
+                    );
+                  },
                 ),
               ),
               SizedBox(height: MediaQuery.of(ctx).padding.bottom + 16),
@@ -239,8 +240,6 @@ class AddToListFloater extends StatelessWidget {
       },
     );
   }
-
-  // ─── Create Collection Dialog ──────────────────────────────────────
 
   void _showCreateDialog(BuildContext context) {
     final controller = TextEditingController();
@@ -327,10 +326,6 @@ class AddToListFloater extends StatelessWidget {
     );
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════
-//  SUB-WIDGETS
-// ═══════════════════════════════════════════════════════════════════════
 
 class _LibraryButton extends StatelessWidget {
   final bool isCompact;

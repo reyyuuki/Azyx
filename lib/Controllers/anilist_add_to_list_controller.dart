@@ -1,9 +1,9 @@
 import 'dart:developer';
 
 import 'package:azyx/Controllers/services/service_handler.dart';
+import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Models/anime_all_data.dart';
-import 'package:azyx/Models/anime_details_data.dart';
-import 'package:azyx/Models/user_anime.dart';
+import 'package:azyx/Models/user_media.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/custom_text_field.dart';
@@ -29,7 +29,7 @@ class AnilistAddToListController extends GetxController {
           .firstWhere(
             (i) => i.id == data.id!,
             orElse: () {
-              return UserAnime(
+              return UserMedia(
                 id: data.id,
                 progress: 1,
                 episodes: data.episodes,
@@ -49,7 +49,7 @@ class AnilistAddToListController extends GetxController {
           .firstWhere(
             (i) => i.id == data.id,
             orElse: () {
-              return UserAnime(
+              return UserMedia(
                 id: data.id,
                 progress: 0,
                 episodes: data.episodes,
@@ -74,9 +74,9 @@ class AnilistAddToListController extends GetxController {
           (i) => i.title == data.title,
           orElse: () {
             log(
-              "No existing serviceHandler.currentMedia found, creating new UserAnime entry.",
+              "No existing serviceHandler.currentMedia found, creating new UserMedia entry.",
             );
-            return UserAnime(
+            return UserMedia(
               id: data.id.toString(),
               status: "CURRENT",
               score: 5,
@@ -85,7 +85,7 @@ class AnilistAddToListController extends GetxController {
           },
         );
         serviceHandler.updateListEntry(
-          UserAnime(
+          UserMedia(
             id: serviceHandler.currentMedia.value.id!,
             progress: number,
             status: serviceHandler.currentMedia.value.status,
@@ -346,7 +346,7 @@ class AnilistAddToListController extends GetxController {
                                     'aando: ${serviceHandler.currentMedia.value.id}',
                                   );
                                   serviceHandler.updateListEntry(
-                                    UserAnime(
+                                    UserMedia(
                                       id: serviceHandler.currentMedia.value.id!,
                                       status: getMALStatusEquivalent(
                                         serviceHandler
@@ -675,7 +675,7 @@ class AnilistAddToListController extends GetxController {
                                           .status ??
                                       'CURRENT';
                                   serviceHandler.updateListEntry(
-                                    UserAnime(
+                                    UserMedia(
                                       id: serviceHandler.currentMedia.value.id!,
                                       status: serviceHandler
                                           .currentMedia

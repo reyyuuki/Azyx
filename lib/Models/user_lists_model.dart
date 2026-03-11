@@ -1,16 +1,16 @@
 import 'dart:developer';
 
-import 'package:azyx/Models/user_anime.dart';
+import 'package:azyx/Models/user_media.dart';
 import 'package:get/get.dart';
 
 class UserListsModel {
-  RxList<UserAnime> currentlyWatching = <UserAnime>[].obs;
-  RxList<UserAnime> planning = <UserAnime>[].obs;
-  RxList<UserAnime> completed = <UserAnime>[].obs;
-  RxList<UserAnime> repeating = <UserAnime>[].obs;
-  RxList<UserAnime> paused = <UserAnime>[].obs;
-  RxList<UserAnime> dropped = <UserAnime>[].obs;
-  RxList<UserAnime> allList = RxList<UserAnime>();
+  RxList<UserMedia> currentlyWatching = <UserMedia>[].obs;
+  RxList<UserMedia> planning = <UserMedia>[].obs;
+  RxList<UserMedia> completed = <UserMedia>[].obs;
+  RxList<UserMedia> repeating = <UserMedia>[].obs;
+  RxList<UserMedia> paused = <UserMedia>[].obs;
+  RxList<UserMedia> dropped = <UserMedia>[].obs;
+  RxList<UserMedia> allList = RxList<UserMedia>();
 
   UserListsModel();
 
@@ -21,7 +21,7 @@ class UserListsModel {
       final entries = item['entries'] as List<dynamic>?;
       if (entries == null) continue;
       for (var entry in entries) {
-        final anime = UserAnime.fromJson(entry);
+        final anime = UserMedia.fromJson(entry);
         model.allList.add(anime);
         final status = entry['status'];
         switch (status) {
@@ -56,7 +56,7 @@ class UserListsModel {
       final entry = item['node'];
       log("check => ${entry.toString()}");
       if (entry == null) continue;
-      final anime = UserAnime.fromMAL(item);
+      final anime = UserMedia.fromMAL(item);
       model.allList.add(anime);
       final status = item['list_status']['status']
           .toString()

@@ -1,5 +1,5 @@
-import 'package:azyx/Models/anime_details_data.dart';
-import 'package:azyx/Models/episode_class.dart';
+import 'package:azyx/Database/isar_models/anime_details_data.dart';
+import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/anime/anime_scrollable_list.dart';
 import 'package:azyx/Widgets/anime/characters_list.dart';

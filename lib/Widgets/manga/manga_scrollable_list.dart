@@ -1,6 +1,6 @@
 // import 'dart:io';
 
-// import 'package:azyx/Models/anime_class.dart';
+// import 'package:azyx/Models/media.dart';
 // import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
 // import 'package:azyx/Widgets/Animation/scale_animation.dart';
 // import 'package:azyx/Widgets/anime/item_card.dart';

@@ -1,213 +1,243 @@
 import 'dart:developer';
 
 import 'package:azyx/Database/isar_models/category.dart';
-import 'package:azyx/Functions/string_extensions.dart';
-import 'package:azyx/Models/offline_item.dart';
+import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:azyx/main.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
 import 'package:isar_community/isar.dart';
 
 final OfflineController offlineController = Get.find();
 
 class OfflineController extends GetxController {
-  final RxList<OfflineItem> offlineAnimeList = RxList();
-  final RxList<OfflineItem> offlineMangaList = RxList();
-  final RxList<Category> offlineAnimeCategories = RxList();
-  final RxList<Category> offlineMangaCategories = RxList();
-
-  @override
-  void onInit() {
-    super.onInit();
-    loadOfflineData();
-  }
+  // @override
+  // void onInit() {
+  //   super.onInit();
+  //   loadOfflineData();
+  // }
 
   Stream<List<Category>> getAnimeCategories() {
-    return isar.categorys.where().watch(fireImmediately: true);
+    return isar.categorys
+        .filter()
+        .isMangaEqualTo(false)
+        .watch(fireImmediately: true);
   }
 
-  void addOfflineItem(OfflineItem data, String categoryName) {
+  Stream<List<OfflineItem>> getOfflineAnimeStream() {
+    return isar.offlineItems
+        .filter()
+        .mediaTypeEqualTo(1)
+        .watch(fireImmediately: true);
+  }
+
+  Stream<List<OfflineItem>> getOfflineMangaStream() {
+    return isar.offlineItems
+        .filter()
+        .mediaTypeEqualTo(0)
+        .watch(fireImmediately: true);
+  }
+
+  Stream<List<Category>> getMangaCategoriesStream() {
+    return isar.categorys
+        .filter()
+        .isMangaEqualTo(true)
+        .watch(fireImmediately: true);
+  }
+
+  Future<List<OfflineItem>> getOfflineAnimeList() async {
+    return await isar.offlineItems.filter().mediaTypeEqualTo(1).findAll();
+  }
+
+  Future<List<OfflineItem>> getOfflineMangaList() async {
+    return await isar.offlineItems.filter().mediaTypeEqualTo(0).findAll();
+  }
+
+  Future<List<Category>> getAnimeCategoriesList() async {
+    return await isar.categorys.filter().isMangaEqualTo(false).findAll();
+  }
+
+  Future<List<Category>> getMangaCategoriesList() async {
+    return await isar.categorys.filter().isMangaEqualTo(true).findAll();
+  }
+
+  void addOfflineItem(OfflineItem data, Category category) async {
+    final offlineAnimeList = await getOfflineAnimeList();
     final index = offlineAnimeList.indexWhere(
-      (i) => i.mediaData.id == data.mediaData.id,
+      (i) => i.mediaData?.id == data.mediaData?.id,
     );
     if (index != -1) {
       offlineAnimeList[index] = data;
     } else {
       offlineAnimeList.add(data);
     }
-    addToCategory(categoryName, data.mediaData.id!);
+
+    await isar.writeTxn(() async {
+      await isar.offlineItems.put(data);
+    });
+    addToCategory(category, data.mediaData!.id!.toString());
   }
 
-  void addMangaOfflineItem(OfflineItem data, String categoryName) {
+  void addMangaOfflineItem(OfflineItem data, Category category) async {
+    final offlineMangaList = await getOfflineMangaList();
     final index = offlineMangaList.indexWhere(
-      (i) => i.mediaData.id == data.mediaData.id,
+      (i) => i.mediaData?.id == data.mediaData?.id,
     );
     if (index != -1) {
       offlineMangaList[index] = data;
     } else {
       offlineMangaList.add(data);
     }
-    addToMangaCategory(categoryName, data.mediaData.id!);
+
+    await isar.writeTxn(() async {
+      await isar.offlineItems.put(data);
+    });
+    addToMangaCategory(category, data.mediaData!.id!.toString());
   }
 
-  void persistOfflineData() async {
-    final box = Hive.box('offline-data');
-    await box.put(
-      'animeList',
-      offlineAnimeList.map((e) => e.toJson()).toList(),
-    );
-    await box.put(
-      'categories',
-      offlineAnimeCategories.map((e) => e.toJson()).toList(),
-    );
-    await box.put(
-      "mangaList",
-      offlineMangaList.map((e) => e.toJson()).toList(),
-    );
-    await box.put(
-      'mangaCategories',
-      offlineMangaCategories.map((e) => e.toJson()).toList(),
+  // void persistOfflineData() async {
+  //   final box = Hive.box('offline-data');
+  //   await box.put(
+  //     'animeList',
+  //     offlineAnimeList.map((e) => e.toJson()).toList(),
+  //   );
+  //   await box.put(
+  //     'categories',
+  //     offlineAnimeCategories.map((e) => e.toJson()).toList(),
+  //   );
+  //   await box.put(
+  //     "mangaList",
+  //     offlineMangaList.map((e) => e.toJson()).toList(),
+  //   );
+  //   await box.put(
+  //     'mangaCategories',
+  //     offlineMangaCategories.map((e) => e.toJson()).toList(),
+  //   );
+  // }
+
+  // void loadOfflineData() {
+  //   final box = Hive.box('offline-data');
+  //   final storedAnimeList = box.get('animeList', defaultValue: []);
+  //   final storedCategories = box.get('categories', defaultValue: []);
+  //   final storedMangaCategories = box.get('mangaCategories', defaultValue: []);
+  //   final storedMangaList = box.get('mangaList', defaultValue: []);
+
+  //   if (storedAnimeList != null) {
+  //     offlineAnimeList.assignAll(
+  //       (storedAnimeList as List).map((e) => OfflineItem.fromJson(e)).toList(),
+  //     );
+  //   }
+
+  //   if (storedCategories != null) {
+  //     offlineAnimeCategories.assignAll(
+  //       (storedCategories as List).map((e) => Category.fromJson(e)).toList(),
+  //     );
+  //   }
+
+  //   if (storedMangaList != null) {
+  //     offlineMangaList.assignAll(
+  //       (storedMangaList as List).map((e) => OfflineItem.fromJson(e)).toList(),
+  //     );
+  //   }
+
+  //   if (storedMangaCategories != null) {
+  //     offlineMangaCategories.assignAll(
+  //       (storedMangaCategories as List)
+  //           .map((e) => Category.fromJson(e))
+  //           .toList(),
+  //     );
+  //   }
+  //   log(offlineMangaList.length.toString());
+  // }
+
+  void removeOfflineItem(OfflineItem data, Category categoryName) async {
+    await isar.writeTxn(() async => await isar.offlineItems.delete(data.id));
+    removeFromCategory(categoryName, data.mediaData!.id!.toString());
+  }
+
+  void removeMangaOfflineItem(OfflineItem data, Category categoryName) async {
+    await isar.writeTxn(() async => await isar.offlineItems.delete(data.id));
+    removeFromCategory(categoryName, data.mediaData!.id!.toString());
+  }
+
+  void createCategory(String categoryName) async {
+    await isar.writeTxn(
+      () async => await isar.categorys.put(
+        Category(name: categoryName, anilistIds: [], isManga: false),
+      ),
     );
   }
 
-  void loadOfflineData() {
-    final box = Hive.box('offline-data');
-    final storedAnimeList = box.get('animeList', defaultValue: []);
-    final storedCategories = box.get('categories', defaultValue: []);
-    final storedMangaCategories = box.get('mangaCategories', defaultValue: []);
-    final storedMangaList = box.get('mangaList', defaultValue: []);
-
-    if (storedAnimeList != null) {
-      offlineAnimeList.assignAll(
-        (storedAnimeList as List)
-            .map((e) => OfflineItem.fromJson(e, false))
-            .toList(),
-      );
-    }
-
-    if (storedCategories != null) {
-      offlineAnimeCategories.assignAll(
-        (storedCategories as List).map((e) => Category.fromJson(e)).toList(),
-      );
-    }
-
-    if (storedMangaList != null) {
-      offlineMangaList.assignAll(
-        (storedMangaList as List)
-            .map((e) => OfflineItem.fromJson(e, true))
-            .toList(),
-      );
-    }
-
-    if (storedMangaCategories != null) {
-      offlineMangaCategories.assignAll(
-        (storedMangaCategories as List)
-            .map((e) => Category.fromJson(e))
-            .toList(),
-      );
-    }
-    log(offlineMangaList.length.toString());
-  }
-
-  void removeOfflineItem(OfflineItem data, String categoryName) {
-    final index = offlineAnimeList.indexWhere(
-      (i) => i.mediaData.id == data.mediaData.id,
+  void createMangaCategory(String categoryName) async {
+    await isar.writeTxn(
+      () async => await isar.categorys.put(
+        Category(name: categoryName, anilistIds: [], isManga: true),
+      ),
     );
-    offlineAnimeList.removeAt(index);
-    removeFromCategory(categoryName, data.mediaData.id!.toInt());
   }
 
-  void removeMangaOfflineItem(OfflineItem data, String categoryName) {
-    final index = offlineMangaList.indexWhere(
-      (i) => i.mediaData.id == data.mediaData.id,
-    );
-    offlineMangaList.removeAt(index);
-    removeFromMangaCategory(categoryName, data.mediaData.id!.toInt());
+  void deleteCategory(Category cat) async {
+    await isar.categorys
+        .filter()
+        .idEqualTo(cat.id)
+        .isMangaEqualTo(cat.isManga)
+        .deleteFirst();
   }
 
-  void createCategory(String categoryName) {
-    offlineAnimeCategories.add(Category(name: categoryName, anilistIds: []));
-    persistOfflineData();
-  }
-
-  void createMangaCategory(String categoryName) {
-    offlineMangaCategories.add(Category(name: categoryName, anilistIds: []));
-    persistOfflineData();
-  }
-
-  void deleteCategory(String categoryName) {
-    final index = offlineAnimeCategories.indexWhere(
-      (i) => i.name == categoryName,
-    );
-    offlineAnimeCategories.removeAt(index);
-    persistOfflineData();
-  }
-
-  void deleteMangaCategory(String categoryName) {
-    final index = offlineMangaCategories.indexWhere(
-      (i) => i.name == categoryName,
-    );
-    offlineMangaCategories.removeAt(index);
-    persistOfflineData();
-  }
-
-  void addToCategory(String categoryName, String mediaId) {
-    final index = offlineAnimeCategories.indexWhere(
-      (i) => i.name == categoryName,
-    );
-    if (index != -1) {
-      offlineAnimeCategories[index].anilistIds?.add(mediaId);
-      log(
-        "Added to category '${offlineAnimeCategories[index].name}': $mediaId",
-      );
+  void addToCategory(Category category, String mediaId) async {
+    final cat = await isar.categorys
+        .filter()
+        .idEqualTo(category.id)
+        .and()
+        .isMangaEqualTo(category.isManga)
+        .findFirst();
+    if (cat != null) {
+      final ids = List<String>.from(cat.anilistIds ?? []);
+      if (!ids.contains(mediaId)) {
+        ids.add(mediaId);
+        cat.anilistIds = ids;
+        await isar.writeTxn(() async => await isar.categorys.put(cat));
+        log("Added to category '${cat.name}': $mediaId");
+      }
     } else {
-      log("Error: Category '$categoryName' not found.");
+      log("Error: Category '${category.name}' not found.");
     }
-    persistOfflineData();
   }
 
-  void addToMangaCategory(String categoryName, String mediaId) {
-    final index = offlineMangaCategories.indexWhere(
-      (i) => i.name == categoryName,
-    );
-    if (index != -1) {
-      offlineMangaCategories[index].anilistIds?.add(mediaId);
-      log(
-        "Added to category '${offlineMangaCategories[index].name}': $mediaId",
-      );
+  void addToMangaCategory(Category category, String mediaId) async {
+    final cat = await isar.categorys
+        .filter()
+        .idEqualTo(category.id)
+        .and()
+        .isMangaEqualTo(true)
+        .findFirst();
+    if (cat != null) {
+      final ids = List<String>.from(cat.anilistIds ?? []);
+      if (!ids.contains(mediaId)) {
+        ids.add(mediaId);
+        cat.anilistIds = ids;
+        await isar.writeTxn(() async => await isar.categorys.put(cat));
+        log("Added to category '${cat.name}': $mediaId");
+      }
     } else {
-      log("Error: Category '$categoryName' not found.");
+      log("Error: Category '${category.name}' not found.");
     }
-    persistOfflineData();
   }
 
-  void removeFromCategory(String categoryName, int mediaId) {
-    final index = offlineAnimeCategories.indexWhere(
-      (i) => i.name == categoryName,
-    );
-    if (index != -1) {
-      offlineAnimeCategories[index].anilistIds?.remove(mediaId);
-      log(
-        "Removed from category '${offlineAnimeCategories[index].name}': $mediaId",
-      );
+  void removeFromCategory(Category category, String mediaId) async {
+    final cat = await isar.categorys
+        .filter()
+        .idEqualTo(category.id)
+        .and()
+        .isMangaEqualTo(category.isManga)
+        .findFirst();
+    if (cat != null) {
+      final ids = List<String>.from(cat.anilistIds ?? []);
+      if (ids.remove(mediaId)) {
+        cat.anilistIds = ids;
+        await isar.writeTxn(() async => await isar.categorys.put(cat));
+        log("Removed from category '${cat.name}': $mediaId");
+      }
     } else {
-      log("Error: Category '$categoryName' not found.");
+      log("Error: Category '${category.name}' not found.");
     }
-    persistOfflineData();
-  }
-
-  void removeFromMangaCategory(String categoryName, int mediaId) {
-    final index = offlineMangaCategories.indexWhere(
-      (i) => i.name == categoryName,
-    );
-    if (index != -1) {
-      offlineMangaCategories[index].anilistIds?.remove(mediaId);
-      log(
-        "Removed from category '${offlineMangaCategories[index].name}': $mediaId",
-      );
-    } else {
-      log("Error: Category '$categoryName' not found.");
-    }
-    persistOfflineData();
   }
 }

@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:azyx/Models/carousale_data.dart';
-import 'package:azyx/Models/user_anime.dart';
+import 'package:azyx/Models/user_media.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
 import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
@@ -10,7 +10,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class UserGridList extends StatelessWidget {
-  final List<UserAnime> data;
+  final List<UserMedia> data;
   final bool isManga;
   const UserGridList({super.key, required this.data, required this.isManga});
 

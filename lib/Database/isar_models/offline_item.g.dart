@@ -43,7 +43,12 @@ const OfflineItemSchema = CollectionSchema(
 
       target: r'AnilistMediaData',
     ),
-    r'number': PropertySchema(id: 4, name: r'number', type: IsarType.string),
+    r'mediaType': PropertySchema(
+      id: 4,
+      name: r'mediaType',
+      type: IsarType.long,
+    ),
+    r'number': PropertySchema(id: 5, name: r'number', type: IsarType.string),
   },
 
   estimateSize: _offlineItemEstimateSize,
@@ -62,6 +67,19 @@ const OfflineItemSchema = CollectionSchema(
           name: r'number',
           type: IndexType.hash,
           caseSensitive: true,
+        ),
+      ],
+    ),
+    r'mediaType': IndexSchema(
+      id: 6292565701790234963,
+      name: r'mediaType',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'mediaType',
+          type: IndexType.value,
+          caseSensitive: false,
         ),
       ],
     ),
@@ -158,7 +176,8 @@ void _offlineItemSerialize(
     AnilistMediaDataSchema.serialize,
     object.mediaData,
   );
-  writer.writeString(offsets[4], object.number);
+  writer.writeLong(offsets[4], object.mediaType);
+  writer.writeString(offsets[5], object.number);
 }
 
 OfflineItem _offlineItemDeserialize(
@@ -186,7 +205,8 @@ OfflineItem _offlineItemDeserialize(
       AnilistMediaDataSchema.deserialize,
       allOffsets,
     ),
-    number: reader.readString(offsets[4]),
+    mediaType: reader.readLongOrNull(offsets[4]),
+    number: reader.readString(offsets[5]),
   );
   object.id = id;
   return object;
@@ -225,6 +245,8 @@ P _offlineItemDeserializeProp<P>(
           ))
           as P;
     case 4:
+      return (reader.readLongOrNull(offset)) as P;
+    case 5:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -252,6 +274,14 @@ extension OfflineItemQueryWhereSort
   QueryBuilder<OfflineItem, OfflineItem, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+
+  QueryBuilder<OfflineItem, OfflineItem, QAfterWhere> anyMediaType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'mediaType'),
+      );
     });
   }
 }
@@ -379,6 +409,131 @@ extension OfflineItemQueryWhere
               ),
             );
       }
+    });
+  }
+
+  QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause> mediaTypeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(indexName: r'mediaType', value: [null]),
+      );
+    });
+  }
+
+  QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause>
+  mediaTypeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'mediaType',
+          lower: [null],
+          includeLower: false,
+          upper: [],
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause> mediaTypeEqualTo(
+    int? mediaType,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(indexName: r'mediaType', value: [mediaType]),
+      );
+    });
+  }
+
+  QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause> mediaTypeNotEqualTo(
+    int? mediaType,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'mediaType',
+                lower: [],
+                upper: [mediaType],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'mediaType',
+                lower: [mediaType],
+                includeLower: false,
+                upper: [],
+              ),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'mediaType',
+                lower: [mediaType],
+                includeLower: false,
+                upper: [],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'mediaType',
+                lower: [],
+                upper: [mediaType],
+                includeUpper: false,
+              ),
+            );
+      }
+    });
+  }
+
+  QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause>
+  mediaTypeGreaterThan(int? mediaType, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'mediaType',
+          lower: [mediaType],
+          includeLower: include,
+          upper: [],
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause> mediaTypeLessThan(
+    int? mediaType, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'mediaType',
+          lower: [],
+          upper: [mediaType],
+          includeUpper: include,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause> mediaTypeBetween(
+    int? lowerMediaType,
+    int? upperMediaType, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'mediaType',
+          lower: [lowerMediaType],
+          includeLower: includeLower,
+          upper: [upperMediaType],
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
@@ -763,6 +918,79 @@ extension OfflineItemQueryFilter
     });
   }
 
+  QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
+  mediaTypeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'mediaType'),
+      );
+    });
+  }
+
+  QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
+  mediaTypeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'mediaType'),
+      );
+    });
+  }
+
+  QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
+  mediaTypeEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'mediaType', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
+  mediaTypeGreaterThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'mediaType',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
+  mediaTypeLessThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'mediaType',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
+  mediaTypeBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'mediaType',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition> numberEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -953,6 +1181,18 @@ extension OfflineItemQuerySortBy
     });
   }
 
+  QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> sortByMediaType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'mediaType', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> sortByMediaTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'mediaType', Sort.desc);
+    });
+  }
+
   QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> sortByNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'number', Sort.asc);
@@ -992,6 +1232,18 @@ extension OfflineItemQuerySortThenBy
     });
   }
 
+  QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> thenByMediaType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'mediaType', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> thenByMediaTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'mediaType', Sort.desc);
+    });
+  }
+
   QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> thenByNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'number', Sort.asc);
@@ -1012,6 +1264,12 @@ extension OfflineItemQueryWhereDistinct
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'animeTitle', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<OfflineItem, OfflineItem, QDistinct> distinctByMediaType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'mediaType');
     });
   }
 
@@ -1056,6 +1314,12 @@ extension OfflineItemQueryProperty
   mediaDataProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'mediaData');
+    });
+  }
+
+  QueryBuilder<OfflineItem, int?, QQueryOperations> mediaTypeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'mediaType');
     });
   }
 

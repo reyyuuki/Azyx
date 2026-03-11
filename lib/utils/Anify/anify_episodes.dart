@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:azyx/Models/episode_class.dart';
+import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:http/http.dart' as http;
 
 Future<List<Episode>> fetchAnifyEpisodes(int id, List<Episode> data) async {

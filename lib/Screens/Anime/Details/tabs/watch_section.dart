@@ -1,6 +1,6 @@
 import 'package:azyx/Controllers/source/source_controller.dart';
-import 'package:azyx/Models/anime_details_data.dart';
-import 'package:azyx/Models/episode_class.dart';
+import 'package:azyx/Database/isar_models/anime_details_data.dart';
+import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Models/wrong_title_search.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_normal_card.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';

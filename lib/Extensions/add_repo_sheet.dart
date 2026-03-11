@@ -248,7 +248,7 @@ class _RepositoryBottomSheetState extends State<RepositoryBottomSheet>
               controller: animeController,
               style: const TextStyle(fontFamily: 'Poppins'),
               decoration: InputDecoration(
-                labelText: "Anime Repository URL",
+                labelText: "Media Repository URL",
                 labelStyle: TextStyle(
                   fontFamily: 'Poppins',
                   color: theme.primary,

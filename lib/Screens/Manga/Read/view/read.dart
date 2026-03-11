@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
-import 'package:azyx/Models/episode_class.dart';
+import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Screens/Manga/Details/tabs/widgets/reader_controls.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/utils/utils.dart';

@@ -3,7 +3,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:azyx/Models/anime_class.dart';
+import 'package:azyx/Models/media.dart';
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
 import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class MainCarousale extends StatefulWidget {
-  final List<Anime> data;
+  final List<Media> data;
   final bool isManga;
   const MainCarousale({super.key, required this.data, required this.isManga});
 
@@ -236,7 +236,7 @@ class _MainCarousaleState extends State<MainCarousale>
     );
   }
 
-  void _navigateToDetails(Anime anime) {
+  void _navigateToDetails(Media anime) {
     HapticFeedback.lightImpact();
     _stopAutoPlay();
     final screen = widget.isManga
@@ -289,7 +289,7 @@ class _BgImage extends StatelessWidget {
 }
 
 class _CinematicCard extends StatelessWidget {
-  final Anime anime;
+  final Media anime;
   final bool isManga;
   final double parallaxOffset;
   final VoidCallback onTap;

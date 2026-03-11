@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
-import 'package:azyx/Models/offline_item.dart';
+
+import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';
@@ -42,9 +43,9 @@ class GridList extends StatelessWidget {
         itemCount: data.length,
         itemBuilder: (context, index) {
           final item = data[index].mediaData;
-          final taggname = "${item.id}&$tagg";
+          final taggname = "${item?.id}&$tagg";
           final isStatus =
-              item.status == "RELEASING" || item.status == "Ongoing";
+              item?.status == "RELEASING" || item?.status == "Ongoing";
           return GestureDetector(
             onTap: () => ontap(data[index], taggname),
             child: SizedBox(
@@ -72,7 +73,7 @@ class GridList extends StatelessWidget {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(15),
                             child: CachedNetworkImage(
-                              imageUrl: item.image!,
+                              imageUrl: item?.image ?? '',
                               fit: BoxFit.cover,
                               placeholder: (context, url) => ShimmerEffect(
                                 height: Platform.isAndroid || Platform.isIOS
@@ -88,7 +89,7 @@ class GridList extends StatelessWidget {
                           ),
                         ),
                       ),
-                      item.rating != null
+                      item?.rating != null
                           ? Positioned(
                               top: 0,
                               left: 0,
@@ -118,7 +119,7 @@ class GridList extends StatelessWidget {
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
                                       AzyXText(
-                                        text: item.rating!,
+                                        text: item?.rating ?? "",
                                         fontSize: 12,
                                         color: Colors.black,
                                         fontVariant: FontVariant.bold,
@@ -178,7 +179,7 @@ class GridList extends StatelessWidget {
                               ),
                               10.width,
                               AzyXText(
-                                text: item.episodes?.toString() ?? "12",
+                                text: item?.episodes?.toString() ?? "12",
                                 fontSize: 12,
                                 color: isStatus
                                     ? Colors.black
@@ -196,12 +197,12 @@ class GridList extends StatelessWidget {
                   const SizedBox(height: 10),
                   AzyXText(
                     text: Platform.isAndroid || Platform.isIOS
-                        ? (item.title!.length > 12
-                              ? '${item.title!.substring(0, 10)}...'
-                              : item.title!)
-                        : (item.title!.length > 20
-                              ? '${item.title!.substring(0, 17)}...'
-                              : item.title!),
+                        ? ((item?.title?.length ?? 0) > 12
+                              ? '${item!.title!.substring(0, 10)}...'
+                              : (item?.title ?? ''))
+                        : ((item?.title?.length ?? 0) > 20
+                              ? '${item!.title!.substring(0, 17)}...'
+                              : (item?.title ?? '')),
                     fontVariant: FontVariant.bold,
                   ),
                 ],

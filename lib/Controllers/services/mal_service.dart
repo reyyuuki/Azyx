@@ -10,10 +10,10 @@ import 'package:azyx/Controllers/services/models/online_service.dart';
 import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Models/anilist_user_data.dart';
-import 'package:azyx/Models/anime_class.dart';
-import 'package:azyx/Models/anime_details_data.dart';
+import 'package:azyx/Models/media.dart';
+import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Models/params.dart';
-import 'package:azyx/Models/user_anime.dart';
+import 'package:azyx/Models/user_media.dart';
 import 'package:azyx/Screens/Anime/anime_screen.dart';
 import 'package:azyx/Screens/search/search_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
@@ -33,20 +33,20 @@ import 'package:http/http.dart';
 final MalService malService = Get.find<MalService>();
 
 class MalService extends GetxController implements BaseService, OnlineService {
-  // Anime
-  RxList<Anime> spotlight = RxList();
-  RxList<Anime> popular = RxList();
-  RxList<Anime> trending = RxList();
-  RxList<Anime> topUpcoming = RxList();
+  // Media
+  RxList<Media> spotlight = RxList();
+  RxList<Media> popular = RxList();
+  RxList<Media> trending = RxList();
+  RxList<Media> topUpcoming = RxList();
 
   // Manga
-  RxList<Anime> spotlightM = RxList();
-  RxList<Anime> popularM = RxList();
-  RxList<Anime> trendingM = RxList();
-  RxList<Anime> topUpcomingM = RxList();
+  RxList<Media> spotlightM = RxList();
+  RxList<Media> popularM = RxList();
+  RxList<Media> trendingM = RxList();
+  RxList<Media> topUpcomingM = RxList();
 
   @override
-  Rx<UserAnime> currentMedia = UserAnime().obs;
+  Rx<UserMedia> currentMedia = UserMedia().obs;
 
   @override
   RxBool isLoggedIn = false.obs;
@@ -232,7 +232,7 @@ class MalService extends GetxController implements BaseService, OnlineService {
   }
 
   static const field = "fields=mean,status,media_type,synopsis";
-  Future<List<Anime>> fetchDataFromApi(
+  Future<List<Media>> fetchDataFromApi(
     String url, {
     String? customFields,
   }) async {
@@ -240,7 +240,7 @@ class MalService extends GetxController implements BaseService, OnlineService {
     final data = await fetchMAL('$url&$newField') as Map<String, dynamic>;
 
     return (data['data'] as List<dynamic>)
-        .map((e) => Anime.fromMAL(e))
+        .map((e) => Media.fromMAL(e))
         .toList();
   }
 
@@ -479,13 +479,13 @@ class MalService extends GetxController implements BaseService, OnlineService {
   Rx<User> userData = User().obs;
 
   @override
-  Future<List<Anime>> fetchsearchData(SearchParams query) {
+  Future<List<Media>> fetchsearchData(SearchParams query) {
     throw UnimplementedError();
   }
 
   @override
   Future<void> updateEntry(
-    UserAnime params, {
+    UserMedia params, {
     required bool isAnime,
     String? syncId,
   }) async {
@@ -519,7 +519,7 @@ class MalService extends GetxController implements BaseService, OnlineService {
 
     if (syncId != null) {
       await anilistAuthController.updateEntry(
-        UserAnime(id: listId, score: score, status: status, progress: progress),
+        UserMedia(id: listId, score: score, status: status, progress: progress),
         isAnime: isAnime,
         syncId: syncId,
       );
@@ -568,7 +568,7 @@ class MalService extends GetxController implements BaseService, OnlineService {
         "${isAnime ? "Anime" : "Manga"} successfully deleted from your list!",
       );
 
-      currentMedia.value = UserAnime();
+      currentMedia.value = UserMedia();
       if (isAnime) {
         fetchUserAnimeList();
       } else {
@@ -583,10 +583,10 @@ class MalService extends GetxController implements BaseService, OnlineService {
   }
 
   @override
-  RxList<UserAnime> userAnimeList = RxList();
+  RxList<UserMedia> userAnimeList = RxList();
 
   @override
-  RxList<UserAnime> userMangaList = RxList();
+  RxList<UserMedia> userMangaList = RxList();
 
   Future<void> fetchUserAnimeList() async {
     final data = await fetchMAL(
@@ -595,7 +595,7 @@ class MalService extends GetxController implements BaseService, OnlineService {
       useAuthHeader: true,
     );
     userAnimeList.value = (data['data'] as List<dynamic>)
-        .map((e) => UserAnime.fromMAL(e))
+        .map((e) => UserMedia.fromMAL(e))
         .toList();
     log("animeList: ${data['data']}");
   }
@@ -608,7 +608,7 @@ class MalService extends GetxController implements BaseService, OnlineService {
     );
     log("mangaList: ${data['data']}");
     userMangaList.value = (data['data'] as List<dynamic>)
-        .map((e) => UserAnime.fromMAL(e))
+        .map((e) => UserMedia.fromMAL(e))
         .toList();
     log("animeList: ${data['data']}");
   }

@@ -1,6 +1,6 @@
 import 'package:azyx/Models/anilist_schedules.dart';
-import 'package:azyx/Models/anime_class.dart';
-import 'package:azyx/Models/anime_details_data.dart';
+import 'package:azyx/Models/media.dart';
+import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/utils/Anilist/anilist_calender.dart';
 import 'package:get/get.dart';
 import 'dart:convert';
@@ -250,7 +250,7 @@ class AnilistDataController extends GetxController {
     }
   }
 
-  Future<List<Anime>> searchAnilistAnime({
+  Future<List<Media>> searchAnilistAnime({
     String? query,
     String? type = "ANIME",
     String? format,
@@ -374,7 +374,7 @@ class AnilistDataController extends GetxController {
           log('First result: ${animeList.first}');
         }
 
-        return animeList.map<Anime>((anime) => Anime.fromJson(anime)).toList();
+        return animeList.map<Media>((anime) => Media.fromJson(anime)).toList();
       } else {
         log('Error response: ${response.body}');
         throw Exception(
@@ -388,7 +388,7 @@ class AnilistDataController extends GetxController {
   }
 
   // Similar method for manga search
-  Future<List<Anime>> searchAnilistManga({
+  Future<List<Media>> searchAnilistManga({
     String? query,
     String? type = "MANGA",
     String? format,
@@ -497,7 +497,7 @@ class AnilistDataController extends GetxController {
         final mangaList = data['data']['Page']['media'] as List<dynamic>;
         log('Found ${mangaList.length} manga results');
 
-        return mangaList.map<Anime>((manga) => Anime.fromJson(manga)).toList();
+        return mangaList.map<Media>((manga) => Media.fromJson(manga)).toList();
       } else {
         log('Error response: ${response.body}');
         throw Exception(
@@ -545,7 +545,7 @@ class AnilistDataController extends GetxController {
   //     final data = jsonDecode(response.body);
   //     final List<dynamic> schedules = data['data']['Page']['airingSchedules'];
 
-  //     Map<String, List<Anime>> dateToAnimeList = {};
+  //     Map<String, List<Media>> dateToAnimeList = {};
 
   //     for (var schedule in schedules) {
   //       int airingAt = schedule['airingAt'];
@@ -558,7 +558,7 @@ class AnilistDataController extends GetxController {
   //       if (!dateToAnimeList.containsKey(formattedDate)) {
   //         dateToAnimeList[formattedDate] = [];
   //       }
-  //       dateToAnimeList[formattedDate]!.add(Anime.fromJson(media));
+  //       dateToAnimeList[formattedDate]!.add(Media.fromJson(media));
   //     }
 
   //     List<AnilistSchedules> result = dateToAnimeList.entries.map((entry) {

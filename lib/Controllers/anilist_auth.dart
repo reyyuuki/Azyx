@@ -11,10 +11,10 @@ import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Functions/string_extensions.dart';
 import 'package:azyx/Models/anilist_anime_data.dart';
 import 'package:azyx/Models/anilist_user_data.dart';
-import 'package:azyx/Models/anime_class.dart';
-import 'package:azyx/Models/anime_details_data.dart';
+import 'package:azyx/Models/media.dart';
+import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Models/params.dart';
-import 'package:azyx/Models/user_anime.dart';
+import 'package:azyx/Models/user_media.dart';
 import 'package:azyx/Screens/Anime/anime_screen.dart';
 import 'package:azyx/Screens/search/search_screen.dart';
 import 'package:azyx/Widgets/anime/anime_scrollable_list.dart';
@@ -39,23 +39,23 @@ class AnilistService extends GetxController
   Rx<MediaData> animeData = Rx(MediaData());
   Rx<MediaData> mangaData = Rx(MediaData());
   @override
-  RxList<UserAnime> userAnimeList = RxList();
+  RxList<UserMedia> userAnimeList = RxList();
   @override
-  RxList<UserAnime> userMangaList = RxList();
+  RxList<UserMedia> userMangaList = RxList();
 
-  RxList<Anime> spotlight = RxList();
-  RxList<Anime> popular = RxList();
-  RxList<Anime> trending = RxList();
-  RxList<Anime> topUpcoming = RxList();
+  RxList<Media> spotlight = RxList();
+  RxList<Media> popular = RxList();
+  RxList<Media> trending = RxList();
+  RxList<Media> topUpcoming = RxList();
 
   // Manga
-  RxList<Anime> spotlightM = RxList();
-  RxList<Anime> popularM = RxList();
-  RxList<Anime> trendingM = RxList();
-  RxList<Anime> topUpcomingM = RxList();
+  RxList<Media> spotlightM = RxList();
+  RxList<Media> popularM = RxList();
+  RxList<Media> trendingM = RxList();
+  RxList<Media> topUpcomingM = RxList();
 
   @override
-  Rx<UserAnime> currentMedia = UserAnime().obs;
+  Rx<UserMedia> currentMedia = UserMedia().obs;
 
   @override
   RxBool isLoggedIn = false.obs;
@@ -243,7 +243,7 @@ class AnilistService extends GetxController
           userAnimeList.value = lists
               .expand(
                 (e) => (e['entries'] as List<dynamic>).map(
-                  (item) => UserAnime.fromJson(item),
+                  (item) => UserMedia.fromJson(item),
                 ),
               )
               .toList();
@@ -252,7 +252,7 @@ class AnilistService extends GetxController
           // userAnimeList.assignAll(
           //   lists
           //       .expand((list) => (list['entries'] as List<dynamic>)
-          //           .map((entry) => UserAnime.fromJson(entry)))
+          //           .map((entry) => UserMedia.fromJson(entry)))
           //       .toList(),
           // );
         } else {
@@ -338,7 +338,7 @@ class AnilistService extends GetxController
             lists
                 .expand(
                   (list) => (list['entries'] as List<dynamic>).map(
-                    (item) => UserAnime.fromJson(item),
+                    (item) => UserMedia.fromJson(item),
                   ),
                 )
                 .toList(),
@@ -447,18 +447,18 @@ class AnilistService extends GetxController
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       spotlight.value = (data['data']['trending']['media'] as List<dynamic>)
-          .map((item) => Anime.fromJson(item))
+          .map((item) => Media.fromJson(item))
           .toList();
       popular.value = (data['data']['popular']['media'] as List<dynamic>)
-          .map((item) => Anime.fromJson(item))
+          .map((item) => Media.fromJson(item))
           .toList();
       topUpcoming.value =
           (data['data']['latestReleasing']['media'] as List<dynamic>)
-              .map((item) => Anime.fromJson(item))
+              .map((item) => Media.fromJson(item))
               .toList();
       trending.value =
           (data['data']['recentlyCompleted']['media'] as List<dynamic>)
-              .map((item) => Anime.fromJson(item))
+              .map((item) => Media.fromJson(item))
               .toList();
     } else {
       throw Exception('Failed to load data');
@@ -550,18 +550,18 @@ class AnilistService extends GetxController
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       spotlightM.value = (data['data']['trending']['media'] as List<dynamic>)
-          .map((item) => Anime.fromJson(item))
+          .map((item) => Media.fromJson(item))
           .toList();
       popularM.value = (data['data']['popular']['media'] as List<dynamic>)
-          .map((item) => Anime.fromJson(item))
+          .map((item) => Media.fromJson(item))
           .toList();
       topUpcomingM.value =
           (data['data']['latestReleasing']['media'] as List<dynamic>)
-              .map((item) => Anime.fromJson(item))
+              .map((item) => Media.fromJson(item))
               .toList();
       trendingM.value =
           (data['data']['recentlyCompleted']['media'] as List<dynamic>)
-              .map((item) => Anime.fromJson(item))
+              .map((item) => Media.fromJson(item))
               .toList();
     } else {
       throw Exception('Failed to load data');
@@ -570,7 +570,7 @@ class AnilistService extends GetxController
 
   @override
   Future<void> updateEntry(
-    UserAnime anime, {
+    UserMedia anime, {
     required bool isAnime,
     String? syncId,
   }) async {
@@ -710,7 +710,7 @@ class AnilistService extends GetxController
   }
 
   @override
-  Future<List<Anime>> fetchsearchData(SearchParams query) {
+  Future<List<Media>> fetchsearchData(SearchParams query) {
     throw UnimplementedError();
   }
 

@@ -1,6 +1,7 @@
 import 'dart:developer';
+
 import 'package:azyx/Controllers/source/source_controller.dart';
-import 'package:azyx/Models/anime_class.dart';
+import 'package:azyx/Models/media.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:get/get.dart';
@@ -343,7 +344,7 @@ AnimeMatchResult matchAnimeTitle(
   );
 }
 
-Future<Anime?> mapMedia(List<String> animeId, RxString searchedTitle) async {
+Future<Media?> mapMedia(List<String> animeId, RxString searchedTitle) async {
   final sourceController = Get.find<SourceController>();
   final isManga = animeId[0].split("*").last == "MANGA";
   final type = isManga ? MediaType.manga : MediaType.anime;
@@ -443,10 +444,10 @@ Future<Anime?> mapMedia(List<String> animeId, RxString searchedTitle) async {
     Utils.log(
       "Final match selected: $bestMatch with score ${highestSimilarity.toStringAsFixed(3)}",
     );
-    return Anime.froDMedia(bestMatchResult, type);
+    return Media.froDMedia(bestMatchResult, type);
   }
 
-  // If no good match was found, return the first result or an empty Anime object
+  // If no good match was found, return the first result or an empty Media object
   Utils.log(
     "No good match found. Highest similarity: ${highestSimilarity.toStringAsFixed(3)}",
   );
@@ -454,6 +455,6 @@ Future<Anime?> mapMedia(List<String> animeId, RxString searchedTitle) async {
       ? searchResults.first.title
       : "No match found";
   return searchResults.isNotEmpty
-      ? Anime.froDMedia(searchResults.first, type)
-      : Anime();
+      ? Media.froDMedia(searchResults.first, type)
+      : Media();
 }

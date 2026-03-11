@@ -5,11 +5,11 @@ import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Controllers/source/source_mapper.dart';
-import 'package:azyx/Models/anime_details_data.dart';
+import 'package:azyx/Database/isar_models/anime_details_data.dart';
+import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:azyx/Models/carousale_data.dart';
-import 'package:azyx/Models/episode_class.dart';
-import 'package:azyx/Models/offline_item.dart';
-import 'package:azyx/Models/user_anime.dart';
+import 'package:azyx/Database/isar_models/episode_class.dart';
+import 'package:azyx/Models/user_media.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/add_to_list_floater.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/details_section.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/watch_section.dart';
@@ -90,7 +90,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
   void getMediaStatus() {
     if (serviceHandler.isLoggedIn.value) {
       serviceHandler.currentMedia.value = serviceHandler.userAnimeList
-          .firstWhere((e) => e.id == id.value, orElse: UserAnime().obs);
+          .firstWhere((e) => e.id == id.value, orElse: UserMedia().obs);
     }
   }
 
@@ -119,14 +119,14 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
 
   void convertData() {
     if (widget.isOffline) {
-      anilistAddToListController.findAnime(widget.allData!.mediaData);
-      image.value = widget.allData!.mediaData.image!;
-      title.value = widget.allData!.mediaData.title!;
-      id.value = widget.allData!.mediaData.id!;
+      anilistAddToListController.findAnime(widget.allData!.mediaData!);
+      image.value = widget.allData!.mediaData!.image!;
+      title.value = widget.allData!.mediaData!.title!;
+      id.value = widget.allData!.mediaData!.id!;
       episodesList.value = widget.allData!.episodesList!;
       animeTitle.value = widget.allData!.animeTitle ?? '';
-      mediaData.value = widget.allData!.mediaData;
-      coverImage.value = widget.allData?.mediaData.coverImage! ?? image.value;
+      mediaData.value = widget.allData!.mediaData!;
+      coverImage.value = widget.allData?.mediaData?.coverImage ?? image.value;
       totalEpisodes.value = episodesList.length.toString();
       isLoading.value = false;
     } else {
@@ -224,7 +224,8 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
             mediaData: mediaData.value,
             number: '1',
             animeTitle: title.value,
-            episodesList: episodesList,
+            mediaType: 1,
+            episodesList: episodesList.toList(),
           ),
           mediaData: mediaData.value,
         ),

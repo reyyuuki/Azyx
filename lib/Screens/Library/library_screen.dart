@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:azyx/Controllers/offline_controller.dart';
+import 'package:azyx/Database/isar_models/category.dart';
+import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
 import 'package:azyx/Screens/Library/widgets/grid_list.dart';
 import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
@@ -22,7 +24,6 @@ class LibraryScreen extends StatefulWidget {
 
 class _FavoriteScreenState extends State<LibraryScreen>
     with TickerProviderStateMixin {
-  TabController? tabController;
   final Rx<String> contentType = "Anime".obs;
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocusNode = FocusNode();
@@ -32,7 +33,6 @@ class _FavoriteScreenState extends State<LibraryScreen>
   @override
   void initState() {
     super.initState();
-    _initializeTabController();
     _initializeAnimations();
   }
 
@@ -57,25 +57,9 @@ class _FavoriteScreenState extends State<LibraryScreen>
     });
   }
 
-  void _initializeTabController() {
-    tabController = TabController(
-      length: contentType.value == "Anime"
-          ? offlineController.offlineAnimeCategories.length
-          : offlineController.offlineMangaCategories.length,
-      vsync: this,
-    );
-  }
-
-  void _updateTabController() {
-    tabController?.dispose();
-    _initializeTabController();
-    setState(() {});
-  }
-
   @override
   void dispose() {
     super.dispose();
-    tabController?.dispose();
     _searchAnimationController.dispose();
     searchController.dispose();
     searchFocusNode.dispose();
@@ -381,174 +365,158 @@ class _FavoriteScreenState extends State<LibraryScreen>
                 ),
               ),
               Expanded(
-                child: Column(
-                  children: [
-                    if (contentType.value == "Anime"
-                        ? offlineController.offlineAnimeCategories.isNotEmpty
-                        : offlineController.offlineMangaCategories.isNotEmpty)
-                      Container(
-                        margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerHighest
-                              .withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(24),
-                          border: Border.all(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.outline.withOpacity(0.1),
-                          ),
-                        ),
-                        child: TabBar(
-                          controller: tabController,
-                          isScrollable: true,
-                          tabs: contentType.value == "Anime"
-                              ? offlineController.offlineAnimeCategories.map((
-                                  category,
-                                ) {
-                                  return Tab(
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 20,
-                                        vertical: 8,
-                                      ),
-                                      child: Text(category.name ?? ""),
-                                    ),
-                                  );
-                                }).toList()
-                              : offlineController.offlineMangaCategories.map((
-                                  category,
-                                ) {
-                                  return Tab(
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 20,
-                                        vertical: 8,
-                                      ),
-                                      child: Text(category.name ?? ""),
-                                    ),
-                                  );
-                                }).toList(),
-                          labelStyle: const TextStyle(
-                            fontSize: 14,
-                            fontFamily: "Poppins-Bold",
-                            color: Colors.black,
-                          ),
-                          unselectedLabelStyle: TextStyle(
-                            fontSize: 14,
-                            fontFamily: "Poppins-Medium",
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withOpacity(0.7),
-                          ),
-                          indicator: BoxDecoration(
-                            borderRadius: BorderRadius.circular(18),
-                            color: Theme.of(context).colorScheme.primary,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.primary.withOpacity(0.3),
-                                spreadRadius: 0,
-                                blurRadius: 12,
-                              ),
-                            ],
-                          ),
-                          indicatorSize: TabBarIndicatorSize.tab,
-                          dividerColor: Colors.transparent,
-                          tabAlignment: TabAlignment.start,
-                          automaticIndicatorColorAdjustment: true,
-                          indicatorAnimation: TabIndicatorAnimation.elastic,
-                        ),
-                      ),
-                    10.height,
-                    Expanded(
-                      child: contentType.value == "Anime"
-                          ? (offlineController.offlineAnimeCategories.isEmpty
-                                ? _buildEmptyState()
-                                : TabBarView(
-                                    controller: tabController,
-                                    children: offlineController
-                                        .offlineAnimeCategories
-                                        .map((i) {
-                                          final data = offlineController
-                                              .offlineAnimeList
-                                              .where((item) {
-                                                return i.anilistIds!.contains(
-                                                  item.mediaData.id,
-                                                );
-                                              })
-                                              .toList();
+                child: Obx(
+                  () => StreamBuilder<List<Category>>(
+                    stream: contentType.value == "Anime"
+                        ? offlineController.getAnimeCategories()
+                        : offlineController.getMangaCategoriesStream(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting &&
+                          !snapshot.hasData) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                                          if (data.isEmpty) {
-                                            return _buildCategoryEmptyState(
-                                              i.name ?? "Category",
-                                            );
-                                          }
-                                          return GridList(
-                                            data: data,
-                                            tagg: i.name!,
-                                            ontap: (item, tagg) {
-                                              Get.to(
-                                                AnimeDetailsScreen(
-                                                  tagg: tagg,
-                                                  allData: item,
-                                                  isOffline: true,
-                                                ),
-                                              );
-                                            },
-                                          );
-                                        })
-                                        .toList(),
-                                  ))
-                          : (offlineController.offlineMangaCategories.isEmpty
-                                ? _buildEmptyState()
-                                : TabBarView(
-                                    controller: tabController,
-                                    children: offlineController
-                                        .offlineMangaCategories
-                                        .map((i) {
-                                          final data = offlineController
-                                              .offlineMangaList
-                                              .where((item) {
-                                                return i.anilistIds!.contains(
-                                                  item.mediaData.id,
+                      final categories = snapshot.data ?? [];
+
+                      if (categories.isEmpty) {
+                        return _buildEmptyState();
+                      }
+
+                      return StreamBuilder<List<OfflineItem>>(
+                        stream: contentType.value == "Anime"
+                            ? offlineController.getOfflineAnimeStream()
+                            : offlineController.getOfflineMangaStream(),
+                        builder: (context, itemSnapshot) {
+                          return DefaultTabController(
+                            length: categories.length,
+                            child: Column(
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.fromLTRB(
+                                    20,
+                                    0,
+                                    20,
+                                    0,
+                                  ),
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainerHighest
+                                        .withOpacity(0.3),
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.outline.withOpacity(0.1),
+                                    ),
+                                  ),
+                                  child: TabBar(
+                                    isScrollable: true,
+                                    tabs: categories.map((category) {
+                                      return Tab(
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                            vertical: 8,
+                                          ),
+                                          child: Text(category.name ?? ""),
+                                        ),
+                                      );
+                                    }).toList(),
+                                    labelStyle: const TextStyle(
+                                      fontSize: 14,
+                                      fontFamily: "Poppins-Bold",
+                                      color: Colors.black,
+                                    ),
+                                    unselectedLabelStyle: TextStyle(
+                                      fontSize: 14,
+                                      fontFamily: "Poppins-Medium",
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface.withOpacity(0.7),
+                                    ),
+                                    indicator: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(18),
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withOpacity(0.3),
+                                          spreadRadius: 0,
+                                          blurRadius: 12,
+                                        ),
+                                      ],
+                                    ),
+                                    indicatorSize: TabBarIndicatorSize.tab,
+                                    dividerColor: Colors.transparent,
+                                    tabAlignment: TabAlignment.start,
+                                    automaticIndicatorColorAdjustment: true,
+                                    indicatorAnimation:
+                                        TabIndicatorAnimation.elastic,
+                                  ),
+                                ),
+                                10.height,
+                                Expanded(
+                                  child: TabBarView(
+                                    children: categories.map((i) {
+                                      if (itemSnapshot.connectionState ==
+                                              ConnectionState.waiting &&
+                                          !itemSnapshot.hasData) {
+                                        return const Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      }
+
+                                      final allItems = itemSnapshot.data ?? [];
+                                      final data = allItems.where((item) {
+                                        return i.anilistIds?.contains(
+                                              item.mediaData?.id?.toString(),
+                                            ) ??
+                                            false;
+                                      }).toList();
+
+                                      if (data.isEmpty) {
+                                        return _buildCategoryEmptyState(
+                                          i.name ?? "Category",
+                                        );
+                                      }
+
+                                      return GridList(
+                                        data: data,
+                                        tagg: i.name!,
+                                        ontap: (item, tagg) {
+                                          contentType.value == "Anime"
+                                              ? Get.to(
+                                                  AnimeDetailsScreen(
+                                                    tagg: tagg,
+                                                    allData: item,
+                                                    isOffline: true,
+                                                  ),
+                                                )
+                                              : Get.to(
+                                                  MangaDetailsScreen(
+                                                    tagg: tagg,
+                                                    allData: item,
+                                                    isOffline: true,
+                                                  ),
                                                 );
-                                              })
-                                              .toList();
-                                          if (data.isEmpty) {
-                                            return _buildCategoryEmptyState(
-                                              i.name ?? "Category",
-                                            );
-                                          }
-                                          return GridList(
-                                            data: data,
-                                            tagg: i.name!,
-                                            ontap: (item, tagg) {
-                                              contentType.value == "Anime"
-                                                  ? Get.to(
-                                                      AnimeDetailsScreen(
-                                                        tagg: tagg,
-                                                        allData: item,
-                                                        isOffline: true,
-                                                      ),
-                                                    )
-                                                  : Get.to(
-                                                      MangaDetailsScreen(
-                                                        tagg: tagg,
-                                                        allData: item,
-                                                        isOffline: true,
-                                                      ),
-                                                    );
-                                            },
-                                          );
-                                        })
-                                        .toList(),
-                                  )),
-                    ),
-                  ],
+                                        },
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
               ),
             ],
@@ -613,7 +581,6 @@ class _FavoriteScreenState extends State<LibraryScreen>
                     GestureDetector(
                       onTap: () {
                         contentType.value = "Anime";
-                        _updateTabController();
                         Future.delayed(
                           const Duration(milliseconds: 300),
                           () => Get.back(),
@@ -629,7 +596,6 @@ class _FavoriteScreenState extends State<LibraryScreen>
                     GestureDetector(
                       onTap: () {
                         contentType.value = "Manga";
-                        _updateTabController();
                         Future.delayed(
                           const Duration(milliseconds: 300),
                           () => Get.back(),

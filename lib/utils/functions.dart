@@ -1,8 +1,8 @@
 import 'dart:developer';
 
-import 'package:azyx/Models/anime_class.dart';
+import 'package:azyx/Models/media.dart';
 import 'package:azyx/Models/carousale_data.dart';
-import 'package:azyx/Models/user_anime.dart';
+import 'package:azyx/Models/user_media.dart';
 
 enum CarousaleVarient { userList, regular, other }
 
@@ -13,7 +13,7 @@ List<CarousaleData> getCarousaleData(
   return data.map((e) {
     switch (varient) {
       case CarousaleVarient.userList:
-        final d = e as UserAnime;
+        final d = e as UserMedia;
         return CarousaleData(
           id: d.id!,
           image: d.image!,
@@ -22,7 +22,7 @@ List<CarousaleData> getCarousaleData(
           other: d.progress.toString(),
         );
       case CarousaleVarient.regular:
-        final d = e as Anime;
+        final d = e as Media;
         return CarousaleData(
           id: d.id!,
           image: d.image!,
@@ -31,7 +31,7 @@ List<CarousaleData> getCarousaleData(
           other: d.status.toString(),
         );
       case CarousaleVarient.other:
-        final d = e as UserAnime;
+        final d = e as UserMedia;
         return CarousaleData(
           id: d.id!,
           image: d.image!,

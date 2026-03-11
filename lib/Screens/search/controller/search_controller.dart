@@ -1,11 +1,11 @@
 import 'package:azyx/Controllers/anilist_data_controller.dart';
-import 'package:azyx/Models/anime_class.dart';
+import 'package:azyx/Models/media.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 class SearchController extends GetxController {
-  final RxList<Anime> searchItemList = RxList();
+  final RxList<Media> searchItemList = RxList();
   final TextEditingController textController = TextEditingController();
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;

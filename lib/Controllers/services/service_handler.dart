@@ -6,10 +6,10 @@ import 'package:azyx/Controllers/services/simkl_service.dart';
 import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Models/anilist_user_data.dart';
-import 'package:azyx/Models/anime_class.dart';
-import 'package:azyx/Models/anime_details_data.dart';
+import 'package:azyx/Models/media.dart';
+import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Models/params.dart';
-import 'package:azyx/Models/user_anime.dart';
+import 'package:azyx/Models/user_media.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
@@ -46,10 +46,10 @@ class ServiceHandler extends GetxController {
   }
 
   Rx<User> get userData => onlineService.userData;
-  RxList<UserAnime> get userAnimeList => onlineService.userAnimeList;
-  RxList<UserAnime> get userMangaList => onlineService.userMangaList;
+  RxList<UserMedia> get userAnimeList => onlineService.userAnimeList;
+  RxList<UserMedia> get userMangaList => onlineService.userMangaList;
 
-  Rx<UserAnime> get currentMedia => onlineService.currentMedia;
+  Rx<UserMedia> get currentMedia => onlineService.currentMedia;
 
   RxBool get isLoggedIn => onlineService.isLoggedIn;
 
@@ -64,7 +64,7 @@ class ServiceHandler extends GetxController {
   Future<void> refresh() => onlineService.refresh();
 
   Future<void> updateListEntry(
-    UserAnime params, {
+    UserMedia params, {
     required bool isAnime,
     String? syncId,
   }) async => await onlineService.updateEntry(params, isAnime: isAnime);
@@ -93,7 +93,7 @@ class ServiceHandler extends GetxController {
     return service.fetchDetails(params);
   }
 
-  Future<List<Anime>?> search(SearchParams params) async =>
+  Future<List<Media>?> search(SearchParams params) async =>
       service.fetchsearchData(params);
 
   void changeService(ServicesType type) {

@@ -2,7 +2,7 @@
 
 import 'dart:developer';
 import 'package:azyx/Controllers/source/source_controller.dart';
-import 'package:azyx/Models/episode_class.dart';
+import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Models/wrong_title_search.dart';
 import 'package:azyx/Screens/Manga/Details/tabs/widgets/chapter_item.dart';
 import 'package:azyx/Screens/Manga/Read/view/read.dart';

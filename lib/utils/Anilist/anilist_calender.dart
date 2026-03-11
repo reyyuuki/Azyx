@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:azyx/Models/anilist_schedules.dart';
-import 'package:azyx/Models/anime_class.dart';
+import 'package:azyx/Models/media.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart'; // for formatting the date
@@ -65,7 +65,7 @@ Future<void> fetchCalendarData(RxList<AnilistSchedules> callbackData,
     final schedules = responseData['data']['Page']['airingSchedules'];
 
     // Map to hold anime grouped by date
-    Map<String, List<Anime>> dateToAnimeList = {};
+    Map<String, List<Media>> dateToAnimeList = {};
 
     for (var schedule in schedules) {
       int airingAt = schedule['airingAt'];
@@ -73,7 +73,7 @@ Future<void> fetchCalendarData(RxList<AnilistSchedules> callbackData,
       String formattedDate = DateFormat('EEEE, MMMM d, y').format(dateTime);
 
       var media = schedule['media'];
-      Anime anime = Anime.fromJson(media); // Assuming Anime.fromJson exists
+      Media anime = Media.fromJson(media); // Assuming Media.fromJson exists
 
       if (!dateToAnimeList.containsKey(formattedDate)) {
         dateToAnimeList[formattedDate] = [];

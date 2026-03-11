@@ -19,6 +19,10 @@ class AnilistMediaData {
   int? timeUntilAiring;
   List<String>? genres;
 
+  List<Character>? characters;
+  List<AnilistMediaData>? relations;
+  List<AnilistMediaData>? recommendations;
+
   @Enumerated(EnumType.ordinal32)
   ServicesType? servicesType;
 
@@ -38,9 +42,51 @@ class AnilistMediaData {
     this.popularity,
     this.timeUntilAiring,
     this.genres,
+    this.characters,
+    this.relations,
+    this.recommendations,
     this.servicesType,
     this.mediaType,
   });
+
+  factory AnilistMediaData.fromMAL(
+    Map<String, dynamic> json, {
+    bool isManga = false,
+  }) {
+    return AnilistMediaData(
+      id: json['id']?.toString() ?? '',
+      title: json['title'] ?? '??',
+      image: json['main_picture']?['large'] ?? json['main_picture']?['medium'],
+      coverImage: json['main_picture']?['large'],
+      episodes: isManga ? json['num_chapters'] : json['num_episodes'],
+      description: json['synopsis'],
+      status: json['status'],
+      rating: json['mean']?.toString(),
+      type: json['media_type'],
+      popularity: json['popularity'],
+      genres: (json['genres'] as List?)
+          ?.map((e) => e['name'].toString())
+          .toList(),
+    );
+  }
+
+  factory AnilistMediaData.fromSimkl(
+    Map<String, dynamic> json, [
+    bool isMovie = false,
+  ]) {
+    return AnilistMediaData(
+      id: json['id']?.toString() ?? '',
+      title: json['title'] ?? '??',
+      image: json['poster'] != null
+          ? "https://wsrv.nl/?url=https://simkl.in/posters/${json['poster']}_m.jpg"
+          : '?',
+      episodes: json['total_episodes_count'],
+      description: json['overview'],
+      status: json['status'],
+      rating: json['ratings']?['simkl']?['rating']?.toString(),
+      type: json['type'],
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -61,7 +107,10 @@ class AnilistMediaData {
     };
   }
 
-  factory AnilistMediaData.fromJson(Map<String, dynamic> json) {
+  factory AnilistMediaData.fromJson(
+    Map<String, dynamic> json, [
+    bool isManga = false,
+  ]) {
     return AnilistMediaData(
       id: json['id'],
       episodes: json['episodes'],
@@ -88,5 +137,26 @@ class AnilistMediaData {
             )
           : null,
     );
+  }
+}
+
+@embedded
+class Character {
+  String? image;
+  String? name;
+  int? popularity;
+
+  Character({this.image, this.name, this.popularity});
+
+  factory Character.fromJson(Map<String, dynamic> json) {
+    return Character(
+      image: json['image'],
+      name: json['name'],
+      popularity: json['popularity'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'image': image, 'name': name, 'popularity': popularity};
   }
 }
