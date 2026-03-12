@@ -1,11 +1,9 @@
-// ignore_for_file: invalid_use_of_protected_member
-
-import 'dart:math';
+import 'dart:io';
 
 import 'package:azyx/AI/ai_pics.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';
-import 'package:azyx/Models/media.dart';
 import 'package:azyx/Models/carousale_data.dart';
+import 'package:azyx/Models/media.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
 import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
@@ -29,6 +27,7 @@ class AiRecommendationsPage extends StatefulWidget {
 class _AiRecommendationsPageState extends State<AiRecommendationsPage> {
   final RxList<Media> recommendationsList = RxList();
   final RxBool isAdult = false.obs;
+
   @override
   void initState() {
     super.initState();
@@ -46,12 +45,9 @@ class _AiRecommendationsPageState extends State<AiRecommendationsPage> {
 
   @override
   Widget build(BuildContext context) {
-    int itemCount = (MediaQuery.of(context).size.width ~/ 200).toInt();
-    int minCount = 3;
-    double gridWidth =
-        MediaQuery.of(context).size.width / max(itemCount, minCount);
-    double maxHeight = MediaQuery.of(context).size.height / 2.5;
-    double gridHeight = min(gridWidth * 1.9, maxHeight);
+    final isMobile = Platform.isAndroid || Platform.isIOS;
+    final double itemHeight = isMobile ? 230 : 310;
+
     return Scaffold(
       body: AzyXGradientContainer(
         child: Column(
@@ -67,38 +63,60 @@ class _AiRecommendationsPageState extends State<AiRecommendationsPage> {
               child: Obx(
                 () => recommendationsList.value.isEmpty
                     ? const Center(child: CircularProgressIndicator())
-                    : GridView.builder(
-                        padding: const EdgeInsets.all(10),
-                        physics: const BouncingScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: max(itemCount, minCount),
-                          childAspectRatio: gridWidth / gridHeight,
-                          crossAxisSpacing: 5,
-                        ),
-                        itemCount: recommendationsList.value.length,
-                        itemBuilder: (context, index) {
-                          final tagg = recommendationsList.value[index].id;
-                          final item = recommendationsList.value[index];
-                          final CarousaleData data = CarousaleData(
-                            id: item.id!,
-                            image: item.image!,
-                            title: item.title!,
-                          );
-                          return GestureDetector(
-                            onTap: () {
-                              widget.isManga
-                                  ? MangaDetailsScreen(
-                                      smallMedia: data,
-                                      tagg: item.title! + item.id.toString(),
-                                      isOffline: false,
-                                    ).navigate(context)
-                                  : AnimeDetailsScreen(
-                                      smallMedia: data,
-                                      tagg: item.title! + item.id.toString(),
-                                      isOffline: false,
-                                    ).navigate(context);
+                    : LayoutBuilder(
+                        builder: (context, constraints) {
+                          final crossAxisCount =
+                              (constraints.maxWidth / (isMobile ? 115 : 170))
+                                  .floor()
+                                  .clamp(2, 8);
+                          final itemWidth =
+                              constraints.maxWidth / crossAxisCount;
+                          final aspectRatio = itemWidth / itemHeight;
+
+                          return GridView.builder(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 15,
+                            ),
+                            physics: const BouncingScrollPhysics(),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: crossAxisCount,
+                                  childAspectRatio: aspectRatio,
+                                  crossAxisSpacing: 8,
+                                  mainAxisSpacing: 10,
+                                ),
+                            itemCount: recommendationsList.value.length,
+                            itemBuilder: (context, index) {
+                              final tagg = recommendationsList.value[index].id;
+                              final item = recommendationsList.value[index];
+                              final CarousaleData data = CarousaleData(
+                                id: item.id!,
+                                image: item.image!,
+                                title: item.title!,
+                              );
+                              return GestureDetector(
+                                onTap: () {
+                                  widget.isManga
+                                      ? MangaDetailsScreen(
+                                          smallMedia: data,
+                                          tagg:
+                                              item.title! + item.id.toString(),
+                                          isOffline: false,
+                                        ).navigate(context)
+                                      : AnimeDetailsScreen(
+                                          smallMedia: data,
+                                          tagg:
+                                              item.title! + item.id.toString(),
+                                          isOffline: false,
+                                        ).navigate(context);
+                                },
+                                child: ItemCard(
+                                  item: data,
+                                  tagg: tagg.toString(),
+                                ),
+                              );
                             },
-                            child: ItemCard(item: data, tagg: tagg.toString()),
                           );
                         },
                       ),

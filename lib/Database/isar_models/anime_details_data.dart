@@ -111,23 +111,56 @@ class AnilistMediaData {
     Map<String, dynamic> json, [
     bool isManga = false,
   ]) {
+    final titleJson = json['title'];
+    String? title;
+    if (titleJson is Map) {
+      title =
+          titleJson['english'] ??
+          titleJson['romaji'] ??
+          titleJson['native'] ??
+          '??';
+    } else {
+      title = titleJson?.toString() ?? '??';
+    }
+
+    final coverImageJson = json['coverImage'];
+    String? image;
+    if (coverImageJson is Map) {
+      image = coverImageJson['large'] ?? coverImageJson['medium'];
+    } else {
+      image = json['image']?.toString() ?? coverImageJson?.toString();
+    }
+
     return AnilistMediaData(
-      id: json['id'],
+      id: json['id']?.toString(),
       episodes: json['episodes'],
-      title: json['title'],
+      title: title,
       description: json['description'],
-      image: json['image'],
-      coverImage: json['coverImage'],
-      rating: json['rating'],
-      type: json['type'],
-      status: json['status'],
+      image: image,
+      coverImage: json['bannerImage']?.toString() ?? image,
+      rating: json['averageScore']?.toString() ?? json['rating']?.toString(),
+      type: json['type']?.toString(),
+      status: json['status']?.toString(),
       popularity: json['popularity'],
       timeUntilAiring: json['timeUntilAiring'],
-      genres: (json['genres'] as List?)?.map((e) => e as String).toList(),
+      genres: (json['genres'] as List?)?.map((e) => e.toString()).toList(),
+      characters: (json['characters']?['edges'] as List?)
+          ?.map((e) => Character.fromJson(e['node']))
+          .toList(),
+      relations: (json['relations']?['edges'] as List?)
+          ?.map((e) => AnilistMediaData.fromJson(e['node']))
+          .toList(),
+      recommendations: (json['recommendations']?['edges'] as List?)
+          ?.map(
+            (e) => AnilistMediaData.fromJson(
+              e['node']?['mediaRecommendation'] ?? {},
+            ),
+          )
+          .toList(),
       servicesType: json['servicesType'] != null
           ? ServicesType.values.firstWhere(
               (e) => e.name == json['servicesType'],
-              orElse: () => ServicesType.mal,
+              orElse: () => ServicesType.anilist,
             )
           : null,
       mediaType: json['mediaType'] != null
@@ -149,10 +182,26 @@ class Character {
   Character({this.image, this.name, this.popularity});
 
   factory Character.fromJson(Map<String, dynamic> json) {
+    final nameJson = json['name'];
+    String? name;
+    if (nameJson is Map) {
+      name = nameJson['full'] ?? nameJson['userPreferred'];
+    } else {
+      name = nameJson?.toString();
+    }
+
+    final imageJson = json['image'];
+    String? image;
+    if (imageJson is Map) {
+      image = imageJson['large'] ?? imageJson['medium'];
+    } else {
+      image = imageJson?.toString();
+    }
+
     return Character(
-      image: json['image'],
-      name: json['name'],
-      popularity: json['popularity'],
+      image: image,
+      name: name,
+      popularity: json['popularity'] ?? json['favourites'],
     );
   }
 

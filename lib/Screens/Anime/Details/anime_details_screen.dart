@@ -6,9 +6,9 @@ import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Controllers/source/source_mapper.dart';
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
+import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:azyx/Models/carousale_data.dart';
-import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Models/user_media.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/add_to_list_floater.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/details_section.dart';
@@ -47,7 +47,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
   final Rx<String> coverImage = ''.obs;
   final Rx<String> id = ''.obs;
   final Rx<AnilistMediaData> mediaData = AnilistMediaData().obs;
-  final Rx<bool> isLoading = true.obs;
+  final RxBool isLoading = true.obs;
   final Rx<Source> selectedSource = Source().obs;
   final Rx<String> animeTitle = "??".obs;
   final Rx<String> totalEpisodes = "??".obs;
@@ -228,6 +228,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
             episodesList: episodesList.toList(),
           ),
           mediaData: mediaData.value,
+          isLoading: isLoading,
         ),
       ),
       body: SingleChildScrollView(
