@@ -51,7 +51,7 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
   final Rx<String> coverImage = ''.obs;
   final Rx<String> id = ''.obs;
   final Rx<AnilistMediaData> mediaData = AnilistMediaData().obs;
-  final Rx<bool> isLoading = true.obs;
+  final RxBool isLoading = true.obs;
   final RxList<Source> installedExtensions = RxList<Source>();
   final Rx<Source> selectedSource = Source().obs;
   final Rx<String> mangaTitle = "??".obs;
@@ -184,21 +184,20 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      bottomNavigationBar: Container(
-        height: 90,
-        margin: const EdgeInsets.only(bottom: 10),
-        child: Obx(
-          () => MangaAddToList(
-            data: azyx_offline_item.OfflineItem(
-              mediaData: mediaData.value,
-              number: '1',
-              animeTitle: title.value,
-              mediaType: 0,
-              chaptersList: chaptersList.value,
-            ),
+      backgroundColor: theme.colorScheme.surface,
+      extendBody: true,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: Obx(
+        () => MangaAddToList(
+          data: azyx_offline_item.OfflineItem(
             mediaData: mediaData.value,
+            number: '1',
+            animeTitle: title.value,
+            mediaType: 0,
+            chaptersList: chaptersList.value,
           ),
+          mediaData: mediaData.value,
+          isLoading: isLoading,
         ),
       ),
       body: SingleChildScrollView(

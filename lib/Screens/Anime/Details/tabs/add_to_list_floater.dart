@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:ui';
 
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
@@ -16,12 +17,14 @@ class AddToListFloater extends StatelessWidget {
   final int? index;
   final OfflineItem data;
   final AnilistMediaData mediaData;
+  final RxBool isLoading;
 
   const AddToListFloater({
     super.key,
     this.index,
     required this.data,
     required this.mediaData,
+    required this.isLoading,
   });
 
   @override
@@ -33,6 +36,7 @@ class AddToListFloater extends StatelessWidget {
 
       return Container(
         margin: const EdgeInsets.only(bottom: 28, left: 20, right: 20),
+        height: 70,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
@@ -63,34 +67,43 @@ class AddToListFloater extends StatelessWidget {
                 color: colorScheme.surfaceContainerHigh.withOpacity(0.88),
                 borderRadius: BorderRadius.circular(24),
               ),
-              child: Row(
-                children: [
-                  _LibraryButton(
-                    isCompact: isLoggedIn,
-                    onTap: () => _openLibrarySheet(context),
-                  ),
-
-                  if (isLoggedIn) ...[
-                    const SizedBox(width: 8),
-
-                    Expanded(
-                      child: _AddToListButton(
-                        mediaData: mediaData,
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          anilistAddToListController.addToListSheet(
-                            context,
-                            mediaData.image ?? '',
-                            mediaData.title ?? 'Unknown',
-                            mediaData.episodes ?? 24,
-                            mediaData.id!,
-                          );
-                        },
+              child: isLoading.value
+                  ? Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          color: colorScheme.primary,
+                        ),
                       ),
+                    )
+                  : Row(
+                      children: [
+                        _LibraryButton(
+                          isCompact: isLoggedIn,
+                          onTap: () => _openLibrarySheet(context),
+                        ),
+                        if (isLoggedIn) ...[
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _AddToListButton(
+                              mediaData: mediaData,
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                anilistAddToListController.addToListSheet(
+                                  context,
+                                  mediaData.image ?? '',
+                                  mediaData.title ?? 'Unknown',
+                                  mediaData.episodes ?? 24,
+                                  mediaData.id!,
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                  ],
-                ],
-              ),
             ),
           ),
         ),
@@ -219,6 +232,9 @@ class AddToListFloater extends StatelessWidget {
                             HapticFeedback.selectionClick();
                             isSelected.value = !isSelected.value;
                             if (isSelected.value) {
+                              log(
+                                'Adding to offline: ${data.mediaData?.title} ${data.mediaData?.id}',
+                              );
                               offlineController.addOfflineItem(data, category);
                             } else {
                               offlineController.removeOfflineItem(

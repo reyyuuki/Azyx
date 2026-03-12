@@ -323,7 +323,7 @@ class AiSuggestionsCard extends StatelessWidget {
             : Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                 child: Container(
-                  height: 215,
+                  height: 220,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     gradient: LinearGradient(
@@ -383,7 +383,7 @@ class AiSuggestionsCard extends StatelessWidget {
                               ),
                               const SizedBox(height: 12),
                               const AzyXText(
-                                text: "Your Media Journey",
+                                text: "AI Media Hub",
                                 fontSize: 22,
                                 color: Colors.white,
                                 fontVariant: FontVariant.bold,
@@ -393,8 +393,8 @@ class AiSuggestionsCard extends StatelessWidget {
                               const SizedBox(height: 8),
                               const AzyXText(
                                 text:
-                                    "Explore your personalized recommendations from AI",
-                                fontSize: 14,
+                                    "Personalized recommendations powered by AI",
+                                fontSize: 13,
                                 color: Colors.white,
                                 fontVariant: FontVariant.regular,
                                 maxLines: 2,
@@ -402,91 +402,25 @@ class AiSuggestionsCard extends StatelessWidget {
                               ),
                               const SizedBox(height: 16),
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
                                 children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      Get.to(
+                                  Expanded(
+                                    child: _SuggestionButton(
+                                      label: "Anime",
+                                      onTap: () => Get.to(
                                         () => const AiRecommendationsPage(
                                           isManga: false,
                                         ),
-                                      );
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(30),
-                                        border: Border.all(
-                                          color: Colors.white.withOpacity(0.3),
-                                          width: 1,
-                                        ),
-                                      ),
-                                      child: const Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            "Anime",
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          SizedBox(width: 8),
-                                          Icon(
-                                            Icons.arrow_forward_rounded,
-                                            size: 18,
-                                            color: Colors.white,
-                                          ),
-                                        ],
                                       ),
                                     ),
                                   ),
-                                  10.width,
-                                  GestureDetector(
-                                    onTap: () {
-                                      Get.to(
+                                  8.width,
+                                  Expanded(
+                                    child: _SuggestionButton(
+                                      label: "Manga",
+                                      onTap: () => Get.to(
                                         () => const AiRecommendationsPage(
                                           isManga: true,
                                         ),
-                                      );
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.2),
-                                        borderRadius: BorderRadius.circular(30),
-                                        border: Border.all(
-                                          color: Colors.white.withOpacity(0.3),
-                                          width: 1,
-                                        ),
-                                      ),
-                                      child: const Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            "Manga",
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          SizedBox(width: 8),
-                                          Icon(
-                                            Icons.arrow_forward_rounded,
-                                            size: 18,
-                                            color: Colors.white,
-                                          ),
-                                        ],
                                       ),
                                     ),
                                   ),
@@ -500,6 +434,53 @@ class AiSuggestionsCard extends StatelessWidget {
                   ),
                 ),
               ),
+      ),
+    );
+  }
+}
+
+class _SuggestionButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  final IconData icon;
+
+  const _SuggestionButton({
+    required this.label,
+    required this.onTap,
+    this.icon = Icons.arrow_forward_rounded,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 42,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(icon, size: 14, color: Colors.white),
+          ],
+        ),
       ),
     );
   }
