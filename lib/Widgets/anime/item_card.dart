@@ -24,13 +24,15 @@ class ItemCard extends StatelessWidget {
               width: Platform.isAndroid || Platform.isIOS ? 103 : 160,
               margin: const EdgeInsets.only(right: 10),
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(45),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.black.withOpacity(0.5),
-                        blurRadius: 10,
-                        offset: const Offset(2, 2))
-                  ]),
+                borderRadius: BorderRadius.circular(45),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.5),
+                    blurRadius: 10,
+                    offset: const Offset(2, 2),
+                  ),
+                ],
+              ),
               child: Hero(
                 tag: tagg,
                 child: ClipRRect(
@@ -58,16 +60,17 @@ class ItemCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceBright
-                                  .withOpacity(0.6),
-                              blurRadius: 10)
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceBright.withOpacity(0.6),
+                            blurRadius: 10,
+                          ),
                         ],
                         color: Theme.of(context).colorScheme.surfaceBright,
                         borderRadius: const BorderRadius.only(
-                            bottomRight: Radius.circular(10),
-                            topLeft: Radius.circular(25)),
+                          bottomRight: Radius.circular(10),
+                          topLeft: Radius.circular(25),
+                        ),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -100,25 +103,28 @@ class ItemCard extends StatelessWidget {
                       height: 15,
                       width: 15,
                       decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 95, 209, 99),
-                          border: Border.all(
-                              width: 2,
-                              color: const Color.fromARGB(255, 8, 117, 11)),
-                          borderRadius: BorderRadius.circular(20)),
-                    ))
-                : const SizedBox.shrink()
+                        color: const Color.fromARGB(255, 95, 209, 99),
+                        border: Border.all(
+                          width: 2,
+                          color: const Color.fromARGB(255, 8, 117, 11),
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(),
           ],
         ),
         const SizedBox(height: 10),
-        AzyXText(
-          text: Platform.isAndroid || Platform.isIOS
-              ? (item.title.length > 12
-                  ? '${item.title.substring(0, 10)}...'
-                  : item.title)
-              : (item.title.length > 20
-                  ? '${item.title.substring(0, 17)}...'
-                  : item.title),
-          fontVariant: FontVariant.bold,
+        SizedBox(
+          width: Platform.isAndroid || Platform.isIOS ? 103 : 160,
+          child: AzyXText(
+            text: item.title,
+            fontVariant: FontVariant.bold,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
         ),
       ],
     );
