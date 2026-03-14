@@ -1,7 +1,7 @@
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_mapper.dart';
 import 'package:azyx/utils/utils.dart';
-import 'package:dartotsu_extension_bridge/Models/DMedia.dart';
+import 'package:anymex_extension_bridge/Models/DMedia.dart';
 
 class Media {
   String? title;

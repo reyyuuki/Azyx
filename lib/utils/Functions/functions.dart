@@ -1,4 +1,4 @@
-import 'package:dartotsu_extension_bridge/ExtensionManager.dart';
+import 'package:anymex_extension_bridge/ExtensionManager.dart';
 
 String getExtensionIcon(ExtensionType extensionType) {
   switch (extensionType) {

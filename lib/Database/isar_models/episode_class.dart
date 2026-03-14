@@ -169,26 +169,69 @@ class ChapterRecognition {
 
 List<Chapter> mChapterToChapter(List<dynamic> chapters, String title) {
   return chapters.map((e) {
+    String? eName;
+    try {
+      eName = e.name;
+    } catch (_) {
+      try {
+        eName = e.title;
+      } catch (_) {
+        eName = null;
+      }
+    }
+
     return Chapter(
-      title: e.name,
+      title: eName,
       link: e.url,
       scanlator: e.scanlator,
-      number: ChapterRecognition.parseChapterNumber(title, e.name!).toDouble(),
+      number: ChapterRecognition.parseChapterNumber(
+        title,
+        eName ?? '',
+      ).toDouble(),
       releaseDate: calcTime(e.dateUpload ?? ''),
     );
   }).toList();
 }
 
 Episode mChapterToEpisode(dynamic item, dynamic episodeResult) {
+  String? itemNumber;
+  try {
+    itemNumber = item.number?.toString();
+  } catch (_) {
+    itemNumber = null;
+  }
+
+  String? itemName;
+  try {
+    itemName = item.name;
+  } catch (_) {
+    try {
+      itemName = item.title;
+    } catch (_) {
+      itemName = null;
+    }
+  }
+
+  String? episodeResultName;
+  try {
+    episodeResultName = episodeResult.name;
+  } catch (_) {
+    try {
+      episodeResultName = episodeResult.title;
+    } catch (_) {
+      episodeResultName = null;
+    }
+  }
+
   return Episode(
-    title: item.name,
+    title: itemName,
     url: item.url,
-    number: item.number != null
-        ? item.number.toString()
-        : ChapterRecognition.parseChapterNumber(
-            episodeResult.name ?? '',
-            item.name ?? '',
-          ).toString(),
+    number:
+        itemNumber ??
+        ChapterRecognition.parseChapterNumber(
+          episodeResultName ?? '',
+          itemName ?? '',
+        ).toString(),
     desc: item.scanlator ?? '',
     thumbnail: item.thumbnail,
   );

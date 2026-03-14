@@ -4,8 +4,8 @@ import 'package:azyx/Database/isar_models/category.dart';
 import 'package:azyx/Database/isar_models/key_value.dart';
 import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:azyx/main.dart';
-import 'package:dartotsu_extension_bridge/Mangayomi/Eval/dart/model/source_preference.dart';
-import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart'
+import 'package:anymex_extension_bridge/Mangayomi/Eval/dart/model/source_preference.dart';
+import 'package:anymex_extension_bridge/dartotsu_extension_bridge.dart'
     hide isar;
 import 'package:isar_community/isar.dart';
 import 'package:path/path.dart';

@@ -20,7 +20,7 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/scrollable_app_bar.dart';
 import 'package:azyx/utils/mapper.dart';
-import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
+import 'package:anymex_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:expandable_page_view/expandable_page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -83,7 +83,10 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
   void getMediaStatus() {
     if (serviceHandler.isLoggedIn.value) {
       serviceHandler.currentMedia.value = serviceHandler.userMangaList
-          .firstWhere((e) => e.id == id.value, orElse: UserMedia().obs);
+          .firstWhere(
+            (e) => e.id == id.value,
+            orElse: () => UserMedia(id: id.value),
+          );
     }
     Utils.log('st; ${serviceHandler.currentMedia.value.status} / $id');
   }

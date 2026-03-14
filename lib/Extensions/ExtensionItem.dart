@@ -7,7 +7,7 @@ import 'package:azyx/Widgets/AlertDialogBuilder.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/functions.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:dartotsu_extension_bridge/Models/Source.dart';
+import 'package:anymex_extension_bridge/Models/Source.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -55,21 +55,13 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
       vsync: this,
     );
 
-    _shimmerAnimation = Tween<double>(
-      begin: -1.0,
-      end: 2.0,
-    ).animate(CurvedAnimation(
-      parent: _shimmerController,
-      curve: Curves.easeInOut,
-    ));
+    _shimmerAnimation = Tween<double>(begin: -1.0, end: 2.0).animate(
+      CurvedAnimation(parent: _shimmerController, curve: Curves.easeInOut),
+    );
 
-    _pulseAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
+    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -81,6 +73,7 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
   }
 
   Future<void> _handleSourceAction() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
       _installProgress = 0.0;
@@ -98,9 +91,9 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
         }
       }
 
-      await widget.source.extensionType
-          ?.getManager()
-          .installSource(widget.source);
+      await widget.source.extensionType?.getManager().installSource(
+        widget.source,
+      );
       await sourceController.sortExtensions();
 
       // Complete the progress quickly
@@ -108,6 +101,7 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
         setState(() => _installProgress = 1.0);
         // Immediately hide loading state after completion
         await Future.delayed(const Duration(milliseconds: 100));
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
           _installProgress = 0.0;
@@ -139,8 +133,9 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
   Widget build(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
     final updateAvailable = widget.source.hasUpdate ?? false;
-    final sourceNotEmpty =
-        _installedExtensions.any((e) => e.id == widget.source.id);
+    final sourceNotEmpty = _installedExtensions.any(
+      (e) => e.id == widget.source.id,
+    );
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -305,10 +300,7 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         color: theme.primaryContainer.withOpacity(0.4),
-        border: Border.all(
-          color: theme.primary.withOpacity(0.3),
-          width: 1.5,
-        ),
+        border: Border.all(color: theme.primary.withOpacity(0.3), width: 1.5),
         boxShadow: [
           BoxShadow(
             color: theme.primary.withOpacity(0.1),
@@ -322,16 +314,10 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
         child: CachedNetworkImage(
           imageUrl: getExtensionIcon(widget.source.extensionType!),
           fit: BoxFit.cover,
-          placeholder: (context, url) => Icon(
-            Icons.extension,
-            color: theme.onPrimaryContainer,
-            size: 16,
-          ),
-          errorWidget: (context, url, error) => Icon(
-            Icons.extension,
-            color: theme.onPrimaryContainer,
-            size: 16,
-          ),
+          placeholder: (context, url) =>
+              Icon(Icons.extension, color: theme.onPrimaryContainer, size: 16),
+          errorWidget: (context, url, error) =>
+              Icon(Icons.extension, color: theme.onPrimaryContainer, size: 16),
         ),
       ),
     );
@@ -407,10 +393,7 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
                       decoration: BoxDecoration(
                         color: theme.error,
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: theme.surface,
-                          width: 2,
-                        ),
+                        border: Border.all(color: theme.surface, width: 2),
                       ),
                       child: Center(
                         child: Icon(
@@ -462,10 +445,7 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
             decoration: BoxDecoration(
               color: theme.errorContainer.withOpacity(0.8),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: theme.error.withOpacity(0.3),
-                width: 1,
-              ),
+              border: Border.all(color: theme.error.withOpacity(0.3), width: 1),
             ),
             child: Text(
               "18+",
@@ -484,10 +464,7 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
             decoration: BoxDecoration(
               color: theme.error.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: theme.error.withOpacity(0.4),
-                width: 1,
-              ),
+              border: Border.all(color: theme.error.withOpacity(0.4), width: 1),
             ),
             child: Text(
               "OBSOLETE",
@@ -505,9 +482,13 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
   }
 
   Widget _buildButtons(
-      bool sourceNotEmpty, bool updateAvailable, ColorScheme theme) {
+    bool sourceNotEmpty,
+    bool updateAvailable,
+    ColorScheme theme,
+  ) {
     void onTap() async {
       if (updateAvailable) {
+        if (!mounted) return;
         setState(() => _isLoading = true);
         try {
           widget.source.extensionType!.getManager().update([widget.source.id!]);
@@ -523,12 +504,13 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
           ..setTitle("Delete Extension")
           ..setMessage("Are you sure you want to delete this extension?")
           ..setPositiveButton("Yes", () async {
+            if (!mounted) return;
             setState(() => _isLoading = true);
             try {
               log("Uninstalling => ${widget.source.id}");
-              await widget.source.extensionType!
-                  .getManager()
-                  .uninstallSource(widget.source);
+              await widget.source.extensionType!.getManager().uninstallSource(
+                widget.source,
+              );
               await sourceController.sortExtensions();
             } catch (e) {
               log("Uninstall Failed => ${e.toString()}");
@@ -558,8 +540,9 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
                         color: theme.onPrimaryContainer,
-                        value:
-                            _installProgress == 0.0 ? null : _installProgress,
+                        value: _installProgress == 0.0
+                            ? null
+                            : _installProgress,
                       ),
                     ),
                   )

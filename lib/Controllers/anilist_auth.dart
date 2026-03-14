@@ -6,13 +6,13 @@ import 'dart:developer';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/models/online_service.dart';
+import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Functions/string_extensions.dart';
 import 'package:azyx/Models/anilist_anime_data.dart';
 import 'package:azyx/Models/anilist_user_data.dart';
 import 'package:azyx/Models/media.dart';
-import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Models/params.dart';
 import 'package:azyx/Models/user_media.dart';
 import 'package:azyx/Screens/Anime/anime_screen.dart';
@@ -247,14 +247,6 @@ class AnilistService extends GetxController
                 ),
               )
               .toList();
-          log("test: ${lists.toString()}");
-
-          // userAnimeList.assignAll(
-          //   lists
-          //       .expand((list) => (list['entries'] as List<dynamic>)
-          //           .map((entry) => UserMedia.fromJson(entry)))
-          //       .toList(),
-          // );
         } else {
           log('Unexpected response structure: ${response.body}');
         }
@@ -615,11 +607,11 @@ class AnilistService extends GetxController
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       log('Successfully added to list: ${data['data']['SaveMediaListEntry']}');
-      final newMedia = currentMedia.value
-        ..progress = anime.progress
-        ..status = anime.status
-        ..score = anime.score;
-      currentMedia.value = newMedia;
+      currentMedia.update((val) {
+        val?.progress = anime.progress;
+        val?.status = anime.status;
+        val?.score = anime.score;
+      });
     } else {
       final error = jsonDecode(response.body);
       log('Error adding to list: ${error['errors']}');

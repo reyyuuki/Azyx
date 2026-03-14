@@ -1,0 +1,345 @@
+Analyzing Azyx...                                               
+
+   info • Missing an 'await' for the 'Future' computed by this expression • AnymeXExtensionBridge/lib/Services/Aniyomi/AniyomiExtensions.dart:71:5 • unawaited_futures
+warning • The method doesn't override an inherited method • AnymeXExtensionBridge/lib/Services/Aniyomi/AniyomiExtensions.dart:76:24 • override_on_non_overriding_member
+warning • The method doesn't override an inherited method • AnymeXExtensionBridge/lib/Services/Aniyomi/AniyomiExtensions.dart:84:24 • override_on_non_overriding_member
+   info • Missing an 'await' for the 'Future' computed by this expression • AnymeXExtensionBridge/lib/Services/Aniyomi/AniyomiExtensions.dart:97:5 • unawaited_futures
+   info • Missing an 'await' for the 'Future' computed by this expression • AnymeXExtensionBridge/lib/Services/Aniyomi/AniyomiExtensions.dart:168:11 • unawaited_futures
+   info • Missing an 'await' for the 'Future' computed by this expression • AnymeXExtensionBridge/lib/Services/Aniyomi/AniyomiExtensions.dart:171:11 • unawaited_futures
+warning • The value of the local variable 'data' isn't used • AnymeXExtensionBridge/lib/Services/LnReader/JsEngine/JsEngine.dart:39:17 • unused_local_variable
+   info • Missing an 'await' for the 'Future' computed by this expression • AnymeXExtensionBridge/lib/Services/Mangayomi/Eval/dart/model/m_bridge.dart:616:5 • unawaited_futures
+   info • Missing an 'await' for the 'Future' computed by this expression • AnymeXExtensionBridge/lib/Services/Mangayomi/Eval/dart/model/m_bridge.dart:628:7 • unawaited_futures
+warning • The declaration '_convertLang' isn't referenced • AnymeXExtensionBridge/lib/Services/Mangayomi/MangayomiExtensions.dart:321:10 • unused_element
+warning • The value of the field '_lastCookie' isn't used • AnymeXExtensionBridge/lib/Services/Mangayomi/anime_extractors/quarkuc_extractor.dart:25:10 • unused_field
+   info • Use the '??' operator rather than '?:' when testing for 'null' • lib/Controllers/anilist_add_to_list_controller.dart:576:33 • prefer_if_null_operators
+   info • Don't invoke 'print' in production code • lib/Controllers/online_subtitles_controller.dart:34:7 • avoid_print
+   info • Parameter 'key' could be a super parameter • lib/Controllers/online_subtitles_controller.dart:67:9 • use_super_parameters
+   info • Unnecessary braces in a string interpolation • lib/Controllers/services/simkl_service.dart:58:26 • unnecessary_brace_in_string_interps
+   info • The member 'currentMedia' overrides an inherited member but isn't annotated with '@override' • lib/Controllers/services/simkl_service.dart:142:17 • annotate_overrides
+   info • Use 'const' with the constructor to improve performance • lib/Controllers/services/simkl_service.dart:571:47 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/Controllers/services/simkl_service.dart:584:52 • prefer_const_constructors
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Controllers/source/source_controller.dart:7:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/ExtensionManager.dart' • lib/Controllers/source/source_controller.dart:7:8 • uri_does_not_exist
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Controllers/source/source_controller.dart:8:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Models/Source.dart' • lib/Controllers/source/source_controller.dart:8:8 • uri_does_not_exist
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Controllers/source/source_controller.dart:9:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/extension_bridge.dart' • lib/Controllers/source/source_controller.dart:9:8 • uri_does_not_exist
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:17:30 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:18:35 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:19:35 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:20:30 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:21:26 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:23:40 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:25:35 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:26:31 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:28:35 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:29:31 • non_type_as_type_argument
+  error • The property 'id' can't be unconditionally accessed because the receiver can be 'null' • lib/Controllers/source/source_controller.dart:59:28 • unchecked_use_of_nullable_value
+  error • The property 'id' can't be unconditionally accessed because the receiver can be 'null' • lib/Controllers/source/source_controller.dart:62:28 • unchecked_use_of_nullable_value
+  error • The property 'id' can't be unconditionally accessed because the receiver can be 'null' • lib/Controllers/source/source_controller.dart:65:28 • unchecked_use_of_nullable_value
+  error • Undefined name 'ExtensionType' • lib/Controllers/source/source_controller.dart:93:27 • undefined_identifier
+  error • Undefined name 'ExtensionType' • lib/Controllers/source/source_controller.dart:95:18 • undefined_identifier
+  error • Undefined name 'ExtensionType' • lib/Controllers/source/source_controller.dart:116:27 • undefined_identifier
+  error • Undefined name 'ExtensionType' • lib/Controllers/source/source_controller.dart:117:39 • undefined_identifier
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:121:37 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:122:42 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:123:42 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:124:37 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:125:42 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:126:42 • non_type_as_type_argument
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/Controllers/source/source_controller.dart:158:25 • unchecked_use_of_nullable_value
+  error • Undefined class 'Source' • lib/Controllers/source/source_controller.dart:162:24 • undefined_class
+  error • Undefined name 'ItemType' • lib/Controllers/source/source_controller.dart:163:28 • undefined_identifier
+  error • Undefined name 'ItemType' • lib/Controllers/source/source_controller.dart:167:35 • undefined_identifier
+  error • Undefined class 'ExtensionType' • lib/Controllers/source/source_controller.dart:178:23 • undefined_class
+  error • Undefined name 'ExtensionType' • lib/Controllers/source/source_controller.dart:179:17 • undefined_identifier
+  error • Undefined class 'ExtensionType' • lib/Controllers/source/source_controller.dart:188:23 • undefined_class
+  error • Undefined name 'ExtensionType' • lib/Controllers/source/source_controller.dart:189:17 • undefined_identifier
+  error • Undefined class 'ExtensionType' • lib/Controllers/source/source_controller.dart:233:33 • undefined_class
+  error • Undefined name 'ExtensionType' • lib/Controllers/source/source_controller.dart:234:17 • undefined_identifier
+  error • Undefined class 'ExtensionType' • lib/Controllers/source/source_controller.dart:243:33 • undefined_class
+  error • Undefined name 'ExtensionType' • lib/Controllers/source/source_controller.dart:244:17 • undefined_identifier
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:251:8 • non_type_as_type_argument
+  error • The body might complete normally, causing 'null' to be returned, but the return type, 'List<InvalidType>', is a potentially non-nullable type • lib/Controllers/source/source_controller.dart:251:16 • body_might_complete_normally
+  error • Undefined class 'ItemType' • lib/Controllers/source/source_controller.dart:251:39 • undefined_class
+  error • Undefined name 'ItemType' • lib/Controllers/source/source_controller.dart:253:12 • undefined_identifier
+  error • Undefined name 'ItemType' • lib/Controllers/source/source_controller.dart:255:12 • undefined_identifier
+  error • Undefined name 'ItemType' • lib/Controllers/source/source_controller.dart:257:12 • undefined_identifier
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Controllers/source/source_controller.dart:262:8 • non_type_as_type_argument
+  error • The body might complete normally, causing 'null' to be returned, but the return type, 'List<InvalidType>', is a potentially non-nullable type • lib/Controllers/source/source_controller.dart:262:16 • body_might_complete_normally
+  error • Undefined class 'ItemType' • lib/Controllers/source/source_controller.dart:262:39 • undefined_class
+  error • Undefined name 'ItemType' • lib/Controllers/source/source_controller.dart:264:12 • undefined_identifier
+  error • Undefined name 'ItemType' • lib/Controllers/source/source_controller.dart:266:12 • undefined_identifier
+  error • Undefined name 'ItemType' • lib/Controllers/source/source_controller.dart:268:12 • undefined_identifier
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Controllers/source/source_mapper.dart:6:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart' • lib/Controllers/source/source_mapper.dart:6:8 • uri_does_not_exist
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Database/database.dart:7:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Mangayomi/Eval/dart/model/source_preference.dart' • lib/Database/database.dart:7:8 • uri_does_not_exist
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Database/database.dart:8:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart' • lib/Database/database.dart:8:8 • uri_does_not_exist
+  error • Undefined name 'MSourceSchema' • lib/Database/database.dart:21:9 • undefined_identifier
+  error • Undefined name 'SourcePreferenceSchema' • lib/Database/database.dart:22:9 • undefined_identifier
+  error • Undefined name 'SourcePreferenceStringValueSchema' • lib/Database/database.dart:23:9 • undefined_identifier
+  error • Undefined name 'BridgeSettingsSchema' • lib/Database/database.dart:24:9 • undefined_identifier
+  error • The method 'DartotsuExtensionBridge' isn't defined for the type 'Database' • lib/Database/database.dart:33:11 • undefined_method
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Database/kv_helper.dart:5:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart' • lib/Database/kv_helper.dart:5:8 • uri_does_not_exist
+  error • Undefined name 'isar' • lib/Database/kv_helper.dart:16:17 • undefined_identifier
+  error • Undefined name 'isar' • lib/Database/kv_helper.dart:48:5 • undefined_identifier
+  error • Undefined name 'isar' • lib/Database/kv_helper.dart:48:29 • undefined_identifier
+  error • Undefined name 'isar' • lib/Database/kv_helper.dart:52:17 • undefined_identifier
+  error • Undefined name 'isar' • lib/Database/kv_helper.dart:55:7 • undefined_identifier
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Extensions/ExtensionItem.dart:10:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Models/Source.dart' • lib/Extensions/ExtensionItem.dart:10:8 • uri_does_not_exist
+  error • Undefined class 'Source' • lib/Extensions/ExtensionItem.dart:16:9 • undefined_class
+  error • Undefined class 'ItemType' • lib/Extensions/ExtensionItem.dart:17:9 • undefined_class
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionItem.dart:121:8 • non_type_as_type_argument
+  error • The body might complete normally, causing 'null' to be returned, but the return type, 'List<InvalidType>', is a potentially non-nullable type • lib/Extensions/ExtensionItem.dart:121:20 • body_might_complete_normally
+  error • Undefined name 'ItemType' • lib/Extensions/ExtensionItem.dart:123:12 • undefined_identifier
+  error • Undefined name 'ItemType' • lib/Extensions/ExtensionItem.dart:125:12 • undefined_identifier
+  error • Undefined name 'ItemType' • lib/Extensions/ExtensionItem.dart:127:12 • undefined_identifier
+  error • The property 'id' can't be unconditionally accessed because the receiver can be 'null' • lib/Extensions/ExtensionItem.dart:137:16 • unchecked_use_of_nullable_value
+   info • The file name 'ExtensionList.dart' isn't a lower_case_with_underscores identifier • lib/Extensions/ExtensionList.dart:1:1 • file_names
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Extensions/ExtensionList.dart:6:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/ExtensionManager.dart' • lib/Extensions/ExtensionList.dart:6:8 • uri_does_not_exist
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Extensions/ExtensionList.dart:7:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Models/Source.dart' • lib/Extensions/ExtensionList.dart:7:8 • uri_does_not_exist
+  error • Undefined class 'ItemType' • lib/Extensions/ExtensionList.dart:19:9 • undefined_class
+   info • The private field _isUpdatingAll could be 'final' • lib/Extensions/ExtensionList.dart:37:8 • prefer_final_fields
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:77:8 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:80:8 • non_type_as_type_argument
+warning • The declaration '_buildErrorState' isn't referenced • lib/Extensions/ExtensionList.dart:202:10 • unused_element
+warning • The declaration '_buildLoadingState' isn't referenced • lib/Extensions/ExtensionList.dart:262:10 • unused_element
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:369:8 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:369:33 • non_type_as_type_argument
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/Extensions/ExtensionList.dart:373:21 • unchecked_use_of_nullable_value
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/Extensions/ExtensionList.dart:378:21 • unchecked_use_of_nullable_value
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:382:8 • non_type_as_type_argument
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/Extensions/ExtensionList.dart:388:21 • unchecked_use_of_nullable_value
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/Extensions/ExtensionList.dart:388:39 • unchecked_use_of_nullable_value
+  error • The property 'lang' can't be unconditionally accessed because the receiver can be 'null' • lib/Extensions/ExtensionList.dart:388:57 • unchecked_use_of_nullable_value
+  error • The property 'lang' can't be unconditionally accessed because the receiver can be 'null' • lib/Extensions/ExtensionList.dart:388:75 • unchecked_use_of_nullable_value
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:394:8 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:399:8 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:402:30 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:505:37 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:555:25 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:556:12 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:557:34 • non_type_as_type_argument
+  error • Undefined class 'Source' • lib/Extensions/ExtensionList.dart:565:30 • undefined_class
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/Extensions/ExtensionList.dart:570:47 • unchecked_use_of_nullable_value
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/Extensions/ExtensionList.dart:570:69 • unchecked_use_of_nullable_value
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:575:25 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:576:12 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:578:36 • non_type_as_type_argument
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/Extensions/ExtensionList.dart:579:19 • prefer_const_literals_to_create_immutables
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:586:34 • non_type_as_type_argument
+  error • Undefined class 'Source' • lib/Extensions/ExtensionList.dart:593:30 • undefined_class
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/Extensions/ExtensionList.dart:598:47 • unchecked_use_of_nullable_value
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/Extensions/ExtensionList.dart:598:69 • unchecked_use_of_nullable_value
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:603:25 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:604:12 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:606:36 • non_type_as_type_argument
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/Extensions/ExtensionList.dart:607:19 • prefer_const_literals_to_create_immutables
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:614:34 • non_type_as_type_argument
+  error • The property 'lang' can't be unconditionally accessed because the receiver can be 'null' • lib/Extensions/ExtensionList.dart:616:58 • unchecked_use_of_nullable_value
+  error • The property 'lang' can't be unconditionally accessed because the receiver can be 'null' • lib/Extensions/ExtensionList.dart:620:40 • unchecked_use_of_nullable_value
+  error • Undefined class 'Source' • lib/Extensions/ExtensionList.dart:628:30 • undefined_class
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/Extensions/ExtensionList.dart:633:47 • unchecked_use_of_nullable_value
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/Extensions/ExtensionList.dart:633:69 • unchecked_use_of_nullable_value
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionList.dart:638:39 • non_type_as_type_argument
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Extensions/ExtensionScreen.dart:11:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Models/Source.dart' • lib/Extensions/ExtensionScreen.dart:11:8 • uri_does_not_exist
+  error • Undefined name 'ItemType' • lib/Extensions/ExtensionScreen.dart:111:21 • undefined_identifier
+  error • Undefined name 'ItemType' • lib/Extensions/ExtensionScreen.dart:118:21 • undefined_identifier
+  error • Undefined name 'ItemType' • lib/Extensions/ExtensionScreen.dart:125:21 • undefined_identifier
+  error • Undefined name 'ItemType' • lib/Extensions/ExtensionScreen.dart:132:21 • undefined_identifier
+  error • Undefined name 'ItemType' • lib/Extensions/ExtensionScreen.dart:144:29 • undefined_identifier
+  error • Undefined name 'ItemType' • lib/Extensions/ExtensionScreen.dart:150:29 • undefined_identifier
+  error • Undefined name 'ItemType' • lib/Extensions/ExtensionScreen.dart:156:29 • undefined_identifier
+  error • Undefined name 'ItemType' • lib/Extensions/ExtensionScreen.dart:162:29 • undefined_identifier
+  error • Undefined class 'ItemType' • lib/Extensions/ExtensionScreen.dart:177:5 • undefined_class
+  error • Undefined class 'ItemType' • lib/Extensions/ExtensionScreen.dart:209:3 • undefined_class
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Extensions/ExtensionScreen.dart:212:8 • non_type_as_type_argument
+  error • The property 'lang' can't be unconditionally accessed because the receiver can be 'null' • lib/Extensions/ExtensionScreen.dart:231:29 • unchecked_use_of_nullable_value
+   info • The file name 'ExtensionSettings.dart' isn't a lower_case_with_underscores identifier • lib/Extensions/ExtensionSettings/ExtensionSettings.dart:1:1 • file_names
+   info • The file name 'ListTileChapterFilter.dart' isn't a lower_case_with_underscores identifier • lib/Extensions/ExtensionSettings/ListTileChapterFilter.dart:1:1 • file_names
+   info • Use 'const' with the constructor to improve performance • lib/Extensions/add_repo_sheet.dart:113:11 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/Extensions/add_repo_sheet.dart:410:17 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/Extensions/add_repo_sheet.dart:411:26 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/Extensions/add_repo_sheet.dart:487:13 • prefer_const_constructors
+   info • The file name 'Extensions.dart' isn't a lower_case_with_underscores identifier • lib/Functions/Extensions.dart:1:1 • file_names
+   info • The file name 'Function.dart' isn't a lower_case_with_underscores identifier • lib/Functions/Function.dart:1:1 • file_names
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Models/anime_all_data.dart:2:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart' • lib/Models/anime_all_data.dart:2:8 • uri_does_not_exist
+  error • The name 'Video' isn't a type, so it can't be used as a type argument • lib/Models/anime_all_data.dart:13:8 • non_type_as_type_argument
+  error • The name 'Video' isn't a type, so it can't be used as a type argument • lib/Models/anime_all_data.dart:20:31 • non_type_as_type_argument
+  error • Undefined name 'Video' • lib/Models/anime_all_data.dart:39:28 • undefined_identifier
+  error • The method 'toJson' can't be unconditionally invoked because the receiver can be 'null' • lib/Models/anime_all_data.dart:57:47 • unchecked_use_of_nullable_value
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Models/episode_class.dart:2:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart' • lib/Models/episode_class.dart:2:8 • uri_does_not_exist
+   info • The imported package 'intl' isn't a dependency of the importing package • lib/Models/episode_class.dart:3:8 • depend_on_referenced_packages
+  error • Undefined class 'DEpisode' • lib/Models/episode_class.dart:131:27 • undefined_class
+  error • Undefined class 'DMedia' • lib/Models/episode_class.dart:131:45 • undefined_class
+  error • The name 'DEpisode' isn't a type, so it can't be used as a type argument • lib/Models/episode_class.dart:181:38 • non_type_as_type_argument
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/Models/episode_class.dart:184:16 • unchecked_use_of_nullable_value
+  error • The property 'url' can't be unconditionally accessed because the receiver can be 'null' • lib/Models/episode_class.dart:185:15 • unchecked_use_of_nullable_value
+  error • The property 'scanlator' can't be unconditionally accessed because the receiver can be 'null' • lib/Models/episode_class.dart:186:20 • unchecked_use_of_nullable_value
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/Models/episode_class.dart:187:62 • unchecked_use_of_nullable_value
+  error • The property 'dateUpload' can't be unconditionally accessed because the receiver can be 'null' • lib/Models/episode_class.dart:188:31 • unchecked_use_of_nullable_value
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Models/local_history.dart:3:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Models/Source.dart' • lib/Models/local_history.dart:3:8 • uri_does_not_exist
+  error • Undefined class 'Source' • lib/Models/local_history.dart:16:3 • undefined_class
+  error • Undefined name 'Source' • lib/Models/local_history.dart:55:13 • undefined_identifier
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Models/media.dart:4:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Models/DMedia.dart' • lib/Models/media.dart:4:8 • uri_does_not_exist
+   info • Use the '??' operator rather than '?:' when testing for 'null' • lib/Models/media.dart:39:14 • prefer_if_null_operators
+  error • Undefined class 'DMedia' • lib/Models/media.dart:90:27 • undefined_class
+   info • The file name 'PrefManager.dart' isn't a lower_case_with_underscores identifier • lib/Preferences/PrefManager.dart:1:1 • file_names
+   info • The file name 'Preferences.dart' isn't a lower_case_with_underscores identifier • lib/Preferences/Preferences.dart:1:1 • file_names
+warning • The member 'value' can only be used within instance members of subclasses of 'package:get/get_rx/src/rx_types/rx_iterables/rx_list.dart' • lib/Screens/AI/ai_recommendations_page.dart:64:43 • invalid_use_of_protected_member
+warning • The member 'value' can only be used within instance members of subclasses of 'package:get/get_rx/src/rx_types/rx_iterables/rx_list.dart' • lib/Screens/AI/ai_recommendations_page.dart:89:60 • invalid_use_of_protected_member
+warning • The member 'value' can only be used within instance members of subclasses of 'package:get/get_rx/src/rx_types/rx_iterables/rx_list.dart' • lib/Screens/AI/ai_recommendations_page.dart:91:64 • invalid_use_of_protected_member
+warning • The member 'value' can only be used within instance members of subclasses of 'package:get/get_rx/src/rx_types/rx_iterables/rx_list.dart' • lib/Screens/AI/ai_recommendations_page.dart:92:64 • invalid_use_of_protected_member
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Screens/Anime/Details/anime_details_screen.dart:20:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart' • lib/Screens/Anime/Details/anime_details_screen.dart:20:8 • uri_does_not_exist
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Screens/Anime/Details/anime_details_screen.dart:51:12 • non_type_as_type_argument
+  error • The method 'Source' isn't defined for the type '_DetailsScreenState' • lib/Screens/Anime/Details/anime_details_screen.dart:51:37 • undefined_method
+  error • Undefined name 'DMedia' • lib/Screens/Anime/Details/anime_details_screen.dart:152:20 • undefined_identifier
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Screens/Anime/Details/tabs/watch_section.dart:12:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/ExtensionManager.dart' • lib/Screens/Anime/Details/tabs/watch_section.dart:12:8 • uri_does_not_exist
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Screens/Anime/Details/tabs/watch_section.dart:13:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Models/Source.dart' • lib/Screens/Anime/Details/tabs/watch_section.dart:13:8 • uri_does_not_exist
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Screens/Anime/Details/tabs/watch_section.dart:22:16 • non_type_as_type_argument
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/Screens/Anime/Details/tabs/watch_section.dart:116:31 • unchecked_use_of_nullable_value
+  error • The property 'extensionType' can't be unconditionally accessed because the receiver can be 'null' • lib/Screens/Anime/Details/tabs/watch_section.dart:116:41 • unchecked_use_of_nullable_value
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Screens/Anime/Watch/controller/watch_controller.dart:27:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/ExtensionManager.dart' • lib/Screens/Anime/Watch/controller/watch_controller.dart:27:8 • uri_does_not_exist
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Screens/Anime/Watch/controller/watch_controller.dart:28:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Models/DEpisode.dart' • lib/Screens/Anime/Watch/controller/watch_controller.dart:28:8 • uri_does_not_exist
+  error • The method 'DEpisode' isn't defined for the type 'WatchController' • lib/Screens/Anime/Watch/controller/watch_controller.dart:229:25 • undefined_method
+  error • The property 'url' can't be unconditionally accessed because the receiver can be 'null' • lib/Screens/Anime/Watch/controller/watch_controller.dart:232:20 • unchecked_use_of_nullable_value
+   info • Use a 'SizedBox' to add whitespace to a layout • lib/Screens/Library/library_screen.dart:811:15 • sized_box_for_whitespace
+   info • Use a 'SizedBox' to add whitespace to a layout • lib/Screens/Library/library_screen.dart:939:11 • sized_box_for_whitespace
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Screens/Manga/Details/manga_details_screen.dart:23:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart' • lib/Screens/Manga/Details/manga_details_screen.dart:23:8 • uri_does_not_exist
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Screens/Manga/Details/manga_details_screen.dart:55:16 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Screens/Manga/Details/manga_details_screen.dart:55:53 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Screens/Manga/Details/manga_details_screen.dart:56:12 • non_type_as_type_argument
+  error • The method 'Source' isn't defined for the type '_DetailsScreenState' • lib/Screens/Manga/Details/manga_details_screen.dart:56:37 • undefined_method
+  error • Undefined name 'DMedia' • lib/Screens/Manga/Details/manga_details_screen.dart:137:20 • undefined_identifier
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Screens/Manga/Details/tabs/read_section.dart:18:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart' • lib/Screens/Manga/Details/tabs/read_section.dart:18:8 • uri_does_not_exist
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Screens/Manga/Details/tabs/read_section.dart:25:12 • non_type_as_type_argument
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Screens/Manga/Details/tabs/read_section.dart:26:16 • non_type_as_type_argument
+  error • The name 'DEpisode' isn't a type, so it can't be used as a type argument • lib/Screens/Manga/Details/tabs/read_section.dart:32:17 • non_type_as_type_argument
+  error • The property 'name' can't be unconditionally accessed because the receiver can be 'null' • lib/Screens/Manga/Details/tabs/read_section.dart:114:43 • unchecked_use_of_nullable_value
+  error • The property 'extensionType' can't be unconditionally accessed because the receiver can be 'null' • lib/Screens/Manga/Details/tabs/read_section.dart:114:53 • unchecked_use_of_nullable_value
+  error • Undefined name 'DMedia' • lib/Screens/Manga/Details/tabs/read_section.dart:333:48 • undefined_identifier
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Screens/Manga/Read/controller/reader_controller.dart:5:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Models/Page.dart' • lib/Screens/Manga/Read/controller/reader_controller.dart:5:8 • uri_does_not_exist
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Screens/Manga/Read/controller/reader_controller.dart:6:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Models/Source.dart' • lib/Screens/Manga/Read/controller/reader_controller.dart:6:8 • uri_does_not_exist
+  error • The name 'PageUrl' isn't a type, so it can't be used as a type argument • lib/Screens/Manga/Read/controller/reader_controller.dart:13:16 • non_type_as_type_argument
+warning • The declaration '_setupPageViewListener' isn't referenced • lib/Screens/Manga/Read/controller/reader_controller.dart:22:8 • unused_element
+  error • Undefined class 'Source' • lib/Screens/Manga/Read/controller/reader_controller.dart:27:17 • undefined_class
+  error • Undefined class 'Source' • lib/Screens/Manga/Read/controller/reader_controller.dart:44:17 • undefined_class
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Screens/Manga/Read/view/read.dart:12:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Models/Page.dart' • lib/Screens/Manga/Read/view/read.dart:12:8 • uri_does_not_exist
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Screens/Manga/Read/view/read.dart:13:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Models/Source.dart' • lib/Screens/Manga/Read/view/read.dart:13:8 • uri_does_not_exist
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Screens/Manga/Read/view/read.dart:14:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart' • lib/Screens/Manga/Read/view/read.dart:14:8 • uri_does_not_exist
+  error • Undefined class 'Source' • lib/Screens/Manga/Read/view/read.dart:23:9 • undefined_class
+  error • The name 'PageUrl' isn't a type, so it can't be used as a type argument • lib/Screens/Manga/Read/view/read.dart:40:16 • non_type_as_type_argument
+  error • The method 'DEpisode' isn't defined for the type '_ReadPageState' • lib/Screens/Manga/Read/view/read.dart:89:13 • undefined_method
+   info • Use 'const' with the constructor to improve performance • lib/Screens/search/search_screen.dart:200:23 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/Screens/search/widgets/gridview_list.dart:62:27 • prefer_const_constructors
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Widgets/anime/anify_episodes_list.dart:17:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart' • lib/Widgets/anime/anify_episodes_list.dart:17:8 • uri_does_not_exist
+  error • The name 'Video' isn't a type, so it can't be used as a type argument • lib/Widgets/anime/anify_episodes_list.dart:37:16 • non_type_as_type_argument
+  error • The method 'DEpisode' isn't defined for the type 'AnifyEpisodesWidget' • lib/Widgets/anime/anify_episodes_list.dart:51:25 • undefined_method
+   info • Use 'const' with the constructor to improve performance • lib/Widgets/anime/anime_scrollable_list.dart:72:41 • prefer_const_constructors
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Widgets/anime/episode_bottom_sheet.dart:3:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Models/Video.dart' • lib/Widgets/anime/episode_bottom_sheet.dart:3:8 • uri_does_not_exist
+  error • The name 'Video' isn't a type, so it can't be used as a type argument • lib/Widgets/anime/episode_bottom_sheet.dart:8:14 • non_type_as_type_argument
+  error • The property 'quality' can't be unconditionally accessed because the receiver can be 'null' • lib/Widgets/anime/episode_bottom_sheet.dart:52:43 • unchecked_use_of_nullable_value
+  error • The property 'url' can't be unconditionally accessed because the receiver can be 'null' • lib/Widgets/anime/episode_bottom_sheet.dart:52:57 • unchecked_use_of_nullable_value
+  error • The name 'Video' isn't a type, so it can't be used as a type argument • lib/Widgets/anime/episode_bottom_sheet.dart:64:10 • non_type_as_type_argument
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Widgets/anime/episodes_list.dart:15:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart' • lib/Widgets/anime/episodes_list.dart:15:8 • uri_does_not_exist
+  error • The name 'Video' isn't a type, so it can't be used as a type argument • lib/Widgets/anime/episodes_list.dart:33:16 • non_type_as_type_argument
+  error • The method 'DEpisode' isn't defined for the type 'EpisodesList' • lib/Widgets/anime/episodes_list.dart:46:25 • undefined_method
+   info • The private field _bounceControllers could be 'final' • lib/Widgets/common/custom_nav_bar.dart:29:29 • prefer_final_fields
+   info • The private field _bounceScaleAnimations could be 'final' • lib/Widgets/common/custom_nav_bar.dart:30:27 • prefer_final_fields
+   info • The private field _bounceOpacityAnimations could be 'final' • lib/Widgets/common/custom_nav_bar.dart:31:27 • prefer_final_fields
+   info • Use 'const' with the constructor to improve performance • lib/Widgets/common_cards.dart:228:48 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/Widgets/common_cards.dart:240:48 • prefer_const_constructors
+warning • A value for optional parameter 'icon' isn't ever given • lib/Widgets/common_cards.dart:450:10 • unused_element_parameter
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Widgets/custom_drop_down.dart:4:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/ExtensionManager.dart' • lib/Widgets/custom_drop_down.dart:4:8 • uri_does_not_exist
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/Widgets/custom_drop_down.dart:5:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Models/Source.dart' • lib/Widgets/custom_drop_down.dart:5:8 • uri_does_not_exist
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Widgets/custom_drop_down.dart:10:16 • non_type_as_type_argument
+  error • Undefined class 'Source' • lib/Widgets/custom_drop_down.dart:14:9 • undefined_class
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Widgets/custom_drop_down.dart:15:12 • non_type_as_type_argument
+  error • Undefined class 'Source' • lib/Widgets/custom_drop_down.dart:59:3 • undefined_class
+  error • Undefined name 'ExtensionType' • lib/Widgets/custom_drop_down.dart:306:55 • undefined_identifier
+  error • The name 'Source' isn't a type, so it can't be used as a type argument • lib/Widgets/custom_drop_down.dart:371:17 • non_type_as_type_argument
+  error • Undefined name 'ExtensionType' • lib/Widgets/custom_drop_down.dart:488:31 • undefined_identifier
+   info • The null check operator shouldn't be used on a variable whose type is a potentially nullable type parameter • lib/Widgets/drop_dwon.dart:326:68 • null_check_on_nullable_type_parameter
+   info • Parameter 'key' could be a super parameter • lib/Widgets/test.dart:6:9 • use_super_parameters
+   info • Don't use 'BuildContext's across async gaps • lib/Widgets/theme_widgets/theme_color.dart:204:61 • use_build_context_synchronously
+   info • The file name 'Jikan.dart' isn't a lower_case_with_underscores identifier • lib/api/EpisodeDetails/Jikan/Jikan.dart:1:1 • file_names
+   info • The file name 'Kitsu.dart' isn't a lower_case_with_underscores identifier • lib/api/EpisodeDetails/Kitsu/Kitsu.dart:1:1 • file_names
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/main.dart:295:3 • prefer_const_constructors_in_immutables
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/storage_provider.dart:3:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Mangayomi/Eval/dart/model/source_preference.dart' • lib/storage_provider.dart:3:8 • uri_does_not_exist
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/storage_provider.dart:4:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Mangayomi/Models/Source.dart' • lib/storage_provider.dart:4:8 • uri_does_not_exist
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/storage_provider.dart:5:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Settings/Settings.dart' • lib/storage_provider.dart:5:8 • uri_does_not_exist
+  error • Undefined name 'MSourceSchema' • lib/storage_provider.dart:49:9 • undefined_identifier
+  error • Undefined name 'SourcePreferenceSchema' • lib/storage_provider.dart:50:9 • undefined_identifier
+  error • Undefined name 'SourcePreferenceStringValueSchema' • lib/storage_provider.dart:51:9 • undefined_identifier
+  error • Undefined name 'BridgeSettingsSchema' • lib/storage_provider.dart:52:9 • undefined_identifier
+   info • The imported package 'intl' isn't a dependency of the importing package • lib/utils/Anilist/anilist_calender.dart:7:8 • depend_on_referenced_packages
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/utils/Functions/functions.dart:1:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/ExtensionManager.dart' • lib/utils/Functions/functions.dart:1:8 • uri_does_not_exist
+  error • The body might complete normally, causing 'null' to be returned, but the return type, 'String', is a potentially non-nullable type • lib/utils/Functions/functions.dart:3:8 • body_might_complete_normally
+  error • Undefined class 'ExtensionType' • lib/utils/Functions/functions.dart:3:25 • undefined_class
+  error • Undefined name 'ExtensionType' • lib/utils/Functions/functions.dart:5:10 • undefined_identifier
+  error • Undefined name 'ExtensionType' • lib/utils/Functions/functions.dart:7:10 • undefined_identifier
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/utils/Functions/mapping_helper.dart:5:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart' • lib/utils/Functions/mapping_helper.dart:5:8 • uri_does_not_exist
+  error • The name 'DMedia' isn't a type, so it can't be used as a type argument • lib/utils/Functions/mapping_helper.dart:51:24 • non_type_as_type_argument
+warning • Unused import: 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart' • lib/utils/color_profiler.dart:6:8 • unused_import
+   info • The private field _pageController could be 'final' • lib/utils/color_profiler.dart:204:18 • prefer_final_fields
+   info • Use 'const' with the constructor to improve performance • lib/utils/color_profiler.dart:381:26 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/utils/color_profiler.dart:512:24 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/utils/color_profiler.dart:984:19 • prefer_const_constructors
+warning • Unused import: 'package:azyx/Controllers/services/service_handler.dart' • lib/utils/constants.dart:1:8 • unused_import
+warning • Unused import: 'package:azyx/Screens/Home/UserLists/widgets/grid_list.dart' • lib/utils/constants.dart:2:8 • unused_import
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/utils/deeplink.dart:5:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart' • lib/utils/deeplink.dart:5:8 • uri_does_not_exist
+  error • Undefined class 'ExtensionType' • lib/utils/deeplink.dart:10:5 • undefined_class
+  error • Undefined name 'ExtensionType' • lib/utils/deeplink.dart:16:18 • undefined_identifier
+  error • Undefined name 'ExtensionType' • lib/utils/deeplink.dart:19:18 • undefined_identifier
+  error • Undefined name 'ExtensionType' • lib/utils/deeplink.dart:22:18 • undefined_identifier
+  error • Undefined name 'ExtensionType' • lib/utils/deeplink.dart:29:14 • undefined_identifier
+  error • Undefined name 'ItemType' • lib/utils/deeplink.dart:36:64 • undefined_identifier
+  error • Undefined name 'ItemType' • lib/utils/deeplink.dart:37:64 • undefined_identifier
+   info • Statements in an if should be enclosed in a block • lib/utils/deeplink.dart:40:7 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/utils/deeplink.dart:42:7 • curly_braces_in_flow_control_structures
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/utils/extensions.dart:2:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/ExtensionManager.dart' • lib/utils/extensions.dart:2:8 • uri_does_not_exist
+   info • The imported package 'dartotsu_extension_bridge' isn't a dependency of the importing package • lib/utils/extensions.dart:3:8 • depend_on_referenced_packages
+  error • Target of URI doesn't exist: 'package:dartotsu_extension_bridge/Models/Source.dart' • lib/utils/extensions.dart:3:8 • uri_does_not_exist
+  error • Undefined class 'ExtensionType' • lib/utils/extensions.dart:8:24 • undefined_class
+  error • Undefined class 'ItemType' • lib/utils/extensions.dart:8:59 • undefined_class
+  error • Undefined name 'ItemType' • lib/utils/extensions.dart:9:17 • undefined_identifier
+  error • Undefined name 'ItemType' • lib/utils/extensions.dart:11:24 • undefined_identifier
+   info • Statements in an if should be enclosed in a block • lib/utils/functions.dart:28:11 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/utils/functions.dart:49:11 • curly_braces_in_flow_control_structures
+
+341 issues found. (ran in 2.7s)

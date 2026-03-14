@@ -2,7 +2,7 @@
 
 import 'dart:developer';
 
-import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
+import 'package:anymex_extension_bridge/dartotsu_extension_bridge.dart';
 
 double jaroWinklerDistance(String s1, String s2) {
   if (s1 == s2) return 1.0;

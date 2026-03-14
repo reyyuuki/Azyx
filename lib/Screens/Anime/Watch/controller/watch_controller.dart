@@ -2,16 +2,17 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as max;
+
+import 'package:azyx/Constants/constants.dart';
+import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
+import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/online_subtitles_controller.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Database/isar_models/episode_class.dart';
+import 'package:azyx/Functions/string_extensions.dart';
 import 'package:azyx/Models/anime_all_data.dart';
 import 'package:azyx/Models/local_history.dart';
-import 'package:azyx/Constants/constants.dart';
-import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
-import 'package:azyx/Controllers/anilist_auth.dart';
-import 'package:azyx/Functions/string_extensions.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/bottom_sheets.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/episode_list_drawer.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/indicator.dart';
@@ -20,11 +21,11 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/slider_bar.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
+import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:azyx/utils/color_profiler.dart';
 import 'package:azyx/utils/utils.dart';
-import 'package:azyx/utils/Functions/multiplier_extension.dart';
-import 'package:dartotsu_extension_bridge/ExtensionManager.dart';
-import 'package:dartotsu_extension_bridge/Models/DEpisode.dart';
+import 'package:anymex_extension_bridge/ExtensionManager.dart';
+import 'package:anymex_extension_bridge/Models/DEpisode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -96,7 +97,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     );
 
     intializeData(playerData);
-
+    log('checking: ${playerData.episodeUrls.first.headers}}');
     for (var element in playerData.episodeUrls) {
       log(
         "Headers: ${element.headers} / ${sourceController.activeSource.value!.baseUrl!}",
@@ -108,10 +109,10 @@ class WatchController extends GetxController with WidgetsBindingObserver {
         playerData.url!,
         httpHeaders: {
           'Referer':
-              playerData.episodeUrls.first.headers?['Referer'] ??
+              playerData.episodeUrls.first.headers?['referer'] ??
               sourceController.activeSource.value!.baseUrl!,
           'Origin':
-              playerData.episodeUrls.first.headers?['Origin'] ??
+              playerData.episodeUrls.first.headers?['origin'] ??
               sourceController.activeSource.value!.baseUrl!,
           'User-Agent':
               playerData.episodeUrls.first.headers?['user-agent'] ??
@@ -159,7 +160,9 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   void localHistoryEntry() {}
 
   void updateEntry() async {
-    Utils.log(serviceHandler.currentMedia.value.id ?? '');
+    Utils.log(
+      'aando: ${animeData.value.id}  ${serviceHandler.currentMedia.value.id ?? ''}',
+    );
     await serviceHandler.updateListEntry(
       serviceHandler.currentMedia.value,
       isAnime: true,

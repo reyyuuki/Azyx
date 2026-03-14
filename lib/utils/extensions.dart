@@ -1,6 +1,6 @@
 import 'package:azyx/Controllers/source/source_controller.dart';
-import 'package:dartotsu_extension_bridge/ExtensionManager.dart';
-import 'package:dartotsu_extension_bridge/Models/Source.dart';
+import 'package:anymex_extension_bridge/ExtensionManager.dart';
+import 'package:anymex_extension_bridge/Models/Source.dart';
 import 'package:get/get.dart';
 
 class Extensions {

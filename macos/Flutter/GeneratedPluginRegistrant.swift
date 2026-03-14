@@ -5,9 +5,9 @@
 import FlutterMacOS
 import Foundation
 
+import anymex_extension_bridge
 import app_links
 import bitsdojo_window_macos
-import dartotsu_extension_bridge
 import desktop_webview_window
 import device_info_plus
 import dynamic_color
@@ -28,9 +28,9 @@ import wakelock_plus
 import window_to_front
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+  DartotsuExtensionBridgePlugin.register(with: registry.registrar(forPlugin: "DartotsuExtensionBridgePlugin"))
   AppLinksMacosPlugin.register(with: registry.registrar(forPlugin: "AppLinksMacosPlugin"))
   BitsdojoWindowPlugin.register(with: registry.registrar(forPlugin: "BitsdojoWindowPlugin"))
-  DartotsuExtensionBridgePlugin.register(with: registry.registrar(forPlugin: "DartotsuExtensionBridgePlugin"))
   DesktopWebviewWindowPlugin.register(with: registry.registrar(forPlugin: "DesktopWebviewWindowPlugin"))
   DeviceInfoPlusMacosPlugin.register(with: registry.registrar(forPlugin: "DeviceInfoPlusMacosPlugin"))
   DynamicColorPlugin.register(with: registry.registrar(forPlugin: "DynamicColorPlugin"))

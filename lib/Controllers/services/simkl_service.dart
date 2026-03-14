@@ -4,11 +4,11 @@ import 'dart:convert';
 
 import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/models/online_service.dart';
+import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Models/anilist_user_data.dart';
 import 'package:azyx/Models/media.dart';
-import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Models/params.dart';
 import 'package:azyx/Models/simkl.dart';
 import 'package:azyx/Models/user_media.dart';
@@ -204,7 +204,9 @@ class SimklService extends GetxController
       );
       Utils.log(response.body);
       if (progress != null) {
-        currentMedia.value.progress = progress;
+        currentMedia.update((val) {
+          val?.progress = progress;
+        });
       }
       azyxSnackBar('${isMovie ? "Movie" : "Series"} Tracked Successfully');
       isMovie ? fetchUserMovieList() : fetchUserSeriesList();

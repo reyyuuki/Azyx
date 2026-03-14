@@ -10,7 +10,7 @@ class ServiceBottomSheet {
     showModalBottomSheet(
       context: context,
       barrierColor: Colors.black.withOpacity(0.5),
-      // isScrollControlled: true,
+      isScrollControlled: true,
       builder: (context) {
         return AzyXGradientContainer(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -29,7 +29,6 @@ class ServiceBottomSheet {
                 ),
               ),
 
-              // Title
               const AzyXText(
                 text: 'Select Service',
                 fontSize: 20,
@@ -38,7 +37,6 @@ class ServiceBottomSheet {
 
               const SizedBox(height: 20),
 
-              // Service tiles
               _buildServiceTile(
                 context,
                 name: 'Anilist',
@@ -62,8 +60,7 @@ class ServiceBottomSheet {
                 image: Assets.simklLogo,
                 serviceType: ServicesType.simkl,
               ),
-
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
             ],
           ),
         );

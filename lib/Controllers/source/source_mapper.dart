@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Models/media.dart';
 import 'package:azyx/utils/utils.dart';
-import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
+import 'package:anymex_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:get/get.dart';
 
 enum MediaType { manga, anime, novel }

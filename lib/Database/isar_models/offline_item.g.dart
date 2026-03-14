@@ -87,6 +87,7 @@ const OfflineItemSchema = CollectionSchema(
   links: {},
   embeddedSchemas: {
     r'AnilistMediaData': AnilistMediaDataSchema,
+    r'Character': CharacterSchema,
     r'Episode': EpisodeSchema,
     r'Chapter': ChapterSchema,
   },
@@ -94,7 +95,7 @@ const OfflineItemSchema = CollectionSchema(
   getId: _offlineItemGetId,
   getLinks: _offlineItemGetLinks,
   attach: _offlineItemAttach,
-  version: '3.3.0',
+  version: '3.3.0-dev.3',
 );
 
 int _offlineItemEstimateSize(

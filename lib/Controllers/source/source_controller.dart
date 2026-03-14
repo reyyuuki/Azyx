@@ -4,10 +4,12 @@ import 'dart:io';
 import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/storage_provider.dart';
-import 'package:dartotsu_extension_bridge/ExtensionManager.dart';
-import 'package:dartotsu_extension_bridge/Models/Source.dart';
-import 'package:dartotsu_extension_bridge/extension_bridge.dart';
+import 'package:anymex_extension_bridge/ExtensionManager.dart';
+import 'package:anymex_extension_bridge/Models/Source.dart';
+import 'package:anymex_extension_bridge/extension_bridge.dart';
 import 'package:get/get.dart';
+
+import '../../main.dart' as m;
 
 final sourceController = Get.put(SourceController());
 
@@ -41,8 +43,6 @@ class SourceController extends GetxController {
   }
 
   void _initialize() async {
-    isar = await StorageProvider().initDB(null);
-    await DartotsuExtensionBridge().init(isar, 'AzyX');
     await initExtensions();
   }
 

@@ -8,7 +8,7 @@ import 'package:azyx/Extensions/add_repo_sheet.dart';
 import 'package:azyx/Widgets/ScrollConfig.dart';
 import 'package:azyx/Widgets/language.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
-import 'package:dartotsu_extension_bridge/Models/Source.dart';
+import 'package:anymex_extension_bridge/Models/Source.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';

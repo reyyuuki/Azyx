@@ -30,90 +30,109 @@ class CustomControls extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.symmetric(
-          vertical: controller.isPotraitOrientaion.value ? 20 : 12,
-          horizontal: controller.isPotraitOrientaion.value ? 20 : 35),
+        vertical: controller.isPotraitOrientaion.value ? 20 : 12,
+        horizontal: controller.isPotraitOrientaion.value ? 20 : 35,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Obx(() => controller.isControlsLocked.value
-              ? const SizedBox.shrink()
-              : AnimatedContainer(
-                  height: controller.isPotraitOrientaion.value ? 150 : 101,
-                  alignment: Alignment.center,
-                  transform: Matrix4.translationValues(
-                      0, controller.showControls.value ? 0 : -Get.height, 0),
-                  duration: const Duration(milliseconds: 1000),
-                  curve: Curves.easeInOutCubicEmphasized,
-                  child: topBar)),
+          Obx(
+            () => controller.isControlsLocked.value
+                ? const SizedBox.shrink()
+                : AnimatedContainer(
+                    height: controller.isPotraitOrientaion.value ? 150 : 101,
+                    alignment: Alignment.center,
+                    transform: Matrix4.translationValues(
+                      0,
+                      controller.showControls.value ? 0 : -Get.height,
+                      0,
+                    ),
+                    duration: const Duration(milliseconds: 1000),
+                    curve: Curves.easeInOutCubicEmphasized,
+                    child: topBar,
+                  ),
+          ),
           Obx(
             () => Expanded(
-                child: AnimatedOpacity(
-              opacity: controller.showControls.value ? 1 : 0,
-              duration: const Duration(milliseconds: 500),
-              child: controller.isControlsLocked.value
-                  ? _lockedCenterControls(controller)
-                  : _centerControls(controller, context),
-            )),
+              child: AnimatedOpacity(
+                opacity: controller.showControls.value ? 1 : 0,
+                duration: const Duration(milliseconds: 500),
+                child: controller.isControlsLocked.value
+                    ? _lockedCenterControls(controller)
+                    : _centerControls(controller, context),
+              ),
+            ),
           ),
           AnimatedContainer(
             height: controller.isPotraitOrientaion.value ? 150 : 101,
             transform: Matrix4.translationValues(
-                0, controller.showControls.value ? 0 : Get.height, 0),
+              0,
+              controller.showControls.value ? 0 : Get.height,
+              0,
+            ),
             duration: const Duration(milliseconds: 1000),
             curve: Curves.easeInOutCubicEmphasized,
             child: Column(
               children: [
                 Row(
                   children: [
-                    Obx(() => AzyXText(
-                          text: controller.getFormattedTime(
-                              controller.position.value.inSeconds),
-                          fontVariant: FontVariant.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        )),
-                    const AzyXText(
-                      text: ' / ',
-                      fontVariant: FontVariant.bold,
+                    Obx(
+                      () => AzyXText(
+                        text: controller.getFormattedTime(
+                          controller.position.value.inSeconds,
+                        ),
+                        fontVariant: FontVariant.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
-                    Obx(() => AzyXText(
-                          text: controller.getFormattedTime(
-                              controller.totalDuration.value.inSeconds),
-                          fontVariant: FontVariant.bold,
-                        ))
+                    const AzyXText(text: ' / ', fontVariant: FontVariant.bold),
+                    Obx(
+                      () => AzyXText(
+                        text: controller.getFormattedTime(
+                          controller.totalDuration.value.inSeconds,
+                        ),
+                        fontVariant: FontVariant.bold,
+                      ),
+                    ),
                   ],
                 ),
                 Obx(
                   () => Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: CustomSlider(
-                        min: 0.0,
-                        max: controller.totalDuration.value.inSeconds > 0
-                            ? controller.totalDuration.value.inSeconds
-                                .toDouble()
-                            : 0.0,
-                        secondaryTrackValue:
-                            controller.totalDuration.value.inSeconds > 0
-                                ? controller.buffered.value.inSeconds.toDouble()
-                                : 0.0,
-                        indiactorTime: controller.getFormattedTime(
-                            controller.position.value.inSeconds),
-                        value: controller.totalDuration.value.inSeconds > 0.0
-                            ? double.parse(controller.position.value.inSeconds
-                                .toStringAsFixed(2))
-                            : 0.0,
-                        onDragEnd: (value) {
-                          controller.player
-                              .seek(Duration(seconds: value.toInt()));
-                          controller.player.play();
-                        },
-                        isLocked: controller.isControlsLocked.value,
-                        onChanged: (value) {
-                          controller.position.value =
-                              Duration(seconds: value.toInt());
-                        }),
+                      min: 0.0,
+                      max: controller.totalDuration.value.inSeconds > 0
+                          ? controller.totalDuration.value.inSeconds.toDouble()
+                          : 0.0,
+                      secondaryTrackValue:
+                          controller.totalDuration.value.inSeconds > 0
+                          ? controller.buffered.value.inSeconds.toDouble()
+                          : 0.0,
+                      indiactorTime: controller.getFormattedTime(
+                        controller.position.value.inSeconds,
+                      ),
+                      value: controller.totalDuration.value.inSeconds > 0.0
+                          ? double.parse(
+                              controller.position.value.inSeconds
+                                  .toStringAsFixed(2),
+                            )
+                          : 0.0,
+                      onDragEnd: (value) {
+                        controller.player.seek(
+                          Duration(seconds: value.toInt()),
+                        );
+                        controller.player.play();
+                      },
+                      isLocked: controller.isControlsLocked.value,
+                      onChanged: (value) {
+                        controller.position.value = Duration(
+                          seconds: value.toInt(),
+                        );
+                      },
+                    ),
                   ),
                 ),
-                bottomBar
+                bottomBar,
               ],
             ),
           ),
@@ -122,24 +141,23 @@ class CustomControls extends StatelessWidget {
     );
   }
 
-  Widget _buildIconButton(
-      {required VoidCallback ontap, required IconData icon}) {
+  Widget _buildIconButton({
+    required VoidCallback ontap,
+    required IconData icon,
+  }) {
     return InkWell(
-        onTap: ontap,
-        child: AzyXContainer(
-          padding: const EdgeInsets.all(10),
-          margin: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.6),
-              border:
-                  Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
-              borderRadius: BorderRadius.circular(50)),
-          child: Icon(
-            icon,
-            color: Colors.white,
-            size: 35,
-          ),
-        ));
+      onTap: ontap,
+      child: AzyXContainer(
+        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.6),
+          border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
+          borderRadius: BorderRadius.circular(50),
+        ),
+        child: Icon(icon, color: Colors.white, size: 35),
+      ),
+    );
   }
 
   Widget _centerControls(WatchController controller, BuildContext context) {
@@ -148,28 +166,33 @@ class CustomControls extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _buildIconButton(
-            ontap: () {
-              changeEpisode(false);
-            },
-            icon: Broken.previous),
+          ontap: () {
+            changeEpisode(false);
+          },
+          icon: Broken.previous,
+        ),
         20.width,
-        Obx(() => controller.isBuffering.value
-            ? const CircularProgressIndicator()
-            : GestureDetector(
-                onTap: () => controller.player.playOrPause(),
-                child: Icon(
-                  controller.isPlaying.value
-                      ? Icons.pause_rounded
-                      : Icons.play_arrow_rounded,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 60,
-                ))),
+        Obx(
+          () => controller.isBuffering.value
+              ? const CircularProgressIndicator()
+              : GestureDetector(
+                  onTap: () => controller.player.playOrPause(),
+                  child: Icon(
+                    controller.isPlaying.value
+                        ? Icons.pause_rounded
+                        : Icons.play_arrow_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 60,
+                  ),
+                ),
+        ),
         20.width,
         _buildIconButton(
-            ontap: () {
-              changeEpisode(true);
-            },
-            icon: Broken.next)
+          ontap: () {
+            changeEpisode(true);
+          },
+          icon: Broken.next,
+        ),
       ],
     );
   }

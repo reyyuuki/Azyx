@@ -13,50 +13,71 @@ const AnilistMediaDataSchema = Schema(
   name: r'AnilistMediaData',
   id: -5760830946583651264,
   properties: {
-    r'coverImage': PropertySchema(
+    r'characters': PropertySchema(
       id: 0,
+      name: r'characters',
+      type: IsarType.objectList,
+
+      target: r'Character',
+    ),
+    r'coverImage': PropertySchema(
+      id: 1,
       name: r'coverImage',
       type: IsarType.string,
     ),
     r'description': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'description',
       type: IsarType.string,
     ),
-    r'episodes': PropertySchema(id: 2, name: r'episodes', type: IsarType.long),
+    r'episodes': PropertySchema(id: 3, name: r'episodes', type: IsarType.long),
     r'genres': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'genres',
       type: IsarType.stringList,
     ),
-    r'id': PropertySchema(id: 4, name: r'id', type: IsarType.string),
-    r'image': PropertySchema(id: 5, name: r'image', type: IsarType.string),
+    r'id': PropertySchema(id: 5, name: r'id', type: IsarType.string),
+    r'image': PropertySchema(id: 6, name: r'image', type: IsarType.string),
     r'mediaType': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'mediaType',
       type: IsarType.int,
       enumMap: _AnilistMediaDatamediaTypeEnumValueMap,
     ),
     r'popularity': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'popularity',
       type: IsarType.long,
     ),
-    r'rating': PropertySchema(id: 8, name: r'rating', type: IsarType.string),
+    r'rating': PropertySchema(id: 9, name: r'rating', type: IsarType.string),
+    r'recommendations': PropertySchema(
+      id: 10,
+      name: r'recommendations',
+      type: IsarType.objectList,
+
+      target: r'AnilistMediaData',
+    ),
+    r'relations': PropertySchema(
+      id: 11,
+      name: r'relations',
+      type: IsarType.objectList,
+
+      target: r'AnilistMediaData',
+    ),
     r'servicesType': PropertySchema(
-      id: 9,
+      id: 12,
       name: r'servicesType',
       type: IsarType.int,
       enumMap: _AnilistMediaDataservicesTypeEnumValueMap,
     ),
-    r'status': PropertySchema(id: 10, name: r'status', type: IsarType.string),
+    r'status': PropertySchema(id: 13, name: r'status', type: IsarType.string),
     r'timeUntilAiring': PropertySchema(
-      id: 11,
+      id: 14,
       name: r'timeUntilAiring',
       type: IsarType.long,
     ),
-    r'title': PropertySchema(id: 12, name: r'title', type: IsarType.string),
-    r'type': PropertySchema(id: 13, name: r'type', type: IsarType.string),
+    r'title': PropertySchema(id: 15, name: r'title', type: IsarType.string),
+    r'type': PropertySchema(id: 16, name: r'type', type: IsarType.string),
   },
 
   estimateSize: _anilistMediaDataEstimateSize,
@@ -71,6 +92,23 @@ int _anilistMediaDataEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final list = object.characters;
+    if (list != null) {
+      bytesCount += 3 + list.length * 3;
+      {
+        final offsets = allOffsets[Character]!;
+        for (var i = 0; i < list.length; i++) {
+          final value = list[i];
+          bytesCount += CharacterSchema.estimateSize(
+            value,
+            offsets,
+            allOffsets,
+          );
+        }
+      }
+    }
+  }
   {
     final value = object.coverImage;
     if (value != null) {
@@ -114,6 +152,40 @@ int _anilistMediaDataEstimateSize(
     }
   }
   {
+    final list = object.recommendations;
+    if (list != null) {
+      bytesCount += 3 + list.length * 3;
+      {
+        final offsets = allOffsets[AnilistMediaData]!;
+        for (var i = 0; i < list.length; i++) {
+          final value = list[i];
+          bytesCount += AnilistMediaDataSchema.estimateSize(
+            value,
+            offsets,
+            allOffsets,
+          );
+        }
+      }
+    }
+  }
+  {
+    final list = object.relations;
+    if (list != null) {
+      bytesCount += 3 + list.length * 3;
+      {
+        final offsets = allOffsets[AnilistMediaData]!;
+        for (var i = 0; i < list.length; i++) {
+          final value = list[i];
+          bytesCount += AnilistMediaDataSchema.estimateSize(
+            value,
+            offsets,
+            allOffsets,
+          );
+        }
+      }
+    }
+  }
+  {
     final value = object.status;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -140,20 +212,38 @@ void _anilistMediaDataSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.coverImage);
-  writer.writeString(offsets[1], object.description);
-  writer.writeLong(offsets[2], object.episodes);
-  writer.writeStringList(offsets[3], object.genres);
-  writer.writeString(offsets[4], object.id);
-  writer.writeString(offsets[5], object.image);
-  writer.writeInt(offsets[6], object.mediaType?.index);
-  writer.writeLong(offsets[7], object.popularity);
-  writer.writeString(offsets[8], object.rating);
-  writer.writeInt(offsets[9], object.servicesType?.index);
-  writer.writeString(offsets[10], object.status);
-  writer.writeLong(offsets[11], object.timeUntilAiring);
-  writer.writeString(offsets[12], object.title);
-  writer.writeString(offsets[13], object.type);
+  writer.writeObjectList<Character>(
+    offsets[0],
+    allOffsets,
+    CharacterSchema.serialize,
+    object.characters,
+  );
+  writer.writeString(offsets[1], object.coverImage);
+  writer.writeString(offsets[2], object.description);
+  writer.writeLong(offsets[3], object.episodes);
+  writer.writeStringList(offsets[4], object.genres);
+  writer.writeString(offsets[5], object.id);
+  writer.writeString(offsets[6], object.image);
+  writer.writeInt(offsets[7], object.mediaType?.index);
+  writer.writeLong(offsets[8], object.popularity);
+  writer.writeString(offsets[9], object.rating);
+  writer.writeObjectList<AnilistMediaData>(
+    offsets[10],
+    allOffsets,
+    AnilistMediaDataSchema.serialize,
+    object.recommendations,
+  );
+  writer.writeObjectList<AnilistMediaData>(
+    offsets[11],
+    allOffsets,
+    AnilistMediaDataSchema.serialize,
+    object.relations,
+  );
+  writer.writeInt(offsets[12], object.servicesType?.index);
+  writer.writeString(offsets[13], object.status);
+  writer.writeLong(offsets[14], object.timeUntilAiring);
+  writer.writeString(offsets[15], object.title);
+  writer.writeString(offsets[16], object.type);
 }
 
 AnilistMediaData _anilistMediaDataDeserialize(
@@ -163,26 +253,44 @@ AnilistMediaData _anilistMediaDataDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = AnilistMediaData(
-    coverImage: reader.readStringOrNull(offsets[0]),
-    description: reader.readStringOrNull(offsets[1]),
-    episodes: reader.readLongOrNull(offsets[2]),
-    genres: reader.readStringList(offsets[3]),
-    id: reader.readStringOrNull(offsets[4]),
-    image: reader.readStringOrNull(offsets[5]),
+    characters: reader.readObjectList<Character>(
+      offsets[0],
+      CharacterSchema.deserialize,
+      allOffsets,
+      Character(),
+    ),
+    coverImage: reader.readStringOrNull(offsets[1]),
+    description: reader.readStringOrNull(offsets[2]),
+    episodes: reader.readLongOrNull(offsets[3]),
+    genres: reader.readStringList(offsets[4]),
+    id: reader.readStringOrNull(offsets[5]),
+    image: reader.readStringOrNull(offsets[6]),
     mediaType:
         _AnilistMediaDatamediaTypeValueEnumMap[reader.readIntOrNull(
-          offsets[6],
+          offsets[7],
         )],
-    popularity: reader.readLongOrNull(offsets[7]),
-    rating: reader.readStringOrNull(offsets[8]),
+    popularity: reader.readLongOrNull(offsets[8]),
+    rating: reader.readStringOrNull(offsets[9]),
+    recommendations: reader.readObjectList<AnilistMediaData>(
+      offsets[10],
+      AnilistMediaDataSchema.deserialize,
+      allOffsets,
+      AnilistMediaData(),
+    ),
+    relations: reader.readObjectList<AnilistMediaData>(
+      offsets[11],
+      AnilistMediaDataSchema.deserialize,
+      allOffsets,
+      AnilistMediaData(),
+    ),
     servicesType:
         _AnilistMediaDataservicesTypeValueEnumMap[reader.readIntOrNull(
-          offsets[9],
+          offsets[12],
         )],
-    status: reader.readStringOrNull(offsets[10]),
-    timeUntilAiring: reader.readLongOrNull(offsets[11]),
-    title: reader.readStringOrNull(offsets[12]),
-    type: reader.readStringOrNull(offsets[13]),
+    status: reader.readStringOrNull(offsets[13]),
+    timeUntilAiring: reader.readLongOrNull(offsets[14]),
+    title: reader.readStringOrNull(offsets[15]),
+    type: reader.readStringOrNull(offsets[16]),
   );
   return object;
 }
@@ -195,38 +303,62 @@ P _anilistMediaDataDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readObjectList<Character>(
+            offset,
+            CharacterSchema.deserialize,
+            allOffsets,
+            Character(),
+          ))
+          as P;
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readLongOrNull(offset)) as P;
-    case 3:
-      return (reader.readStringList(offset)) as P;
-    case 4:
       return (reader.readStringOrNull(offset)) as P;
+    case 3:
+      return (reader.readLongOrNull(offset)) as P;
+    case 4:
+      return (reader.readStringList(offset)) as P;
     case 5:
       return (reader.readStringOrNull(offset)) as P;
     case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
       return (_AnilistMediaDatamediaTypeValueEnumMap[reader.readIntOrNull(
             offset,
           )])
           as P;
-    case 7:
-      return (reader.readLongOrNull(offset)) as P;
     case 8:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 9:
+      return (reader.readStringOrNull(offset)) as P;
+    case 10:
+      return (reader.readObjectList<AnilistMediaData>(
+            offset,
+            AnilistMediaDataSchema.deserialize,
+            allOffsets,
+            AnilistMediaData(),
+          ))
+          as P;
+    case 11:
+      return (reader.readObjectList<AnilistMediaData>(
+            offset,
+            AnilistMediaDataSchema.deserialize,
+            allOffsets,
+            AnilistMediaData(),
+          ))
+          as P;
+    case 12:
       return (_AnilistMediaDataservicesTypeValueEnumMap[reader.readIntOrNull(
             offset,
           )])
           as P;
-    case 10:
-      return (reader.readStringOrNull(offset)) as P;
-    case 11:
-      return (reader.readLongOrNull(offset)) as P;
-    case 12:
-      return (reader.readStringOrNull(offset)) as P;
     case 13:
+      return (reader.readStringOrNull(offset)) as P;
+    case 14:
+      return (reader.readLongOrNull(offset)) as P;
+    case 15:
+      return (reader.readStringOrNull(offset)) as P;
+    case 16:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -256,6 +388,77 @@ const _AnilistMediaDataservicesTypeValueEnumMap = {
 
 extension AnilistMediaDataQueryFilter
     on QueryBuilder<AnilistMediaData, AnilistMediaData, QFilterCondition> {
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  charactersIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'characters'),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  charactersIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'characters'),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  charactersLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'characters', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  charactersIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'characters', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  charactersIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'characters', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  charactersLengthLessThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'characters', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  charactersLengthGreaterThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'characters', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  charactersLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'characters',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
   QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
   coverImageIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1479,6 +1682,154 @@ extension AnilistMediaDataQueryFilter
   }
 
   QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  recommendationsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'recommendations'),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  recommendationsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'recommendations'),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  recommendationsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'recommendations', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  recommendationsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'recommendations', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  recommendationsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'recommendations', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  recommendationsLengthLessThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'recommendations', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  recommendationsLengthGreaterThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'recommendations',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  recommendationsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'recommendations',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  relationsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'relations'),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  relationsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'relations'),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  relationsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'relations', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  relationsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'relations', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  relationsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'relations', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  relationsLengthLessThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'relations', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  relationsLengthGreaterThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'relations', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  relationsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'relations',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
   servicesTypeIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -2103,4 +2454,515 @@ extension AnilistMediaDataQueryFilter
 }
 
 extension AnilistMediaDataQueryObject
-    on QueryBuilder<AnilistMediaData, AnilistMediaData, QFilterCondition> {}
+    on QueryBuilder<AnilistMediaData, AnilistMediaData, QFilterCondition> {
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  charactersElement(FilterQuery<Character> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'characters');
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  recommendationsElement(FilterQuery<AnilistMediaData> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'recommendations');
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  relationsElement(FilterQuery<AnilistMediaData> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'relations');
+    });
+  }
+}
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+const CharacterSchema = Schema(
+  name: r'Character',
+  id: 4658184409279959047,
+  properties: {
+    r'image': PropertySchema(id: 0, name: r'image', type: IsarType.string),
+    r'name': PropertySchema(id: 1, name: r'name', type: IsarType.string),
+    r'popularity': PropertySchema(
+      id: 2,
+      name: r'popularity',
+      type: IsarType.long,
+    ),
+  },
+
+  estimateSize: _characterEstimateSize,
+  serialize: _characterSerialize,
+  deserialize: _characterDeserialize,
+  deserializeProp: _characterDeserializeProp,
+);
+
+int _characterEstimateSize(
+  Character object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  {
+    final value = object.image;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.name;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  return bytesCount;
+}
+
+void _characterSerialize(
+  Character object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeString(offsets[0], object.image);
+  writer.writeString(offsets[1], object.name);
+  writer.writeLong(offsets[2], object.popularity);
+}
+
+Character _characterDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = Character(
+    image: reader.readStringOrNull(offsets[0]),
+    name: reader.readStringOrNull(offsets[1]),
+    popularity: reader.readLongOrNull(offsets[2]),
+  );
+  return object;
+}
+
+P _characterDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readStringOrNull(offset)) as P;
+    case 1:
+      return (reader.readStringOrNull(offset)) as P;
+    case 2:
+      return (reader.readLongOrNull(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+extension CharacterQueryFilter
+    on QueryBuilder<Character, Character, QFilterCondition> {
+  QueryBuilder<Character, Character, QAfterFilterCondition> imageIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'image'),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> imageIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'image'),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> imageEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'image',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> imageGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'image',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> imageLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'image',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> imageBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'image',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> imageStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'image',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> imageEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'image',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> imageContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'image',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> imageMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'image',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> imageIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'image', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> imageIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'image', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> nameIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'name'),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> nameIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'name'),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> nameEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'name',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> nameGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'name',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> nameLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'name',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> nameBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'name',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> nameStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'name',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> nameEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'name',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> nameContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'name',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> nameMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'name',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> nameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'name', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> nameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'name', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> popularityIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'popularity'),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition>
+  popularityIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'popularity'),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> popularityEqualTo(
+    int? value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'popularity', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition>
+  popularityGreaterThan(int? value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'popularity',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> popularityLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'popularity',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Character, Character, QAfterFilterCondition> popularityBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'popularity',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+}
+
+extension CharacterQueryObject
+    on QueryBuilder<Character, Character, QFilterCondition> {}

@@ -34,7 +34,7 @@ class AnimeScrollableList extends StatelessWidget {
               GradientTitle(title: title),
               const SizedBox(height: 15),
               SizedBox(
-                height: Platform.isAndroid || Platform.isIOS ? 210 : 270,
+                height: Platform.isAndroid || Platform.isIOS ? 210 : 280,
                 child: ListView.builder(
                   shrinkWrap: true,
                   physics: const BouncingScrollPhysics(),

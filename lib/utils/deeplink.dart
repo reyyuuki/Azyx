@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/utils/extensions.dart';
-import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
+import 'package:anymex_extension_bridge/dartotsu_extension_bridge.dart';
 
 class Deeplink {
   static void useDeepLink(Uri uri) {

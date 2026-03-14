@@ -3,8 +3,8 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  anymex_extension_bridge
   bitsdojo_window_linux
-  dartotsu_extension_bridge
   desktop_webview_window
   dynamic_color
   flutter_acrylic
@@ -19,6 +19,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
+  fjs
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

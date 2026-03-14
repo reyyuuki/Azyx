@@ -1,5 +1,5 @@
 import 'package:azyx/utils/time_formater.dart';
-import 'package:dartotsu_extension_bridge/dartotsu_extension_bridge.dart';
+import 'package:anymex_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:intl/intl.dart';
 
 class Episode {

@@ -530,11 +530,11 @@ class MalService extends GetxController implements BaseService, OnlineService {
         "${isAnime ? 'Anime' : 'Manga'} Tracked to ${isAnime ? 'Episode' : 'Chapter'} $progress Successfully!",
       );
 
-      final newMedia = currentMedia.value
-        ..progress = progress
-        ..status = status
-        ..score = score;
-      currentMedia.value = newMedia;
+      currentMedia.update((val) {
+        val?.progress = progress;
+        val?.status = status;
+        val?.score = score;
+      });
       log('$isAnime: $body');
       if (isAnime) {
         fetchUserAnimeList();

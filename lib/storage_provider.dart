@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:dartotsu_extension_bridge/Mangayomi/Eval/dart/model/source_preference.dart';
-import 'package:dartotsu_extension_bridge/Mangayomi/Models/Source.dart';
-import 'package:dartotsu_extension_bridge/Settings/Settings.dart';
+import 'package:anymex_extension_bridge/Mangayomi/Eval/dart/model/source_preference.dart';
+import 'package:anymex_extension_bridge/Mangayomi/Models/Source.dart';
+import 'package:anymex_extension_bridge/Settings/Settings.dart';
 import 'package:isar_community/isar.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
