@@ -1,13 +1,12 @@
-// ignore_for_file: non_constant_identifier_names, use_build_context_synchronously, file_names, invalid_use_of_protected_member
-
 import 'dart:developer';
 
+import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
+    hide isar;
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Widgets/AlertDialogBuilder.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
-import 'package:azyx/utils/Functions/functions.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:anymex_extension_bridge/Models/Source.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -73,7 +72,6 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
   }
 
   Future<void> _handleSourceAction() async {
-    if (!mounted) return;
     setState(() {
       _isLoading = true;
       _installProgress = 0.0;
@@ -83,7 +81,6 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
     _progressController.forward();
 
     try {
-      // More realistic progress animation
       for (int i = 0; i <= 90; i += 15) {
         await Future.delayed(const Duration(milliseconds: 100));
         if (mounted) {
@@ -91,15 +88,14 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
         }
       }
 
-      await widget.source.extensionType?.getManager().installSource(
-        widget.source,
+      await widget.source.install();
+      log('installed');
+      await sourceController.extensionManager.refreshManagerType(
+        widget.source.extensionType,
+        widget.mediaType,
       );
-      await sourceController.sortExtensions();
-
-      // Complete the progress quickly
       if (mounted) {
         setState(() => _installProgress = 1.0);
-        // Immediately hide loading state after completion
         await Future.delayed(const Duration(milliseconds: 100));
         if (!mounted) return;
         setState(() {
@@ -108,12 +104,12 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
         });
       }
     } catch (e) {
-      log(e.toString());
       if (mounted) {
         setState(() {
           _isLoading = false;
           _installProgress = 0.0;
         });
+        azyxSnackBar(e.toString());
       }
     }
   }
@@ -121,11 +117,11 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
   List<Source> get _installedExtensions {
     switch (widget.mediaType) {
       case ItemType.manga:
-        return sourceController.installedMangaExtensions.value;
+        return sourceController.installedMangaExtensions;
       case ItemType.anime:
-        return sourceController.installedExtensions.value;
+        return sourceController.installedExtensions;
       case ItemType.novel:
-        return sourceController.installedNovelExtensions.value;
+        return sourceController.installedNovelExtensions;
     }
   }
 
@@ -292,8 +288,6 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
   }
 
   Widget _buildExtensionTypeBadge(ColorScheme theme) {
-    if (widget.source.extensionType == null) return const SizedBox();
-
     return Container(
       width: 32,
       height: 32,
@@ -312,7 +306,7 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
       child: ClipRRect(
         borderRadius: BorderRadius.circular(6),
         child: CachedNetworkImage(
-          imageUrl: getExtensionIcon(widget.source.extensionType!),
+          imageUrl: widget.source.managerIcon,
           fit: BoxFit.cover,
           placeholder: (context, url) =>
               Icon(Icons.extension, color: theme.onPrimaryContainer, size: 16),
@@ -458,25 +452,6 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
               ),
             ),
           ),
-        if (widget.source.isObsolete ?? false)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: theme.error.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: theme.error.withOpacity(0.4), width: 1),
-            ),
-            child: Text(
-              "OBSOLETE",
-              style: TextStyle(
-                color: theme.error,
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w800,
-                fontSize: 9.0,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
       ],
     );
   }
@@ -491,10 +466,10 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
         if (!mounted) return;
         setState(() => _isLoading = true);
         try {
-          widget.source.extensionType!.getManager().update([widget.source.id!]);
-          await sourceController.sortExtensions();
+          await widget.source.update();
+          await sourceController.fetchRepos();
         } catch (e) {
-          log("Update Failed => ${e.toString()}");
+          azyxSnackBar(e.toString());
         }
         if (mounted) {
           setState(() => _isLoading = false);
@@ -507,13 +482,10 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
             if (!mounted) return;
             setState(() => _isLoading = true);
             try {
-              log("Uninstalling => ${widget.source.id}");
-              await widget.source.extensionType!.getManager().uninstallSource(
-                widget.source,
-              );
-              await sourceController.sortExtensions();
+              await widget.source.uninstall();
+              await sourceController.fetchRepos();
             } catch (e) {
-              log("Uninstall Failed => ${e.toString()}");
+              azyxSnackBar(e.toString());
             }
             if (mounted) {
               setState(() => _isLoading = false);

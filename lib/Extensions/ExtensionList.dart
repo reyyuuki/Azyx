@@ -1,27 +1,22 @@
+import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
+    hide isar;
 import 'package:azyx/Controllers/source/source_controller.dart';
-import 'package:azyx/Extensions/ExtensionItem.dart';
-import 'package:azyx/Preferences/PrefManager.dart';
+import 'package:azyx/Extensions/extension_item.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/language.dart';
-import 'package:anymex_extension_bridge/ExtensionManager.dart';
-import 'package:anymex_extension_bridge/Models/Source.dart';
+import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:grouped_list/sliver_grouped_list.dart';
 
-import '../../Preferences/Preferences.dart';
-import '../utils/utils.dart';
-
 class Extension extends StatefulWidget {
   final bool installed;
-  final bool isManga;
   final String query;
   final ItemType itemType;
 
   const Extension({
     required this.installed,
     required this.query,
-    required this.isManga,
     required this.itemType,
     super.key,
   });
@@ -74,11 +69,27 @@ class _ExtensionScreenState extends State<Extension> {
     });
   }
 
-  List<Source> get _allAvailableExtensions =>
-      sourceController.getAvailableExtensions(widget.itemType);
+  List<Source> get _allAvailableExtensions {
+    final extensions = sourceController.getAvailableExtensions(widget.itemType);
+    if (_currentSearchQuery.isEmpty) return extensions;
+    return extensions
+        .where(
+          (e) =>
+              e.name!.toLowerCase().contains(_currentSearchQuery.toLowerCase()),
+        )
+        .toList();
+  }
 
-  List<Source> get _installedExtensions =>
-      sourceController.getInstalledExtensions(widget.itemType);
+  List<Source> get _installedExtensions {
+    final extensions = sourceController.getInstalledExtensions(widget.itemType);
+    if (_currentSearchQuery.isEmpty) return extensions;
+    return extensions
+        .where(
+          (e) =>
+              e.name!.toLowerCase().contains(_currentSearchQuery.toLowerCase()),
+        )
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,20 +109,17 @@ class _ExtensionScreenState extends State<Extension> {
                 interactive: true,
                 controller: _scrollController,
                 child: Obx(() {
-                  final installedEntries = _getInstalledEntries();
-                  final updateEntries = _getUpdateEntries();
-                  final notInstalledEntries = _getNotInstalledEntries();
                   return CustomScrollView(
                     controller: _scrollController,
                     physics: const BouncingScrollPhysics(),
                     slivers: [
                       const SliverToBoxAdapter(child: SizedBox(height: 8)),
+                      // if (widget.installed)
+                      //   _buildUpdatePendingList(updateEntries),
                       if (widget.installed)
-                        _buildUpdatePendingList(updateEntries),
-                      if (widget.installed)
-                        _buildInstalledList(installedEntries),
+                        _buildInstalledList(_installedExtensions),
                       if (!widget.installed)
-                        _buildNotInstalledList(notInstalledEntries),
+                        _buildNotInstalledList(_allAvailableExtensions),
                       const SliverToBoxAdapter(child: SizedBox(height: 80)),
                     ],
                   );
@@ -137,10 +145,7 @@ class _ExtensionScreenState extends State<Extension> {
           ],
         ),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: theme.outline.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: theme.outline.withOpacity(0.3), width: 1),
         boxShadow: [
           BoxShadow(
             color: theme.shadow.withOpacity(0.08),
@@ -168,11 +173,7 @@ class _ExtensionScreenState extends State<Extension> {
           ),
           prefixIcon: Container(
             padding: const EdgeInsets.all(12),
-            child: Icon(
-              Icons.search_rounded,
-              color: theme.primary,
-              size: 22,
-            ),
+            child: Icon(Icons.search_rounded, color: theme.primary, size: 22),
           ),
           suffixIcon: _currentSearchQuery.isNotEmpty
               ? GestureDetector(
@@ -199,217 +200,6 @@ class _ExtensionScreenState extends State<Extension> {
     );
   }
 
-  Widget _buildErrorState(ColorScheme theme) {
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.all(24),
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: theme.errorContainer.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: theme.error.withOpacity(0.2),
-            width: 1,
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.error_outline_rounded,
-              size: 48,
-              color: theme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Failed to load extensions',
-              style: TextStyle(
-                color: theme.onSurface,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Please check your connection and try again',
-              style: TextStyle(
-                color: theme.onSurface.withOpacity(0.7),
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: _refreshData,
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Retry'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.primaryContainer,
-                foregroundColor: theme.onPrimaryContainer,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLoadingState(ColorScheme theme) {
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.all(32),
-        padding: const EdgeInsets.all(40),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              theme.primaryContainer.withOpacity(0.3),
-              theme.secondaryContainer.withOpacity(0.2),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: theme.primary.withOpacity(0.2),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: theme.shadow.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: theme.primary.withOpacity(0.1),
-                  ),
-                ),
-                SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: CircularProgressIndicator.adaptive(
-                    valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
-                    strokeWidth: 3,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Loading Extensions',
-              style: TextStyle(
-                color: theme.onSurface,
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                fontFamily: 'Poppins',
-                letterSpacing: 0.5,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'This may take 10-15 seconds to fetch\nall available extensions',
-              style: TextStyle(
-                color: theme.onSurface.withOpacity(0.7),
-                fontSize: 15,
-                fontFamily: 'Poppins',
-                height: 1.4,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: theme.secondary.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.info_outline_rounded,
-                    size: 16,
-                    color: theme.secondary,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Please wait...',
-                    style: TextStyle(
-                      color: theme.onSurface.withOpacity(0.8),
-                      fontSize: 13,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<Source> _filterData(List<Source> data) {
-    return data
-        .where((element) =>
-            _currentSearchQuery.isEmpty ||
-            element.name!
-                .toLowerCase()
-                .contains(_currentSearchQuery.toLowerCase()))
-        .where((element) =>
-            widget.query.isEmpty ||
-            element.name!.toLowerCase().contains(widget.query.toLowerCase()))
-        .toList();
-  }
-
-  List<Source> _getNotInstalledEntries() {
-    final availableExtensions = _allAvailableExtensions;
-    final installedExtensions = _installedExtensions;
-
-    final notInstalled = availableExtensions.where((available) {
-      return !installedExtensions.any((installed) =>
-          installed.name == available.name && installed.lang == available.lang);
-    }).toList();
-
-    return _filterData(notInstalled);
-  }
-
-  List<Source> _getInstalledEntries() {
-    final installedExtensions = _installedExtensions;
-    return _filterData(installedExtensions);
-  }
-
-  List<Source> _getUpdateEntries() {
-    final installedExtensions = _installedExtensions;
-
-    final updateAvailable = <Source>[];
-
-    for (final installed in installedExtensions) {
-      if (installed.hasUpdate ?? false) {
-        updateAvailable.add(installed);
-      }
-    }
-
-    return _filterData(updateAvailable);
-  }
-
   Widget _buildSectionHeader({
     required String title,
     Widget? action,
@@ -430,10 +220,7 @@ class _ExtensionScreenState extends State<Extension> {
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.primary.withOpacity(0.3),
-          width: 1.5,
-        ),
+        border: Border.all(color: theme.primary.withOpacity(0.3), width: 1.5),
       ),
       child: Row(
         children: [
@@ -443,11 +230,7 @@ class _ExtensionScreenState extends State<Extension> {
               color: theme.primary.withOpacity(0.15),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              _getSectionIcon(title),
-              color: theme.primary,
-              size: 18,
-            ),
+            child: Icon(_getSectionIcon(title), color: theme.primary, size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -466,8 +249,10 @@ class _ExtensionScreenState extends State<Extension> {
                 if (count != null) ...[
                   const SizedBox(width: 8),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: theme.secondary.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(12),
@@ -517,16 +302,18 @@ class _ExtensionScreenState extends State<Extension> {
         ],
       ),
       child: ElevatedButton.icon(
-        onPressed:
-            _isUpdatingAll ? null : () => _updateAllSources(updateEntries),
+        onPressed: _isUpdatingAll
+            ? null
+            : () => _updateAllSources(updateEntries),
         icon: _isUpdatingAll
             ? SizedBox(
                 width: 16,
                 height: 16,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(theme.onPrimaryContainer),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    theme.onPrimaryContainer,
+                  ),
                 ),
               )
             : const Icon(Icons.system_update_rounded, size: 16),
@@ -541,10 +328,7 @@ class _ExtensionScreenState extends State<Extension> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(
-              color: theme.primary.withOpacity(0.3),
-              width: 1,
-            ),
+            side: BorderSide(color: theme.primary.withOpacity(0.3), width: 1),
           ),
           elevation: 0,
         ),
@@ -553,7 +337,8 @@ class _ExtensionScreenState extends State<Extension> {
   }
 
   SliverGroupedListView<Source, String> _buildUpdatePendingList(
-      List<Source> updateEntries) {
+    List<Source> updateEntries,
+  ) {
     return SliverGroupedListView<Source, String>(
       elements: updateEntries,
       groupBy: (element) => "Update",
@@ -562,10 +347,8 @@ class _ExtensionScreenState extends State<Extension> {
         count: updateEntries.length,
         action: _buildUpdateAllButton(updateEntries),
       ),
-      itemBuilder: (context, Source element) => ExtensionListTileWidget(
-        source: element,
-        mediaType: widget.itemType,
-      ),
+      itemBuilder: (context, Source element) =>
+          ExtensionListTileWidget(source: element, mediaType: widget.itemType),
       groupComparator: (group1, group2) => group1.compareTo(group2),
       itemComparator: (item1, item2) => item1.name!.compareTo(item2.name!),
       order: GroupedListOrder.ASC,
@@ -573,7 +356,8 @@ class _ExtensionScreenState extends State<Extension> {
   }
 
   SliverGroupedListView<Source, String> _buildInstalledList(
-      List<Source> installedEntries) {
+    List<Source> installedEntries,
+  ) {
     if (installedEntries.isEmpty) {
       return SliverGroupedListView<Source, String>(
         elements: [],
@@ -590,10 +374,8 @@ class _ExtensionScreenState extends State<Extension> {
         title: groupValue,
         count: installedEntries.length,
       ),
-      itemBuilder: (context, Source element) => ExtensionListTileWidget(
-        source: element,
-        mediaType: widget.itemType,
-      ),
+      itemBuilder: (context, Source element) =>
+          ExtensionListTileWidget(source: element, mediaType: widget.itemType),
       groupComparator: (group1, group2) => group1.compareTo(group2),
       itemComparator: (item1, item2) => item1.name!.compareTo(item2.name!),
       order: GroupedListOrder.ASC,
@@ -601,7 +383,8 @@ class _ExtensionScreenState extends State<Extension> {
   }
 
   SliverGroupedListView<Source, String> _buildNotInstalledList(
-      List<Source> notInstalledEntries) {
+    List<Source> notInstalledEntries,
+  ) {
     if (notInstalledEntries.isEmpty) {
       return SliverGroupedListView<Source, String>(
         elements: [],
@@ -616,8 +399,10 @@ class _ExtensionScreenState extends State<Extension> {
       groupBy: (element) => completeLanguageName(element.lang!.toLowerCase()),
       groupSeparatorBuilder: (String groupByValue) {
         final countForLanguage = notInstalledEntries
-            .where((e) =>
-                completeLanguageName(e.lang!.toLowerCase()) == groupByValue)
+            .where(
+              (e) =>
+                  completeLanguageName(e.lang!.toLowerCase()) == groupByValue,
+            )
             .length;
 
         return _buildSectionHeader(
@@ -625,10 +410,8 @@ class _ExtensionScreenState extends State<Extension> {
           count: countForLanguage,
         );
       },
-      itemBuilder: (context, Source element) => ExtensionListTileWidget(
-        source: element,
-        mediaType: widget.itemType,
-      ),
+      itemBuilder: (context, Source element) =>
+          ExtensionListTileWidget(source: element, mediaType: widget.itemType),
       groupComparator: (group1, group2) => group1.compareTo(group2),
       itemComparator: (item1, item2) => item1.name!.compareTo(item2.name!),
       order: GroupedListOrder.ASC,
@@ -637,7 +420,7 @@ class _ExtensionScreenState extends State<Extension> {
 
   Future<void> _updateAllSources(List<Source> sources) async {
     for (var source in sources) {
-      await source.extensionType!.getManager().updateSource(source);
+      await source.update();
     }
     setState(() {});
   }
