@@ -98,7 +98,7 @@ void main(List<String> args) async {
       }
     },
     (error, stack) {
-      Utils.log("Unhandled error: $error");
+      Utils.log("Unhandled error: $error $stack");
     },
   );
 }

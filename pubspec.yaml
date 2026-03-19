@@ -37,10 +37,7 @@ dependencies:
     flutter_web_auth_2: ^4.0.2
     # sidebarx: ^0.17.1
     # dart_eval: ^0.7.10
-    dartotsu_extension_bridge:
-        git:
-            url: https://github.com/aayush2622/DartotsuExtensionBridge.git
-            ref: 239ef59
+    # removed dartotsu_extension_bridge in favor of anymex_extension_bridge
     # isar_flutter_libs:
     #   git:
     #     url: https://github.com/MrLittleWhite/isar_flutter_libs.git
@@ -77,8 +74,6 @@ dependencies:
     shimmer: ^3.0.0
     ionicons: ^0.2.2
     carousel_slider: ^5.0.0
-    # manga_page_view:
-    #   git: https://github.com/reyyuuki/manga_page_view
     path_provider: ^2.1.5
     expandable_page_view: ^1.0.17
     manga_page_view: ^1.0.5
@@ -87,14 +82,19 @@ dependencies:
     flutter_acrylic: ^1.1.4
     bitsdojo_window: ^0.1.6
     readmore: ^3.0.0
+    anymex_extension_runtime_bridge:
+        git:
+            url: https://github.com/RyanYuuki/AnymeXExtensionRuntimeBridge.git
+            ref: main
 
 dev_dependencies:
     flutter_test:
         sdk: flutter
     # hive_generator: ^2.0.1
-    # flutter_lints: ^4.0.0
+    flutter_lints: ^4.0.0
     flutter_launcher_icons: ^0.14.0
     isar_community_generator: ^3.3.0-dev.3
+    build_runner: ^2.4.11
 
 flutter_launcher_icons:
     android: "ic_launcher"

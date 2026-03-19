@@ -3,7 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  anymex_extension_bridge
+  anymex_extension_runtime_bridge
   app_links
   bitsdojo_window_windows
   desktop_webview_window
@@ -22,7 +22,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
-  fjs
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

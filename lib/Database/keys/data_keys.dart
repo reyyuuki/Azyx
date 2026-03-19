@@ -18,6 +18,10 @@ enum SourceKeys {
   activeMangaRepo,
   activeAniyomiAnimeRepo,
   activeAniyomiMangaRepo,
+  mangayomiAnimeRepos,
+  mangayomiMangaRepos,
+  aniyomiAnimeRepos,
+  aniyomiMangaRepos,
 }
 
 enum UiKeys {

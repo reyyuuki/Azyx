@@ -1,5 +1,5 @@
 import 'package:azyx/Database/isar_models/episode_class.dart';
-import 'package:anymex_extension_bridge/dartotsu_extension_bridge.dart';
+import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
 // import 'package:azyx/api/Mangayomi/Eval/dart/model/video.dart';
 // import 'package:azyx/api/Mangayomi/Model/Source.dart';
 

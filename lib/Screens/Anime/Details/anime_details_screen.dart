@@ -1,5 +1,4 @@
-import 'dart:convert';
-
+import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
@@ -17,11 +16,9 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/scrollable_app_bar.dart';
 import 'package:azyx/utils/mapper.dart';
 import 'package:azyx/utils/utils.dart';
-import 'package:anymex_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:expandable_page_view/expandable_page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart';
 
 class AnimeDetailsScreen extends StatefulWidget {
   final String tagg;
@@ -157,35 +154,35 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
     episodesList.value = mappedList;
     totalEpisodes.value = episodesList.length.toString();
 
-    final resp = await get(
-      Uri.parse(
-        "https://api.ani.zip/mappings?${serviceHandler.serviceType.value == ServicesType.anilist ? 'anilist_id' : 'mal_id'}=${id.value}",
-      ),
-    );
+    // final resp = await get(
+    //   Uri.parse(
+    //     "https://api.ani.zip/mappings?${serviceHandler.serviceType.value == ServicesType.anilist ? 'anilist_id' : 'mal_id'}=${id.value}",
+    //   ),
+    // );
 
-    final check = jsonDecode(resp.body);
-    final ep = (check['episodes'] as Map<String, dynamic>).entries
-        .map((entry) {
-          final data = entry.value;
-          final epNum = (data['absoluteEpisodeNumber']).toString();
-          final matched = mappedList.firstWhere(
-            (e) => e.number.toString() == epNum,
-            orElse: () => Episode(url: '', number: epNum, desc: ''),
-          );
+    // final check = jsonDecode(resp.body);
+    // final ep = (check['episodes'] as Map<String, dynamic>).entries
+    //     .map((entry) {
+    //       final data = entry.value;
+    //       final epNum = (data['absoluteEpisodeNumber']).toString();
+    //       final matched = mappedList.firstWhere(
+    //         (e) => e.number.toString() == epNum,
+    //         orElse: () => Episode(url: '', number: epNum, desc: ''),
+    //       );
 
-          return Episode(
-            url: matched.url ?? '',
-            number: epNum,
-            desc: data['overview'] ?? '',
-            thumbnail: data['image'] ?? '',
-            title: (data['title']?['en']) ?? '',
-          );
-        })
-        .whereType<Episode>()
-        .toList();
-    if (ep.first.number.isNotEmpty) {
-      episodesList.value = ep;
-    }
+    //       return Episode(
+    //         url: matched.url ?? '',
+    //         number: epNum,
+    //         desc: data['overview'] ?? '',
+    //         thumbnail: data['image'] ?? '',
+    //         title: (data['title']?['en']) ?? '',
+    //       );
+    //     })
+    //     .whereType<Episode>()
+    //     .toList();
+    // if (ep.first.number.isNotEmpty) {
+    //   episodesList.value = ep;
+    // }
     if (mounted) setState(() {});
   }
 

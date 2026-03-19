@@ -1,40 +1,43 @@
 import 'dart:io';
 
+import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
+    hide isar;
+import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
-import 'package:azyx/utils/extensions.dart';
-import 'package:anymex_extension_bridge/dartotsu_extension_bridge.dart';
 
 class Deeplink {
   static void useDeepLink(Uri uri) {
     if (uri.host != 'add-repo') return;
-    ExtensionType type;
+    String managerId;
     String? animeUrl;
     String? mangaUrl;
     if (Platform.isAndroid) {
       switch (uri.scheme.toLowerCase()) {
         case 'aniyomi':
-          type = ExtensionType.aniyomi;
+          managerId = 'aniyomi';
           animeUrl = uri.queryParameters['url']?.trim();
         case 'tachiyomi':
-          type = ExtensionType.aniyomi;
+          managerId = 'aniyomi';
           mangaUrl = uri.queryParameters['url']?.trim();
         default:
-          type = ExtensionType.mangayomi;
+          managerId = 'mangayomi';
           animeUrl =
               (uri.queryParameters["url"] ?? uri.queryParameters['anime_url'])
                   ?.trim();
           mangaUrl = uri.queryParameters['manga_url']?.trim();
       }
     } else {
-      type = ExtensionType.mangayomi;
+      managerId = 'mangayomi';
       animeUrl =
           (uri.queryParameters["url"] ?? uri.queryParameters['anime_url'])
               ?.trim();
       mangaUrl = uri.queryParameters['manga_url']?.trim();
     }
 
-    if (animeUrl != null) Extensions().addRepo(type, animeUrl, ItemType.anime);
-    if (mangaUrl != null) Extensions().addRepo(type, mangaUrl, ItemType.manga);
+    if (animeUrl != null)
+      sourceController.addRepo(animeUrl, ItemType.anime, managerId);
+    if (mangaUrl != null)
+      sourceController.addRepo(mangaUrl, ItemType.manga, managerId);
 
     if (animeUrl != null || mangaUrl != null)
       azyxSnackBar('Repo added succesfully');

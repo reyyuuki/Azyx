@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:azyx/Database/isar_models/key_value.dart';
-import 'package:anymex_extension_bridge/dartotsu_extension_bridge.dart';
+import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
 import 'package:isar_community/isar.dart';
 
 extension KvpExtension on Enum {

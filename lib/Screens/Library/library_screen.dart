@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:azyx/Controllers/offline_controller.dart';
+import 'package:azyx/Controllers/settings_controller.dart';
 import 'package:azyx/Database/isar_models/category.dart';
 import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
@@ -68,458 +69,479 @@ class _FavoriteScreenState extends State<LibraryScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(context).colorScheme.surface,
-              Theme.of(context).colorScheme.surface.withOpacity(0.8),
-              Theme.of(context).colorScheme.surfaceContainerLowest,
-            ],
-          ),
-        ),
-        child: BouncePageAnimation(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: EdgeInsets.only(
-                  top: Platform.isAndroid || Platform.isIOS ? 0 : 10,
-                ),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+      body: Obx(
+        () => Container(
+          decoration: BoxDecoration(
+            gradient: settingsController.isGradient.value
+                ? LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                     colors: [
-                      Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                      Colors.transparent,
+                      Theme.of(context).colorScheme.surface,
+                      Theme.of(context).colorScheme.surface.withOpacity(0.8),
+                      Theme.of(context).colorScheme.surfaceContainerLowest,
                     ],
+                  )
+                : null,
+            color: settingsController.isGradient.value
+                ? null
+                : Theme.of(context).colorScheme.surface,
+          ),
+          child: BouncePageAnimation(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: EdgeInsets.only(
+                    top: Platform.isAndroid || Platform.isIOS ? 0 : 10,
                   ),
-                ),
-                child: SafeArea(
-                  bottom: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
-                    child: Column(
-                      children: [
-                        // Header Row
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary.withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary.withOpacity(0.3),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: AzyXText(
-                                      text: "MY LIBRARY",
-                                      fontVariant: FontVariant.bold,
-                                      fontSize: 10,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                    ),
-                                  ),
-                                  8.height,
-                                  const AzyXText(
-                                    text: "Continue Your",
-                                    fontVariant: FontVariant.bold,
-                                    fontSize: 28,
-                                  ),
-                                  const AzyXText(
-                                    text: "Journey",
-                                    fontVariant: FontVariant.bold,
-                                    fontSize: 28,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // Content Type Selector with glassmorphism
-                            GestureDetector(
-                              onTap: () {
-                                changeContentSheet();
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.primary.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary.withOpacity(0.2),
-                                    width: 1,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary.withOpacity(0.1),
-                                      blurRadius: 20,
-                                      spreadRadius: 0,
-                                    ),
-                                  ],
-                                ),
-                                child: Obx(
-                                  () => Column(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primary,
-                                          borderRadius: BorderRadius.circular(
-                                            16,
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary
-                                                  .withOpacity(0.4),
-                                              blurRadius: 12,
-                                              spreadRadius: 0,
-                                            ),
-                                          ],
-                                        ),
-                                        child: Icon(
-                                          contentType.value == "Anime"
-                                              ? Ionicons.logo_youtube
-                                              : Broken.book,
-                                          color: Colors.black,
-                                          size: 20,
-                                        ),
-                                      ),
-                                      8.height,
-                                      AzyXText(
-                                        text: contentType.value,
-                                        fontVariant: FontVariant.bold,
-                                        fontSize: 12,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        25.height,
-                        // Aesthetic Glowing Search Bar
-                        AnimatedBuilder(
-                          animation: _searchAnimation,
-                          builder: (context, child) {
-                            return Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(28),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Theme.of(context).colorScheme.primary
-                                        .withOpacity(
-                                          0.1 + (_searchAnimation.value * 0.2),
-                                        ),
-                                    blurRadius:
-                                        20 + (_searchAnimation.value * 10),
-                                    spreadRadius:
-                                        0 + (_searchAnimation.value * 2),
-                                  ),
-                                ],
-                              ),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .surfaceContainerHighest
-                                      .withOpacity(0.7),
-                                  borderRadius: BorderRadius.circular(28),
-                                  border: Border.all(
-                                    color: Theme.of(context).colorScheme.primary
-                                        .withOpacity(
-                                          0.1 + (_searchAnimation.value * 0.3),
-                                        ),
-                                    width: 1 + _searchAnimation.value,
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      margin: const EdgeInsets.all(8),
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary
-                                            .withOpacity(
-                                              0.1 +
-                                                  (_searchAnimation.value *
-                                                      0.1),
-                                            ),
-                                        borderRadius: BorderRadius.circular(24),
-                                      ),
-                                      child: Icon(
-                                        Broken.search_normal,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary
-                                            .withOpacity(
-                                              0.7 +
-                                                  (_searchAnimation.value *
-                                                      0.3),
-                                            ),
-                                        size: 18,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: TextField(
-                                        controller: searchController,
-                                        focusNode: searchFocusNode,
-                                        style: TextStyle(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onSurface,
-                                          fontSize: 16,
-                                          fontFamily: "Poppins-Medium",
-                                        ),
-                                        decoration: InputDecoration(
-                                          hintText: "Search your library...",
-                                          hintStyle: TextStyle(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurface
-                                                .withOpacity(0.5),
-                                            fontSize: 16,
-                                            fontFamily: "Poppins-Regular",
-                                          ),
-                                          border: InputBorder.none,
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                horizontal: 16,
-                                                vertical: 16,
-                                              ),
-                                        ),
-                                      ),
-                                    ),
-                                    if (searchController.text.isNotEmpty)
-                                      Container(
-                                        margin: const EdgeInsets.all(8),
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            searchController.clear();
-                                            searchFocusNode.unfocus();
-                                          },
-                                          child: Container(
-                                            padding: const EdgeInsets.all(8),
-                                            decoration: BoxDecoration(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .surfaceContainerHigh,
-                                              borderRadius:
-                                                  BorderRadius.circular(16),
-                                            ),
-                                            child: Icon(
-                                              Icons.close,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurface
-                                                  .withOpacity(0.7),
-                                              size: 16,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                        Colors.transparent,
                       ],
                     ),
                   ),
-                ),
-              ),
-              Expanded(
-                child: Obx(
-                  () => StreamBuilder<List<Category>>(
-                    stream: contentType.value == "Anime"
-                        ? offlineController.getAnimeCategories()
-                        : offlineController.getMangaCategoriesStream(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting &&
-                          !snapshot.hasData) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-
-                      final categories = snapshot.data ?? [];
-
-                      if (categories.isEmpty) {
-                        return _buildEmptyState();
-                      }
-
-                      return StreamBuilder<List<OfflineItem>>(
-                        stream: contentType.value == "Anime"
-                            ? offlineController.getOfflineAnimeStream()
-                            : offlineController.getOfflineMangaStream(),
-                        builder: (context, itemSnapshot) {
-                          return DefaultTabController(
-                            length: categories.length,
-                            child: Column(
-                              children: [
-                                Container(
-                                  margin: const EdgeInsets.fromLTRB(
-                                    20,
-                                    0,
-                                    20,
-                                    0,
-                                  ),
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .surfaceContainerHighest
-                                        .withOpacity(0.3),
-                                    borderRadius: BorderRadius.circular(24),
-                                    border: Border.all(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.outline.withOpacity(0.1),
-                                    ),
-                                  ),
-                                  child: TabBar(
-                                    isScrollable: true,
-                                    tabs: categories.map((category) {
-                                      return Tab(
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 20,
-                                            vertical: 8,
-                                          ),
-                                          child: Text(category.name ?? ""),
-                                        ),
-                                      );
-                                    }).toList(),
-                                    labelStyle: const TextStyle(
-                                      fontSize: 14,
-                                      fontFamily: "Poppins-Bold",
-                                      color: Colors.black,
-                                    ),
-                                    unselectedLabelStyle: TextStyle(
-                                      fontSize: 14,
-                                      fontFamily: "Poppins-Medium",
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurface.withOpacity(0.7),
-                                    ),
-                                    indicator: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(18),
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                      boxShadow: [
-                                        BoxShadow(
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
+                      child: Column(
+                        children: [
+                          // Header Row
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary.withOpacity(0.15),
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(
                                           color: Theme.of(context)
                                               .colorScheme
                                               .primary
                                               .withOpacity(0.3),
-                                          spreadRadius: 0,
-                                          blurRadius: 12,
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: AzyXText(
+                                        text: "MY LIBRARY",
+                                        fontVariant: FontVariant.bold,
+                                        fontSize: 10,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                      ),
+                                    ),
+                                    8.height,
+                                    const AzyXText(
+                                      text: "Continue Your",
+                                      fontVariant: FontVariant.bold,
+                                      fontSize: 28,
+                                    ),
+                                    const AzyXText(
+                                      text: "Journey",
+                                      fontVariant: FontVariant.bold,
+                                      fontSize: 28,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // Content Type Selector with glassmorphism
+                              GestureDetector(
+                                onTap: () {
+                                  changeContentSheet();
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary.withOpacity(0.2),
+                                      width: 1,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary.withOpacity(0.1),
+                                        blurRadius: 20,
+                                        spreadRadius: 0,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Obx(
+                                    () => Column(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary
+                                                    .withOpacity(0.4),
+                                                blurRadius: 12,
+                                                spreadRadius: 0,
+                                              ),
+                                            ],
+                                          ),
+                                          child: Icon(
+                                            contentType.value == "Anime"
+                                                ? Ionicons.logo_youtube
+                                                : Broken.book,
+                                            color: Colors.black,
+                                            size: 20,
+                                          ),
+                                        ),
+                                        8.height,
+                                        AzyXText(
+                                          text: contentType.value,
+                                          fontVariant: FontVariant.bold,
+                                          fontSize: 12,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
                                         ),
                                       ],
                                     ),
-                                    indicatorSize: TabBarIndicatorSize.tab,
-                                    dividerColor: Colors.transparent,
-                                    tabAlignment: TabAlignment.start,
-                                    automaticIndicatorColorAdjustment: true,
-                                    indicatorAnimation:
-                                        TabIndicatorAnimation.elastic,
                                   ),
                                 ),
-                                10.height,
-                                Expanded(
-                                  child: TabBarView(
-                                    children: categories.map((i) {
-                                      if (itemSnapshot.connectionState ==
-                                              ConnectionState.waiting &&
-                                          !itemSnapshot.hasData) {
-                                        return const Center(
-                                          child: CircularProgressIndicator(),
-                                        );
-                                      }
-
-                                      final allItems = itemSnapshot.data ?? [];
-                                      final data = allItems.where((item) {
-                                        return i.anilistIds?.contains(
-                                              item.mediaData?.id?.toString(),
-                                            ) ??
-                                            false;
-                                      }).toList();
-
-                                      if (data.isEmpty) {
-                                        return _buildCategoryEmptyState(
-                                          i.name ?? "Category",
-                                        );
-                                      }
-
-                                      return GridList(
-                                        data: data,
-                                        tagg: i.name!,
-                                        ontap: (item, tagg) {
-                                          contentType.value == "Anime"
-                                              ? Get.to(
-                                                  AnimeDetailsScreen(
-                                                    tagg: tagg,
-                                                    allData: item,
-                                                    isOffline: true,
-                                                  ),
-                                                )
-                                              : Get.to(
-                                                  MangaDetailsScreen(
-                                                    tagg: tagg,
-                                                    allData: item,
-                                                    isOffline: true,
-                                                  ),
-                                                );
-                                        },
-                                      );
-                                    }).toList(),
+                              ),
+                            ],
+                          ),
+                          25.height,
+                          // Aesthetic Glowing Search Bar
+                          AnimatedBuilder(
+                            animation: _searchAnimation,
+                            builder: (context, child) {
+                              return Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(28),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withOpacity(
+                                            0.1 +
+                                                (_searchAnimation.value * 0.2),
+                                          ),
+                                      blurRadius:
+                                          20 + (_searchAnimation.value * 10),
+                                      spreadRadius:
+                                          0 + (_searchAnimation.value * 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainerHighest
+                                        .withOpacity(0.7),
+                                    borderRadius: BorderRadius.circular(28),
+                                    border: Border.all(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary
+                                          .withOpacity(
+                                            0.1 +
+                                                (_searchAnimation.value * 0.3),
+                                          ),
+                                      width: 1 + _searchAnimation.value,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        margin: const EdgeInsets.all(8),
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withOpacity(
+                                                0.1 +
+                                                    (_searchAnimation.value *
+                                                        0.1),
+                                              ),
+                                          borderRadius: BorderRadius.circular(
+                                            24,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Broken.search_normal,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary
+                                              .withOpacity(
+                                                0.7 +
+                                                    (_searchAnimation.value *
+                                                        0.3),
+                                              ),
+                                          size: 18,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: TextField(
+                                          controller: searchController,
+                                          focusNode: searchFocusNode,
+                                          style: TextStyle(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onSurface,
+                                            fontSize: 16,
+                                            fontFamily: "Poppins-Medium",
+                                          ),
+                                          decoration: InputDecoration(
+                                            hintText: "Search your library...",
+                                            hintStyle: TextStyle(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface
+                                                  .withOpacity(0.5),
+                                              fontSize: 16,
+                                              fontFamily: "Poppins-Regular",
+                                            ),
+                                            border: InputBorder.none,
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                  horizontal: 16,
+                                                  vertical: 16,
+                                                ),
+                                          ),
+                                        ),
+                                      ),
+                                      if (searchController.text.isNotEmpty)
+                                        Container(
+                                          margin: const EdgeInsets.all(8),
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              searchController.clear();
+                                              searchFocusNode.unfocus();
+                                            },
+                                            child: Container(
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .surfaceContainerHigh,
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                              ),
+                                              child: Icon(
+                                                Icons.close,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withOpacity(0.7),
+                                                size: 16,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                 ),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    },
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: Obx(
+                    () => StreamBuilder<List<Category>>(
+                      stream: contentType.value == "Anime"
+                          ? offlineController.getAnimeCategories()
+                          : offlineController.getMangaCategoriesStream(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                                ConnectionState.waiting &&
+                            !snapshot.hasData) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        final categories = snapshot.data ?? [];
+
+                        if (categories.isEmpty) {
+                          return _buildEmptyState();
+                        }
+
+                        return StreamBuilder<List<OfflineItem>>(
+                          stream: contentType.value == "Anime"
+                              ? offlineController.getOfflineAnimeStream()
+                              : offlineController.getOfflineMangaStream(),
+                          builder: (context, itemSnapshot) {
+                            return DefaultTabController(
+                              length: categories.length,
+                              child: Column(
+                                children: [
+                                  Container(
+                                    margin: const EdgeInsets.fromLTRB(
+                                      20,
+                                      0,
+                                      20,
+                                      0,
+                                    ),
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerHighest
+                                          .withOpacity(0.3),
+                                      borderRadius: BorderRadius.circular(24),
+                                      border: Border.all(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.outline.withOpacity(0.1),
+                                      ),
+                                    ),
+                                    child: TabBar(
+                                      isScrollable: true,
+                                      tabs: categories.map((category) {
+                                        return Tab(
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 20,
+                                              vertical: 8,
+                                            ),
+                                            child: Text(category.name ?? ""),
+                                          ),
+                                        );
+                                      }).toList(),
+                                      labelStyle: const TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins-Bold",
+                                        color: Colors.black,
+                                      ),
+                                      unselectedLabelStyle: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins-Medium",
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withOpacity(0.7),
+                                      ),
+                                      indicator: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(18),
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withOpacity(0.3),
+                                            spreadRadius: 0,
+                                            blurRadius: 12,
+                                          ),
+                                        ],
+                                      ),
+                                      indicatorSize: TabBarIndicatorSize.tab,
+                                      dividerColor: Colors.transparent,
+                                      tabAlignment: TabAlignment.start,
+                                      automaticIndicatorColorAdjustment: true,
+                                      indicatorAnimation:
+                                          TabIndicatorAnimation.elastic,
+                                    ),
+                                  ),
+                                  10.height,
+                                  Expanded(
+                                    child: TabBarView(
+                                      children: categories.map((i) {
+                                        if (itemSnapshot.connectionState ==
+                                                ConnectionState.waiting &&
+                                            !itemSnapshot.hasData) {
+                                          return const Center(
+                                            child: CircularProgressIndicator(),
+                                          );
+                                        }
+
+                                        final allItems =
+                                            itemSnapshot.data ?? [];
+                                        final data = allItems.where((item) {
+                                          return i.anilistIds?.contains(
+                                                item.mediaData?.id?.toString(),
+                                              ) ??
+                                              false;
+                                        }).toList();
+
+                                        if (data.isEmpty) {
+                                          return _buildCategoryEmptyState(
+                                            i.name ?? "Category",
+                                          );
+                                        }
+
+                                        return GridList(
+                                          data: data,
+                                          tagg: i.name!,
+                                          ontap: (item, tagg) {
+                                            contentType.value == "Anime"
+                                                ? Get.to(
+                                                    () => AnimeDetailsScreen(
+                                                      tagg: tagg,
+                                                      allData: item,
+                                                      isOffline: true,
+                                                    ),
+                                                  )
+                                                : Get.to(
+                                                    () => MangaDetailsScreen(
+                                                      tagg: tagg,
+                                                      allData: item,
+                                                      isOffline: true,
+                                                    ),
+                                                  );
+                                          },
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

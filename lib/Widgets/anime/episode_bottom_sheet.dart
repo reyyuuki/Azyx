@@ -1,6 +1,6 @@
+import 'package:anymex_extension_runtime_bridge/Models/Video.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
-import 'package:anymex_extension_bridge/Models/Video.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -35,23 +35,26 @@ class EpisodeBottomSheet extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 15),
-          Obx(() => hasError.value
-              ? Image.asset(
-                  'assets/images/sticker.png',
-                  fit: BoxFit.contain,
-                )
-              : episodeUrls.isEmpty
-                  ? Container(
-                      alignment: Alignment.center,
-                      height: 250,
-                      child: const CircularProgressIndicator(),
-                    )
-                  : Column(
-                      children: episodeUrls.map<Widget>((item) {
-                        return serverAzyXContainer(
-                            context, item.quality, item.url, number);
-                      }).toList(),
-                    )),
+          Obx(
+            () => hasError.value
+                ? Image.asset('assets/images/sticker.png', fit: BoxFit.contain)
+                : episodeUrls.isEmpty
+                ? Container(
+                    alignment: Alignment.center,
+                    height: 250,
+                    child: const CircularProgressIndicator(),
+                  )
+                : Column(
+                    children: episodeUrls.map<Widget>((item) {
+                      return serverAzyXContainer(
+                        context,
+                        item.quality,
+                        item.url,
+                        number,
+                      );
+                    }).toList(),
+                  ),
+          ),
         ],
       ),
     );
@@ -59,11 +62,12 @@ class EpisodeBottomSheet extends StatelessWidget {
 }
 
 void showEpisodeBottomSheet(
-    BuildContext context,
-    String number,
-    List<Video> episodeUrls,
-    Rx<bool> hasError,
-    Function(BuildContext, String, String, String) serverAzyXContainer) {
+  BuildContext context,
+  String number,
+  List<Video> episodeUrls,
+  Rx<bool> hasError,
+  Function(BuildContext, String, String, String) serverAzyXContainer,
+) {
   showModalBottomSheet(
     context: context,
     shape: const RoundedRectangleBorder(

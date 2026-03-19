@@ -1,8 +1,10 @@
 import 'dart:io';
 
-import 'package:anymex_extension_bridge/Mangayomi/Eval/dart/model/source_preference.dart';
-import 'package:anymex_extension_bridge/Mangayomi/Models/Source.dart';
-import 'package:anymex_extension_bridge/Settings/Settings.dart';
+import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
+    hide isar;
+import 'package:azyx/Database/isar_models/category.dart';
+import 'package:azyx/Database/isar_models/key_value.dart';
+import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:isar_community/isar.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -46,10 +48,10 @@ class StorageProvider {
 
     final isar = Isar.openSync(
       [
-        MSourceSchema,
-        SourcePreferenceSchema,
-        SourcePreferenceStringValueSchema,
-        BridgeSettingsSchema,
+        ...AnymeXExtensionBridge.isarSchema,
+        KeyValueSchema,
+        CategorySchema,
+        OfflineItemSchema,
       ],
       directory: dir!.path,
       name: "AzyX",

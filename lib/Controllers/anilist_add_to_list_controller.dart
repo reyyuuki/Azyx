@@ -342,9 +342,7 @@ class AnilistAddToListController extends GetxController {
                                           .status ??
                                       "CURRENT";
                                   serviceHandler.currentMedia.value.id = id;
-                                  Utils.log(
-                                    'aando: ${serviceHandler.currentMedia.value.id}',
-                                  );
+
                                   serviceHandler.updateListEntry(
                                     UserMedia(
                                       id: serviceHandler.currentMedia.value.id!,

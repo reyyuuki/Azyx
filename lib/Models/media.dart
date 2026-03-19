@@ -1,7 +1,6 @@
+import 'package:anymex_extension_runtime_bridge/Models/DMedia.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_mapper.dart';
-import 'package:azyx/utils/utils.dart';
-import 'package:anymex_extension_bridge/Models/DMedia.dart';
 
 class Media {
   String? title;
@@ -53,9 +52,6 @@ class Media {
 
   factory Media.fromSmallSimkl(Map<String?, dynamic> json, bool isMovie) {
     MediaType type = MediaType.anime;
-    Utils.log(
-      'ids: $isMovie ${json['ids']?['simkl_id']?.toString()}*${isMovie ? "MOVIE" : "SERIES"}',
-    );
     return Media(
       id: '${json['ids']?['simkl_id']?.toString()}*${isMovie ? "MOVIE" : "SERIES"}',
       title: json['title'] ?? 'Unknown Title',

@@ -1,12 +1,11 @@
 import 'dart:io';
 
+import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
+    hide isar;
 import 'package:azyx/Database/isar_models/category.dart';
 import 'package:azyx/Database/isar_models/key_value.dart';
 import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:azyx/main.dart';
-import 'package:anymex_extension_bridge/Mangayomi/Eval/dart/model/source_preference.dart';
-import 'package:anymex_extension_bridge/dartotsu_extension_bridge.dart'
-    hide isar;
 import 'package:isar_community/isar.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -18,10 +17,7 @@ class Database {
     dir = await getDatabaseDirectory();
     isar = Isar.openSync(
       [
-        MSourceSchema,
-        SourcePreferenceSchema,
-        SourcePreferenceStringValueSchema,
-        BridgeSettingsSchema,
+        ...AnymeXExtensionBridge.isarSchema,
         KeyValueSchema,
         CategorySchema,
         OfflineItemSchema,
@@ -30,7 +26,20 @@ class Database {
       name: "AzyX",
       inspector: true,
     );
-    await DartotsuExtensionBridge().init(isar, 'AzyX');
+    await AnymeXExtensionBridge.init(
+      isarInstance: isar,
+      getDirectory:
+          ({subPath, useCustomPath = false, useSystemPath = false}) async {
+            final base = await getApplicationSupportDirectory();
+            final dir = subPath != null
+                ? Directory('${base.path}/$subPath')
+                : base;
+            if (!await dir.exists()) {
+              await dir.create(recursive: true);
+            }
+            return dir;
+          },
+    );
   }
 
   Future<bool> requestPermission() async {

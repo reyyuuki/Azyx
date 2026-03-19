@@ -51,11 +51,9 @@ class SimklService extends GetxController
         "https://api.simkl.com/${isSeries ? 'tv' : 'movies'}/$newId?extended=full&client_id=${dotenv.env['SIMKL_CLIENT_ID']}",
       ),
     );
-    Utils.log('start');
     if (resp.statusCode == 200) {
       final data = jsonDecode(resp.body);
       final result = AnilistMediaData.fromSimkl(data, !isSeries);
-      Utils.log('namnae: ${data}');
       return result;
     } else {
       throw Exception('Failed to fetch trending movies: ${resp.statusCode}');
@@ -88,7 +86,6 @@ class SimklService extends GetxController
 
     if (resp.statusCode == 200) {
       final data = jsonDecode(resp.body) as List<dynamic>;
-      Utils.log('aando: $data');
       final list = data.map((e) {
         return Media.fromSmallSimkl(e, false);
       }).toList();

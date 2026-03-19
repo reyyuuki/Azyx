@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as max;
 
+import 'package:anymex_extension_runtime_bridge/ExtensionManager.dart';
+import 'package:anymex_extension_runtime_bridge/Models/DEpisode.dart';
 import 'package:azyx/Constants/constants.dart';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';
@@ -24,8 +26,6 @@ import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:azyx/utils/color_profiler.dart';
 import 'package:azyx/utils/utils.dart';
-import 'package:anymex_extension_bridge/ExtensionManager.dart';
-import 'package:anymex_extension_bridge/Models/DEpisode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';

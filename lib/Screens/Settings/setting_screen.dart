@@ -1,4 +1,8 @@
+import 'dart:developer';
 
+import 'package:azyx/Controllers/source/source_controller.dart';
+import 'package:azyx/Database/keys/data_keys.dart';
+import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Screens/Settings/Pages/theme_setting.dart';
 import 'package:azyx/Screens/Settings/Pages/ui_settings.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
@@ -6,6 +10,7 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:flutter/material.dart';
+
 import '../../Widgets/common/custom_app_bar.dart';
 
 class SettingScreen extends StatelessWidget {
@@ -133,12 +138,15 @@ class SettingScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            // ElevatedButton(
-            //   onPressed: () async {
-            //     AcrylicTestScreen().navigate(context);
-            //   },
-            //   child: Text("Testing"),
-            // ),
+            ElevatedButton(
+              onPressed: () async {
+                // log('activesource: ${sourceController.activeSource.value?.id}');
+                await sourceController.initExtensions();
+                log('activesource: ${sourceController.activeSource.value?.id}');
+                log('sources: ${SourceKeys.activeSourceId.get('')}');
+              },
+              child: Text("Testing"),
+            ),
           ],
         ),
       ),

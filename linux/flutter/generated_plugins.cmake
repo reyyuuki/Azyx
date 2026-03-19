@@ -3,7 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  anymex_extension_bridge
+  anymex_extension_runtime_bridge
   bitsdojo_window_linux
   desktop_webview_window
   dynamic_color
@@ -19,7 +19,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
-  fjs
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

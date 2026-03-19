@@ -1,8 +1,7 @@
+import 'package:anymex_extension_runtime_bridge/ExtensionManager.dart';
+import 'package:anymex_extension_runtime_bridge/Models/Source.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
-import 'package:azyx/utils/Functions/functions.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:anymex_extension_bridge/ExtensionManager.dart';
-import 'package:anymex_extension_bridge/Models/Source.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -301,10 +300,7 @@ class _CustomSourceDropdownState extends State<CustomSourceDropdown>
                                               borderRadius:
                                                   BorderRadius.circular(8),
                                               child: CachedNetworkImage(
-                                                imageUrl: getExtensionIcon(
-                                                  item.extensionType ??
-                                                      ExtensionType.mangayomi,
-                                                ),
+                                                imageUrl: item.managerIcon,
                                                 width: 28,
                                                 height: 28,
                                                 fit: BoxFit.cover,
@@ -483,10 +479,7 @@ class _CustomSourceDropdownState extends State<CustomSourceDropdown>
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: CachedNetworkImage(
-                        imageUrl: getExtensionIcon(
-                          selectedSource.value!.extensionType ??
-                              ExtensionType.mangayomi,
-                        ),
+                        imageUrl: selectedSource.value!.managerIcon,
                         width: 32,
                         height: 32,
                         fit: BoxFit.cover,

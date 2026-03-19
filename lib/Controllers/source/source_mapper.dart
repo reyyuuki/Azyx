@@ -1,9 +1,9 @@
 import 'dart:developer';
 
+import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Models/media.dart';
 import 'package:azyx/utils/utils.dart';
-import 'package:anymex_extension_bridge/dartotsu_extension_bridge.dart';
 import 'package:get/get.dart';
 
 enum MediaType { manga, anime, novel }
@@ -388,7 +388,7 @@ Future<Media?> mapMedia(List<String> animeId, RxString searchedTitle) async {
     for (final result in results) {
       final resultTitle = normalize((result.title ?? '').trim());
       searchedTitle.value = "Searching: $resultTitle";
-      Utils.log("Matching '$resultTitle' with query '$query'");
+      // Utils.log("Matching '$resultTitle' with query '$query'");
 
       // Use the advanced anime title matcher
       final matchResult = matchAnimeTitle(

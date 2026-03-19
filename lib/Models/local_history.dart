@@ -1,6 +1,6 @@
 import 'package:azyx/Models/anime_all_data.dart';
 import 'package:azyx/Database/isar_models/episode_class.dart';
-import 'package:anymex_extension_bridge/Models/Source.dart';
+import 'package:anymex_extension_runtime_bridge/Models/Source.dart';
 
 class LocalHistory {
   int? mediaId;
