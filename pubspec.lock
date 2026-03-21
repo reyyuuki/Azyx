@@ -30,7 +30,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "44ec2dfb07a57857196598dc6f5546a3f5d66e8b"
+      resolved-ref: f178caa08d2f33c8516b568c9e52be5a9b135bb8
       url: "https://github.com/RyanYuuki/AnymeXExtensionRuntimeBridge.git"
     source: git
     version: "1.0.0"
@@ -496,14 +496,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_acrylic:
-    dependency: "direct main"
-    description:
-      name: flutter_acrylic
-      sha256: b3996dbde5abf5823cc9ead4cf2e5267c3181f15585fe47ce4dc4472e7ec827a
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.4"
   flutter_cache_manager:
     dependency: transitive
     description:
@@ -899,14 +891,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.3.1"
-  macos_window_utils:
-    dependency: transitive
-    description:
-      name: macos_window_utils
-      sha256: d4df3501fd32ac0d2d7590cb6a8e4758337d061c8fa0db816fdd636be63a8438
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.9.0"
   manga_page_view:
     dependency: "direct main"
     description:

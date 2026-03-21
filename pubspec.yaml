@@ -79,7 +79,6 @@ dependencies:
     manga_page_view: ^1.0.5
     lottie: ^3.3.1
     app_links: ^6.4.1
-    flutter_acrylic: ^1.1.4
     bitsdojo_window: ^0.1.6
     readmore: ^3.0.0
     anymex_extension_runtime_bridge:

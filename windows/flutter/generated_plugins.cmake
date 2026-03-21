@@ -8,7 +8,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   bitsdojo_window_windows
   desktop_webview_window
   dynamic_color
-  flutter_acrylic
   flutter_inappwebview_windows
   flutter_qjs
   isar_community_flutter_libs

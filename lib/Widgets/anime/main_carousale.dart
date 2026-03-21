@@ -3,8 +3,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:azyx/Models/media.dart';
 import 'package:azyx/Models/carousale_data.dart';
+import 'package:azyx/Models/media.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
 import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';

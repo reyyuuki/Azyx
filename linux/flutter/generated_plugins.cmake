@@ -7,7 +7,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   bitsdojo_window_linux
   desktop_webview_window
   dynamic_color
-  flutter_acrylic
   flutter_qjs
   gtk
   isar_community_flutter_libs
