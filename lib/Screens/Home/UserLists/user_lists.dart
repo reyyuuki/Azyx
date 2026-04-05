@@ -79,7 +79,7 @@ class _UserListScreenState extends State<UserListPage>
           ),
           const SizedBox(height: 8),
           AzyXText(
-            text: "Your are so noob",
+            text: "Try adding something bruh!",
             fontSize: 16,
             fontVariant: FontVariant.regular,
             color: context.theme.colorScheme.onBackground.withOpacity(0.7),

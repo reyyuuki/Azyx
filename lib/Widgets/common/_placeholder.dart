@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:azyx/Extensions/ExtensionScreen.dart';
+import 'package:azyx/Extensions/extensionScreen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:flutter/material.dart';
@@ -52,9 +52,7 @@ class PlaceholderExtensions extends StatelessWidget {
               log("No sources available to select.");
             },
           ),
-          const SizedBox(
-            height: 50,
-          ),
+          const SizedBox(height: 50),
           const AzyXText(
             text: "Oops! u didn't installed any extensions yet",
             textAlign: TextAlign.center,
@@ -63,9 +61,11 @@ class PlaceholderExtensions extends StatelessWidget {
           GestureDetector(
             onTap: () {
               Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const ExtensionScreen()));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ExtensionScreen(),
+                ),
+              );
             },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -84,21 +84,19 @@ class PlaceholderExtensions extends StatelessWidget {
                         Icons.extension,
                         color: Theme.of(context).colorScheme.inversePrimary,
                       ),
-                      const SizedBox(
-                        width: 10,
-                      ),
+                      const SizedBox(width: 10),
                       AzyXText(
                         text: "Install Extensions",
                         fontVariant: FontVariant.bold,
                         fontSize: 16,
                         color: Theme.of(context).colorScheme.inversePrimary,
-                      )
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

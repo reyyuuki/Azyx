@@ -1,8 +1,15 @@
+import 'dart:developer';
+
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
+import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Database/isar_models/episode_class.dart';
+import 'package:azyx/Models/anime_all_data.dart';
+import 'package:azyx/Screens/Anime/Watch/watch_screen.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
+import 'package:azyx/Widgets/anime/episode_bottom_sheet.dart';
 import 'package:azyx/Widgets/anime/episodes_list.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -27,6 +34,79 @@ class AnifyEpisodesWidget extends StatelessWidget {
 
   final Rx<String> episodeTitle = ''.obs;
   final Rx<bool> hasError = false.obs;
+  final RxList<Video> episodeUrls = <Video>[].obs;
+
+  Future<void> fetchEpisodeLink(
+    String url,
+    String number,
+    String setTitle,
+    context,
+  ) async {
+    try {
+      final response = await sourceController.activeSource.value!.methods
+          .getVideoList(DEpisode(episodeNumber: number, url: url));
+      if (response.isNotEmpty) {
+        episodeUrls.value = response;
+        episodeTitle.value = setTitle;
+      } else {
+        hasError.value = true;
+      }
+    } catch (e) {
+      hasError.value = true;
+      log("Error while fetching episode url: $e");
+    }
+  }
+
+  GestureDetector serverAzyXContainer(
+    BuildContext context,
+    String name,
+    String url,
+    String number,
+  ) {
+    return GestureDetector(
+      onTap: () async {
+        log("Selected URL: $url");
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WatchScreen(
+              playerData: AnimeAllData(
+                url: url,
+                episodeTitle: episodeTitle.value,
+                title: title,
+                number: number,
+                image: image,
+                id: id,
+                episodeUrls: episodeUrls,
+                episodeList: anifyEpisodes,
+              ),
+            ),
+          ),
+        );
+        serviceHandler.currentMedia.value.status =
+            serviceHandler.currentMedia.value.status;
+      },
+      child: AzyXContainer(
+        margin: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            width: 1,
+            color: Theme.of(context).colorScheme.inversePrimary,
+          ),
+        ),
+        child: Center(
+          child: AzyXText(
+            text: name,
+            fontSize: 18,
+            fontVariant: FontVariant.bold,
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,41 +116,50 @@ class AnifyEpisodesWidget extends StatelessWidget {
       children: anifyEpisodes.map((entry) {
         return GestureDetector(
           onTap: () {
-            if (entry.url == null || entry.url!.isEmpty) {
-              hasError.value = true;
-              return;
-            }
+            // if (entry.url == null || entry.url!.isEmpty) {
+            //   hasError.value = true;
+            //   return;
+            // }
 
-            episodeTitle.value = entry.title ?? '';
-            hasError.value = false;
+            // episodeTitle.value = entry.title ?? '';
+            // hasError.value = false;
 
-            final stream = sourceController.activeSource.value!.methods
-                .getVideoListStream(
-                  DEpisode(episodeNumber: entry.number, url: entry.url),
-                );
+            // final stream = sourceController.activeSource.value!.methods
+            //     .getVideoList(
+            //       DEpisode(episodeNumber: entry.number, url: entry.url),
+            //     );
 
-            showModalBottomSheet(
-              context: context,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-              ),
-              isScrollControlled: true,
-              enableDrag: true,
-              elevation: 5,
-              barrierColor: Colors.black87.withOpacity(0.5),
-              builder: (_) {
-                return StreamEpisodeSheet(
-                  stream: stream,
-                  number: entry.number,
-                  title: title,
-                  image: image,
-                  id: id,
-                  episodeList: anifyEpisodes,
-                  episodeTitle: episodeTitle,
-                  hasError: hasError,
-                );
-              },
+            // showModalBottomSheet(
+            //   context: context,
+            //   shape: const RoundedRectangleBorder(
+            //     borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+            //   ),
+            //   isScrollControlled: true,
+            //   enableDrag: true,
+            //   elevation: 5,
+            //   barrierColor: Colors.black87.withOpacity(0.5),
+            //   builder: (_) {
+            //     // return StreamEpisodeSheet(
+            //   stream: stream,
+            //   number: entry.number,
+            //   title: title,
+            //   image: image,
+            //   id: id,
+            //   episodeList: anifyEpisodes,
+            //   episodeTitle: episodeTitle,
+            //   hasError: hasError,
+            // );
+            // );
+
+            showEpisodeBottomSheet(
+              context,
+              entry.number,
+              episodeUrls,
+              hasError,
+              (context, name, url, number) =>
+                  serverAzyXContainer(context, name, url, number),
             );
+            fetchEpisodeLink(entry.url!, entry.number, title, context);
           },
           child: Container(
             margin: const EdgeInsets.only(bottom: 14),

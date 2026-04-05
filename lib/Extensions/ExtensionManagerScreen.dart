@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
     hide isar, SourceExecution;
 import 'package:azyx/Controllers/settings_controller.dart';
-import 'package:azyx/Controllers/source/download_run_time_apk.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Widgets/Animation/drop_animation.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
@@ -31,7 +30,6 @@ class _ExtensionManagerScreenState extends State<ExtensionManagerScreen> {
   }
 
   Future<void> _checkRuntime() async {
-    if (!Platform.isAndroid) return;
     final loaded = await AnymeXRuntimeBridge.isLoaded();
     _isRuntimeLoaded.value = loaded;
   }
@@ -280,12 +278,11 @@ class _ExtensionManagerScreenState extends State<ExtensionManagerScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              final loaded = await DownloadRunTimeApk.showDownloadDialog(
-                context,
-              );
+              sourceController.checkRuntimeHost();
               if (!mounted) return;
-              _isRuntimeLoaded.value = loaded;
-              if (loaded) {
+              _isRuntimeLoaded.value =
+                  AnymeXRuntimeBridge.controller.isReady.value;
+              if (_isRuntimeLoaded.value) {
                 await _refresh();
               }
             },

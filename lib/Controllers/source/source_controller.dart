@@ -1,9 +1,7 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
     hide isar;
-import 'package:azyx/Controllers/source/download_run_time_apk.dart';
 import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
@@ -38,17 +36,20 @@ class SourceController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    checkRuntimeHost();
     _bindExtensionLists();
     _initialize();
   }
 
   void checkRuntimeHost() async {
-    if (!Platform.isAndroid) return;
-    final isLoaded = await AnymeXRuntimeBridge.isLoaded();
-    if (isLoaded) return;
-    final context = Get.context;
-    if (context == null) return;
-    await DownloadRunTimeApk.showDownloadDialog(context);
+    await AnymeXRuntimeBridge.checkAndInitialize();
+    await AnymeXRuntimeBridge.setupRuntime();
+    if (AnymeXRuntimeBridge.controller.isReady.value) {
+      await Get.find<ExtensionManager>().onRuntimeBridgeInitialization();
+    }
+    // final context = Get.context;
+    // if (context == null) return;
+    // await DownloadRunTimeApk.showDownloadDialog(context);
   }
 
   void _bindExtensionLists() {
