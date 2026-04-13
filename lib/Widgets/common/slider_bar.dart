@@ -14,20 +14,21 @@ class CustomSlider extends StatefulWidget {
   final Color? inactveColor;
   final String? indiactorTime;
   final bool? isLocked;
-  const CustomSlider(
-      {super.key,
-      required this.onChanged,
-      required this.max,
-      required this.min,
-      required this.value,
-      this.onDragEnd,
-      this.onDragStart,
-      this.divisions,
-      this.customValueIndicatorSize,
-      this.secondaryTrackValue,
-      this.inactveColor,
-      this.indiactorTime,
-      this.isLocked});
+  const CustomSlider({
+    super.key,
+    required this.onChanged,
+    required this.max,
+    required this.min,
+    required this.value,
+    this.onDragEnd,
+    this.onDragStart,
+    this.divisions,
+    this.customValueIndicatorSize,
+    this.secondaryTrackValue,
+    this.inactveColor,
+    this.indiactorTime,
+    this.isLocked,
+  });
 
   @override
   State<CustomSlider> createState() => CustomSliderState();
@@ -63,20 +64,28 @@ class CustomSliderState extends State<CustomSlider> {
         valueIndicatorShape: valueIndicator,
         trackShape: const MarginedTrack(),
         valueIndicatorTextStyle: TextStyle(
-          color: colorScheme.surface,
+          color: colorScheme.onSurface,
           fontFamily: "Poppins",
-          fontWeight: FontWeight.bold,
-          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          fontSize: 12,
         ),
         showValueIndicator: ShowValueIndicator.always,
-        valueIndicatorColor: colorScheme.primary,
+        valueIndicatorColor: Colors.transparent,
         trackHeight: 12,
         tickMarkShape: SmallTickMarkShape(division: widget.divisions),
         thumbShape: RoundedRectangularThumbShape(
-            width: 2, radius: 40, height: 35, colorScheme),
+          width: 2,
+          radius: 40,
+          height: 35,
+          colorScheme,
+        ),
         overlayColor: Colors.white,
         overlayShape: RoundedRectangularThumbShape(
-            width: 0, radius: 0, height: 30, colorScheme),
+          width: 0,
+          radius: 0,
+          height: 30,
+          colorScheme,
+        ),
       ),
       child: Slider(
         min: widget.min,
@@ -141,15 +150,22 @@ class RoundedSliderValueIndicator extends SliderComponentShape {
   final bool onBottom;
   final ColorScheme colorScheme;
 
-  RoundedSliderValueIndicator(this.colorScheme,
-      {required this.width,
-      required this.height,
-      this.radius = 5,
-      this.onBottom = false});
+  RoundedSliderValueIndicator(
+    this.colorScheme, {
+    required this.width,
+    required this.height,
+    this.radius = 5,
+    this.onBottom = false,
+  });
+
+  static const double _hPad = 12.0;
+  static const double _vPad = 6.0;
+  static const double _pillRadius = 20.0;
+  static const double _gapFromThumb = 14.0;
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return Size(width, height);
+    return const Size(80, 32);
   }
 
   @override
@@ -167,27 +183,60 @@ class RoundedSliderValueIndicator extends SliderComponentShape {
     required double textScaleFactor,
     required Size sizeWithOverflow,
   }) {
-    if (sliderTheme.trackHeight == 0) {
-      return;
+    final opacity = activationAnimation.value;
+    if (opacity == 0.0) return;
+
+    labelPainter.layout();
+
+    final double pillW = labelPainter.width + _hPad * 2;
+    final double pillH = labelPainter.height + _vPad * 2;
+    final double yOffset = onBottom
+        ? (sliderTheme.trackHeight ?? 4) / 2 + _gapFromThumb + pillH / 2
+        : -((sliderTheme.trackHeight ?? 4) / 2 + _gapFromThumb + pillH / 2);
+
+    final Offset pillCenter = Offset(center.dx, center.dy + yOffset);
+
+    double left = pillCenter.dx - pillW / 2;
+    double right = pillCenter.dx + pillW / 2;
+    final double parentW = parentBox.size.width;
+    if (left < 0) {
+      left = 0;
+      right = pillW;
+    } else if (right > parentW) {
+      right = parentW;
+      left = parentW - pillW;
     }
-    final verticalValue = onBottom ? 35 : -45;
-    final centerWithVerticalOffset =
-        Offset(center.dx, center.dy + verticalValue);
+    final Rect pillRect = Rect.fromLTRB(
+      left,
+      pillCenter.dy - pillH / 2,
+      right,
+      pillCenter.dy + pillH / 2,
+    );
 
-    final rect = Rect.fromCenter(
-        center: centerWithVerticalOffset, height: height, width: width);
-
-    final TextPainter tp = labelPainter;
-
-    tp.layout();
+    final Color bgColor = colorScheme.surfaceContainerHighest.withOpacity(
+      0.92 * opacity,
+    );
+    final Color borderColor = colorScheme.outline.withOpacity(0.25 * opacity);
 
     context.canvas.drawRRect(
-        RRect.fromRectAndRadius(rect, Radius.circular(radius)),
-        Paint()..color = colorScheme.primary);
-    tp.paint(
-        context.canvas,
-        Offset(center.dx - (tp.width / 2),
-            centerWithVerticalOffset.dy - (tp.height / 2)));
+      RRect.fromRectAndRadius(pillRect, const Radius.circular(_pillRadius)),
+      Paint()..color = bgColor,
+    );
+    context.canvas.drawRRect(
+      RRect.fromRectAndRadius(pillRect, const Radius.circular(_pillRadius)),
+      Paint()
+        ..color = borderColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0,
+    );
+
+    labelPainter.paint(
+      context.canvas,
+      Offset(
+        left + (pillW - labelPainter.width) / 2,
+        pillCenter.dy - labelPainter.height / 2,
+      ),
+    );
   }
 }
 
@@ -195,14 +244,16 @@ class MarginedTrack extends SliderTrackShape {
   const MarginedTrack();
 
   @override
-  Rect getPreferredRect(
-      {required RenderBox parentBox,
-      Offset offset = Offset.zero,
-      required SliderThemeData sliderTheme,
-      bool isEnabled = true,
-      bool isDiscrete = true}) {
-    final double overlayWidth =
-        sliderTheme.overlayShape!.getPreferredSize(isEnabled, isDiscrete).width;
+  Rect getPreferredRect({
+    required RenderBox parentBox,
+    Offset offset = Offset.zero,
+    required SliderThemeData sliderTheme,
+    bool isEnabled = true,
+    bool isDiscrete = true,
+  }) {
+    final double overlayWidth = sliderTheme.overlayShape!
+        .getPreferredSize(isEnabled, isDiscrete)
+        .width;
     final double trackHeight = sliderTheme.trackHeight ?? 20;
     assert(overlayWidth >= 0);
     assert(trackHeight >= 0);
@@ -230,11 +281,13 @@ class MarginedTrack extends SliderTrackShape {
     required TextDirection textDirection,
   }) {
     final ColorTween activeTrackColorTween = ColorTween(
-        begin: sliderTheme.disabledActiveTrackColor,
-        end: sliderTheme.activeTrackColor);
+      begin: sliderTheme.disabledActiveTrackColor,
+      end: sliderTheme.activeTrackColor,
+    );
     final ColorTween inactiveTrackColorTween = ColorTween(
-        begin: sliderTheme.disabledInactiveTrackColor,
-        end: sliderTheme.inactiveTrackColor);
+      begin: sliderTheme.disabledInactiveTrackColor,
+      end: sliderTheme.inactiveTrackColor,
+    );
 
     final Paint activePaint = Paint()
       ..color = activeTrackColorTween.evaluate(enableAnimation)!;
@@ -269,10 +322,18 @@ class MarginedTrack extends SliderTrackShape {
     const double thumbGap = 7.0;
 
     // Primary track segments with proper gaps
-    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left, trackRect.top,
-        thumbCenter.dx - thumbGap, trackRect.bottom);
-    final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx + thumbGap,
-        trackRect.top, trackRect.right, trackRect.bottom);
+    final Rect leftTrackSegment = Rect.fromLTRB(
+      trackRect.left,
+      trackRect.top,
+      thumbCenter.dx - thumbGap,
+      trackRect.bottom,
+    );
+    final Rect rightTrackSegment = Rect.fromLTRB(
+      thumbCenter.dx + thumbGap,
+      trackRect.top,
+      trackRect.right,
+      trackRect.bottom,
+    );
 
     // Draw primary tracks with gaps
     context.canvas.drawRRect(
@@ -292,15 +353,20 @@ class MarginedTrack extends SliderTrackShape {
         // Only show secondary track if it's beyond the current thumb position
         if (secondaryOffset.dx > thumbCenter.dx + thumbGap) {
           final Rect secondarySegment = Rect.fromLTRB(
+            thumbCenter.dx + thumbGap,
+            trackRect.top,
+            secondaryOffset.dx.clamp(
               thumbCenter.dx + thumbGap,
-              trackRect.top,
-              secondaryOffset.dx
-                  .clamp(thumbCenter.dx + thumbGap, trackRect.right),
-              trackRect.bottom);
+              trackRect.right,
+            ),
+            trackRect.bottom,
+          );
 
           context.canvas.drawRRect(
             RRect.fromRectAndRadius(
-                secondarySegment, const Radius.circular(50)),
+              secondarySegment,
+              const Radius.circular(50),
+            ),
             secondaryPaint,
           );
         }
@@ -308,15 +374,17 @@ class MarginedTrack extends SliderTrackShape {
         // RTL: Secondary track shows buffered content ahead (to the left) of current position
         if (secondaryOffset.dx < thumbCenter.dx - thumbGap) {
           final Rect secondarySegment = Rect.fromLTRB(
-              secondaryOffset.dx
-                  .clamp(trackRect.left, thumbCenter.dx - thumbGap),
-              trackRect.top,
-              thumbCenter.dx - thumbGap,
-              trackRect.bottom);
+            secondaryOffset.dx.clamp(trackRect.left, thumbCenter.dx - thumbGap),
+            trackRect.top,
+            thumbCenter.dx - thumbGap,
+            trackRect.bottom,
+          );
 
           context.canvas.drawRRect(
             RRect.fromRectAndRadius(
-                secondarySegment, const Radius.circular(50)),
+              secondarySegment,
+              const Radius.circular(50),
+            ),
             secondaryPaint,
           );
         }
@@ -331,8 +399,12 @@ class RoundedRectangularThumbShape extends SliderComponentShape {
   final double height;
   final ColorScheme colorScheme;
 
-  RoundedRectangularThumbShape(this.colorScheme,
-      {required this.width, this.radius = 4, this.height = 25});
+  RoundedRectangularThumbShape(
+    this.colorScheme, {
+    required this.width,
+    this.radius = 4,
+    this.height = 25,
+  });
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
@@ -360,13 +432,17 @@ class RoundedRectangularThumbShape extends SliderComponentShape {
       Paint()..color = colorScheme.primary,
     );
 
-    final strokeRect =
-        Rect.fromCenter(center: center, width: width, height: height);
+    final strokeRect = Rect.fromCenter(
+      center: center,
+      width: width,
+      height: height,
+    );
     context.canvas.drawRRect(
-        RRect.fromRectAndRadius(strokeRect, Radius.circular(radius)),
-        Paint()
-          ..color = colorScheme.inverseSurface
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2);
+      RRect.fromRectAndRadius(strokeRect, Radius.circular(radius)),
+      Paint()
+        ..color = colorScheme.inverseSurface
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2,
+    );
   }
 }
