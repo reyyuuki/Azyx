@@ -10,7 +10,6 @@ import 'package:azyx/Screens/Anime/Watch/watch_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/anime/episode_bottom_sheet.dart';
-import 'package:azyx/Widgets/anime/episodes_list.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +45,7 @@ class AnifyEpisodesWidget extends StatelessWidget {
       final response = await sourceController.activeSource.value!.methods
           .getVideoList(DEpisode(episodeNumber: number, url: url));
       if (response.isNotEmpty) {
+        log('response: ${response.first.title}');
         episodeUrls.value = response;
         episodeTitle.value = setTitle;
       } else {
@@ -116,16 +116,11 @@ class AnifyEpisodesWidget extends StatelessWidget {
       children: anifyEpisodes.map((entry) {
         return GestureDetector(
           onTap: () {
-            // if (entry.url == null || entry.url!.isEmpty) {
-            //   hasError.value = true;
-            //   return;
-            // }
-
-            // episodeTitle.value = entry.title ?? '';
-            // hasError.value = false;
+            episodeTitle.value = entry.title ?? '';
+            hasError.value = false;
 
             // final stream = sourceController.activeSource.value!.methods
-            //     .getVideoList(
+            //     .getVideoListStream(
             //       DEpisode(episodeNumber: entry.number, url: entry.url),
             //     );
 
@@ -139,16 +134,17 @@ class AnifyEpisodesWidget extends StatelessWidget {
             //   elevation: 5,
             //   barrierColor: Colors.black87.withOpacity(0.5),
             //   builder: (_) {
-            //     // return StreamEpisodeSheet(
-            //   stream: stream,
-            //   number: entry.number,
-            //   title: title,
-            //   image: image,
-            //   id: id,
-            //   episodeList: anifyEpisodes,
-            //   episodeTitle: episodeTitle,
-            //   hasError: hasError,
-            // );
+            //     return StreamEpisodeSheet(
+            //       stream: stream,
+            //       number: entry.number,
+            //       title: title,
+            //       image: image,
+            //       id: id,
+            //       episodeList: anifyEpisodes,
+            //       episodeTitle: episodeTitle,
+            //       hasError: hasError,
+            //     );
+            //   },
             // );
 
             showEpisodeBottomSheet(
