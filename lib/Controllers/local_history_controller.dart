@@ -1,69 +1,126 @@
 import 'dart:developer';
 
-import 'package:azyx/Models/local_history.dart';
+import 'package:azyx/Database/isar_models/local_history_item.dart';
+import 'package:azyx/main.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
+import 'package:isar_community/isar.dart';
 
 final localHistoryController = Get.find<LocalHistoryController>();
 
 class LocalHistoryController extends GetxController {
-  final RxList<LocalHistory> animeWatchingHistory = RxList();
-  final RxList<LocalHistory> mangaReadingHistory = RxList();
+  final RxList<LocalHistoryItem> animeWatchingHistory = RxList();
+  final RxList<LocalHistoryItem> mangaReadingHistory = RxList();
 
   @override
   void onInit() {
     super.onInit();
-    loadfromHive();
+    _loadHistory();
   }
 
-  void addToWatchingHistory(LocalHistory data) {
-    final index =
-        animeWatchingHistory.indexWhere((i) => i.mediaId == data.mediaId);
+  void _loadHistory() {
+    final all = isar.localHistoryItems.where().findAllSync();
+    animeWatchingHistory.assignAll(
+      all.where((e) => e.mediaType == HistoryMediaType.anime).toList()..sort(
+        (a, b) => (b.lastWatched ?? DateTime(0)).compareTo(
+          a.lastWatched ?? DateTime(0),
+        ),
+      ),
+    );
+    mangaReadingHistory.assignAll(
+      all.where((e) => e.mediaType == HistoryMediaType.manga).toList()..sort(
+        (a, b) => (b.lastWatched ?? DateTime(0)).compareTo(
+          a.lastWatched ?? DateTime(0),
+        ),
+      ),
+    );
+    log(
+      'History loaded — anime: ${animeWatchingHistory.length}, manga: ${mangaReadingHistory.length}',
+    );
+  }
+
+  void addToWatchingHistory(LocalHistoryItem data) {
+    data.mediaType = HistoryMediaType.anime;
+    data.lastWatched = DateTime.now();
+    isar.writeTxnSync(() {
+      final existing = isar.localHistoryItems
+          .where()
+          .mediaIdEqualTo(data.mediaId)
+          .findFirstSync();
+      if (existing != null) {
+        data.id = existing.id;
+      }
+      isar.localHistoryItems.putSync(data);
+    });
+    final index = animeWatchingHistory.indexWhere(
+      (i) => i.mediaId == data.mediaId,
+    );
     if (index != -1) {
       animeWatchingHistory[index] = data;
     } else {
-      animeWatchingHistory.add(data);
+      animeWatchingHistory.insert(0, data);
     }
-    persistOfflineData();
-    log("Succesfully added: ${animeWatchingHistory.length}");
-    log("Succesfully added: ${animeWatchingHistory.first.lastTime}");
-  }
-
-  void persistOfflineData() async {
-    final box = Hive.box('offline-data');
-    await box.put('animeWatchingHistory',
-        animeWatchingHistory.map((e) => e.toJson()).toList());
-  }
-
-  void loadfromHive() {
-    final box = Hive.box('offline-data');
-    final storedAnimeWatchingHistory =
-        box.get('animeWatchingHistory', defaultValue: []);
-
-    if (storedAnimeWatchingHistory != null) {
-      animeWatchingHistory.assignAll((storedAnimeWatchingHistory as List)
-          .map((i) => LocalHistory.fromJson(i))
-          .toList());
-    }
-    log(storedAnimeWatchingHistory.toString());
+    log('Added to anime history: ${data.title}');
   }
 
   void removeFromWatchingHistory(int mediaId) {
-    animeWatchingHistory.removeWhere((history) => history.mediaId == mediaId);
+    isar.writeTxnSync(() {
+      final item = isar.localHistoryItems
+          .where()
+          .mediaIdEqualTo(mediaId)
+          .findFirstSync();
+      if (item != null) isar.localHistoryItems.deleteSync(item.id);
+    });
+    animeWatchingHistory.removeWhere((h) => h.mediaId == mediaId);
   }
 
-  void addToReadingHistory(LocalHistory data) {
-    final index =
-        mangaReadingHistory.indexWhere((i) => i.mediaId == data.mediaId);
+  void addToReadingHistory(LocalHistoryItem data) {
+    data.mediaType = HistoryMediaType.manga;
+    data.lastWatched = DateTime.now();
+    isar.writeTxnSync(() {
+      final existing = isar.localHistoryItems
+          .where()
+          .mediaIdEqualTo(data.mediaId)
+          .findFirstSync();
+      if (existing != null) {
+        data.id = existing.id;
+      }
+      isar.localHistoryItems.putSync(data);
+    });
+    final index = mangaReadingHistory.indexWhere(
+      (i) => i.mediaId == data.mediaId,
+    );
     if (index != -1) {
       mangaReadingHistory[index] = data;
     } else {
-      mangaReadingHistory.add(data);
+      mangaReadingHistory.insert(0, data);
     }
-    log("Succesfully added: ${animeWatchingHistory.length}");
+    log('Added to manga history: ${data.title}');
   }
 
   void removeFromReadingHistory(int mediaId) {
-    mangaReadingHistory.removeWhere((history) => history.mediaId == mediaId);
+    isar.writeTxnSync(() {
+      final item = isar.localHistoryItems
+          .where()
+          .mediaIdEqualTo(mediaId)
+          .findFirstSync();
+      if (item != null) isar.localHistoryItems.deleteSync(item.id);
+    });
+    mangaReadingHistory.removeWhere((h) => h.mediaId == mediaId);
+  }
+
+  void clearAnimeHistory() {
+    isar.writeTxnSync(() {
+      final ids = animeWatchingHistory.map((e) => e.id).toList();
+      isar.localHistoryItems.deleteAllSync(ids);
+    });
+    animeWatchingHistory.clear();
+  }
+
+  void clearMangaHistory() {
+    isar.writeTxnSync(() {
+      final ids = mangaReadingHistory.map((e) => e.id).toList();
+      isar.localHistoryItems.deleteAllSync(ids);
+    });
+    mangaReadingHistory.clear();
   }
 }

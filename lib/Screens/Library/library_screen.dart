@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:azyx/Screens/History/history_screen.dart' as azyx_history;
 import 'package:azyx/Controllers/offline_controller.dart';
 import 'package:azyx/Controllers/settings_controller.dart';
 import 'package:azyx/Database/isar_models/category.dart';
@@ -160,6 +161,56 @@ class _FavoriteScreenState extends State<LibraryScreen>
                                   ],
                                 ),
                               ),
+                              GestureDetector(
+                                onTap: () => Get.to(
+                                  () => const azyx_history.HistoryScreen(),
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: Border.all(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary.withOpacity(0.2),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
+                                          borderRadius: BorderRadius.circular(
+                                            16,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          Broken.clock,
+                                          color: Colors.black,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      8.height,
+                                      AzyXText(
+                                        text: "History",
+                                        fontVariant: FontVariant.bold,
+                                        fontSize: 12,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              12.width,
                               // Content Type Selector with glassmorphism
                               GestureDetector(
                                 onTap: () {

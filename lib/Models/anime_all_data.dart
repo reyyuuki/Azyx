@@ -1,7 +1,5 @@
 import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
-// import 'package:azyx/api/Mangayomi/Eval/dart/model/video.dart';
-// import 'package:azyx/api/Mangayomi/Model/Source.dart';
 
 class AnimeAllData {
   String? url;
@@ -13,6 +11,7 @@ class AnimeAllData {
   List<Video> episodeUrls;
   List<Episode>? episodeList;
   String? source;
+  int? startFromSeconds;
 
   AnimeAllData({
     this.episodeList,
@@ -24,6 +23,7 @@ class AnimeAllData {
     this.title,
     this.image,
     this.url,
+    this.startFromSeconds,
   });
 
   factory AnimeAllData.fromJson(Map<String, dynamic> json) {
@@ -43,6 +43,7 @@ class AnimeAllData {
           ?.map((e) => Episode.fromJson(e as Map<dynamic, dynamic>))
           .toList(),
       source: json['source'] ?? '',
+      startFromSeconds: json['startFromSeconds'] as int?,
     );
   }
 
@@ -57,6 +58,7 @@ class AnimeAllData {
       'episodeUrls': episodeUrls.map((e) => e.toJson()).toList(),
       'episodeList': episodeList?.map((e) => e.toJson()).toList(),
       'source': source,
+      'startFromSeconds': startFromSeconds,
     };
   }
 }

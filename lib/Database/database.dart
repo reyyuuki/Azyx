@@ -4,6 +4,7 @@ import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.
     hide isar;
 import 'package:azyx/Database/isar_models/category.dart';
 import 'package:azyx/Database/isar_models/key_value.dart';
+import 'package:azyx/Database/isar_models/local_history_item.dart';
 import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:azyx/main.dart';
 import 'package:isar_community/isar.dart';
@@ -21,6 +22,7 @@ class Database {
         KeyValueSchema,
         CategorySchema,
         OfflineItemSchema,
+        LocalHistoryItemSchema,
       ],
       directory: dir!.path,
       name: "AzyX",

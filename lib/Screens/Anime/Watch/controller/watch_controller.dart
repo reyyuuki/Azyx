@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as max;
@@ -11,10 +12,11 @@ import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/online_subtitles_controller.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
+import 'package:azyx/Controllers/local_history_controller.dart';
 import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Functions/string_extensions.dart';
 import 'package:azyx/Models/anime_all_data.dart';
-import 'package:azyx/Models/local_history.dart';
+import 'package:azyx/Database/isar_models/local_history_item.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/bottom_sheets.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/episode_list_drawer.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/indicator.dart';
@@ -37,8 +39,6 @@ import 'package:volume_controller/volume_controller.dart';
 
 enum ResizeModes { contain, cover, fill }
 
-final WatchController watchController = Get.put(WatchController());
-
 class WatchController extends GetxController with WidgetsBindingObserver {
   late Player player;
   late VideoController controller;
@@ -60,7 +60,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   final Rx<double> _brightnessValue = 0.0.obs;
   final Rx<bool> isPotraitOrientaion = false.obs;
   final Rx<String> selectedSbt = ''.obs;
-  final Rx<LocalHistory> localHistoryData = LocalHistory().obs;
   final Rx<bool> isPlaying = false.obs;
   final Rx<bool> isBuffering = false.obs;
   final Rx<int> doubleTapLable = 0.obs;
@@ -107,6 +106,9 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     player.open(
       Media(
         playerData.url!,
+        start: playerData.startFromSeconds != null
+            ? Duration(seconds: playerData.startFromSeconds!)
+            : Duration.zero,
         httpHeaders: {
           'Referer':
               playerData.episodeUrls.first.headers?['referer'] ??
@@ -157,7 +159,30 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     });
   }
 
-  void localHistoryEntry() {}
+  void localHistoryEntry() {
+    final data = animeData.value;
+    if (data.id == null) return;
+
+    final String episodeUrlsJson = jsonEncode(
+      data.episodeUrls.map((e) => e.toJson()).toList(),
+    );
+
+    final entry = LocalHistoryItem()
+      ..mediaId = int.tryParse(data.id ?? '')
+      ..title = data.title
+      ..image = data.image
+      ..link = data.url
+      ..sourceName = data.source
+      ..progress = 'EP ${data.number ?? episodeNumber.value}'
+      ..currentTimeSeconds = position.value.inSeconds
+      ..totalDurationSeconds = totalDuration.value.inSeconds > 0
+          ? totalDuration.value.inSeconds
+          : null
+      ..mediaType = HistoryMediaType.anime
+      ..episodeList = data.episodeList
+      ..episodeUrlsJson = episodeUrlsJson;
+    Future.microtask(() => localHistoryController.addToWatchingHistory(entry));
+  }
 
   void updateEntry() async {
     Utils.log(

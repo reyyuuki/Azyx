@@ -48,7 +48,7 @@ class EpisodeBottomSheet extends StatelessWidget {
                     children: episodeUrls.map<Widget>((item) {
                       return serverAzyXContainer(
                         context,
-                        item.quality,
+                        item.title ?? 'Unknown',
                         item.url,
                         number,
                       );

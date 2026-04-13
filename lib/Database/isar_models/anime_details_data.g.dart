@@ -71,23 +71,28 @@ const AnilistMediaDataSchema = Schema(
       enumMap: _AnilistMediaDataservicesTypeEnumValueMap,
     ),
     r'status': PropertySchema(id: 13, name: r'status', type: IsarType.string),
-    r'timeUntilAiring': PropertySchema(
+    r'synonyms': PropertySchema(
       id: 14,
+      name: r'synonyms',
+      type: IsarType.stringList,
+    ),
+    r'timeUntilAiring': PropertySchema(
+      id: 15,
       name: r'timeUntilAiring',
       type: IsarType.long,
     ),
-    r'title': PropertySchema(id: 15, name: r'title', type: IsarType.string),
+    r'title': PropertySchema(id: 16, name: r'title', type: IsarType.string),
     r'titleNative': PropertySchema(
-      id: 16,
+      id: 17,
       name: r'titleNative',
       type: IsarType.string,
     ),
     r'titleRomaji': PropertySchema(
-      id: 17,
+      id: 18,
       name: r'titleRomaji',
       type: IsarType.string,
     ),
-    r'type': PropertySchema(id: 18, name: r'type', type: IsarType.string),
+    r'type': PropertySchema(id: 19, name: r'type', type: IsarType.string),
   },
 
   estimateSize: _anilistMediaDataEstimateSize,
@@ -202,6 +207,18 @@ int _anilistMediaDataEstimateSize(
     }
   }
   {
+    final list = object.synonyms;
+    if (list != null) {
+      bytesCount += 3 + list.length * 3;
+      {
+        for (var i = 0; i < list.length; i++) {
+          final value = list[i];
+          bytesCount += value.length * 3;
+        }
+      }
+    }
+  }
+  {
     final value = object.title;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -263,11 +280,12 @@ void _anilistMediaDataSerialize(
   );
   writer.writeInt(offsets[12], object.servicesType?.index);
   writer.writeString(offsets[13], object.status);
-  writer.writeLong(offsets[14], object.timeUntilAiring);
-  writer.writeString(offsets[15], object.title);
-  writer.writeString(offsets[16], object.titleNative);
-  writer.writeString(offsets[17], object.titleRomaji);
-  writer.writeString(offsets[18], object.type);
+  writer.writeStringList(offsets[14], object.synonyms);
+  writer.writeLong(offsets[15], object.timeUntilAiring);
+  writer.writeString(offsets[16], object.title);
+  writer.writeString(offsets[17], object.titleNative);
+  writer.writeString(offsets[18], object.titleRomaji);
+  writer.writeString(offsets[19], object.type);
 }
 
 AnilistMediaData _anilistMediaDataDeserialize(
@@ -312,11 +330,12 @@ AnilistMediaData _anilistMediaDataDeserialize(
           offsets[12],
         )],
     status: reader.readStringOrNull(offsets[13]),
-    timeUntilAiring: reader.readLongOrNull(offsets[14]),
-    title: reader.readStringOrNull(offsets[15]),
-    titleNative: reader.readStringOrNull(offsets[16]),
-    titleRomaji: reader.readStringOrNull(offsets[17]),
-    type: reader.readStringOrNull(offsets[18]),
+    synonyms: reader.readStringList(offsets[14]),
+    timeUntilAiring: reader.readLongOrNull(offsets[15]),
+    title: reader.readStringOrNull(offsets[16]),
+    titleNative: reader.readStringOrNull(offsets[17]),
+    titleRomaji: reader.readStringOrNull(offsets[18]),
+    type: reader.readStringOrNull(offsets[19]),
   );
   return object;
 }
@@ -381,14 +400,16 @@ P _anilistMediaDataDeserializeProp<P>(
     case 13:
       return (reader.readStringOrNull(offset)) as P;
     case 14:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readStringList(offset)) as P;
     case 15:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 16:
       return (reader.readStringOrNull(offset)) as P;
     case 17:
       return (reader.readStringOrNull(offset)) as P;
     case 18:
+      return (reader.readStringOrNull(offset)) as P;
+    case 19:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -2087,6 +2108,218 @@ extension AnilistMediaDataQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.greaterThan(property: r'status', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'synonyms'),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'synonyms'),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsElementEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'synonyms',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'synonyms',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'synonyms',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'synonyms',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsElementStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'synonyms',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsElementEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'synonyms',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsElementContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'synonyms',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsElementMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'synonyms',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'synonyms', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'synonyms', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'synonyms', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'synonyms', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'synonyms', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsLengthLessThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'synonyms', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsLengthGreaterThan(int length, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(r'synonyms', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  synonymsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'synonyms',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
       );
     });
   }
