@@ -6,6 +6,7 @@ import 'package:app_links/app_links.dart';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
+import 'package:azyx/Controllers/local_history_controller.dart';
 import 'package:azyx/Controllers/offline_controller.dart';
 import 'package:azyx/Controllers/services/mal_service.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
@@ -62,7 +63,6 @@ void main(List<String> args) async {
           statusBarColor: Colors.transparent,
         ),
       );
-      deepLink();
       MediaKit.ensureInitialized();
       await Database().init();
       await Hive.initFlutter();
@@ -80,6 +80,7 @@ void main(List<String> args) async {
       Get.put(AnilistAddToListController());
       Get.put(SettingsController());
       Get.put(SourceController());
+      Get.put(LocalHistoryController());
       runApp(
         MultiProvider(
           providers: [ChangeNotifierProvider(create: (_) => ThemeProvider())],
@@ -93,16 +94,21 @@ void main(List<String> args) async {
   );
 }
 
+bool _isDeepLinkInitialized = false;
+
 void deepLink() async {
+  if (_isDeepLinkInitialized) return;
+  _isDeepLinkInitialized = true;
+
   final appLink = AppLinks();
   try {
     final initLink = await appLink.getInitialLink();
-    if (initLink != null) Deeplink.useDeepLink(initLink);
+    if (initLink != null) Deeplink.handleDeepLink(initLink, isInitial: true);
   } catch (e) {
     azyxSnackBar('Error while getting link: $e');
   }
   appLink.uriLinkStream.listen(
-    (uri) => Deeplink.useDeepLink(uri),
+    (uri) => Deeplink.handleDeepLink(uri),
     onError: (err) => azyxSnackBar('Error Opening link: $err'),
   );
 }
@@ -122,13 +128,13 @@ class MainApp extends StatelessWidget {
       scrollBehavior: MyCustomScrollBehavior(),
       debugShowCheckedModeBanner: false,
       theme: provider.themeData,
-      home: HomePage(),
+      home: const HomePage(),
     );
   }
 }
 
 class HomePage extends StatefulWidget {
-  HomePage({super.key});
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -138,6 +144,9 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      deepLink();
+    });
   }
 
   final List<Widget> _screens = [
