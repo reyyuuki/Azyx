@@ -14,6 +14,8 @@ class WatchScreen extends StatefulWidget {
 }
 
 class _WatchScreenState extends State<WatchScreen> {
+  final WatchController watchController = Get.put(WatchController());
+
   @override
   void initState() {
     super.initState();

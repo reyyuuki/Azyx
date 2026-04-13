@@ -33,6 +33,26 @@ class SourceController extends GetxController {
 
   final ExtensionManager extensionManager = Get.put(ExtensionManager());
 
+  final Map<String, String> _activeTokens = {};
+
+  void cancelInProgress(String key) {
+    if (_activeTokens.containsKey(key)) {
+      final token = _activeTokens[key]!;
+      final source = switch (key) {
+        'search' || 'detail' => activeSource.value,
+        'manga_search' || 'manga_detail' => activeMangaSource.value,
+        _ => null,
+      };
+      source?.cancelRequest(token);
+      _activeTokens.remove(key);
+    }
+  }
+
+  void updateToken(String key, String token) {
+    cancelInProgress(key);
+    _activeTokens[key] = token;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -135,10 +155,18 @@ class SourceController extends GetxController {
 
   void setActiveSource(Source source) {
     if (source.itemType == ItemType.manga) {
+      if (activeMangaSource.value?.id != source.id) {
+        cancelInProgress('manga_search');
+        cancelInProgress('manga_detail');
+      }
       activeMangaSource.value = source;
       SourceKeys.activeMangaSourceId.set(source.id.toString());
       lastUpdatedSource.value = 'MANGA';
     } else if (source.itemType == ItemType.anime) {
+      if (activeSource.value?.id != source.id) {
+        cancelInProgress('search');
+        cancelInProgress('detail');
+      }
       activeSource.value = source;
       SourceKeys.activeSourceId.set(source.id.toString());
       log("activeSourceId: ${SourceKeys.activeSourceId.get<String>('')}");

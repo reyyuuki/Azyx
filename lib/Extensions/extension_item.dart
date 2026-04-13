@@ -89,11 +89,6 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
       }
 
       await widget.source.install();
-      log('installed');
-      await sourceController.extensionManager.refreshManagerType(
-        widget.source.extensionType,
-        widget.mediaType,
-      );
       if (mounted) {
         setState(() => _installProgress = 1.0);
         await Future.delayed(const Duration(milliseconds: 100));
@@ -483,9 +478,8 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
             setState(() => _isLoading = true);
             try {
               await widget.source.uninstall();
-              await sourceController.fetchRepos();
-            } catch (e) {
-              azyxSnackBar(e.toString());
+            } catch (e, t) {
+              azyxSnackBar('error when uninstalling: $e\n$t');
             }
             if (mounted) {
               setState(() => _isLoading = false);

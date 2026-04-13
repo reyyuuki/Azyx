@@ -31,6 +31,7 @@ class AnilistDataController extends GetxController {
           english
           native
         }
+        synonyms
         description
         coverImage {
           large   
@@ -144,6 +145,7 @@ class AnilistDataController extends GetxController {
         english
         native
       }
+      synonyms
       description
       coverImage {
         large   

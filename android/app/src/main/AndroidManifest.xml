@@ -60,6 +60,19 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="aniyomi" android:host="add-repo" />
             </intent-filter>
+            <intent-filter android:label="Add Repo">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="cloudstreamrepo" />
+            </intent-filter>  
+
+            <intent-filter android:label="Add Repo">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="sora" />
+            </intent-filter> 
         </activity>
         <!-- Web Auth Callback Activity -->
         <activity android:name="com.linusu.flutter_web_auth_2.CallbackActivity" android:exported="true">

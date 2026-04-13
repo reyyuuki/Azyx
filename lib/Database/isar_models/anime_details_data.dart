@@ -9,6 +9,8 @@ class AnilistMediaData {
   String? id;
   int? episodes;
   String? title;
+  String? titleRomaji;
+  String? titleNative;
   String? description;
   String? image;
   String? coverImage;
@@ -18,6 +20,7 @@ class AnilistMediaData {
   int? popularity;
   int? timeUntilAiring;
   List<String>? genres;
+  List<String>? synonyms;
 
   List<Character>? characters;
   List<AnilistMediaData>? relations;
@@ -32,6 +35,8 @@ class AnilistMediaData {
   AnilistMediaData({
     this.id,
     this.title,
+    this.titleRomaji,
+    this.titleNative,
     this.episodes,
     this.description,
     this.image,
@@ -42,6 +47,7 @@ class AnilistMediaData {
     this.popularity,
     this.timeUntilAiring,
     this.genres,
+    this.synonyms,
     this.characters,
     this.relations,
     this.recommendations,
@@ -53,9 +59,12 @@ class AnilistMediaData {
     Map<String, dynamic> json, {
     bool isManga = false,
   }) {
+    final altTitles = json['alternative_titles'] as Map<String, dynamic>?;
     return AnilistMediaData(
       id: json['id']?.toString() ?? '',
       title: json['title'] ?? '??',
+      titleRomaji: altTitles?['ja']?.toString(),
+      titleNative: altTitles?['ja']?.toString(),
       image: json['main_picture']?['large'] ?? json['main_picture']?['medium'],
       coverImage: json['main_picture']?['large'],
       episodes: isManga ? json['num_chapters'] : json['num_episodes'],
@@ -66,6 +75,9 @@ class AnilistMediaData {
       popularity: json['popularity'],
       genres: (json['genres'] as List?)
           ?.map((e) => e['name'].toString())
+          .toList(),
+      synonyms: (altTitles?['synonyms'] as List?)
+          ?.map((e) => e.toString())
           .toList(),
     );
   }
@@ -93,6 +105,8 @@ class AnilistMediaData {
       'id': id,
       'episodes': episodes,
       'title': title,
+      'titleRomaji': titleRomaji,
+      'titleNative': titleNative,
       'description': description,
       'image': image,
       'coverImage': coverImage,
@@ -102,6 +116,7 @@ class AnilistMediaData {
       'popularity': popularity,
       'timeUntilAiring': timeUntilAiring,
       'genres': genres,
+      'synonyms': synonyms,
       'servicesType': servicesType?.name,
       'mediaType': mediaType?.name,
     };
@@ -113,12 +128,16 @@ class AnilistMediaData {
   ]) {
     final titleJson = json['title'];
     String? title;
+    String? titleRomaji;
+    String? titleNative;
     if (titleJson is Map) {
       title =
           titleJson['english'] ??
           titleJson['romaji'] ??
           titleJson['native'] ??
           '??';
+      titleRomaji = titleJson['romaji']?.toString();
+      titleNative = titleJson['native']?.toString();
     } else {
       title = titleJson?.toString() ?? '??';
     }
@@ -135,6 +154,8 @@ class AnilistMediaData {
       id: json['id']?.toString(),
       episodes: json['episodes'],
       title: title,
+      titleRomaji: titleRomaji ?? json['titleRomaji']?.toString(),
+      titleNative: titleNative ?? json['titleNative']?.toString(),
       description: json['description'],
       image: image,
       coverImage: json['bannerImage']?.toString() ?? image,
@@ -144,6 +165,7 @@ class AnilistMediaData {
       popularity: json['popularity'],
       timeUntilAiring: json['timeUntilAiring'],
       genres: (json['genres'] as List?)?.map((e) => e.toString()).toList(),
+      synonyms: (json['synonyms'] as List?)?.map((e) => e.toString()).toList(),
       characters: (json['characters']?['edges'] as List?)
           ?.map((e) => Character.fromJson(e['node']))
           .toList(),

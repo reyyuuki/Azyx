@@ -1,3 +1,5 @@
+import 'package:azyx/Controllers/local_history_controller.dart';
+import 'package:azyx/Database/isar_models/local_history_item.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -13,130 +15,41 @@ class AnimeHistoryScreen extends StatefulWidget {
 }
 
 class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
-  final RxList<AnimeHistoryItem> historyItems = RxList<AnimeHistoryItem>();
-  final RxBool isLoading = RxBool(true);
+  late final LocalHistoryController _controller;
   final RxString selectedFilter = RxString('All');
-  final List<String> filterOptions = [
-    'All',
-    'Today',
-    'This Week',
-    'This Month'
-  ];
+  final List<String> filterOptions = ['All', 'Today', 'This Week', 'This Month'];
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _controller = localHistoryController;
   }
 
-  void _loadData() {
-    Future.delayed(const Duration(milliseconds: 800), () {
-      historyItems.value = _getMockData();
-      isLoading.value = false;
-    });
-  }
-
-  // Enhanced mock data with more variety
-  List<AnimeHistoryItem> _getMockData() {
-    return [
-      AnimeHistoryItem(
-        id: 1,
-        title: "Attack on Titan: Final Season",
-        image:
-            "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx131681-ODIRpBIbR5Eu.jpg",
-        url:
-            "https://anilist.co/anime/131681/Shingeki-no-Kyojin-The-Final-Season/",
-        currentEpisode: 5,
-        totalEpisodes: 16,
-        currentTimeWatched: 18 * 60 + 45,
-        totalDuration: 24 * 60,
-        source: "Gogoanime",
-        lastWatched: DateTime.now().subtract(const Duration(hours: 2)),
-        rating: 9.2,
-        genre: "Action, Drama",
-        status: "Continuing",
-      ),
-      AnimeHistoryItem(
-        id: 2,
-        title: "Jujutsu Kaisen Season 2",
-        image:
-            "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx145064-oNJGBxbDELkW.jpg",
-        url: "https://anilist.co/anime/145064/Jujutsu-Kaisen-2nd-Season/",
-        currentEpisode: 12,
-        totalEpisodes: 23,
-        currentTimeWatched: 20 * 60 + 30,
-        totalDuration: 24 * 60,
-        source: "AnimePahe",
-        lastWatched: DateTime.now().subtract(const Duration(days: 1)),
-        rating: 8.9,
-        genre: "Action, Supernatural",
-        status: "Continuing",
-      ),
-      AnimeHistoryItem(
-        id: 3,
-        title: "Demon Slayer: Entertainment District Arc",
-        image:
-            "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx142329-f0a5pIaYnRLS.jpg",
-        url: "https://anilist.co/anime/142329/Kimetsu-no-Yaiba-Yuukakuhen/",
-        currentEpisode: 3,
-        totalEpisodes: 11,
-        currentTimeWatched: 15 * 60 + 10,
-        totalDuration: 24 * 60 + 30,
-        source: "Zoro",
-        lastWatched: DateTime.now().subtract(const Duration(days: 2)),
-        rating: 8.7,
-        genre: "Action, Historical",
-        status: "Completed",
-      ),
-      AnimeHistoryItem(
-        id: 4,
-        title: "Chainsaw Man",
-        image:
-            "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx127230-FlochcFsyoF4.png",
-        url: "https://anilist.co/anime/127230/Chainsaw-Man/",
-        currentEpisode: 8,
-        totalEpisodes: 12,
-        currentTimeWatched: 22 * 60,
-        totalDuration: 24 * 60,
-        source: "Crunchyroll",
-        lastWatched: DateTime.now().subtract(const Duration(days: 3)),
-        rating: 8.5,
-        genre: "Action, Horror",
-        status: "Continuing",
-      ),
-      AnimeHistoryItem(
-        id: 5,
-        title: "Spy x Family",
-        image:
-            "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx140960-vN39AmOWrVB5.jpg",
-        url: "https://anilist.co/anime/140960/SPYFAMILY/",
-        currentEpisode: 10,
-        totalEpisodes: 25,
-        currentTimeWatched: 10 * 60 + 45,
-        totalDuration: 24 * 60 + 30,
-        source: "Gogoanime",
-        lastWatched: DateTime.now().subtract(const Duration(days: 4)),
-        rating: 8.8,
-        genre: "Comedy, Family",
-        status: "Continuing",
-      ),
-      AnimeHistoryItem(
-        id: 6,
-        title: "My Hero Academia Season 6",
-        image:
-            "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx139630-J0jXl0MQWj5n.jpg",
-        url: "https://anilist.co/anime/139630/Boku-no-Hero-Academia-6/",
-        currentEpisode: 15,
-        totalEpisodes: 25,
-        currentTimeWatched: 5 * 60 + 30,
-        totalDuration: 24 * 60,
-        source: "AnimePahe",
-        lastWatched: DateTime.now().subtract(const Duration(days: 5)),
-        rating: 8.3,
-        genre: "Action, School",
-        status: "Completed",
-      ),
-    ];
+  List<LocalHistoryItem> _getFilteredItems() {
+    final items = _controller.animeWatchingHistory;
+    final now = DateTime.now();
+    switch (selectedFilter.value) {
+      case 'Today':
+        return items
+            .where((e) =>
+                e.lastWatched != null &&
+                now.difference(e.lastWatched!).inDays == 0)
+            .toList();
+      case 'This Week':
+        return items
+            .where((e) =>
+                e.lastWatched != null &&
+                now.difference(e.lastWatched!).inDays <= 7)
+            .toList();
+      case 'This Month':
+        return items
+            .where((e) =>
+                e.lastWatched != null &&
+                now.difference(e.lastWatched!).inDays <= 30)
+            .toList();
+      default:
+        return items.toList();
+    }
   }
 
   String _formatDuration(int seconds) {
@@ -145,32 +58,13 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
     return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
-  String _formatLastWatched(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
-      return 'Just now';
-    }
-  }
-
-  Color _getStatusColor(String status, BuildContext context) {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return Colors.green;
-      case 'continuing':
-        return Theme.of(context).colorScheme.primary;
-      case 'paused':
-        return Colors.orange;
-      default:
-        return Theme.of(context).colorScheme.secondary;
-    }
+  String _formatLastWatched(DateTime? dateTime) {
+    if (dateTime == null) return '';
+    final difference = DateTime.now().difference(dateTime);
+    if (difference.inDays > 0) return '${difference.inDays}d ago';
+    if (difference.inHours > 0) return '${difference.inHours}h ago';
+    if (difference.inMinutes > 0) return '${difference.inMinutes}m ago';
+    return 'Just now';
   }
 
   @override
@@ -243,13 +137,9 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
             _buildFilterChips(context),
             Expanded(
               child: Obx(() {
-                if (isLoading.value) {
-                  return _buildLoadingState();
-                }
-                if (historyItems.isEmpty) {
-                  return _buildEmptyState(context);
-                }
-                return _buildHistoryList(context, historyItems);
+                final items = _getFilteredItems();
+                if (items.isEmpty) return _buildEmptyState(context);
+                return _buildHistoryList(context, items);
               }),
             ),
           ],
@@ -285,9 +175,7 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                             ? Theme.of(context).colorScheme.onPrimary
                             : Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
-                      onSelected: (selected) {
-                        selectedFilter.value = option;
-                      },
+                      onSelected: (_) => selectedFilter.value = option,
                       backgroundColor:
                           Theme.of(context).colorScheme.surfaceContainerLow,
                       selectedColor: Theme.of(context).colorScheme.primary,
@@ -312,29 +200,6 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildLoadingState() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: 6,
-      itemBuilder: (context, index) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          child: Shimmer.fromColors(
-            baseColor: Theme.of(context).colorScheme.surfaceContainerLowest,
-            highlightColor: Theme.of(context).colorScheme.surfaceContainerLow,
-            child: Container(
-              height: 140,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -424,7 +289,7 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
     );
   }
 
-  Widget _buildHistoryList(BuildContext context, List<AnimeHistoryItem> items) {
+  Widget _buildHistoryList(BuildContext context, List<LocalHistoryItem> items) {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       itemCount: items.length,
@@ -432,22 +297,25 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
         final item = items[index];
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
-          child: _buildEnhancedHistoryCard(context, item),
+          child: _buildHistoryCard(context, item),
         );
       },
     );
   }
 
-  Widget _buildEnhancedHistoryCard(
-      BuildContext context, AnimeHistoryItem item) {
-    final watchProgress = item.currentTimeWatched / item.totalDuration;
+  Widget _buildHistoryCard(BuildContext context, LocalHistoryItem item) {
+    final currentSecs = item.currentTimeSeconds ?? 0;
+    final totalSecs = item.totalDurationSeconds ?? 1;
+    final watchProgress = (currentSecs / totalSecs).clamp(0.0, 1.0);
     final percentWatched = (watchProgress * 100).toInt();
-    final formattedCurrentTime = _formatDuration(item.currentTimeWatched);
-    final formattedTotalTime = _formatDuration(item.totalDuration);
+    final formattedCurrentTime = _formatDuration(currentSecs);
+    final formattedTotalTime = _formatDuration(totalSecs);
     final formattedLastWatched = _formatLastWatched(item.lastWatched);
 
     return GestureDetector(
-      onTap: () => Get.toNamed('/anime-details/${item.id}'),
+      onTap: () {
+        if (item.mediaId != null) Get.toNamed('/anime-details/${item.mediaId}');
+      },
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -469,12 +337,10 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
         ),
         child: Column(
           children: [
-            // Main content row
             Container(
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  // Enhanced Image Section
                   Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
@@ -493,162 +359,78 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(16),
-                          child: CachedNetworkImage(
-                            imageUrl: item.image,
-                            width: 100,
-                            height: 140,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Shimmer.fromColors(
-                              baseColor: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerLowest,
-                              highlightColor: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerLow,
-                              child: Container(
-                                width: 100,
-                                height: 140,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              width: 100,
-                              height: 140,
+                          child: item.image != null
+                              ? CachedNetworkImage(
+                                  imageUrl: item.image!,
+                                  width: 100,
+                                  height: 140,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) =>
+                                      Shimmer.fromColors(
+                                    baseColor: Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainerLowest,
+                                    highlightColor: Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainerLow,
+                                    child: Container(
+                                      width: 100,
+                                      height: 140,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius:
+                                            BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      _imagePlaceholder(context),
+                                )
+                              : _imagePlaceholder(context),
+                        ),
+                        if (item.progress != null)
+                          Positioned(
+                            top: 8,
+                            left: 8,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerLowest,
-                                borderRadius: BorderRadius.circular(16),
+                                color: Theme.of(context).colorScheme.primary,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                              child: Icon(
-                                Broken.image,
-                                color: Theme.of(context).colorScheme.outline,
-                                size: 32,
+                              child: AzyXText(
+                                text: item.progress!,
+                                fontSize: 11,
+                                fontVariant: FontVariant.bold,
+                                color: Colors.white,
                               ),
                             ),
                           ),
-                        ),
-
-                        // Episode badge
-                        Positioned(
-                          top: 8,
-                          left: 8,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: AzyXText(
-                              text: "EP ${item.currentEpisode}",
-                              fontSize: 11,
-                              fontVariant: FontVariant.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-
-                        // Rating badge
-                        Positioned(
-                          top: 8,
-                          right: 8,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.amber,
-                              borderRadius: BorderRadius.circular(8),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.star,
-                                    size: 10, color: Colors.white),
-                                const SizedBox(width: 2),
-                                AzyXText(
-                                  text: item.rating.toString(),
-                                  fontSize: 9,
-                                  fontVariant: FontVariant.bold,
-                                  color: Colors.white,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),
-
                   const SizedBox(width: 16),
-
-                  // Content Section
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Title
                         AzyXText(
-                          text: item.title,
+                          text: item.title ?? 'Unknown',
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           fontSize: 16,
                           fontVariant: FontVariant.bold,
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
-
-                        const SizedBox(height: 8),
-
-                        // Genre and Status
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: _getStatusColor(item.status, context)
-                                    .withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: AzyXText(
-                                text: item.status,
-                                fontSize: 10,
-                                fontVariant: FontVariant.bold,
-                                color: _getStatusColor(item.status, context),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 8),
-
-                        // Genre
-                        AzyXText(
-                          text: item.genre,
-                          fontSize: 12,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-
                         const SizedBox(height: 12),
-
-                        // Progress section
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -659,15 +441,8 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                                   text: "Progress: $percentWatched%",
                                   fontSize: 12,
                                   fontVariant: FontVariant.bold,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                                AzyXText(
-                                  text:
-                                      "${item.currentEpisode}/${item.totalEpisodes}",
-                                  fontSize: 12,
-                                  fontVariant: FontVariant.bold,
                                   color:
-                                      Theme.of(context).colorScheme.secondary,
+                                      Theme.of(context).colorScheme.primary,
                                 ),
                               ],
                             ),
@@ -701,13 +476,24 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                       ],
                     ),
                   ),
+                  IconButton(
+                    onPressed: () {
+                      if (item.mediaId != null) {
+                        _controller.removeFromWatchingHistory(item.mediaId!);
+                      }
+                    },
+                    icon: Icon(
+                      Broken.trash,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
                 ],
               ),
             ),
-
-            // Bottom info bar
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: Theme.of(context)
                     .colorScheme
@@ -732,29 +518,32 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                       AzyXText(
                         text: "$formattedCurrentTime / $formattedTotalTime",
                         fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        color:
+                            Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ],
                   ),
                   Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color:
-                              Theme.of(context).colorScheme.secondaryContainer,
-                          borderRadius: BorderRadius.circular(8),
+                      if (item.sourceName != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .secondaryContainer,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: AzyXText(
+                            text: item.sourceName!,
+                            fontSize: 10,
+                            fontVariant: FontVariant.bold,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSecondaryContainer,
+                          ),
                         ),
-                        child: AzyXText(
-                          text: item.source,
-                          fontSize: 10,
-                          fontVariant: FontVariant.bold,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSecondaryContainer,
-                        ),
-                      ),
                       const SizedBox(width: 12),
                       AzyXText(
                         text: formattedLastWatched,
@@ -768,6 +557,22 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _imagePlaceholder(BuildContext context) {
+    return Container(
+      width: 100,
+      height: 140,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Icon(
+        Broken.image,
+        color: Theme.of(context).colorScheme.outline,
+        size: 32,
       ),
     );
   }
@@ -801,27 +606,6 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
               color: Theme.of(context).colorScheme.onSurface,
             ),
             const SizedBox(height: 24),
-            _buildOptionTile(
-              context,
-              Broken.sort,
-              "Sort History",
-              "Change sorting order",
-              () => Navigator.pop(context),
-            ),
-            _buildOptionTile(
-              context,
-              Broken.filter,
-              "Filter Options",
-              "Advanced filtering",
-              () => Navigator.pop(context),
-            ),
-            _buildOptionTile(
-              context,
-              Broken.export,
-              "Export History",
-              "Save your watch history",
-              () => Navigator.pop(context),
-            ),
             _buildOptionTile(
               context,
               Broken.trash,
@@ -928,7 +712,8 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                       .withOpacity(0.3),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.error.withOpacity(0.3),
+                    color:
+                        Theme.of(context).colorScheme.error.withOpacity(0.3),
                   ),
                 ),
                 child: Row(
@@ -940,11 +725,13 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: AzyXText(
-                        text:
-                            "This will remove ${historyItems.length} items from your history",
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.error,
+                      child: Obx(
+                        () => AzyXText(
+                          text:
+                              "This will remove ${_controller.animeWatchingHistory.length} items from your history",
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
                       ),
                     ),
                   ],
@@ -957,7 +744,8 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
@@ -980,7 +768,7 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
             ),
             child: TextButton(
               onPressed: () {
-                historyItems.clear();
+                _controller.clearAnimeHistory();
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -1011,37 +799,4 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
       ),
     );
   }
-}
-
-// Enhanced model class for anime history item
-class AnimeHistoryItem {
-  final int id;
-  final String title;
-  final String image;
-  final String url;
-  final int currentEpisode;
-  final int totalEpisodes;
-  final int currentTimeWatched; // in seconds
-  final int totalDuration; // in seconds
-  final String source;
-  final DateTime lastWatched;
-  final double rating;
-  final String genre;
-  final String status;
-
-  AnimeHistoryItem({
-    required this.id,
-    required this.title,
-    required this.image,
-    required this.url,
-    required this.currentEpisode,
-    required this.totalEpisodes,
-    required this.currentTimeWatched,
-    required this.totalDuration,
-    required this.source,
-    required this.lastWatched,
-    required this.rating,
-    required this.genre,
-    required this.status,
-  });
 }

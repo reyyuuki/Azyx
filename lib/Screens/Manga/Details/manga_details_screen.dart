@@ -6,7 +6,7 @@ import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
-import 'package:azyx/Controllers/source/source_mapper.dart';
+
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Database/isar_models/offline_item.dart'
@@ -20,6 +20,7 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/scrollable_app_bar.dart';
 import 'package:azyx/utils/mapper.dart';
+import 'package:azyx/utils/source_mapper.dart';
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
 import 'package:expandable_page_view/expandable_page_view.dart';
 import 'package:flutter/material.dart';
@@ -130,21 +131,33 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
   }
 
   Future<void> getChapters(String link) async {
-    final episodeResult = await sourceController
-        .activeMangaSource
-        .value!
-        .methods
-        .getDetail(DMedia.withUrl(link));
-    totalChapters.value = chaptersList.length.toString();
-    chaptersList.value = mChapterToChapter(
-      episodeResult.episodes!,
-      widget.smallMedia!.title,
-    );
+    final token = "manga_detail_${id.value}";
+    sourceController.updateToken('manga_detail', token);
+    try {
+      final episodeResult = await sourceController
+          .activeMangaSource
+          .value!
+          .methods
+          .getDetail(DMedia.withUrl(link), parameters: SourceParams(cancelToken: token));
+      totalChapters.value = chaptersList.length.toString();
+      chaptersList.value = mChapterToChapter(
+        episodeResult.episodes!,
+        widget.smallMedia!.title,
+      );
+    } catch(e) {
+      log("Error fetching chapters or cancelled: $e");
+    }
   }
 
   Future<void> loadDetails() async {
     try {
-      final result = await mapMedia(formatTitles(mediaData.value), title);
+      final result = await SourceMapper.mapMedia(
+        formatTitles(mediaData.value),
+        title,
+        mediaId: id.value,
+        type: ItemType.manga,
+        synonyms: mediaData.value.synonyms ?? [],
+      );
       if (result != null) {
         getChapters(result.url!);
         mangaTitle.value = result.title ?? '';
@@ -159,7 +172,10 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
   }
 
   List<String> formatTitles(AnilistMediaData media) {
-    return ['${media.title}*ANIME', media.title ?? ''];
+    return [
+      media.title ?? '',
+      media.titleRomaji ?? '',
+    ];
   }
 
   @override
@@ -180,6 +196,16 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
     _syncMedia();
     convertData();
     getMediaStatus();
+  }
+
+  @override
+  void dispose() {
+    _tabBarController.dispose();
+    pageController.dispose();
+    sourceController.cancelInProgress('manga_search');
+    sourceController.cancelInProgress('manga_detail');
+    SourceMapper.cancelMapping();
+    super.dispose();
   }
 
   @override

@@ -364,7 +364,7 @@ class MalService extends GetxController implements BaseService, OnlineService {
 
   Future<AnilistMediaData> fetchWithToken(String url) async {
     const newField =
-        "fields=mean,status,media_type,synopsis,genres,type,num_episodes,num_chapters,start_date,end_date,source,rating,rank,popularity,favorites,statistics,recommendations";
+        "fields=mean,status,media_type,synopsis,genres,type,num_episodes,num_chapters,start_date,end_date,source,rating,rank,popularity,favorites,statistics,recommendations,alternative_titles";
 
     final data = await fetchMAL('$url?$newField') as Map<String, dynamic>;
     return AnilistMediaData.fromMAL(data);

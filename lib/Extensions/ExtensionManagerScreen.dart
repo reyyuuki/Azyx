@@ -118,7 +118,7 @@ class _ExtensionManagerScreenState extends State<ExtensionManagerScreen> {
                                     fontSize: 28,
                                   ),
                                   AzyXText(
-                                    text: "Manger",
+                                    text: "Manager",
                                     fontVariant: FontVariant.bold,
                                     fontSize: 28,
                                   ),
@@ -329,6 +329,7 @@ class _ManagerSectionState extends State<_ManagerSection> {
     'mangayomi' =>
       'https://raw.githubusercontent.com/kodjodevf/mangayomi/main/assets/app_icons/icon-red.png',
     'aniyomi' => 'https://aniyomi.org/img/logo-128px.png',
+    'aniyomi-desktop' => 'https://aniyomi.org/img/logo-128px.png',
     'sora' => 'https://static.everythingmoe.com/icons/sora.png',
     'cloudstream' => 'https://static.everythingmoe.com/icons/cloudstream.png',
     _ => '',

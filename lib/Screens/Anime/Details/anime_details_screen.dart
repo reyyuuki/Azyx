@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
@@ -17,6 +18,7 @@ import 'package:azyx/Screens/Anime/Details/tabs/watch_section.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/scrollable_app_bar.dart';
 import 'package:azyx/utils/mapper.dart';
+import 'package:azyx/utils/source_mapper.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:expandable_page_view/expandable_page_view.dart';
 import 'package:flutter/material.dart';
@@ -84,6 +86,9 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
   void dispose() {
     _tabBarController.dispose();
     _pageController.dispose();
+    sourceController.cancelInProgress('search');
+    sourceController.cancelInProgress('detail');
+    SourceMapper.cancelMapping();
     super.dispose();
   }
 
@@ -148,51 +153,89 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
   }
 
   Future<void> getEpisodes(String link) async {
-    final episodeResult = await sourceController.activeSource.value!.methods
-        .getDetail(DMedia.withUrl(link));
-    final data = episodeResult.episodes!.reversed.toList();
-    final mappedList = data.map((item) {
-      return mChapterToEpisode(item, episodeResult);
-    }).toList();
-    episodesList.value = mappedList;
-    totalEpisodes.value = episodesList.length.toString();
-    if (serviceHandler.serviceType.value != ServicesType.simkl) {
-      final resp = await get(
-        Uri.parse(
-          "https://api.ani.zip/mappings?${serviceHandler.serviceType.value == ServicesType.anilist ? 'anilist_id' : 'mal_id'}=${id.value}",
-        ),
-      );
+    final token = "detail_${id.value}";
+    sourceController.updateToken('detail', token);
+    try {
+      final episodeResult = await sourceController.activeSource.value!.methods
+          .getDetail(DMedia.withUrl(link), parameters: SourceParams(cancelToken: token));
+      final data = episodeResult.episodes!.reversed.toList();
+      final mappedList = data.map((item) {
+        return mChapterToEpisode(item, episodeResult);
+      }).toList();
+      episodesList.value = mappedList;
+      totalEpisodes.value = episodesList.length.toString();
+      if (serviceHandler.serviceType.value != ServicesType.simkl) {
+        if (mediaData.value.episodes == episodesList.length) {
+          await getAnifyEpisodes();
+        }
 
-      final check = jsonDecode(resp.body);
-      final ep = (check['episodes'] as Map<String, dynamic>).entries
-          .map((entry) {
-            final data = entry.value;
-            final epNum = (data['absoluteEpisodeNumber']).toString();
-            final matched = mappedList.firstWhere(
-              (e) => e.number.toString() == epNum,
-              orElse: () => Episode(url: '', number: epNum, desc: ''),
-            );
-
-            return Episode(
-              url: matched.url ?? '',
-              number: epNum,
-              desc: data['overview'] ?? '',
-              thumbnail: data['image'] ?? '',
-              title: (data['title']?['en']) ?? '',
-            );
-          })
-          .whereType<Episode>()
-          .toList();
-      if (ep.first.number.isNotEmpty) {
-        episodesList.value = ep;
+        if (mounted) setState(() {});
       }
-      if (mounted) setState(() {});
+    } catch (e) {
+      log("Error fetching episodes or cancelled: $e");
+    }
+  }
+
+  // void test() async {
+  //   log('episodesList: ${episodesList.length}');
+  //   log('mediaData.value.episodes: ${mediaData.value.episodes}');
+  //   // if (mediaData.value.episodes == episodesList.length) {
+  //   await getAnifyEpisodes();
+  //   // }
+  // }
+
+  bool matchesAnyTitle(String query) {
+    final q = query.toLowerCase().trim();
+    return [
+      mediaData.value.title,
+      mediaData.value.titleRomaji,
+      mediaData.value.titleNative,
+    ].whereType<String>().any(
+      (t) =>
+          t.toLowerCase().trim().contains(q) ||
+          q.contains(t.toLowerCase().trim()),
+    );
+  }
+
+  Future<void> getAnifyEpisodes() async {
+    final resp = await get(
+      Uri.parse(
+        "https://api.ani.zip/mappings?${serviceHandler.serviceType.value == ServicesType.anilist ? 'anilist_id' : 'mal_id'}=${id.value}",
+      ),
+    );
+    final check = jsonDecode(resp.body);
+    final anifyEpisodes = check['episodes'] as Map<String, dynamic>;
+    final ep = episodesList
+        .map((entry) {
+          final epNum = entry.number;
+          final data = anifyEpisodes.values.firstWhere(
+            (e) => e['absoluteEpisodeNumber'].toString() == epNum,
+            orElse: () => null,
+          );
+          return Episode(
+            url: entry.url ?? '',
+            number: epNum,
+            desc: data['overview'] ?? '',
+            thumbnail: data['image'] ?? '',
+            title: (data['title']?['en']) ?? '',
+          );
+        })
+        .whereType<Episode>()
+        .toList();
+    if (ep.first.number.isNotEmpty) {
+      episodesList.value = ep;
     }
   }
 
   Future<void> loadDetails() async {
     try {
-      final result = await mapMedia(formatTitles(mediaData.value), title);
+      final result = await SourceMapper.mapMedia(
+        formatTitles(mediaData.value),
+        title,
+        mediaId: id.value,
+        type: ItemType.anime,
+        synonyms: mediaData.value.synonyms ?? [],
+      );
       if (result != null) {
         getEpisodes(result.url!);
         animeTitle.value = result.title ?? '';
@@ -205,7 +248,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
   }
 
   List<String> formatTitles(AnilistMediaData media) {
-    return ['${media.title}*ANIME', media.title ?? ''];
+    return [media.title ?? '', media.titleRomaji ?? ''];
   }
 
   void _onPageChanged(int index) {
@@ -244,6 +287,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
               image: image.value,
               tagg: widget.tagg,
             ),
+            // ElevatedButton(onPressed: test, child: Text("Test")),
             if (sourceController.installedExtensions.isNotEmpty)
               Container(
                 margin: const EdgeInsets.fromLTRB(24, 32, 24, 16),

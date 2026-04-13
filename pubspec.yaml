@@ -59,6 +59,7 @@ dependencies:
       url: https://github.com/RyanYuuki/AnymeXExtensionRuntimeBridge.git
       ref: main
   flutter_displaymode: ^0.7.0
+  fuzzywuzzy: ^1.2.0
 
 dev_dependencies:
   flutter_test:

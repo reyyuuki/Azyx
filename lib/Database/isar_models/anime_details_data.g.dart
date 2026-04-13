@@ -77,7 +77,17 @@ const AnilistMediaDataSchema = Schema(
       type: IsarType.long,
     ),
     r'title': PropertySchema(id: 15, name: r'title', type: IsarType.string),
-    r'type': PropertySchema(id: 16, name: r'type', type: IsarType.string),
+    r'titleNative': PropertySchema(
+      id: 16,
+      name: r'titleNative',
+      type: IsarType.string,
+    ),
+    r'titleRomaji': PropertySchema(
+      id: 17,
+      name: r'titleRomaji',
+      type: IsarType.string,
+    ),
+    r'type': PropertySchema(id: 18, name: r'type', type: IsarType.string),
   },
 
   estimateSize: _anilistMediaDataEstimateSize,
@@ -198,6 +208,18 @@ int _anilistMediaDataEstimateSize(
     }
   }
   {
+    final value = object.titleNative;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.titleRomaji;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.type;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -243,7 +265,9 @@ void _anilistMediaDataSerialize(
   writer.writeString(offsets[13], object.status);
   writer.writeLong(offsets[14], object.timeUntilAiring);
   writer.writeString(offsets[15], object.title);
-  writer.writeString(offsets[16], object.type);
+  writer.writeString(offsets[16], object.titleNative);
+  writer.writeString(offsets[17], object.titleRomaji);
+  writer.writeString(offsets[18], object.type);
 }
 
 AnilistMediaData _anilistMediaDataDeserialize(
@@ -290,7 +314,9 @@ AnilistMediaData _anilistMediaDataDeserialize(
     status: reader.readStringOrNull(offsets[13]),
     timeUntilAiring: reader.readLongOrNull(offsets[14]),
     title: reader.readStringOrNull(offsets[15]),
-    type: reader.readStringOrNull(offsets[16]),
+    titleNative: reader.readStringOrNull(offsets[16]),
+    titleRomaji: reader.readStringOrNull(offsets[17]),
+    type: reader.readStringOrNull(offsets[18]),
   );
   return object;
 }
@@ -359,6 +385,10 @@ P _anilistMediaDataDeserializeProp<P>(
     case 15:
       return (reader.readStringOrNull(offset)) as P;
     case 16:
+      return (reader.readStringOrNull(offset)) as P;
+    case 17:
+      return (reader.readStringOrNull(offset)) as P;
+    case 18:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -2289,6 +2319,324 @@ extension AnilistMediaDataQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.greaterThan(property: r'title', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleNativeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'titleNative'),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleNativeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'titleNative'),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleNativeEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'titleNative',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleNativeGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'titleNative',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleNativeLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'titleNative',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleNativeBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'titleNative',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleNativeStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'titleNative',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleNativeEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'titleNative',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleNativeContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'titleNative',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleNativeMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'titleNative',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleNativeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'titleNative', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleNativeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'titleNative', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleRomajiIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'titleRomaji'),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleRomajiIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'titleRomaji'),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleRomajiEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'titleRomaji',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleRomajiGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'titleRomaji',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleRomajiLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'titleRomaji',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleRomajiBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'titleRomaji',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleRomajiStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'titleRomaji',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleRomajiEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'titleRomaji',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleRomajiContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'titleRomaji',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleRomajiMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'titleRomaji',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleRomajiIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'titleRomaji', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<AnilistMediaData, AnilistMediaData, QAfterFilterCondition>
+  titleRomajiIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'titleRomaji', value: ''),
       );
     });
   }
