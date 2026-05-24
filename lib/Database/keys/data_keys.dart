@@ -30,3 +30,8 @@ enum UiKeys {
   radiusMultiplier,
   spreadMultiplier,
 }
+
+enum PluginKeys {
+  runtimeHostInstalledVersion,
+  runtimeHostInstalledReleaseTitle,
+}

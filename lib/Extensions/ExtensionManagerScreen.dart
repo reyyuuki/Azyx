@@ -2,8 +2,9 @@ import 'dart:io';
 
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
     hide isar, SourceExecution;
-import 'package:azyx/Controllers/settings_controller.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
+import 'package:azyx/Controllers/source/download_run_time_apk.dart';
+import 'package:azyx/Extensions/plugin_manager.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
@@ -36,10 +37,17 @@ class _ExtensionManagerScreenState extends State<ExtensionManagerScreen>
     ever(sourceController.isExtensionManagerInitialized, (val) {
       if (val) _rebuildTabController();
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkRuntime();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _checkRuntime();
       if (sourceController.isExtensionManagerInitialized.value) {
         _rebuildTabController();
+      }
+      if (Platform.isAndroid) {
+        await PluginManager().ensurePluginLoaded(context);
+        await _checkRuntime();
+        if (_isRuntimeLoaded.value) {
+          await _refresh();
+        }
       }
     });
   }
@@ -126,6 +134,10 @@ class _ExtensionManagerScreenState extends State<ExtensionManagerScreen>
               ),
             ),
             actions: [
+              IconButton(
+                onPressed: () => PluginManager().checkForUpdates(context, showIfUpToDate: true),
+                icon: Icon(Icons.system_update_alt_rounded, color: cs.onSurface, size: 24),
+              ),
               _isRefreshing
                   ? const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16),
@@ -209,10 +221,10 @@ class _ExtensionManagerScreenState extends State<ExtensionManagerScreen>
           const SizedBox(width: 8),
           GestureDetector(
             onTap: () async {
-              sourceController.checkRuntimeHost();
+              final loaded = await DownloadRunTimeApk.showDownloadDialog(context);
               if (!mounted) return;
               _isRuntimeLoaded.value =
-                  AnymeXRuntimeBridge.controller.isReady.value;
+                  AnymeXRuntimeBridge.controller.isReady.value || loaded;
               if (_isRuntimeLoaded.value) await _refresh();
             },
             child: Text(
