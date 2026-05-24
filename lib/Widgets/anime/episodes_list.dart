@@ -17,6 +17,7 @@ import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class EpisodesList extends StatelessWidget {
   final List<Episode> episodeList;
@@ -121,43 +122,33 @@ class EpisodesList extends StatelessWidget {
             episodeTitle.value = episode.title ?? '';
             hasError.value = false;
 
-            // final stream = sourceController.activeSource.value!.methods
-            //     .getVideoListStream(
-            //       DEpisode(episodeNumber: episode.number, url: episode.url),
-            //     );
+            final stream = sourceController.activeSource.value!.methods
+                .getVideoListStream(
+                  DEpisode(episodeNumber: episode.number, url: episode.url),
+                );
 
-            // showModalBottomSheet(
-            //   context: context,
-            //   shape: const RoundedRectangleBorder(
-            //     borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-            //   ),
-            //   isScrollControlled: true,
-            //   enableDrag: true,
-            //   elevation: 5,
-            //   barrierColor: Colors.black87.withOpacity(0.5),
-            //   builder: (_) {
-            //     return StreamEpisodeSheet(
-            //       stream: stream,
-            //       number: episode.number,
-            //       title: title,
-            //       image: image,
-            //       id: id,
-            //       episodeList: episodeList,
-            //       episodeTitle: episodeTitle,
-            //       hasError: hasError,
-            //     );
-            //   },
-            // );
-
-            showEpisodeBottomSheet(
-              context,
-              episode.number,
-              episodeUrls,
-              hasError,
-              (context, name, url, number) =>
-                  serverAzyXContainer(context, name, url, number),
+            showModalBottomSheet(
+              context: context,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+              ),
+              isScrollControlled: true,
+              enableDrag: true,
+              elevation: 5,
+              barrierColor: Colors.black87.withOpacity(0.5),
+              builder: (_) {
+                return StreamEpisodeSheet(
+                  stream: stream,
+                  number: episode.number,
+                  title: title,
+                  image: image,
+                  id: id,
+                  episodeList: episodeList,
+                  episodeTitle: episodeTitle,
+                  hasError: hasError,
+                );
+              },
             );
-            fetchEpisodeLink(episode.url!, episode.number, title, context);
           },
           child: Container(
             height: 105,
@@ -266,7 +257,7 @@ class EpisodesList extends StatelessWidget {
   }
 }
 
-class StreamEpisodeSheet extends StatelessWidget {
+class StreamEpisodeSheet extends StatefulWidget {
   final Stream<Video>? stream;
   final String number;
   final String title;
@@ -289,9 +280,15 @@ class StreamEpisodeSheet extends StatelessWidget {
   });
 
   @override
+  State<StreamEpisodeSheet> createState() => _StreamEpisodeSheetState();
+}
+
+class _StreamEpisodeSheetState extends State<StreamEpisodeSheet> {
+  final RxList<Video> videos = <Video>[].obs;
+  final Set<String> seenUrls = {};
+
+  @override
   Widget build(BuildContext context) {
-    final RxList<Video> videos = <Video>[].obs;
-    final seenUrls = <String>{};
     final colorScheme = Theme.of(context).colorScheme;
 
     return AzyXGradientContainer(
@@ -301,17 +298,18 @@ class StreamEpisodeSheet extends StatelessWidget {
       child: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
         child: StreamBuilder<Video>(
-          stream: stream,
+          stream: widget.stream,
           builder: (context, snapshot) {
-            if (snapshot.hasData &&
-                seenUrls.add(
-                  '${snapshot.data!.quality}_${snapshot.data!.url}',
-                )) {
-              videos.add(snapshot.data!);
+            if (snapshot.hasData) {
+              final video = snapshot.data!;
+              final uniqueKey = '${video.quality}_${video.url}';
+              if (seenUrls.add(uniqueKey)) {
+                videos.add(video);
+              }
             }
 
             if (snapshot.hasError) {
-              hasError.value = true;
+              widget.hasError.value = true;
             }
 
             return Obx(() {
@@ -332,16 +330,16 @@ class StreamEpisodeSheet extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   AzyXText(
-                    text: episodeTitle.value.isEmpty
-                        ? 'Episode $number'
-                        : 'Episode $number • ${episodeTitle.value}',
+                    text: widget.episodeTitle.value.isEmpty
+                        ? 'Episode ${widget.number}'
+                        : 'Episode ${widget.number} • ${widget.episodeTitle.value}',
                     fontSize: 13,
                     maxLines: 2,
                     color: colorScheme.onSurfaceVariant.withOpacity(0.75),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 18),
-                  if (hasError.value && videos.isEmpty)
+                  if (widget.hasError.value && videos.isEmpty)
                     _StreamSheetMessage(
                       icon: Icons.error_outline_rounded,
                       title: 'Unable to load stream links',
@@ -350,10 +348,15 @@ class StreamEpisodeSheet extends StatelessWidget {
                       color: colorScheme.error,
                     )
                   else if (videos.isEmpty && isFetching)
-                    const _StreamSheetLoading(
-                      title: 'Fetching stream links',
-                      subtitle:
-                          'Servers and qualities are loading for this episode. This can take a moment.',
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 40),
+                        child: SizedBox(
+                          width: 32,
+                          height: 32,
+                          child: LoadingIndicatorM3E(),
+                        ),
+                      ),
                     )
                   else ...[
                     ...videos.map((video) {
@@ -365,13 +368,13 @@ class StreamEpisodeSheet extends StatelessWidget {
                               builder: (context) => WatchScreen(
                                 playerData: AnimeAllData(
                                   url: video.url,
-                                  episodeTitle: episodeTitle.value,
-                                  title: title,
-                                  number: number,
-                                  image: image,
-                                  id: id,
+                                  episodeTitle: widget.episodeTitle.value,
+                                  title: widget.title,
+                                  number: widget.number,
+                                  image: widget.image,
+                                  id: widget.id,
                                   episodeUrls: videos,
-                                  episodeList: episodeList,
+                                  episodeList: widget.episodeList,
                                 ),
                               ),
                             ),
@@ -443,11 +446,15 @@ class StreamEpisodeSheet extends StatelessWidget {
                       );
                     }),
                     if (isFetching)
-                      const _StreamSheetLoading(
-                        title: 'Fetching more links',
-                        subtitle:
-                            'More servers and qualities are still being discovered.',
-                        compact: true,
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: LoadingIndicatorM3E(),
+                          ),
+                        ),
                       ),
                   ],
                 ],
@@ -491,10 +498,7 @@ class _StreamSheetLoading extends StatelessWidget {
           SizedBox(
             width: 22,
             height: 22,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.2,
-              color: colorScheme.primary,
-            ),
+            child: LoadingIndicatorM3E(color: colorScheme.primary),
           ),
           const SizedBox(width: 14),
           Expanded(

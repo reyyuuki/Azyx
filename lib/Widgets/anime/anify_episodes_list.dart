@@ -10,6 +10,7 @@ import 'package:azyx/Screens/Anime/Watch/watch_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/anime/episode_bottom_sheet.dart';
+import 'package:azyx/Widgets/anime/episodes_list.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -119,43 +120,33 @@ class AnifyEpisodesWidget extends StatelessWidget {
             episodeTitle.value = entry.title ?? '';
             hasError.value = false;
 
-            // final stream = sourceController.activeSource.value!.methods
-            //     .getVideoListStream(
-            //       DEpisode(episodeNumber: entry.number, url: entry.url),
-            //     );
+            final stream = sourceController.activeSource.value!.methods
+                .getVideoListStream(
+                  DEpisode(episodeNumber: entry.number, url: entry.url),
+                );
 
-            // showModalBottomSheet(
-            //   context: context,
-            //   shape: const RoundedRectangleBorder(
-            //     borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-            //   ),
-            //   isScrollControlled: true,
-            //   enableDrag: true,
-            //   elevation: 5,
-            //   barrierColor: Colors.black87.withOpacity(0.5),
-            //   builder: (_) {
-            //     return StreamEpisodeSheet(
-            //       stream: stream,
-            //       number: entry.number,
-            //       title: title,
-            //       image: image,
-            //       id: id,
-            //       episodeList: anifyEpisodes,
-            //       episodeTitle: episodeTitle,
-            //       hasError: hasError,
-            //     );
-            //   },
-            // );
-
-            showEpisodeBottomSheet(
-              context,
-              entry.number,
-              episodeUrls,
-              hasError,
-              (context, name, url, number) =>
-                  serverAzyXContainer(context, name, url, number),
+            showModalBottomSheet(
+              context: context,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+              ),
+              isScrollControlled: true,
+              enableDrag: true,
+              elevation: 5,
+              barrierColor: Colors.black87.withOpacity(0.5),
+              builder: (_) {
+                return StreamEpisodeSheet(
+                  stream: stream,
+                  number: entry.number,
+                  title: title,
+                  image: image,
+                  id: id,
+                  episodeList: anifyEpisodes,
+                  episodeTitle: episodeTitle,
+                  hasError: hasError,
+                );
+              },
             );
-            fetchEpisodeLink(entry.url!, entry.number, title, context);
           },
           child: Container(
             margin: const EdgeInsets.only(bottom: 14),
