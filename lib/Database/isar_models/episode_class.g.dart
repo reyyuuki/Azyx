@@ -17,13 +17,15 @@ const EpisodeSchema = Schema(
     r'desc': PropertySchema(id: 1, name: r'desc', type: IsarType.string),
     r'filler': PropertySchema(id: 2, name: r'filler', type: IsarType.bool),
     r'number': PropertySchema(id: 3, name: r'number', type: IsarType.string),
+    r'season': PropertySchema(id: 4, name: r'season', type: IsarType.string),
     r'thumbnail': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'thumbnail',
       type: IsarType.string,
     ),
-    r'title': PropertySchema(id: 5, name: r'title', type: IsarType.string),
-    r'url': PropertySchema(id: 6, name: r'url', type: IsarType.string),
+    r'title': PropertySchema(id: 6, name: r'title', type: IsarType.string),
+    r'type': PropertySchema(id: 7, name: r'type', type: IsarType.string),
+    r'url': PropertySchema(id: 8, name: r'url', type: IsarType.string),
   },
 
   estimateSize: _episodeEstimateSize,
@@ -47,6 +49,12 @@ int _episodeEstimateSize(
   bytesCount += 3 + object.desc.length * 3;
   bytesCount += 3 + object.number.length * 3;
   {
+    final value = object.season;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.thumbnail;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -54,6 +62,12 @@ int _episodeEstimateSize(
   }
   {
     final value = object.title;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.type;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -77,9 +91,11 @@ void _episodeSerialize(
   writer.writeString(offsets[1], object.desc);
   writer.writeBool(offsets[2], object.filler);
   writer.writeString(offsets[3], object.number);
-  writer.writeString(offsets[4], object.thumbnail);
-  writer.writeString(offsets[5], object.title);
-  writer.writeString(offsets[6], object.url);
+  writer.writeString(offsets[4], object.season);
+  writer.writeString(offsets[5], object.thumbnail);
+  writer.writeString(offsets[6], object.title);
+  writer.writeString(offsets[7], object.type);
+  writer.writeString(offsets[8], object.url);
 }
 
 Episode _episodeDeserialize(
@@ -93,9 +109,11 @@ Episode _episodeDeserialize(
     desc: reader.readStringOrNull(offsets[1]) ?? '',
     filler: reader.readBoolOrNull(offsets[2]),
     number: reader.readStringOrNull(offsets[3]) ?? '',
-    thumbnail: reader.readStringOrNull(offsets[4]),
-    title: reader.readStringOrNull(offsets[5]),
-    url: reader.readStringOrNull(offsets[6]),
+    season: reader.readStringOrNull(offsets[4]),
+    thumbnail: reader.readStringOrNull(offsets[5]),
+    title: reader.readStringOrNull(offsets[6]),
+    type: reader.readStringOrNull(offsets[7]),
+    url: reader.readStringOrNull(offsets[8]),
   );
   return object;
 }
@@ -120,6 +138,10 @@ P _episodeDeserializeProp<P>(
     case 5:
       return (reader.readStringOrNull(offset)) as P;
     case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
+      return (reader.readStringOrNull(offset)) as P;
+    case 8:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -608,6 +630,168 @@ extension EpisodeQueryFilter
     });
   }
 
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> seasonIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'season'),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> seasonIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'season'),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> seasonEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'season',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> seasonGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'season',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> seasonLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'season',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> seasonBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'season',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> seasonStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'season',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> seasonEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'season',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> seasonContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'season',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> seasonMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'season',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> seasonIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'season', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> seasonIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'season', value: ''),
+      );
+    });
+  }
+
   QueryBuilder<Episode, Episode, QAfterFilterCondition> thumbnailIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -928,6 +1112,168 @@ extension EpisodeQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.greaterThan(property: r'title', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> typeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'type'),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> typeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'type'),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> typeEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'type',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> typeGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'type',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> typeLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'type',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> typeBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'type',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> typeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'type',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> typeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'type',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> typeContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'type',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> typeMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'type',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> typeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'type', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Episode, Episode, QAfterFilterCondition> typeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'type', value: ''),
       );
     });
   }

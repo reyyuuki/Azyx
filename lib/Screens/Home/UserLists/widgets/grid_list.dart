@@ -8,6 +8,7 @@ import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class UserGridList extends StatelessWidget {
   final List<UserMedia> data;
@@ -73,9 +74,7 @@ class UserGridList extends StatelessWidget {
                       fit: BoxFit.cover,
                       progressIndicatorBuilder:
                           (context, url, downloadProgress) => Center(
-                        child: CircularProgressIndicator(
-                          value: downloadProgress.progress,
-                        ),
+                        child: LoadingIndicatorM3E(),
                       ),
                       errorWidget: (context, url, error) =>
                           const Icon(Icons.error),

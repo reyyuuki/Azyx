@@ -1,3 +1,4 @@
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 // // ignore_for_file: must_be_immutable
 
 // import 'package:azyx/Models/media.dart';
@@ -20,7 +21,7 @@
 //   Widget build(BuildContext context) {
 //     final isDarkMode = Provider.of<ThemeProvider>(context).isDarkMode!;
 //     if (data.isEmpty) {
-//       return const Center(child: CircularProgressIndicator());
+//       return const Center(child: LoadingIndicatorM3E());
 //     }
 
 //     return ConstrainedBox(

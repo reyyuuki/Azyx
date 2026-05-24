@@ -29,6 +29,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 final MalService malService = Get.find<MalService>();
 
@@ -267,7 +268,7 @@ class MalService extends GetxController implements BaseService, OnlineService {
           ? Container(
               alignment: Alignment.center,
               height: Get.height * 0.8,
-              child: const CircularProgressIndicator(),
+              child: const LoadingIndicatorM3E(),
             )
           : SingleChildScrollView(
               child: ListView(
@@ -396,14 +397,14 @@ class MalService extends GetxController implements BaseService, OnlineService {
                     ),
                   ),
                 topUpcoming.value.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: LoadingIndicatorM3E())
                     : AnimeScrollableList(
                         animeList: topUpcoming,
                         isManga: false,
                         title: "Upcoming Animes",
                       ),
                 trendingM.value.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: LoadingIndicatorM3E())
                     : AnimeScrollableList(
                         animeList: trendingM,
                         isManga: true,
@@ -439,7 +440,7 @@ class MalService extends GetxController implements BaseService, OnlineService {
         ? Container(
             alignment: Alignment.center,
             height: Get.height * 0.8,
-            child: const CircularProgressIndicator(),
+            child: const LoadingIndicatorM3E(),
           )
         : SingleChildScrollView(
             child: ListView(

@@ -1,6 +1,7 @@
 
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 void showloader(context) {
     showModalBottomSheet(
@@ -20,7 +21,7 @@ void showloader(context) {
                   height: 10,
                 ),
                 Center(
-                  child: CircularProgressIndicator(),
+                  child: LoadingIndicatorM3E(),
                 ),
               ],
             ),

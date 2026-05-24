@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class MangaAddToList extends StatelessWidget {
   final int? index;
@@ -71,10 +72,7 @@ class MangaAddToList extends StatelessWidget {
                       child: SizedBox(
                         width: 24,
                         height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 3,
-                          color: colorScheme.primary,
-                        ),
+                        child: LoadingIndicatorM3E(color: colorScheme.primary),
                       ),
                     )
                   : Row(
@@ -198,7 +196,7 @@ class MangaAddToList extends StatelessWidget {
                   stream: offlineController.getMangaCategoriesStream(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(child: LoadingIndicatorM3E());
                     }
 
                     final categories = snapshot.data ?? [];

@@ -56,13 +56,21 @@ void main(List<String> args) async {
       if (Platform.isAndroid) {
         await FlutterDisplayMode.setHighRefreshRate();
       }
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-      SystemChrome.setSystemUIOverlayStyle(
-        const SystemUiOverlayStyle(
-          systemNavigationBarColor: Colors.transparent,
-          statusBarColor: Colors.transparent,
-        ),
-      );
+
+      if (Platform.isAndroid || Platform.isIOS) {
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+        SystemChrome.setSystemUIOverlayStyle(
+          const SystemUiOverlayStyle(
+            systemNavigationBarDividerColor: Colors.transparent,
+            systemNavigationBarContrastEnforced: false,
+            systemNavigationBarColor: Colors.transparent,
+            systemNavigationBarIconBrightness: Brightness.dark,
+            statusBarColor: Colors.transparent,
+            statusBarBrightness: Brightness.dark,
+          ),
+        );
+      }
+
       MediaKit.ensureInitialized();
       await Database().init();
       await Hive.initFlutter();

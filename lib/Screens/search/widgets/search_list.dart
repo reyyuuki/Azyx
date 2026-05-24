@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class SearchList extends StatelessWidget {
   final List<Media> data;
@@ -191,7 +192,7 @@ class SearchList extends StatelessWidget {
                       child: SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: LoadingIndicatorM3E(),
                       ),
                     ),
                   ),

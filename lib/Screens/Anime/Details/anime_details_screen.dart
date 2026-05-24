@@ -6,7 +6,6 @@ import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
-import 'package:azyx/Controllers/source/source_mapper.dart';
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Database/isar_models/offline_item.dart';
@@ -24,6 +23,7 @@ import 'package:expandable_page_view/expandable_page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class AnimeDetailsScreen extends StatefulWidget {
   final String tagg;
@@ -157,9 +157,44 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
     sourceController.updateToken('detail', token);
     try {
       final episodeResult = await sourceController.activeSource.value!.methods
-          .getDetail(DMedia.withUrl(link), parameters: SourceParams(cancelToken: token));
-      final data = episodeResult.episodes!.reversed.toList();
-      final mappedList = data.map((item) {
+          .getDetail(
+            DMedia.withUrl(link),
+            parameters: SourceParams(cancelToken: token),
+          );
+      final episodes = List<DEpisode>.from(episodeResult.episodes!);
+      episodes.sort((a, b) {
+        final typeA = a.sortMap?['type']?.toLowerCase() ?? '';
+        final typeB = b.sortMap?['type']?.toLowerCase() ?? '';
+
+        int typeRank(String type) {
+          if (type == 'subbed') return 0;
+          if (type == 'dubbed') return 1;
+          if (type.isNotEmpty) return 2;
+          return 3;
+        }
+
+        final rankA = typeRank(typeA);
+        final rankB = typeRank(typeB);
+        if (rankA != rankB) {
+          return rankA.compareTo(rankB);
+        }
+
+        final seasonA = int.tryParse(a.sortMap?['season'] ?? '') ?? 1;
+        final seasonB = int.tryParse(b.sortMap?['season'] ?? '') ?? 1;
+        if (seasonA != seasonB) {
+          return seasonA.compareTo(seasonB);
+        }
+
+        final numA = double.tryParse(a.episodeNumber);
+        final numB = double.tryParse(b.episodeNumber);
+        if (numA != null && numB != null) {
+          return numA.compareTo(numB);
+        }
+        if (numA != null) return -1;
+        if (numB != null) return 1;
+        return (a.name ?? '').compareTo(b.name ?? '');
+      });
+      final mappedList = episodes.map((item) {
         return mChapterToEpisode(item, episodeResult);
       }).toList();
       episodesList.value = mappedList;
@@ -173,6 +208,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
       }
     } catch (e) {
       log("Error fetching episodes or cancelled: $e");
+      _extenstionError.value = true;
     }
   }
 
@@ -244,6 +280,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
       }
     } catch (e) {
       Utils.log("Error loading episodes");
+      _extenstionError.value = true;
     }
   }
 
@@ -367,10 +404,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
                                     textAlign: TextAlign.center,
                                   ),
                                 )
-                              : CircularProgressIndicator(
-                                  color: colorScheme.primary,
-                                  strokeWidth: 2.5,
-                                ),
+                              : LoadingIndicatorM3E(color: colorScheme.primary),
                         )
                       : DetailsSection(
                           animeTitle: animeTitle.value,

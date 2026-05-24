@@ -1,7 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Database/isar_models/episode_class.dart';
@@ -9,27 +8,35 @@ import 'package:azyx/Screens/Manga/Details/tabs/widgets/reader_controls.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:anymex_extension_runtime_bridge/Models/Page.dart';
-import 'package:anymex_extension_runtime_bridge/Models/Source.dart';
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
 import 'package:flutter/material.dart';
+import 'package:azyx/Controllers/local_history_controller.dart';
+import 'package:azyx/Database/isar_models/local_history_item.dart';
+import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:manga_page_view/manga_page_view.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class ReadPage extends StatefulWidget {
   final String mangaTitle;
+  final String mangaImage;
   final String link;
   final Source source;
   final List<Chapter> chapterList;
   final String? syncId;
+  final String? mediaId;
+  final int? initialPage;
   const ReadPage({
     super.key,
     required this.source,
     required this.link,
+    required this.mangaImage,
     required this.chapterList,
     required this.mangaTitle,
+    this.mediaId,
     this.syncId,
+    this.initialPage,
   });
 
   @override
@@ -37,6 +44,7 @@ class ReadPage extends StatefulWidget {
 }
 
 class _ReadPageState extends State<ReadPage> {
+  bool _isFirstLoad = true;
   final RxList<PageUrl> pagesList = RxList();
   final Rx<int> totalImages = 0.obs;
   final Rx<int> _currentPage = 1.obs;
@@ -55,23 +63,31 @@ class _ReadPageState extends State<ReadPage> {
   @override
   void initState() {
     super.initState();
+    _currentPage.value = widget.initialPage ?? 1;
     chapterUrl.value = widget.link;
     loadPages();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     updateEntry();
-    // pageViewController.addPageChangeListener((e) {
-    //   Utils.log(
-    //       'DX => ${pageViewController.getCurrentOffset()?.dx.toString()}');
-    //   Utils.log(
-    //       'DY => ${pageViewController.getCurrentOffset()?.dy.toString()}');
-    // });
-    // pageViewController.addPageChangeListener((i) {
-    //   Utils.log(i.toString());
-    //   _currentPage.value = i;
-    // });
+  }
+
+  void localHistoryEntry() {
+    log("media id: ${widget.mediaId}");
+    final entry = LocalHistoryItem()
+      ..mediaId = int.tryParse(widget.mediaId ?? '')
+      ..title = widget.mangaTitle
+      ..image = widget.mangaImage
+      ..link = chapterUrl.value
+      ..sourceName = widget.source.name
+      ..progress = chapterTitle.value
+      ..currentPage = _currentPage.value
+      ..mediaType = HistoryMediaType.manga
+      ..chapterList = widget.chapterList
+      ..mangaSourceJson = jsonEncode(widget.source.toJson());
+    Future.microtask(() => localHistoryController.addToReadingHistory(entry));
   }
 
   void updateEntry() async {
+    localHistoryEntry();
     if (serviceHandler.userData.value.name != null) {
       await serviceHandler.updateListEntry(
         serviceHandler.currentMedia.value,
@@ -99,6 +115,19 @@ class _ReadPageState extends State<ReadPage> {
       Utils.log(
         "next: ${hasNextChapter.value} / previous: ${hasPreviousChapter.value} ${index.toString()}",
       );
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          if (_isFirstLoad) {
+            if (widget.initialPage != null && widget.initialPage! > 0) {
+              pageViewController.moveToPage(widget.initialPage!);
+            }
+            _isFirstLoad = false;
+          } else {
+            pageViewController.moveToPage(0);
+          }
+        }
+      });
     } catch (e) {
       log("Error: $e");
       azyxSnackBar(e.toString());
@@ -135,7 +164,7 @@ class _ReadPageState extends State<ReadPage> {
         children: [
           Obx(() {
             if (pagesList.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: LoadingIndicatorM3E());
             }
             return GestureDetector(
               onTap: () => isShowed.value = !isShowed.value,
@@ -145,7 +174,6 @@ class _ReadPageState extends State<ReadPage> {
                 controller: pageViewController,
                 mode: readingLayout.value,
                 options: MangaPageViewOptions(
-                  // padding: MediaQuery.paddingOf(context),
                   mainAxisOverscroll: false,
                   crossAxisOverscroll: false,
                   minZoomLevel: switch (readingLayout.value) {
@@ -153,10 +181,6 @@ class _ReadPageState extends State<ReadPage> {
                     MangaPageViewMode.paged => 1.0,
                   },
                   maxZoomLevel: 8.0,
-                  // initialOffset: Offset(200, 0),
-                  // initialPageIndex: 10,
-
-                  // spacing: spacedPages.value ? 20 : 0,
                   pageWidthLimit: Platform.isAndroid || Platform.isIOS
                       ? double.infinity
                       : pageWidth.value,
@@ -173,6 +197,7 @@ class _ReadPageState extends State<ReadPage> {
                 onPageChange: (index) {
                   _currentPage.value = index;
                   Utils.log('page: ${_currentPage.value}/$index');
+                  localHistoryEntry();
                 },
                 direction: readingDirection.value,
                 pageBuilder: (context, index) => CachedNetworkImage(
@@ -186,7 +211,7 @@ class _ReadPageState extends State<ReadPage> {
                   placeholder: (context, _) => Container(
                     alignment: Alignment.center,
                     height: 300,
-                    child: const CircularProgressIndicator(),
+                    child: const LoadingIndicatorM3E(),
                   ),
                 ),
                 startEdgeDragIndicatorBuilder: (context, info) {
@@ -299,29 +324,4 @@ class _ReadPageState extends State<ReadPage> {
       ),
     );
   }
-
-  // Widget _pageView() {
-  //   return PageView.builder(
-  //     // controller: pageViewController,
-  //     onPageChanged: (index) => _currentPage.value = index + 1,
-  //     scrollDirection:
-  //         selectedMode.value == Mode.standard ? Axis.vertical : Axis.horizontal,
-  //     reverse: selectedMode.value == Mode.left,
-  //     itemCount: pagesList.length,
-  //     itemBuilder: (context, index) => Center(
-  //       child: CachedNetworkImage(
-  //         imageUrl: pagesList[index].url,
-  //         fit: BoxFit.cover,
-  //         httpHeaders: {
-  //           'Referer': widget.source.baseUrl!,
-  //         },
-  //         placeholder: (context, _) => Container(
-  //           alignment: Alignment.center,
-  //           height: 300,
-  //           child: const CircularProgressIndicator(),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 }

@@ -138,15 +138,15 @@ class SettingScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                // log('activesource: ${sourceController.activeSource.value?.id}');
-                await sourceController.initExtensions();
-                log('activesource: ${sourceController.activeSource.value?.id}');
-                log('sources: ${SourceKeys.activeSourceId.get('')}');
-              },
-              child: Text("Testing"),
-            ),
+            // ElevatedButton(
+            //   onPressed: () async {
+            //     // log('activesource: ${sourceController.activeSource.value?.id}');
+            //     await sourceController.initExtensions();
+            //     log('activesource: ${sourceController.activeSource.value?.id}');
+            //     log('sources: ${SourceKeys.activeSourceId.get('')}');
+            //   },
+            //   child: Text("Testing"),
+            // ),
           ],
         ),
       ),

@@ -10,8 +10,11 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AzyXGradientContainer(
-      child: BouncePageAnimation(
-        child: Obx(() => serviceHandler.homeWidgets(context).value),
+      child: SafeArea(
+        bottom: false,
+        child: BouncePageAnimation(
+          child: Obx(() => serviceHandler.homeWidgets(context).value),
+        ),
       ),
     );
   }

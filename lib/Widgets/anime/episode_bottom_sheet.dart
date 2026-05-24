@@ -3,6 +3,7 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class EpisodeBottomSheet extends StatelessWidget {
   final List<Video> episodeUrls;
@@ -42,7 +43,7 @@ class EpisodeBottomSheet extends StatelessWidget {
                 ? Container(
                     alignment: Alignment.center,
                     height: 250,
-                    child: const CircularProgressIndicator(),
+                    child: const LoadingIndicatorM3E(),
                   )
                 : Column(
                     children: episodeUrls.map<Widget>((item) {

@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Models/media.dart';
@@ -11,6 +12,7 @@ import 'package:azyx/Widgets/common/shimmer_effect.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class MainCarousale extends StatefulWidget {
   final List<Media> data;
@@ -25,28 +27,26 @@ class _MainCarousaleState extends State<MainCarousale>
     with TickerProviderStateMixin {
   late PageController _pageController;
   late AnimationController _entryController;
-  late AnimationController _bgCrossfadeController;
   Timer? _autoPlayTimer;
   int _currentIndex = 0;
-  int _previousIndex = 0;
   double _pageDelta = 0;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: 0.82);
+    final initialPage = widget.data.isNotEmpty ? widget.data.length ~/ 2 : 0;
+    _currentIndex = initialPage;
+    _pageDelta = initialPage.toDouble();
+    _pageController = PageController(
+      viewportFraction: 0.74,
+      initialPage: initialPage,
+    );
     _pageController.addListener(_onScroll);
 
     _entryController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 950),
     );
-
-    _bgCrossfadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-    _bgCrossfadeController.value = 1.0;
 
     _entryController.forward();
     _startAutoPlay();
@@ -68,8 +68,8 @@ class _MainCarousaleState extends State<MainCarousale>
       final next = (_currentIndex + 1) % widget.data.length;
       _pageController.animateToPage(
         next,
-        duration: const Duration(milliseconds: 700),
-        curve: Curves.easeInOutQuart,
+        duration: const Duration(milliseconds: 800),
+        curve: Curves.easeInOutCubic,
       );
     });
   }
@@ -82,7 +82,6 @@ class _MainCarousaleState extends State<MainCarousale>
     _pageController.removeListener(_onScroll);
     _pageController.dispose();
     _entryController.dispose();
-    _bgCrossfadeController.dispose();
     super.dispose();
   }
 
@@ -92,15 +91,12 @@ class _MainCarousaleState extends State<MainCarousale>
 
     if (widget.data.isEmpty) {
       return SizedBox(
-        height: 460,
+        height: 380,
         child: Center(
           child: SizedBox(
             width: 24,
             height: 24,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: colorScheme.primary,
-            ),
+            child: LoadingIndicatorM3E(color: colorScheme.primary),
           ),
         ),
       );
@@ -117,46 +113,34 @@ class _MainCarousaleState extends State<MainCarousale>
         return Opacity(
           opacity: entryValue,
           child: Transform.translate(
-            offset: Offset(0, 30 * (1 - entryValue)),
+            offset: Offset(0, 24 * (1 - entryValue)),
             child: child,
           ),
         );
       },
       child: Column(
         children: [
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           SizedBox(
-            height: 460,
-            child: Stack(
-              children: [
-                _buildBackgroundBlur(),
-                GestureDetector(
-                  onPanDown: (_) => _stopAutoPlay(),
-                  onPanEnd: (_) => _startAutoPlay(),
-                  onPanCancel: () => _startAutoPlay(),
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: widget.data.length,
-                    onPageChanged: (i) {
-                      _previousIndex = _currentIndex;
-                      _currentIndex = i;
-                      _bgCrossfadeController.forward(from: 0);
-                      setState(() {});
-                    },
-                    itemBuilder: (context, index) {
-                      return _buildCard(index);
-                    },
-                  ),
-                ),
-              ],
+            height: 380,
+            child: PageView.builder(
+              controller: _pageController,
+              clipBehavior: Clip.none,
+              itemCount: widget.data.length,
+              onPageChanged: (i) {
+                _currentIndex = i;
+                setState(() {});
+              },
+              itemBuilder: (context, index) {
+                return _buildCard(index);
+              },
             ),
           ),
           if (widget.data.length > 1) ...[
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             _SlideIndicator(
               count: widget.data.length,
               current: _currentIndex,
-              progress: _pageDelta,
               onTap: (i) {
                 _pageController.animateToPage(
                   i,
@@ -166,44 +150,9 @@ class _MainCarousaleState extends State<MainCarousale>
               },
             ),
           ],
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
         ],
       ),
-    );
-  }
-
-  Widget _buildBackgroundBlur() {
-    if (widget.data.isEmpty) return const SizedBox.shrink();
-
-    return AnimatedBuilder(
-      animation: _bgCrossfadeController,
-      builder: (context, _) {
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            Opacity(
-              opacity: 1 - _bgCrossfadeController.value,
-              child: _BgImage(
-                url:
-                    widget
-                        .data[_previousIndex % widget.data.length]
-                        .bannerImage ??
-                    widget.data[_previousIndex % widget.data.length].image ??
-                    '',
-              ),
-            ),
-            Opacity(
-              opacity: _bgCrossfadeController.value,
-              child: _BgImage(
-                url:
-                    widget.data[_currentIndex].bannerImage ??
-                    widget.data[_currentIndex].image ??
-                    '',
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -213,8 +162,8 @@ class _MainCarousaleState extends State<MainCarousale>
     double absDiff = diff.abs().clamp(0.0, 1.0);
 
     double scale = 1.0 - (absDiff * 0.08);
-    double translateY = absDiff * 20;
-    double rotateY = diff * 0.02;
+    double translateY = absDiff * 14;
+    double rotateY = diff * -0.06;
     double cardOpacity = 1.0 - (absDiff * 0.35);
 
     return Transform(
@@ -229,7 +178,7 @@ class _MainCarousaleState extends State<MainCarousale>
         child: _CinematicCard(
           anime: anime,
           isManga: widget.isManga,
-          parallaxOffset: diff * 30,
+          parallaxOffset: diff * 24,
           onTap: () => _navigateToDetails(anime),
         ),
       ),
@@ -264,30 +213,6 @@ class _MainCarousaleState extends State<MainCarousale>
   }
 }
 
-class _BgImage extends StatelessWidget {
-  final String url;
-  const _BgImage({required this.url});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        image: url.isNotEmpty
-            ? DecorationImage(
-                image: CachedNetworkImageProvider(url),
-                fit: BoxFit.cover,
-              )
-            : null,
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface.withOpacity(0.85),
-        ),
-      ),
-    );
-  }
-}
-
 class _CinematicCard extends StatelessWidget {
   final Media anime;
   final bool isManga;
@@ -308,33 +233,38 @@ class _CinematicCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+        margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.white.withOpacity(0.08), width: 1.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.25),
-              blurRadius: 30,
-              spreadRadius: -8,
-              offset: const Offset(0, 15),
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 36,
+              offset: const Offset(0, 18),
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(24),
           child: Stack(
             fit: StackFit.expand,
             children: [
               Transform.translate(
                 offset: Offset(parallaxOffset, 0),
                 child: CachedNetworkImage(
-                  imageUrl: anime.bannerImage ?? anime.image ?? '',
+                  imageUrl: anime.image ?? anime.bannerImage ?? '',
                   fit: BoxFit.cover,
                   width: double.infinity,
                   placeholder: (_, __) => Container(
                     color: colorScheme.surfaceContainerHighest,
                     child: const ShimmerEffect(
-                      height: 460,
+                      height: 380,
                       width: double.infinity,
                     ),
                   ),
@@ -349,35 +279,22 @@ class _CinematicCard extends StatelessWidget {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.02),
-                      Colors.black.withOpacity(0.5),
-                      Colors.black.withOpacity(0.92),
+                      Colors.black.withOpacity(0.05),
+                      Colors.black.withOpacity(0.4),
+                      Colors.black.withOpacity(0.85),
                     ],
-                    stops: const [0.0, 0.25, 0.5, 1.0],
-                  ),
-                ),
-              ),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Colors.black.withOpacity(0.3),
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.15),
-                    ],
+                    stops: const [0.0, 0.35, 0.65, 1.0],
                   ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildTopChips(),
                     const Spacer(),
-                    _buildBottomContent(context, colorScheme),
+                    _buildBottomInfo(context),
                   ],
                 ),
               ),
@@ -401,34 +318,34 @@ class _CinematicCard extends StatelessWidget {
                     ? Icons.auto_stories_rounded
                     : Icons.play_circle_rounded,
                 color: Colors.white,
-                size: 12,
+                size: 11,
               ),
-              const SizedBox(width: 5),
+              const SizedBox(width: 4),
               Text(
                 isManga ? "MANGA" : "ANIME",
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 10,
+                  fontSize: 9,
                   fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5,
+                  letterSpacing: 1.0,
                 ),
               ),
             ],
           ),
         ),
         if (rating > 0) ...[
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           _GlassChip(
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.star_rounded, color: Colors.amber, size: 13),
-                const SizedBox(width: 4),
+                const Icon(Icons.star_rounded, color: Colors.amber, size: 12),
+                const SizedBox(width: 3),
                 Text(
                   rating.toStringAsFixed(1),
                   style: const TextStyle(
                     color: Colors.amber,
-                    fontSize: 11,
+                    fontSize: 10,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -436,52 +353,14 @@ class _CinematicCard extends StatelessWidget {
             ),
           ),
         ],
-        const Spacer(),
-        _GlassChip(
-          child: Icon(
-            Icons.more_horiz_rounded,
-            color: Colors.white.withOpacity(0.7),
-            size: 16,
-          ),
-        ),
       ],
     );
   }
 
-  Widget _buildBottomContent(BuildContext context, ColorScheme colorScheme) {
+  Widget _buildBottomInfo(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Container(
-          width: 85,
-          height: 120,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.12),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.5),
-                blurRadius: 16,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(13),
-            child: CachedNetworkImage(
-              imageUrl: anime.image ?? '',
-              fit: BoxFit.cover,
-              placeholder: (_, __) =>
-                  const ShimmerEffect(height: 120, width: 85),
-              errorWidget: (_, __, ___) =>
-                  Container(color: Colors.grey.shade900),
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -495,79 +374,92 @@ class _CinematicCard extends StatelessWidget {
                   color: Colors.white,
                   fontSize: 19,
                   fontWeight: FontWeight.w900,
-                  letterSpacing: -0.3,
+                  letterSpacing: -0.4,
                   height: 1.15,
                 ),
               ),
-              if (anime.description != null &&
-                  anime.description!.isNotEmpty) ...[
-                const SizedBox(height: 6),
-                Text(
-                  anime.description!,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w500,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-              const SizedBox(height: 14),
+              const SizedBox(height: 5),
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 10,
+                  if (anime.type != null && anime.type!.isNotEmpty) ...[
+                    Text(
+                      anime.type!.toUpperCase(),
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.75),
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
+                    _buildDotSeparator(),
+                  ],
+                  if (anime.episodes != null && anime.episodes! > 0) ...[
+                    Text(
+                      isManga
+                          ? "${anime.episodes} Chs"
+                          : "${anime.episodes} Eps",
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.75),
+                        fontSize: 9,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isManga
-                              ? Icons.auto_stories_rounded
-                              : Icons.play_arrow_rounded,
-                          color: Colors.black,
-                          size: 16,
+                    _buildDotSeparator(),
+                  ],
+                  if (anime.status != null && anime.status!.isNotEmpty) ...[
+                    Flexible(
+                      child: Text(
+                        anime.status!.toUpperCase(),
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.75),
+                          fontSize: 9,
+                          fontWeight: FontWeight.w600,
                         ),
-                        const SizedBox(width: 6),
-                        Text(
-                          isManga ? "Read" : "Watch",
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white.withOpacity(0.08)),
-                    ),
-                    child: Icon(
-                      Icons.bookmark_add_outlined,
-                      color: Colors.white.withOpacity(0.8),
-                      size: 16,
-                    ),
-                  ),
+                  ],
                 ],
               ),
             ],
           ),
         ),
+        const SizedBox(width: 12),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Container(
+              height: 44,
+              width: 44,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.22),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.25),
+                  width: 1,
+                ),
+              ),
+              child: Icon(
+                isManga ? Icons.auto_stories_rounded : Icons.play_arrow_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+          ),
+        ),
       ],
+    );
+  }
+
+  Widget _buildDotSeparator() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 5),
+      child: Text(
+        "•",
+        style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 7),
+      ),
     );
   }
 
@@ -590,14 +482,23 @@ class _GlassChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white.withOpacity(0.06), width: 0.5),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.22),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.12),
+              width: 0.8,
+            ),
+          ),
+          child: child,
+        ),
       ),
-      child: child,
     );
   }
 }
@@ -605,13 +506,11 @@ class _GlassChip extends StatelessWidget {
 class _SlideIndicator extends StatelessWidget {
   final int count;
   final int current;
-  final double progress;
   final Function(int) onTap;
 
   const _SlideIndicator({
     required this.count,
     required this.current,
-    required this.progress,
     required this.onTap,
   });
 
@@ -627,16 +526,16 @@ class _SlideIndicator extends StatelessWidget {
         return GestureDetector(
           onTap: () => onTap(i),
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeOutCubic,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
             margin: const EdgeInsets.symmetric(horizontal: 3),
-            height: 3.5,
-            width: active ? 32 : 12,
+            height: 4,
+            width: active ? 14 : 4,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(2),
               color: active
                   ? colorScheme.primary
-                  : colorScheme.onSurfaceVariant.withOpacity(0.15),
+                  : colorScheme.onSurface.withOpacity(0.15),
             ),
           ),
         );

@@ -27,6 +27,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../utils/utils.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class MangaDetailsScreen extends StatefulWidget {
   final String tagg;
@@ -138,14 +139,18 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
           .activeMangaSource
           .value!
           .methods
-          .getDetail(DMedia.withUrl(link), parameters: SourceParams(cancelToken: token));
+          .getDetail(
+            DMedia.withUrl(link),
+            parameters: SourceParams(cancelToken: token),
+          );
       totalChapters.value = chaptersList.length.toString();
       chaptersList.value = mChapterToChapter(
         episodeResult.episodes!,
         widget.smallMedia!.title,
       );
-    } catch(e) {
+    } catch (e) {
       log("Error fetching chapters or cancelled: $e");
+      _extenstionError.value = true;
     }
   }
 
@@ -172,10 +177,7 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
   }
 
   List<String> formatTitles(AnilistMediaData media) {
-    return [
-      media.title ?? '',
-      media.titleRomaji ?? '',
-    ];
+    return [media.title ?? '', media.titleRomaji ?? ''];
   }
 
   @override
@@ -297,7 +299,7 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
                                   textAlign: TextAlign.center,
                                   fontSize: 20,
                                 )
-                              : const CircularProgressIndicator(),
+                              : const LoadingIndicatorM3E(),
                         )
                       : DetailsSection(
                           mediaData: mediaData,

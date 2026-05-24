@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:azyx/Database/isar_models/category.dart';
+import 'package:azyx/Database/isar_models/key_value.dart';
 import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:azyx/main.dart';
 import 'package:get/get.dart';
@@ -65,6 +67,7 @@ class OfflineController extends GetxController {
       (i) => i.mediaData?.id == data.mediaData?.id,
     );
     if (index != -1) {
+      data.id = offlineAnimeList[index].id;
       offlineAnimeList[index] = data;
     } else {
       offlineAnimeList.add(data);
@@ -82,6 +85,7 @@ class OfflineController extends GetxController {
       (i) => i.mediaData?.id == data.mediaData?.id,
     );
     if (index != -1) {
+      data.id = offlineMangaList[index].id;
       offlineMangaList[index] = data;
     } else {
       offlineMangaList.add(data);
@@ -175,11 +179,38 @@ class OfflineController extends GetxController {
   }
 
   void deleteCategory(Category cat) async {
-    await isar.categorys
-        .filter()
-        .idEqualTo(cat.id)
-        .isMangaEqualTo(cat.isManga)
-        .deleteFirst();
+    final idsToCheck = List<String>.from(cat.anilistIds ?? []);
+
+    await isar.writeTxn(() async {
+      await isar.categorys
+          .filter()
+          .idEqualTo(cat.id)
+          .isMangaEqualTo(cat.isManga)
+          .deleteFirst();
+    });
+
+    // Clean up items that are now orphaned because their last category was deleted
+    for (var mediaId in idsToCheck) {
+      final allCats = await isar.categorys.filter().isMangaEqualTo(cat.isManga).findAll();
+      bool isOrphaned = true;
+      for (var c in allCats) {
+        if (c.anilistIds?.contains(mediaId) ?? false) {
+          isOrphaned = false;
+          break;
+        }
+      }
+
+      if (isOrphaned) {
+        final mediaType = cat.isManga ? 0 : 1;
+        final allItems = await isar.offlineItems.filter().mediaTypeEqualTo(mediaType).findAll();
+        for (var item in allItems) {
+          if (item.mediaData?.id?.toString() == mediaId) {
+            await isar.writeTxn(() async => await isar.offlineItems.delete(item.id));
+            log("Deleted orphaned offline item after category delete: $mediaId");
+          }
+        }
+      }
+    }
   }
 
   void addToCategory(Category category, String mediaId) async {
@@ -235,9 +266,68 @@ class OfflineController extends GetxController {
         cat.anilistIds = ids;
         await isar.writeTxn(() async => await isar.categorys.put(cat));
         log("Removed from category '${cat.name}': $mediaId");
+        
+        // Check if the item is now orphaned (not in any category of this type)
+        final allCats = await isar.categorys.filter().isMangaEqualTo(category.isManga).findAll();
+        bool isOrphaned = true;
+        for (var c in allCats) {
+          if (c.anilistIds?.contains(mediaId) ?? false) {
+            isOrphaned = false;
+            break;
+          }
+        }
+        
+        if (isOrphaned) {
+          final mediaType = category.isManga ? 0 : 1;
+          final allItems = await isar.offlineItems.filter().mediaTypeEqualTo(mediaType).findAll();
+          for (var item in allItems) {
+            if (item.mediaData?.id?.toString() == mediaId) {
+              await isar.writeTxn(() async => await isar.offlineItems.delete(item.id));
+              log("Deleted orphaned offline item completely from library: $mediaId");
+            }
+          }
+        }
       }
     } else {
       log("Error: Category '${category.name}' not found.");
     }
+  }
+
+  void renameCategory(Category cat, String newName) async {
+    cat.name = newName;
+    await isar.writeTxn(() async => await isar.categorys.put(cat));
+  }
+
+  void saveCategoryOrder(List<int> orderedIds, bool isManga) async {
+    final key = isManga ? 'manga_category_order' : 'anime_category_order';
+    final value = jsonEncode(orderedIds);
+    await isar.writeTxn(() async {
+      await isar.keyValues.put(KeyValue()..key = key..value = value);
+    });
+  }
+
+  List<int> getCategoryOrder(bool isManga) {
+    final key = isManga ? 'manga_category_order' : 'anime_category_order';
+    final kv = isar.keyValues.filter().keyEqualTo(key).findFirstSync();
+    if (kv != null && kv.value != null) {
+      try {
+        final List<dynamic> decoded = jsonDecode(kv.value!);
+        return decoded.map((e) => e as int).toList();
+      } catch (e) {
+        log('Error decoding category order: $e');
+      }
+    }
+    return <int>[];
+  }
+
+  void reorderItemsInCategory(Category category, int oldIndex, int newIndex) async {
+    final ids = List<String>.from(category.anilistIds ?? []);
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final String item = ids.removeAt(oldIndex);
+    ids.insert(newIndex, item);
+    category.anilistIds = ids;
+    await isar.writeTxn(() async => await isar.categorys.put(category));
   }
 }

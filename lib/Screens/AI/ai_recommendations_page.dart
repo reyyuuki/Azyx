@@ -15,6 +15,7 @@ import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class AiRecommendationsPage extends StatefulWidget {
   final bool isManga;
@@ -62,7 +63,7 @@ class _AiRecommendationsPageState extends State<AiRecommendationsPage> {
             Expanded(
               child: Obx(
                 () => recommendationsList.value.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: LoadingIndicatorM3E())
                     : LayoutBuilder(
                         builder: (context, constraints) {
                           final crossAxisCount =

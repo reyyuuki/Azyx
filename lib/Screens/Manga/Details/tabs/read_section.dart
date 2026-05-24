@@ -1,8 +1,10 @@
 // ignore_for_file: use_build_context_synchronously, must_be_immutable
 
 import 'dart:developer';
+import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Database/isar_models/episode_class.dart';
+import 'package:azyx/Models/user_media.dart';
 import 'package:azyx/Models/wrong_title_search.dart';
 import 'package:azyx/Screens/Manga/Details/tabs/widgets/chapter_item.dart';
 import 'package:azyx/Screens/Manga/Read/view/read.dart';
@@ -18,6 +20,7 @@ import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class ReadSection extends StatefulWidget {
   final String image;
@@ -58,6 +61,8 @@ class _WatchSectionState extends State<ReadSection> {
   final RxList<Chapter> filteredList = RxList();
   TextEditingController wrongTitle = TextEditingController();
   final Rx<int> searchNumber = 1.obs;
+  final Rx<bool> isSearchLoading = false.obs;
+  final Rx<bool> searchError = false.obs;
 
   @override
   void initState() {
@@ -66,6 +71,9 @@ class _WatchSectionState extends State<ReadSection> {
   }
 
   Future<void> wrongTitleSearch(String query, BuildContext context) async {
+    isSearchLoading.value = true;
+    searchError.value = false;
+    wrongTitleSearchData.clear();
     try {
       final response = await sourceController.activeMangaSource.value!.methods
           .search(query, 1, []);
@@ -80,9 +88,14 @@ class _WatchSectionState extends State<ReadSection> {
             ),
           );
         }
+      } else {
+        searchError.value = true;
       }
     } catch (e) {
       log("Error while searching for wrong title: $e");
+      searchError.value = true;
+    } finally {
+      isSearchLoading.value = false;
     }
   }
 
@@ -205,7 +218,7 @@ class _WatchSectionState extends State<ReadSection> {
           () => widget.hasError.value
               ? Image.asset('assets/images/sticker.png', fit: BoxFit.contain)
               : widget.chaptersList.isEmpty
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(child: LoadingIndicatorM3E())
               : Column(
                   children: filteredList.map((ch) {
                     return GestureDetector(
@@ -215,11 +228,13 @@ class _WatchSectionState extends State<ReadSection> {
                           MaterialPageRoute(
                             builder: (context) {
                               return ReadPage(
+                                mediaId: widget.id,
                                 syncId: widget.syncId.value,
                                 source: widget.selectedSource.value,
                                 chapterList: widget.chaptersList,
                                 link: ch.link!,
                                 mangaTitle: widget.animeTitle.value,
+                                mangaImage: widget.image,
                               );
                             },
                           ),
@@ -258,23 +273,9 @@ class _WatchSectionState extends State<ReadSection> {
               ),
               const SizedBox(height: 20),
               TextField(
-                onSubmitted: (value) async {
-                  widget.hasError.value = false;
-                  wrongTitleSearchData.value = [];
-                  final data = await sourceController
-                      .activeMangaSource
-                      .value!
-                      .methods
-                      .search(value, 1, []);
-                  final result = data.list;
-                  for (var item in result) {
-                    wrongTitleSearchData.add(
-                      WrongTitleSearch(
-                        image: item.cover,
-                        title: item.title,
-                        link: item.url,
-                      ),
-                    );
+                onSubmitted: (value) {
+                  if (value.trim().isNotEmpty) {
+                    wrongTitleSearch(value.trim(), context);
                   }
                 },
                 controller: wrongTitle,
@@ -306,45 +307,103 @@ class _WatchSectionState extends State<ReadSection> {
               ),
               const SizedBox(height: 10),
               Obx(
-                () => Expanded(
-                  child: widget.hasError.value
-                      ? Image.asset(
-                          'assets/images/sticker.png',
-                          fit: BoxFit.contain,
-                        )
-                      : wrongTitleSearchData.isEmpty
-                      ? const Center(child: CircularProgressIndicator())
-                      : GridView(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                childAspectRatio: 0.52,
-                                crossAxisSpacing: 1.0,
+                () {
+                  if (isSearchLoading.value) {
+                    return const Expanded(
+                      child: Center(
+                        child: LoadingIndicatorM3E(),
+                      ),
+                    );
+                  }
+                  
+                  if (searchError.value) {
+                    return Expanded(
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.search_off_rounded,
+                              size: 40,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.3),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              "No results found",
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
+                                fontWeight: FontWeight.w600,
                               ),
-                          children: wrongTitleSearchData.map((item) {
-                            return GestureDetector(
-                              onTap: () async {
-                                widget.chaptersList.value = [];
-                                Navigator.pop(context);
-                                final data = await sourceController
-                                    .activeMangaSource
-                                    .value!
-                                    .methods
-                                    .getDetail(DMedia.withUrl(item.link!));
-                                widget.onChanged(
-                                  data.episodes!.reversed.toList(),
-                                );
-                                widget.onTitleChanged(item.title!);
-                                widget.chaptersList.value = mChapterToChapter(
-                                  data.episodes!,
-                                  item.title!,
-                                );
-                              },
-                              child: AzyXCard(item: item),
-                            );
-                          }).toList(),
+                            ),
+                          ],
                         ),
-                ),
+                      ),
+                    );
+                  }
+                  
+                  if (wrongTitleSearchData.isEmpty) {
+                    return Expanded(
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.search_rounded,
+                              size: 40,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.3),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              "Type a title to search",
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Expanded(
+                    child: GridView(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            childAspectRatio: 0.52,
+                            crossAxisSpacing: 1.0,
+                          ),
+                      children: wrongTitleSearchData.map((item) {
+                        return GestureDetector(
+                          onTap: () async {
+                            widget.chaptersList.value = [];
+                            Navigator.pop(context);
+                            try {
+                              final data = await sourceController
+                                  .activeMangaSource
+                                  .value!
+                                  .methods
+                                  .getDetail(DMedia.withUrl(item.link!));
+                              widget.onChanged(
+                                data.episodes!.reversed.toList(),
+                              );
+                              widget.onTitleChanged(item.title!);
+                              widget.chaptersList.value = mChapterToChapter(
+                                data.episodes!,
+                                item.title!,
+                              );
+                            } catch (e) {
+                              log("Error getting manga details: $e");
+                              widget.hasError.value = true;
+                            }
+                          },
+                          child: AzyXCard(item: item),
+                        );
+                      }).toList(),
+                    ),
+                  );
+                },
               ),
             ],
           ),

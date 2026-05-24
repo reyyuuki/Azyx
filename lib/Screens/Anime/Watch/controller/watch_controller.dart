@@ -36,6 +36,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:volume_controller/volume_controller.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 enum ResizeModes { contain, cover, fill }
 
@@ -96,12 +97,11 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     );
 
     intializeData(playerData);
-    log('checking: ${playerData.episodeUrls.first.headers}}');
-    for (var element in playerData.episodeUrls) {
-      log(
-        "Headers: ${element.headers} / ${sourceController.activeSource.value!.baseUrl!}",
-      );
-    }
+    
+    final firstVideo = playerData.episodeUrls.isNotEmpty ? playerData.episodeUrls.first : null;
+    final referer = firstVideo?.headers?['referer'] ?? firstVideo?.headers?['Referer'] ?? (sourceController.activeSource.value?.baseUrl ?? '');
+    final origin = firstVideo?.headers?['origin'] ?? firstVideo?.headers?['Origin'] ?? (sourceController.activeSource.value?.baseUrl ?? '');
+    final userAgent = firstVideo?.headers?['user-agent'] ?? firstVideo?.headers?['User-Agent'] ?? 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 
     player.open(
       Media(
@@ -110,15 +110,9 @@ class WatchController extends GetxController with WidgetsBindingObserver {
             ? Duration(seconds: playerData.startFromSeconds!)
             : Duration.zero,
         httpHeaders: {
-          'Referer':
-              playerData.episodeUrls.first.headers?['referer'] ??
-              sourceController.activeSource.value!.baseUrl!,
-          'Origin':
-              playerData.episodeUrls.first.headers?['origin'] ??
-              sourceController.activeSource.value!.baseUrl!,
-          'User-Agent':
-              playerData.episodeUrls.first.headers?['user-agent'] ??
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          'Referer': referer,
+          'Origin': origin,
+          'User-Agent': userAgent,
         },
       ),
     );
@@ -129,6 +123,55 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       const Duration(minutes: 1),
       (timer) => localHistoryEntry(),
     );
+
+    // Fetch fresh episode links in the background
+    final currentEpisode = playerData.episodeList?.firstWhereOrNull(
+      (e) => e.number == playerData.number,
+    );
+    if (currentEpisode != null && currentEpisode.url != null) {
+      _fetchFreshEpisodeUrls(currentEpisode.url!);
+    }
+  }
+
+  Future<void> _fetchFreshEpisodeUrls(String url) async {
+    log("fetching fresh links in background: $url");
+    try {
+      final response = await sourceController.activeSource.value!.methods
+          .getVideoList(DEpisode(episodeNumber: episodeNumber.value, url: url));
+      if (response.isNotEmpty) {
+        final currentPosition = position.value;
+        final quality = response.firstWhereOrNull(
+          (i) => i.url == animeData.value.url,
+        ) ?? response.first;
+        
+        animeData.value.episodeUrls = response;
+        animeData.value.url = quality.url;
+        localHistoryEntry();
+        
+        player.open(
+          Media(
+            quality.url,
+            start: currentPosition,
+            httpHeaders: {
+              'Referer':
+                  quality.headers?['referer'] ??
+                  quality.headers?['Referer'] ??
+                  sourceController.activeSource.value!.baseUrl!,
+              'Origin':
+                  quality.headers?['origin'] ??
+                  quality.headers?['Origin'] ??
+                  sourceController.activeSource.value!.baseUrl!,
+              'User-Agent':
+                  quality.headers?['user-agent'] ??
+                  quality.headers?['User-Agent'] ??
+                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            },
+          ),
+        );
+      }
+    } catch (e, stack) {
+      log("Error fetching fresh links in background: $e , $stack");
+    }
   }
 
   void _setupPlayerListeners() {
@@ -265,7 +308,25 @@ class WatchController extends GetxController with WidgetsBindingObserver {
         animeData.value.episodeUrls = response;
         animeData.value.url = result.url;
         localHistoryEntry();
-        player.open(Media(result.url));
+        player.open(
+          Media(
+            result.url,
+            httpHeaders: {
+              'Referer':
+                  result.headers?['referer'] ??
+                  result.headers?['Referer'] ??
+                  sourceController.activeSource.value!.baseUrl!,
+              'Origin':
+                  result.headers?['origin'] ??
+                  result.headers?['Origin'] ??
+                  sourceController.activeSource.value!.baseUrl!,
+              'User-Agent':
+                  result.headers?['user-agent'] ??
+                  result.headers?['User-Agent'] ??
+                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            },
+          ),
+        );
       } else {
         log("extracting error when fetching link");
       }
@@ -799,7 +860,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
         20.width,
         Obx(
           () => isBuffering.value
-              ? const CircularProgressIndicator()
+              ? const LoadingIndicatorM3E()
               : GestureDetector(
                   onTap: () => player.playOrPause(),
                   child: Icon(
@@ -826,7 +887,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     return AzyXContainer(
       alignment: Alignment.center,
       child: isBuffering.value
-          ? const CircularProgressIndicator()
+          ? const LoadingIndicatorM3E()
           : const SizedBox.shrink(),
     );
   }

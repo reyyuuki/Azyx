@@ -7,6 +7,7 @@ import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class CustomControls extends StatelessWidget {
   final Player player;
@@ -174,7 +175,7 @@ class CustomControls extends StatelessWidget {
         20.width,
         Obx(
           () => controller.isBuffering.value
-              ? const CircularProgressIndicator()
+              ? const LoadingIndicatorM3E()
               : GestureDetector(
                   onTap: () => controller.player.playOrPause(),
                   child: Icon(
@@ -201,7 +202,7 @@ class CustomControls extends StatelessWidget {
     return AzyXContainer(
       alignment: Alignment.center,
       child: controller.isBuffering.value
-          ? const CircularProgressIndicator()
+          ? const LoadingIndicatorM3E()
           : const SizedBox.shrink(),
     );
   }

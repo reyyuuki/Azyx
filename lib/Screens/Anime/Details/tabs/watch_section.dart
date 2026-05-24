@@ -14,6 +14,7 @@ import 'package:anymex_extension_runtime_bridge/Models/Source.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class WatchSection extends StatefulWidget {
   final String image;
@@ -52,11 +53,99 @@ class _WatchSectionState extends State<WatchSection> {
   final RxList<Episode> filteredList = RxList();
   TextEditingController wrongTitle = TextEditingController();
   final Rx<bool> searchError = false.obs;
+  
+  final RxString selectedSeason = ''.obs;
+  final RxString selectedType = ''.obs;
+  final RxString episodeSearchQuery = ''.obs;
 
   @override
   void initState() {
     super.initState();
-    filteredList.value = widget.episodelist;
+    _initFilters();
+    _applyFilters();
+    ever(widget.episodelist, (_) {
+      _initFilters();
+      _applyFilters();
+    });
+  }
+
+  void _initFilters() {
+    final availableSeasons = getAvailableSeasons();
+    if (availableSeasons.isNotEmpty && !availableSeasons.contains(selectedSeason.value)) {
+      selectedSeason.value = availableSeasons.first;
+    }
+
+    final availableTypes = getAvailableTypes();
+    if (availableTypes.isNotEmpty && !availableTypes.contains(selectedType.value)) {
+      if (availableTypes.any((t) => t.toLowerCase() == 'subbed')) {
+        selectedType.value = availableTypes.firstWhere((t) => t.toLowerCase() == 'subbed');
+      } else {
+        selectedType.value = availableTypes.first;
+      }
+    }
+  }
+
+  List<String> getAvailableSeasons() {
+    final seasons = widget.episodelist
+        .map((e) => e.season)
+        .where((s) => s != null && s.isNotEmpty)
+        .cast<String>()
+        .toSet()
+        .toList();
+    seasons.sort((a, b) {
+      final intA = int.tryParse(a) ?? 0;
+      final intB = int.tryParse(b) ?? 0;
+      return intA.compareTo(intB);
+    });
+    return seasons;
+  }
+
+  List<String> getAvailableTypes() {
+    final types = widget.episodelist
+        .map((e) => e.type)
+        .where((t) => t != null && t.isNotEmpty)
+        .cast<String>()
+        .toSet()
+        .toList();
+    types.sort();
+    return types;
+  }
+
+  void _applyFilters() {
+    final query = episodeSearchQuery.value.toLowerCase();
+    
+    var temp = widget.episodelist.where((episode) {
+      if (query.isNotEmpty) {
+        final titleMatch = episode.title?.toLowerCase().contains(query) ?? false;
+        final numMatch = episode.number.toLowerCase().contains(query);
+        if (!titleMatch && !numMatch) return false;
+      }
+      
+      if (selectedSeason.value.isNotEmpty) {
+        final epSeason = episode.season ?? '1';
+        if (epSeason != selectedSeason.value) return false;
+      }
+      
+      if (selectedType.value.isNotEmpty) {
+        final epType = episode.type ?? 'Subbed';
+        if (epType.toLowerCase() != selectedType.value.toLowerCase()) return false;
+      }
+      
+      return true;
+    }).toList();
+    
+    temp.sort((a, b) {
+      final numA = double.tryParse(a.number);
+      final numB = double.tryParse(b.number);
+      if (numA != null && numB != null) {
+        return numA.compareTo(numB);
+      }
+      if (numA != null) return -1;
+      if (numB != null) return 1;
+      return (a.title ?? '').compareTo(b.title ?? '');
+    });
+
+    filteredList.value = temp;
   }
 
   Future<void> wrongTitleSearch(String query, BuildContext context) async {
@@ -84,13 +173,8 @@ class _WatchSectionState extends State<WatchSection> {
   }
 
   void handleEpisodes(String value) {
-    if (value.isNotEmpty) {
-      filteredList.value = widget.episodelist
-          .where((i) => i.title!.toLowerCase().contains(value.toLowerCase()))
-          .toList();
-    } else {
-      filteredList.value = widget.episodelist;
-    }
+    episodeSearchQuery.value = value;
+    _applyFilters();
   }
 
   @override
@@ -191,28 +275,146 @@ class _WatchSectionState extends State<WatchSection> {
           ontap: () {},
           name: "Filter episodes...",
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
+        Obx(() => _buildFilterChips(colorScheme)),
+        const SizedBox(height: 4),
         Obx(
           () => widget.hasError.value
               ? _buildErrorState(colorScheme)
               : widget.episodelist.isEmpty
               ? _buildLoadingState(colorScheme)
-              : widget.episodelist.first.desc.isNotEmpty
+              : filteredList.isEmpty
+              ? _buildEmptyState(colorScheme)
+              : filteredList.first.desc.isNotEmpty
               ? AnifyEpisodesWidget(
                   title: widget.animeTitle.value,
                   id: widget.id,
                   image: widget.image,
                   data: widget.mediaData,
-                  anifyEpisodes: widget.episodelist,
+                  anifyEpisodes: filteredList,
                 )
               : EpisodesList(
-                  episodeList: widget.episodelist,
+                  episodeList: filteredList,
                   image: widget.image,
                   title: widget.animeTitle.value,
                   id: widget.id,
                 ),
         ),
       ],
+    );
+  }
+
+  Widget _buildFilterChips(ColorScheme colorScheme) {
+    final seasons = getAvailableSeasons();
+    final types = getAvailableTypes();
+
+    if (seasons.isEmpty && types.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (seasons.isNotEmpty) ...[
+          Text(
+            "Seasons",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: seasons.map((season) {
+                final isSelected = selectedSeason.value == season;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: Text("Season $season"),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      if (selected) {
+                        selectedSeason.value = season;
+                        _applyFilters();
+                      }
+                    },
+                    selectedColor: colorScheme.primaryContainer,
+                    labelStyle: TextStyle(
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (types.isNotEmpty) ...[
+          Text(
+            "Type",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: types.map((type) {
+                final isSelected = selectedType.value == type;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: Text(type),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      if (selected) {
+                        selectedType.value = type;
+                        _applyFilters();
+                      }
+                    },
+                    selectedColor: colorScheme.primaryContainer,
+                    labelStyle: TextStyle(
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildEmptyState(ColorScheme colorScheme) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.search_off_rounded,
+              size: 40,
+              color: colorScheme.onSurfaceVariant.withOpacity(0.3),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              "No episodes match your filters",
+              style: TextStyle(
+                color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -270,10 +472,7 @@ class _WatchSectionState extends State<WatchSection> {
             SizedBox(
               width: 32,
               height: 32,
-              child: CircularProgressIndicator(
-                color: colorScheme.primary,
-                strokeWidth: 2.5,
-              ),
+              child: LoadingIndicatorM3E(color: colorScheme.primary),
             ),
             const SizedBox(height: 14),
             Text(
@@ -403,10 +602,7 @@ class _WatchSectionState extends State<WatchSection> {
                               : SizedBox(
                                   width: 28,
                                   height: 28,
-                                  child: CircularProgressIndicator(
-                                    color: colorScheme.primary,
-                                    strokeWidth: 2.5,
-                                  ),
+                                  child: LoadingIndicatorM3E(color: colorScheme.primary),
                                 ),
                         )
                       : GridView.builder(

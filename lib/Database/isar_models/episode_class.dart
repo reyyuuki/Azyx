@@ -11,6 +11,8 @@ class Episode {
   String? thumbnail;
   String desc = '';
   bool? filler;
+  String? season;
+  String? type;
 
   Episode({
     this.date,
@@ -20,6 +22,8 @@ class Episode {
     this.thumbnail,
     this.desc = '',
     this.filler,
+    this.season,
+    this.type,
   });
 
   factory Episode.fromJson(Map<dynamic, dynamic> data) {
@@ -31,6 +35,8 @@ class Episode {
       date: data['dateUpload'] ?? "??",
       thumbnail: data['thumbnail'],
       filler: data['filler'],
+      season: data['season']?.toString(),
+      type: data['type']?.toString(),
     );
   }
 
@@ -43,6 +49,8 @@ class Episode {
       'thumbnail': thumbnail ?? '',
       'desc': desc,
       'filler': filler,
+      'season': season,
+      'type': type,
     };
   }
 }
@@ -201,6 +209,12 @@ Episode mChapterToEpisode(dynamic item, dynamic episodeResult) {
     itemNumber = null;
   }
 
+  if (itemNumber == null || itemNumber.isEmpty) {
+    try {
+      itemNumber = item.episodeNumber;
+    } catch (_) {}
+  }
+
   String? itemName;
   try {
     itemName = item.name;
@@ -223,17 +237,27 @@ Episode mChapterToEpisode(dynamic item, dynamic episodeResult) {
     }
   }
 
+  String? season;
+  String? type;
+  try {
+    season = item.sortMap?['season']?.toString();
+    type = item.sortMap?['type']?.toString();
+  } catch (_) {}
+
   return Episode(
     title: itemName,
     url: item.url,
     number:
-        itemNumber ??
-        ChapterRecognition.parseChapterNumber(
-          episodeResultName ?? '',
-          itemName ?? '',
-        ).toString(),
+        (itemNumber != null && itemNumber.isNotEmpty)
+            ? itemNumber
+            : ChapterRecognition.parseChapterNumber(
+                episodeResultName ?? '',
+                itemName ?? '',
+              ).toString(),
     desc: item.scanlator ?? '',
     thumbnail: item.thumbnail,
+    season: season,
+    type: type,
   );
 }
 

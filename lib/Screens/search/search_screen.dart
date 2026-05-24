@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class SearchScreen extends StatefulWidget {
   final bool isManga;
@@ -768,10 +769,7 @@ class _SearchScreenState extends State<SearchScreen>
               color: colorScheme.primary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: CircularProgressIndicator(
-              color: colorScheme.primary,
-              strokeWidth: 3,
-            ),
+            child: LoadingIndicatorM3E(color: colorScheme.primary),
           ),
           24.height,
           Text(

@@ -124,12 +124,14 @@ class _CalenderPageState extends State<CalenderPage>
                     double maxHeight = MediaQuery.of(context).size.height / 2.5;
                     double gridHeight = min(gridWidth * 1.9, maxHeight);
                     return Container(
-                      padding: const EdgeInsets.only(left: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: GridView.builder(
                         physics: const BouncingScrollPhysics(),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: max(itemCount, minCount),
                           childAspectRatio: gridWidth / gridHeight,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
                         ),
                         itemCount: i.animeList.length,
                         itemBuilder: (context, index) {
@@ -145,39 +147,26 @@ class _CalenderPageState extends State<CalenderPage>
                               tagg: item.title! + item.id.toString(),
                               isOffline: false,
                             ).navigate(context),
-                            child: SizedBox(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Stack(
-                                    children: [
-                                      AzyXContainer(
-                                        height:
-                                            Platform.isAndroid || Platform.isIOS
-                                            ? 150
-                                            : 230,
-                                        width:
-                                            Platform.isAndroid || Platform.isIOS
-                                            ? 103
-                                            : 160,
-                                        margin: const EdgeInsets.only(
-                                          right: 10,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: AzyXContainer(
+                                    padding: const EdgeInsets.all(0),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.5),
+                                          blurRadius: 10,
+                                          offset: const Offset(2, 2),
                                         ),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            45,
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withOpacity(
-                                                0.5,
-                                              ),
-                                              blurRadius: 10,
-                                              offset: const Offset(2, 2),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Hero(
+                                      ],
+                                    ),
+                                    child: Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+                                        Hero(
                                           tag: taggname,
                                           child: ClipRRect(
                                             borderRadius: BorderRadius.circular(
@@ -188,16 +177,8 @@ class _CalenderPageState extends State<CalenderPage>
                                               fit: BoxFit.cover,
                                               placeholder: (context, url) =>
                                                   ShimmerEffect(
-                                                    height:
-                                                        Platform.isAndroid ||
-                                                            Platform.isIOS
-                                                        ? 150
-                                                        : 230,
-                                                    width:
-                                                        Platform.isAndroid ||
-                                                            Platform.isIOS
-                                                        ? 103
-                                                        : 160,
+                                                    height: double.infinity,
+                                                    width: double.infinity,
                                                   ),
                                               errorWidget:
                                                   (context, url, error) =>
@@ -205,76 +186,62 @@ class _CalenderPageState extends State<CalenderPage>
                                             ),
                                           ),
                                         ),
-                                      ),
-                                      item.rating != null
-                                          ? Positioned(
-                                              top: 0,
-                                              left: 0,
-                                              child: AzyXContainer(
-                                                height: 22,
-                                                decoration: BoxDecoration(
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                      color: Theme.of(context)
-                                                          .colorScheme
-                                                          .surfaceBright
-                                                          .withOpacity(0.6),
-                                                      blurRadius: 10,
+                                        if (item.rating != null)
+                                          Positioned(
+                                            top: 0,
+                                            left: 0,
+                                            child: Container(
+                                              height: 22,
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
+                                                borderRadius:
+                                                    const BorderRadius.only(
+                                                      bottomRight:
+                                                          Radius.circular(15),
+                                                      topLeft: Radius.circular(
+                                                        15,
+                                                      ),
                                                     ),
-                                                  ],
-                                                  color: Theme.of(
-                                                    context,
-                                                  ).colorScheme.primary,
-                                                  borderRadius:
-                                                      const BorderRadius.only(
-                                                        bottomRight:
-                                                            Radius.circular(20),
-                                                        topLeft:
-                                                            Radius.circular(15),
-                                                      ),
-                                                ),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                        horizontal: 8,
-                                                      ),
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.end,
-                                                    children: [
-                                                      AzyXText(
-                                                        text: item.rating!,
-                                                        fontSize: 12,
-                                                        color: Colors.black,
-                                                        fontVariant:
-                                                            FontVariant.bold,
-                                                      ),
-                                                      const Icon(
-                                                        Icons.star_half,
-                                                        size: 16,
-                                                        color: Colors.black,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
                                               ),
-                                            )
-                                          : const SizedBox.shrink(),
-                                    ],
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                  ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  AzyXText(
+                                                    text: item.rating!,
+                                                    fontSize: 12,
+                                                    color: Colors.black,
+                                                    fontVariant:
+                                                        FontVariant.bold,
+                                                  ),
+                                                  const SizedBox(width: 2),
+                                                  const Icon(
+                                                    Icons.star_half,
+                                                    size: 14,
+                                                    color: Colors.black,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
                                   ),
-                                  const SizedBox(height: 10),
-                                  AzyXText(
-                                    text: Platform.isAndroid || Platform.isIOS
-                                        ? (item.title!.length > 12
-                                              ? '${item.title!.substring(0, 10)}...'
-                                              : item.title!)
-                                        : (item.title!.length > 20
-                                              ? '${item.title!.substring(0, 17)}...'
-                                              : item.title!),
-                                    fontVariant: FontVariant.bold,
-                                  ),
-                                ],
-                              ),
+                                ),
+                                const SizedBox(height: 8),
+                                AzyXText(
+                                  text: item.title!,
+                                  fontVariant: FontVariant.bold,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  fontSize: 12,
+                                ),
+                              ],
                             ),
                           );
                         },
