@@ -2,12 +2,12 @@ import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.
     hide isar;
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Extensions/extension_item.dart';
-import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/language.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:grouped_list/sliver_grouped_list.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class Extension extends StatefulWidget {
   final bool installed;
@@ -136,23 +136,9 @@ class _ExtensionScreenState extends State<Extension> {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            theme.surfaceVariant.withOpacity(0.3),
-            theme.surfaceVariant.withOpacity(0.1),
-          ],
-        ),
+        color: theme.surfaceContainerHighest.withOpacity(0.3),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: theme.outline.withOpacity(0.3), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadow.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: theme.outline.withOpacity(0.12), width: 1),
       ),
       child: TextField(
         controller: _searchController,
@@ -207,130 +193,70 @@ class _ExtensionScreenState extends State<Extension> {
   }) {
     final theme = Theme.of(context).colorScheme;
 
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            theme.primaryContainer.withOpacity(0.4),
-            theme.primaryContainer.withOpacity(0.2),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.primary.withOpacity(0.3), width: 1.5),
-      ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: theme.primary.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(8),
+          Text(
+            title,
+            style: TextStyle(
+              color: theme.onSurface.withOpacity(0.55),
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+              letterSpacing: 0.8,
             ),
-            child: Icon(_getSectionIcon(title), color: theme.primary, size: 18),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Row(
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: theme.onSurface,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                    letterSpacing: 0.5,
-                  ),
+          if (count != null) ...[
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: theme.secondaryContainer.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                count.toString(),
+                style: TextStyle(
+                  color: theme.onSecondaryContainer,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Poppins',
+                  fontSize: 10,
                 ),
-                if (count != null) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.secondary.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      count.toString(),
-                      style: TextStyle(
-                        color: theme.onSurface,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
+              ),
             ),
-          ),
+          ],
+          const Spacer(),
           if (action != null) action,
         ],
       ),
     );
   }
 
-  IconData _getSectionIcon(String title) {
-    switch (title.toLowerCase()) {
-      case 'update pending':
-        return Icons.update_rounded;
-      case 'installed':
-        return Icons.check_circle_rounded;
-      default:
-        return Icons.language_rounded;
-    }
-  }
-
   Widget _buildUpdateAllButton(List<Source> updateEntries) {
     final theme = Theme.of(context).colorScheme;
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: theme.primary.withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+    return TextButton.icon(
+      onPressed: _isUpdatingAll ? null : () => _updateAllSources(updateEntries),
+      style: TextButton.styleFrom(
+        foregroundColor: theme.primary,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
-      child: ElevatedButton.icon(
-        onPressed: _isUpdatingAll
-            ? null
-            : () => _updateAllSources(updateEntries),
-        icon: _isUpdatingAll
-            ? SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    theme.onPrimaryContainer,
-                  ),
-                ),
-              )
-            : const Icon(Icons.system_update_rounded, size: 16),
-        label: const AzyXText(
-          text: 'Update All',
-          fontVariant: FontVariant.bold,
-          fontSize: 13,
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: theme.primaryContainer,
-          foregroundColor: theme.onPrimaryContainer,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: theme.primary.withOpacity(0.3), width: 1),
-          ),
-          elevation: 0,
+      icon: _isUpdatingAll
+          ? SizedBox(
+              width: 14,
+              height: 14,
+              child: LoadingIndicatorM3E(color: theme.primary),
+            )
+          : Icon(Icons.system_update_rounded, size: 14, color: theme.primary),
+      label: Text(
+        'Update All',
+        style: TextStyle(
+          fontFamily: 'Poppins',
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+          color: theme.primary,
         ),
       ),
     );
