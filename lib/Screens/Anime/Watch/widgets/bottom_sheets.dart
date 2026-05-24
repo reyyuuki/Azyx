@@ -1,3 +1,4 @@
+import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Models/anime_all_data.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
@@ -260,7 +261,26 @@ void showQualitySheet(
                   return GestureDetector(
                     onTap: () {
                       animeData.value.url = item.url;
-                      player.open(Media(item.url, start: position.value));
+                      player.open(
+                        Media(
+                          item.url,
+                          start: position.value,
+                          httpHeaders: {
+                            'Referer':
+                                item.headers?['referer'] ??
+                                item.headers?['Referer'] ??
+                                sourceController.activeSource.value!.baseUrl!,
+                            'Origin':
+                                item.headers?['origin'] ??
+                                item.headers?['Origin'] ??
+                                sourceController.activeSource.value!.baseUrl!,
+                            'User-Agent':
+                                item.headers?['user-agent'] ??
+                                item.headers?['User-Agent'] ??
+                                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                          },
+                        ),
+                      );
                       Get.back();
                     },
                     child: AzyXContainer(
