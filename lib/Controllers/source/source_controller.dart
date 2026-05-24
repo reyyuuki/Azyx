@@ -30,8 +30,20 @@ class SourceController extends GetxController {
 
   var lastUpdatedSource = "".obs;
   final RxBool shouldShowExtensions = false.obs;
+  final RxBool isExtensionManagerInitialized = false.obs;
+  bool _isBridgeLoaded = false;
 
-  final ExtensionManager extensionManager = Get.put(ExtensionManager());
+  ExtensionManager? _extensionManager;
+  ExtensionManager get extensionManager {
+    if (_extensionManager == null) {
+      if (Get.isRegistered<ExtensionManager>()) {
+        _extensionManager = Get.find<ExtensionManager>();
+      } else {
+        _extensionManager = Get.put(ExtensionManager());
+      }
+    }
+    return _extensionManager!;
+  }
 
   final Map<String, String> _activeTokens = {};
 
@@ -57,19 +69,44 @@ class SourceController extends GetxController {
   void onInit() {
     super.onInit();
     checkRuntimeHost();
-    _bindExtensionLists();
-    _initialize();
   }
 
-  void checkRuntimeHost() async {
+  Future<void> checkRuntimeHost() async {
+    _initManagerAndBind();
+
     await AnymeXRuntimeBridge.checkAndInitialize();
-    await AnymeXRuntimeBridge.setupRuntime();
-    if (AnymeXRuntimeBridge.controller.isReady.value) {
-      await Get.find<ExtensionManager>().onRuntimeBridgeInitialization();
+
+    final bool loaded = await AnymeXRuntimeBridge.isLoaded();
+    if (!loaded) {
+      await AnymeXRuntimeBridge.setupRuntime();
+    } else {
+      AnymeXRuntimeBridge.controller.setReady(true);
     }
-    // final context = Get.context;
-    // if (context == null) return;
-    // await DownloadRunTimeApk.showDownloadDialog(context);
+
+    if (AnymeXRuntimeBridge.controller.isReady.value) {
+      _loadBridgeExtensions();
+    } else {
+      ever(AnymeXRuntimeBridge.controller.isReady, (isReady) {
+        if (isReady) {
+          _loadBridgeExtensions();
+        }
+      });
+    }
+  }
+
+  void _initManagerAndBind() {
+    if (isExtensionManagerInitialized.value) return;
+    _bindExtensionLists();
+    _initialize();
+    isExtensionManagerInitialized.value = true;
+  }
+
+  void _loadBridgeExtensions() async {
+    if (_isBridgeLoaded) return;
+    final manager = extensionManager;
+    await manager.onRuntimeBridgeInitialization();
+    _isBridgeLoaded = true;
+    fetchRepos();
   }
 
   void _bindExtensionLists() {
