@@ -400,7 +400,7 @@ class AnilistService extends GetxController
       }
     }
     latestReleasing: Page {
-      media(type: ANIME, status: RELEASING, sort: START_DATE_DESC, isAdult: false) {
+      media(type: ANIME, status: NOT_YET_RELEASED, sort: [POPULARITY_DESC, TRENDING_DESC], isAdult: false) {
         id
         title {
           english
@@ -501,7 +501,7 @@ class AnilistService extends GetxController
       }
     }
     latestReleasing: Page {
-      media(type: MANGA, status: RELEASING, sort: START_DATE_DESC) {
+      media(type: MANGA, status: NOT_YET_RELEASED, sort: [POPULARITY_DESC, TRENDING_DESC]) {
         id
         title {
           english
@@ -650,6 +650,16 @@ class AnilistService extends GetxController
                   const SizedBox(height: 10),
                   MainCarousale(isManga: false, data: spotlight),
                   const SizedBox(height: 20),
+                  if (userAnimeList.currentlyWatching.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: AnimeScrollableList(
+                        varient: CarousaleVarient.userList,
+                        isManga: false,
+                        animeList: userAnimeList.currentlyWatching,
+                        title: "Currently Watching",
+                      ),
+                    ),
                   Padding(
                     padding: const EdgeInsets.all(10),
                     child: AnimeScrollableList(
@@ -715,6 +725,8 @@ class AnilistService extends GetxController
       AiSuggestionsCard(userData: userData),
       UserListsCard(userData: userData),
       CalenderCard(userData: userData),
+      const RecentlyWatchedCard(),
+      const RecentlyReadCard(),
       SliverToBoxAdapter(
         child: Obx(() {
           return Padding(
@@ -722,14 +734,24 @@ class AnilistService extends GetxController
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (userAnimeList.isNotEmpty)
+                if (userAnimeList.currentlyWatching.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: AnimeScrollableList(
                       varient: CarousaleVarient.userList,
                       isManga: false,
-                      animeList: userAnimeList,
+                      animeList: userAnimeList.currentlyWatching,
                       title: "Currently Watching",
+                    ),
+                  ),
+                if (userMangaList.currentlyReading.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: AnimeScrollableList(
+                      varient: CarousaleVarient.userList,
+                      isManga: true,
+                      animeList: userMangaList.currentlyReading,
+                      title: "Currently Reading",
                     ),
                   ),
                 topUpcoming.value.isEmpty
@@ -778,10 +800,18 @@ class AnilistService extends GetxController
                   Get.to(() => const SearchScreen(isManga: true));
                 }, 'manga'),
                 const SizedBox(height: 10),
-                MainCarousale(isManga: true, data: spotlightM),
-                const SizedBox(height: 20),
-                const SizedBox(height: 10),
-                AnimeScrollableList(
+                 MainCarousale(isManga: true, data: spotlightM),
+                 const SizedBox(height: 20),
+                 if (userMangaList.currentlyReading.isNotEmpty) ...[
+                   AnimeScrollableList(
+                     varient: CarousaleVarient.userList,
+                     isManga: true,
+                     animeList: userMangaList.currentlyReading,
+                     title: "Currently Reading",
+                   ),
+                   const SizedBox(height: 10),
+                 ],
+                 AnimeScrollableList(
                   animeList: popularM,
                   isManga: true,
                   title: "Popular Manga",
