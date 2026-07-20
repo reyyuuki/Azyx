@@ -38,9 +38,21 @@ class LocalHistoryController extends GetxController {
     );
   }
 
+  int _generateStableId(String title, HistoryMediaType type) {
+    final key = '${type.name}_$title';
+    int hash = 0;
+    for (int i = 0; i < key.length; i++) {
+      hash = (31 * hash + key.codeUnitAt(i)) & 0x7FFFFFFF;
+    }
+    return hash;
+  }
+
   void addToWatchingHistory(LocalHistoryItem data) {
     data.mediaType = HistoryMediaType.anime;
     data.lastWatched = DateTime.now();
+    if (data.mediaId == null && data.title != null) {
+      data.mediaId = _generateStableId(data.title!, HistoryMediaType.anime);
+    }
     isar.writeTxnSync(() {
       final existing = isar.localHistoryItems
           .where()
@@ -55,10 +67,9 @@ class LocalHistoryController extends GetxController {
       (i) => i.mediaId == data.mediaId,
     );
     if (index != -1) {
-      animeWatchingHistory[index] = data;
-    } else {
-      animeWatchingHistory.insert(0, data);
+      animeWatchingHistory.removeAt(index);
     }
+    animeWatchingHistory.insert(0, data);
     log('Added to anime history: ${data.title}');
   }
 
@@ -76,6 +87,9 @@ class LocalHistoryController extends GetxController {
   void addToReadingHistory(LocalHistoryItem data) {
     data.mediaType = HistoryMediaType.manga;
     data.lastWatched = DateTime.now();
+    if (data.mediaId == null && data.title != null) {
+      data.mediaId = _generateStableId(data.title!, HistoryMediaType.manga);
+    }
     isar.writeTxnSync(() {
       final existing = isar.localHistoryItems
           .where()
@@ -90,10 +104,9 @@ class LocalHistoryController extends GetxController {
       (i) => i.mediaId == data.mediaId,
     );
     if (index != -1) {
-      mangaReadingHistory[index] = data;
-    } else {
-      mangaReadingHistory.insert(0, data);
+      mangaReadingHistory.removeAt(index);
     }
+    mangaReadingHistory.insert(0, data);
     log('Added to manga history: ${data.title}');
   }
 

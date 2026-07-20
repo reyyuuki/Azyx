@@ -446,17 +446,16 @@ class SimklService extends GetxController
                   const SizedBox(height: 10),
                   MainCarousale(isManga: false, data: trendingMovies),
                   const SizedBox(height: 20),
-                  // AnimeScrollableList(
-                  //   animeList: popular,
-                  //   isManga: false,
-                  //   title: "Popular Animes",
-                  // ),
-                  // const SizedBox(height: 10),
-                  // AnimeScrollableList(
-                  //   animeList: topUpcoming,
-                  //   isManga: false,
-                  //   title: "TopUpcoming Animes",
-                  // ),
+                  if (userAnimeList.currentlyWatching.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: AnimeScrollableList(
+                        varient: CarousaleVarient.userList,
+                        isManga: false,
+                        animeList: userAnimeList.currentlyWatching,
+                        title: "Currently Watching",
+                      ),
+                    ),
                   const SizedBox(height: 10),
                   Padding(
                     padding: const EdgeInsets.all(10),
@@ -592,7 +591,8 @@ class SimklService extends GetxController
                   ),
           ),
         ),
-
+        const RecentlyWatchedCard(),
+        const RecentlyReadCard(),
         SliverToBoxAdapter(
           child: Obx(() {
             return Padding(
@@ -600,14 +600,24 @@ class SimklService extends GetxController
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (userAnimeList.isNotEmpty)
+                  if (userAnimeList.currentlyWatching.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16),
                       child: AnimeScrollableList(
                         varient: CarousaleVarient.userList,
                         isManga: false,
-                        animeList: userAnimeList,
+                        animeList: userAnimeList.currentlyWatching,
                         title: "Currently Watching",
+                      ),
+                    ),
+                  if (userMangaList.currentlyReading.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: AnimeScrollableList(
+                        varient: CarousaleVarient.userList,
+                        isManga: true,
+                        animeList: userMangaList.currentlyReading,
+                        title: "Currently Reading",
                       ),
                     ),
                   trendingMovies.value.isEmpty
@@ -655,7 +665,15 @@ class SimklService extends GetxController
                   const SizedBox(height: 10),
                   MainCarousale(isManga: false, data: trendingSeries),
                   const SizedBox(height: 20),
-                  const SizedBox(height: 10),
+                  if (userMangaList.currentlyReading.isNotEmpty) ...[
+                    AnimeScrollableList(
+                      varient: CarousaleVarient.userList,
+                      isManga: true,
+                      animeList: userMangaList.currentlyReading,
+                      title: "Currently Reading",
+                    ),
+                    const SizedBox(height: 10),
+                  ],
                   AnimeScrollableList(
                     animeList: trendingSeries,
                     isManga: false,

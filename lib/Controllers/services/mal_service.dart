@@ -286,6 +286,16 @@ class MalService extends GetxController implements BaseService, OnlineService {
                   const SizedBox(height: 10),
                   MainCarousale(isManga: false, data: spotlight),
                   const SizedBox(height: 20),
+                  if (userAnimeList.currentlyWatching.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: AnimeScrollableList(
+                        varient: CarousaleVarient.userList,
+                        isManga: false,
+                        animeList: userAnimeList.currentlyWatching,
+                        title: "Currently Watching",
+                      ),
+                    ),
                   Padding(
                     padding: const EdgeInsets.all(10),
                     child: AnimeScrollableList(
@@ -379,6 +389,8 @@ class MalService extends GetxController implements BaseService, OnlineService {
       AiSuggestionsCard(userData: userData),
       UserListsCard(userData: userData),
       CalenderCard(userData: userData),
+      const RecentlyWatchedCard(),
+      const RecentlyReadCard(),
       SliverToBoxAdapter(
         child: Obx(() {
           return Padding(
@@ -386,14 +398,24 @@ class MalService extends GetxController implements BaseService, OnlineService {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (userAnimeList.isNotEmpty)
+                if (userAnimeList.currentlyWatching.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: AnimeScrollableList(
                       varient: CarousaleVarient.userList,
                       isManga: false,
-                      animeList: userAnimeList,
+                      animeList: userAnimeList.currentlyWatching,
                       title: "Currently Watching",
+                    ),
+                  ),
+                if (userMangaList.currentlyReading.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: AnimeScrollableList(
+                      varient: CarousaleVarient.userList,
+                      isManga: true,
+                      animeList: userMangaList.currentlyReading,
+                      title: "Currently Reading",
                     ),
                   ),
                 topUpcoming.value.isEmpty
@@ -452,10 +474,18 @@ class MalService extends GetxController implements BaseService, OnlineService {
                   Get.to(() => const SearchScreen(isManga: true));
                 }, 'manga'),
                 const SizedBox(height: 10),
-                MainCarousale(isManga: true, data: spotlightM),
-                const SizedBox(height: 20),
-                const SizedBox(height: 10),
-                AnimeScrollableList(
+                 MainCarousale(isManga: true, data: spotlightM),
+                 const SizedBox(height: 20),
+                 if (userMangaList.currentlyReading.isNotEmpty) ...[
+                   AnimeScrollableList(
+                     varient: CarousaleVarient.userList,
+                     isManga: true,
+                     animeList: userMangaList.currentlyReading,
+                     title: "Currently Reading",
+                   ),
+                   const SizedBox(height: 10),
+                 ],
+                 AnimeScrollableList(
                   animeList: popularM,
                   isManga: true,
                   title: "Popular Manga",
