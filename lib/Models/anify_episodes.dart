@@ -31,7 +31,9 @@ class AnifyEpisodes {
       isFiller: json['isFiller'] ?? false,
       image: json['img'] ?? "",
       number: json['number'] ?? number,
-      dateUpload: json['updatedAt'] != null ? formatDate(json['updatedAt']) : "??"
+      dateUpload: json['updatedAt'] != null
+          ? formatDate(num.tryParse(json['updatedAt'].toString())?.toInt() ?? 1)
+          : "??"
     );
   }
 }

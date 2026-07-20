@@ -241,9 +241,15 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
     );
     final check = jsonDecode(resp.body);
     final anifyEpisodes = check['episodes'] as Map<String, dynamic>;
+    log(
+      '[AnifyEpisodes] Enriching ${episodesList.length} episodes with Anify data',
+    );
     final ep = episodesList
         .map((entry) {
           final epNum = entry.number;
+          log(
+            '[AnifyEpisodes] EP $epNum => sortKeys=${entry.sortKeys} sortVals=${entry.sortVals}',
+          );
           final data = anifyEpisodes.values.firstWhere(
             (e) => e['absoluteEpisodeNumber'].toString() == epNum,
             orElse: () => null,
@@ -254,10 +260,16 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
             desc: data['overview'] ?? '',
             thumbnail: data['image'] ?? '',
             title: (data['title']?['en']) ?? '',
+            sortKeys: entry.sortKeys,
+            sortVals: entry.sortVals,
+            season: entry.season,
+            type: entry.type,
+            filler: entry.filler,
           );
         })
         .whereType<Episode>()
         .toList();
+    log('[AnifyEpisodes] Done. First ep sortMap = ${ep.first.sortMap}');
     if (ep.first.number.isNotEmpty) {
       episodesList.value = ep;
     }

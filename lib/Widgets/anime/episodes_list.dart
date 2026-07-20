@@ -1,6 +1,8 @@
 // ignore_for_file: must_be_immutable
 
+import 'dart:async';
 import 'dart:developer';
+import 'dart:math' hide log;
 
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
@@ -44,8 +46,15 @@ class EpisodesList extends StatelessWidget {
     context,
   ) async {
     try {
+      final episode = episodeList.firstWhereOrNull((e) => e.url == url);
       final response = await sourceController.activeSource.value!.methods
-          .getVideoList(DEpisode(episodeNumber: number, url: url));
+          .getVideoList(
+            DEpisode(
+              episodeNumber: number,
+              url: url,
+              sortMap: episode?.effectiveSortMap,
+            ),
+          );
       if (response.isNotEmpty) {
         log('response: ${response.first.quality}');
 
@@ -122,10 +131,31 @@ class EpisodesList extends StatelessWidget {
             episodeTitle.value = episode.title ?? '';
             hasError.value = false;
 
-            final stream = sourceController.activeSource.value!.methods
-                .getVideoListStream(
-                  DEpisode(episodeNumber: episode.number, url: episode.url),
-                );
+            final scrapeToken =
+                'scrape_${DateTime.now().millisecondsSinceEpoch}_${episode.number}_${Random().nextInt(10000)}';
+            final sourceEpisode = DEpisode(
+              episodeNumber: episode.number,
+              url: episode.url,
+              sortMap: episode.effectiveSortMap,
+            );
+            log(
+              '[EpisodesList] Tapped EP ${episode.number} url=${episode.url} sortMap=${sourceEpisode.sortMap}',
+            );
+
+            final stream = () async* {
+              try {
+                final list = await sourceController.activeSource.value!.methods
+                    .getVideoList(
+                      sourceEpisode,
+                      parameters: SourceParams(cancelToken: scrapeToken),
+                    );
+                for (final video in list) {
+                  yield video;
+                }
+              } catch (e) {
+                log('[EpisodesList] getVideoList error: $e');
+              }
+            }();
 
             showModalBottomSheet(
               context: context,
@@ -148,7 +178,9 @@ class EpisodesList extends StatelessWidget {
                   hasError: hasError,
                 );
               },
-            );
+            ).whenComplete(() {
+              sourceController.activeSource.value?.cancelRequest(scrapeToken);
+            });
           },
           child: Container(
             height: 105,
@@ -285,183 +317,211 @@ class StreamEpisodeSheet extends StatefulWidget {
 
 class _StreamEpisodeSheetState extends State<StreamEpisodeSheet> {
   final RxList<Video> videos = <Video>[].obs;
+  final RxBool isFetching = true.obs;
   final Set<String> seenUrls = {};
+  StreamSubscription<Video>? _sub;
+
+  @override
+  void initState() {
+    super.initState();
+    _sub = widget.stream?.listen(
+      (video) {
+        if (seenUrls.add(video.url)) {
+          videos.add(video);
+        }
+      },
+      onError: (e) {},
+      onDone: () {
+        isFetching.value = false;
+        if (videos.isEmpty) {
+          widget.hasError.value = true;
+        }
+      },
+      cancelOnError: false,
+    );
+    if (widget.stream == null) {
+      isFetching.value = false;
+      widget.hasError.value = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
+  String _videoLabel(Video video) {
+    final t = video.title;
+    if (t != null && t.isNotEmpty && t.toLowerCase() != 'null') return t;
+    final q = video.quality;
+    if (q.isNotEmpty && q != 'null') return q;
+    return 'Stream';
+  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return AzyXGradientContainer(
+    return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+      ),
       height: MediaQuery.of(context).size.height * 0.72,
       child: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-        child: StreamBuilder<Video>(
-          stream: widget.stream,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final video = snapshot.data!;
-              final uniqueKey = '${video.quality}_${video.url}';
-              if (seenUrls.add(uniqueKey)) {
-                videos.add(video);
-              }
-            }
+        child: Obx(() {
+          final fetching = isFetching.value;
+          final hasErr = widget.hasError.value;
+          final videoList = videos.toList();
 
-            if (snapshot.hasError) {
-              widget.hasError.value = true;
-            }
-
-            return Obx(() {
-              final isFetching =
-                  snapshot.connectionState == ConnectionState.waiting ||
-                  snapshot.connectionState == ConnectionState.active;
-
-              return ListView(
-                physics: const BouncingScrollPhysics(),
-                children: [
-                  10.height,
-                  AzyXText(
-                    text: "Choose Stream",
-                    fontSize: 25,
-                    fontVariant: FontVariant.bold,
-                    color: colorScheme.primary,
-                    textAlign: TextAlign.center,
+          return ListView(
+            physics: const BouncingScrollPhysics(),
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 5,
+                  margin: const EdgeInsets.only(top: 4, bottom: 16),
+                  decoration: BoxDecoration(
+                    color: colorScheme.onSurfaceVariant.withOpacity(0.4),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  const SizedBox(height: 6),
-                  AzyXText(
-                    text: widget.episodeTitle.value.isEmpty
-                        ? 'Episode ${widget.number}'
-                        : 'Episode ${widget.number} • ${widget.episodeTitle.value}',
-                    fontSize: 13,
-                    maxLines: 2,
-                    color: colorScheme.onSurfaceVariant.withOpacity(0.75),
-                    textAlign: TextAlign.center,
+                ),
+              ),
+              AzyXText(
+                text: "Choose Stream",
+                fontSize: 25,
+                fontVariant: FontVariant.bold,
+                color: colorScheme.primary,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 6),
+              Obx(
+                () => AzyXText(
+                  text: widget.episodeTitle.value.isEmpty
+                      ? 'Episode ${widget.number}'
+                      : 'Episode ${widget.number} • ${widget.episodeTitle.value}',
+                  fontSize: 13,
+                  maxLines: 2,
+                  color: colorScheme.onSurfaceVariant.withOpacity(0.75),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 18),
+              if (hasErr && videoList.isEmpty)
+                _StreamSheetMessage(
+                  icon: Icons.error_outline_rounded,
+                  title: 'Unable to load stream links',
+                  subtitle:
+                      'This source did not return any playable links for this episode.',
+                  color: colorScheme.error,
+                )
+              else if (videoList.isEmpty && fetching)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 40),
+                    child: SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: LoadingIndicatorM3E(),
+                    ),
                   ),
-                  const SizedBox(height: 18),
-                  if (widget.hasError.value && videos.isEmpty)
-                    _StreamSheetMessage(
-                      icon: Icons.error_outline_rounded,
-                      title: 'Unable to load stream links',
-                      subtitle:
-                          'This source did not return any playable links for this episode.',
-                      color: colorScheme.error,
-                    )
-                  else if (videos.isEmpty && isFetching)
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 40),
-                        child: SizedBox(
-                          width: 32,
-                          height: 32,
-                          child: LoadingIndicatorM3E(),
-                        ),
-                      ),
-                    )
-                  else ...[
-                    ...videos.map((video) {
-                      return GestureDetector(
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => WatchScreen(
-                                playerData: AnimeAllData(
-                                  url: video.url,
-                                  episodeTitle: widget.episodeTitle.value,
-                                  title: widget.title,
-                                  number: widget.number,
-                                  image: widget.image,
-                                  id: widget.id,
-                                  episodeUrls: videos,
-                                  episodeList: widget.episodeList,
-                                ),
-                              ),
+                )
+              else ...[
+                ...videoList.map((video) {
+                  return GestureDetector(
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => WatchScreen(
+                            playerData: AnimeAllData(
+                              url: video.url,
+                              episodeTitle: widget.episodeTitle.value,
+                              title: widget.title,
+                              number: widget.number,
+                              image: widget.image,
+                              id: widget.id,
+                              episodeUrls: videos,
+                              episodeList: widget.episodeList,
                             ),
-                          );
-                          serviceHandler.currentMedia.value.status =
-                              serviceHandler.currentMedia.value.status;
-                        },
-                        child: AzyXContainer(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colorScheme.surfaceContainer.withOpacity(
-                              0.65,
-                            ),
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(
-                              color: colorScheme.outlineVariant.withOpacity(
-                                0.14,
-                              ),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 42,
-                                height: 42,
-                                decoration: BoxDecoration(
-                                  color: colorScheme.primary.withOpacity(0.12),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: Icon(
-                                  Icons.play_arrow_rounded,
-                                  color: colorScheme.primary,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    AzyXText(
-                                      text: video.quality,
-                                      fontSize: 16,
-                                      fontVariant: FontVariant.bold,
-                                      color: colorScheme.onSurface,
-                                    ),
-                                    const SizedBox(height: 2),
-                                    AzyXText(
-                                      text: 'Tap to start watching instantly',
-                                      fontSize: 12,
-                                      color: colorScheme.onSurfaceVariant
-                                          .withOpacity(0.72),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Icon(
-                                Icons.chevron_right_rounded,
-                                color: colorScheme.onSurfaceVariant.withOpacity(
-                                  0.45,
-                                ),
-                              ),
-                            ],
                           ),
                         ),
                       );
-                    }),
-                    if (isFetching)
-                      const Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          child: SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: LoadingIndicatorM3E(),
-                          ),
+                      serviceHandler.currentMedia.value.status =
+                          serviceHandler.currentMedia.value.status;
+                    },
+                    child: AzyXContainer(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainer.withOpacity(0.65),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: colorScheme.outlineVariant.withOpacity(0.14),
                         ),
                       ),
-                  ],
-                ],
-              );
-            });
-          },
-        ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Icon(
+                              Icons.play_arrow_rounded,
+                              color: colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                AzyXText(
+                                  text: _videoLabel(video),
+                                  fontSize: 16,
+                                  fontVariant: FontVariant.bold,
+                                  color: colorScheme.onSurface,
+                                ),
+                                const SizedBox(height: 2),
+                                AzyXText(
+                                  text: 'Tap to start watching instantly',
+                                  fontSize: 12,
+                                  color: colorScheme.onSurfaceVariant
+                                      .withOpacity(0.72),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+                if (fetching)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: LoadingIndicatorM3E(),
+                      ),
+                    ),
+                  ),
+              ],
+            ],
+          );
+        }),
       ),
     );
   }

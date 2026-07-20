@@ -81,10 +81,16 @@ class DownloadRunTimeApk {
     isDownloading.value = false;
   }
 
-  static Future<bool> showDownloadDialog(BuildContext context) async {
-    final alreadyDownloaded = await File(
-      "/storage/emulated/0/Download/anymex_runtime_host.apk",
-    ).exists();
+  static Future<bool> showDownloadDialog(BuildContext context, {bool force = false}) async {
+    final file = File("/storage/emulated/0/Download/anymex_runtime_host.apk");
+    if (force && await file.exists()) {
+      try {
+        await file.delete();
+      } catch (e) {
+        log('Error deleting old apk: $e');
+      }
+    }
+    final alreadyDownloaded = !force && await file.exists();
 
     final result = await showDialog<bool>(
       context: context,

@@ -6,7 +6,8 @@ import 'package:azyx/Controllers/source/download_run_time_apk.dart';
 import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
-import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart' hide isar;
+import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
+    hide isar;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -82,7 +83,14 @@ class PluginManager {
       final currentVersion = installedVersion;
       bool needsUpdate = false;
       if (currentVersion.isEmpty) {
-        PluginKeys.runtimeHostInstalledVersion.set(latestTag);
+        if (!context.mounted) return;
+        final success = await DownloadRunTimeApk.showDownloadDialog(context, force: true);
+        if (success) {
+          PluginKeys.runtimeHostInstalledVersion.set(latestTag);
+          PluginKeys.runtimeHostInstalledReleaseTitle.set(
+            json['name'] as String? ?? latestTag,
+          );
+        }
         return;
       } else {
         needsUpdate = isNewerVersion(currentVersion, latestTag);
@@ -112,15 +120,21 @@ class PluginManager {
 
         if (updateNow == true) {
           if (!context.mounted) return;
-          final success = await DownloadRunTimeApk.showDownloadDialog(context);
+          final success = await DownloadRunTimeApk.showDownloadDialog(context, force: true);
           if (success) {
             PluginKeys.runtimeHostInstalledVersion.set(latestTag);
-            PluginKeys.runtimeHostInstalledReleaseTitle.set(json['name'] as String? ?? latestTag);
-            azyxSnackBar('Plugin updated successfully. Please restart the app.');
+            PluginKeys.runtimeHostInstalledReleaseTitle.set(
+              json['name'] as String? ?? latestTag,
+            );
+            log('Plugin updated to version: $latestTag');
+            azyxSnackBar(
+              'Plugin updated successfully. Please restart the app.',
+            );
           }
         }
       } else {
         if (showIfUpToDate) {
+          log('Plugin is already up to date. Version: $installedVersion');
           azyxSnackBar('Plugin is already up to date.');
         }
       }
@@ -162,8 +176,9 @@ class PluginManager {
         : latestParts.length;
 
     for (var index = 0; index < maxLength; index++) {
-      final installedPart =
-          index < installedParts.length ? installedParts[index] : 0;
+      final installedPart = index < installedParts.length
+          ? installedParts[index]
+          : 0;
       final latestPart = index < latestParts.length ? latestParts[index] : 0;
 
       if (latestPart > installedPart) return true;
@@ -184,10 +199,7 @@ class PluginManager {
 }
 
 class PluginRelease {
-  const PluginRelease({
-    required this.tagName,
-    required this.title,
-  });
+  const PluginRelease({required this.tagName, required this.title});
 
   final String tagName;
   final String title;

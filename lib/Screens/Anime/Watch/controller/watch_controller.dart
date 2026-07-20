@@ -129,15 +129,20 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       (e) => e.number == playerData.number,
     );
     if (currentEpisode != null && currentEpisode.url != null) {
-      _fetchFreshEpisodeUrls(currentEpisode.url!);
+      _fetchFreshEpisodeUrls(currentEpisode);
     }
   }
 
-  Future<void> _fetchFreshEpisodeUrls(String url) async {
+  Future<void> _fetchFreshEpisodeUrls(Episode episode) async {
+    final url = episode.url!;
     log("fetching fresh links in background: $url");
     try {
       final response = await sourceController.activeSource.value!.methods
-          .getVideoList(DEpisode(episodeNumber: episodeNumber.value, url: url));
+          .getVideoList(DEpisode(
+            episodeNumber: episodeNumber.value,
+            url: url,
+            sortMap: episode.effectiveSortMap,
+          ));
       if (response.isNotEmpty) {
         final currentPosition = position.value;
         final quality = response.firstWhereOrNull(
@@ -293,8 +298,13 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   Future<void> loadEpisodeurl(String url) async {
     log("new ${sourceController.activeSource.value!.name!}");
     try {
+      final episode = animeData.value.episodeList?.firstWhereOrNull((e) => e.url == url);
       final response = await sourceController.activeSource.value!.methods
-          .getVideoList(DEpisode(episodeNumber: episodeNumber.value, url: url));
+          .getVideoList(DEpisode(
+            episodeNumber: episodeNumber.value,
+            url: url,
+            sortMap: episode?.effectiveSortMap,
+          ));
       if (response.isNotEmpty) {
         final quality = animeData.value.episodeUrls.firstWhere(
           (i) => i.url == animeData.value.url,

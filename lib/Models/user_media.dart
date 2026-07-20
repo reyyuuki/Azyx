@@ -106,3 +106,15 @@ class UserMedia {
     );
   }
 }
+
+extension UserMediaListFilter on List<UserMedia> {
+  List<UserMedia> get currentlyWatching => where((e) {
+        final s = e.status?.toUpperCase() ?? '';
+        return s == 'CURRENT' || s == 'WATCHING';
+      }).toList();
+
+  List<UserMedia> get currentlyReading => where((e) {
+        final s = e.status?.toUpperCase() ?? '';
+        return s == 'CURRENT' || s == 'READING';
+      }).toList();
+}

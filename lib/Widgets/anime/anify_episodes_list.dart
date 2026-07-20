@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:developer';
+import 'dart:math' hide log;
 
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
@@ -43,8 +45,15 @@ class AnifyEpisodesWidget extends StatelessWidget {
     context,
   ) async {
     try {
+      final episode = anifyEpisodes.firstWhereOrNull((e) => e.url == url);
       final response = await sourceController.activeSource.value!.methods
-          .getVideoList(DEpisode(episodeNumber: number, url: url));
+          .getVideoList(
+            DEpisode(
+              episodeNumber: number,
+              url: url,
+              sortMap: episode?.effectiveSortMap,
+            ),
+          );
       if (response.isNotEmpty) {
         log('response: ${response.first.title}');
         episodeUrls.value = response;
@@ -120,10 +129,31 @@ class AnifyEpisodesWidget extends StatelessWidget {
             episodeTitle.value = entry.title ?? '';
             hasError.value = false;
 
-            final stream = sourceController.activeSource.value!.methods
-                .getVideoListStream(
-                  DEpisode(episodeNumber: entry.number, url: entry.url),
-                );
+            final scrapeToken =
+                'scrape_${DateTime.now().millisecondsSinceEpoch}_${entry.number}_${Random().nextInt(10000)}';
+            final sourceEpisode = DEpisode(
+              episodeNumber: entry.number,
+              url: entry.url,
+              sortMap: entry.effectiveSortMap,
+            );
+            log(
+              '[AnifyEpisodesList] Tapped EP ${entry.number} url=${entry.url} sortMap=${sourceEpisode.sortMap}',
+            );
+
+            final stream = () async* {
+              try {
+                final list = await sourceController.activeSource.value!.methods
+                    .getVideoList(
+                      sourceEpisode,
+                      parameters: SourceParams(cancelToken: scrapeToken),
+                    );
+                for (final video in list) {
+                  yield video;
+                }
+              } catch (e) {
+                log('[AnifyEpisodesList] getVideoList error: $e');
+              }
+            }();
 
             showModalBottomSheet(
               context: context,
@@ -146,7 +176,9 @@ class AnifyEpisodesWidget extends StatelessWidget {
                   hasError: hasError,
                 );
               },
-            );
+            ).whenComplete(() {
+              sourceController.activeSource.value?.cancelRequest(scrapeToken);
+            });
           },
           child: Container(
             margin: const EdgeInsets.only(bottom: 14),

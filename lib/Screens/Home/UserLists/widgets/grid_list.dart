@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:azyx/Models/carousale_data.dart';
@@ -17,18 +16,30 @@ class UserGridList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int itemCount = (MediaQuery.of(context).size.width ~/ 200).toInt();
+    int itemCount = (MediaQuery.of(context).size.width ~/ 120).toInt();
     int minCount = 3;
+    int crossAxisCount = max(itemCount, minCount);
+
+    double horizontalPadding = 16;
     double gridWidth =
-        MediaQuery.of(context).size.width / max(itemCount, minCount);
-    double maxHeight = MediaQuery.of(context).size.height / 2.5;
-    double gridHeight = min(gridWidth * 1.9, maxHeight);
+        (MediaQuery.of(context).size.width -
+            (horizontalPadding * 2) -
+            ((crossAxisCount - 1) * 10)) /
+        crossAxisCount;
+    double gridHeight = (gridWidth * 1.5) + 65;
+
     return GridView.builder(
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: 12,
+      ),
       physics: const BouncingScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: max(itemCount, minCount),
-          childAspectRatio: gridWidth / gridHeight,
-          crossAxisSpacing: 5),
+        crossAxisCount: crossAxisCount,
+        childAspectRatio: gridWidth / gridHeight,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 16,
+      ),
       itemCount: data.length,
       itemBuilder: (context, index) {
         final tagg = data[index].id;
@@ -41,41 +52,44 @@ class UserGridList extends StatelessWidget {
                     ? Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => MangaDetailsScreen(
-                                  smallMedia: CarousaleData(
-                                      id: tagg!,
-                                      image: item.image!,
-                                      title: item.title!),
-                                  tagg: item.title! + item.id.toString(),
-                                  isOffline: false,
-                                )))
+                          builder: (context) => MangaDetailsScreen(
+                            smallMedia: CarousaleData(
+                              id: tagg!,
+                              image: item.image!,
+                              title: item.title!,
+                            ),
+                            tagg: item.title! + item.id.toString(),
+                            isOffline: false,
+                          ),
+                        ),
+                      )
                     : Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => AnimeDetailsScreen(
-                                  smallMedia: CarousaleData(
-                                      id: tagg!,
-                                      image: item.image!,
-                                      title: item.title!),
-                                  tagg: item.title! + item.id.toString(),
-                                  isOffline: false,
-                                )));
+                          builder: (context) => AnimeDetailsScreen(
+                            smallMedia: CarousaleData(
+                              id: tagg!,
+                              image: item.image!,
+                              title: item.title!,
+                            ),
+                            tagg: item.title! + item.id.toString(),
+                            isOffline: false,
+                          ),
+                        ),
+                      );
               },
-              child: Container(
-                height: Platform.isAndroid || Platform.isIOS ? 150 : 200,
-                width: Platform.isAndroid || Platform.isIOS ? 103 : 140,
-                margin: const EdgeInsets.only(right: 10),
+              child: AspectRatio(
+                aspectRatio: 2 / 3,
                 child: Hero(
                   tag: tagg.toString(),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(12),
                     child: CachedNetworkImage(
-                      imageUrl: data[index].image!,
+                      imageUrl: item.image!,
                       fit: BoxFit.cover,
                       progressIndicatorBuilder:
-                          (context, url, downloadProgress) => Center(
-                        child: LoadingIndicatorM3E(),
-                      ),
+                          (context, url, downloadProgress) =>
+                              Center(child: LoadingIndicatorM3E()),
                       errorWidget: (context, url, error) =>
                           const Icon(Icons.error),
                     ),
@@ -83,17 +97,24 @@ class UserGridList extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 8),
             AzyXText(
-              text: data[index].title!,
+              text: item.title!,
               fontVariant: FontVariant.bold,
+              fontSize: 12,
               maxLines: 2,
               textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 4),
             AzyXText(
-              text: '${data[index].progress} | ${data[index].episodes ?? '?'}',
-            )
+              text: '${item.progress} | ${item.episodes ?? '?'}',
+              fontSize: 11,
+              fontVariant: FontVariant.regular,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurfaceVariant.withOpacity(0.8),
+            ),
           ],
         );
       },

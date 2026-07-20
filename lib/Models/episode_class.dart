@@ -28,8 +28,8 @@ class Episode {
       number: number ?? data['number'],
       desc: data['desc'] ?? '',
       date: data['dateUpload'] != null
-          ? formatDate(int.tryParse(data['dateUpload'] ?? 12) ?? 1)
-          : data['dateUpload'] ?? "??",
+          ? formatDate(num.tryParse(data['dateUpload'].toString())?.toInt() ?? 1)
+          : data['dateUpload']?.toString() ?? "??",
     );
   }
   Map<dynamic, dynamic> toJson() {
@@ -190,20 +190,32 @@ List<Chapter> mChapterToChapter(List<DEpisode> chapters, String title) {
   }).toList();
 }
 
-String calcTime(String timestamp, {String format = "dd-MM-yyyy"}) {
-  final dateTime = DateTime.fromMillisecondsSinceEpoch(int.parse(timestamp));
-  final now = DateTime.now();
-  final difference = now.difference(dateTime);
-
-  if (difference.inDays <= 14) {
-    if (difference.inDays == 0) {
-      if (difference.inHours < 1) {
-        return "${difference.inMinutes} minutes ago";
-      }
-      return "${difference.inHours} hours ago";
-    }
-    return "${difference.inDays} days ago";
+String calcTime(dynamic timestamp, {String format = "dd-MM-yyyy"}) {
+  if (timestamp == null) return '';
+  final String tsStr = timestamp.toString().trim();
+  if (tsStr.isEmpty) return '';
+  final parsedNum = num.tryParse(tsStr);
+  if (parsedNum == null) {
+    return tsStr;
   }
+  final parsed = parsedNum.toInt();
+  try {
+    final dateTime = DateTime.fromMillisecondsSinceEpoch(parsed);
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
 
-  return DateFormat(format).format(dateTime);
+    if (difference.inDays <= 14) {
+      if (difference.inDays == 0) {
+        if (difference.inHours < 1) {
+          return "${difference.inMinutes} minutes ago";
+        }
+        return "${difference.inHours} hours ago";
+      }
+      return "${difference.inDays} days ago";
+    }
+
+    return DateFormat(format).format(dateTime);
+  } catch (_) {
+    return tsStr;
+  }
 }

@@ -1,4 +1,7 @@
+import 'dart:developer';
 import 'package:isar_community/isar.dart';
+import 'package:azyx/utils/time_formater.dart';
+import 'package:intl/intl.dart';
 
 part 'episode_class.g.dart';
 
@@ -13,6 +16,8 @@ class Episode {
   bool? filler;
   String? season;
   String? type;
+  List<String>? sortKeys;
+  List<String>? sortVals;
 
   Episode({
     this.date,
@@ -24,19 +29,30 @@ class Episode {
     this.filler,
     this.season,
     this.type,
+    this.sortKeys,
+    this.sortVals,
   });
 
   factory Episode.fromJson(Map<dynamic, dynamic> data) {
+    final rawSortKeys = data['sortKeys'] as List<dynamic>?;
+    final rawSortVals = data['sortVals'] as List<dynamic>?;
+
     return Episode(
       title: data['name'] ?? "",
       url: data['url'] ?? "",
       number: data['number'] ?? '',
       desc: data['desc'] ?? '',
-      date: data['dateUpload'] ?? "??",
+      date: data['dateUpload'] != null
+          ? formatDate(
+              num.tryParse(data['dateUpload'].toString())?.toInt() ?? 1,
+            )
+          : data['dateUpload']?.toString() ?? "??",
       thumbnail: data['thumbnail'],
       filler: data['filler'],
       season: data['season']?.toString(),
       type: data['type']?.toString(),
+      sortKeys: rawSortKeys?.map((e) => e.toString()).toList(),
+      sortVals: rawSortVals?.map((e) => e.toString()).toList(),
     );
   }
 
@@ -51,7 +67,34 @@ class Episode {
       'filler': filler,
       'season': season,
       'type': type,
+      'sortKeys': sortKeys,
+      'sortVals': sortVals,
     };
+  }
+}
+
+extension EpisodeMap on Episode {
+  Map<String, String> get sortMap {
+    if (sortKeys == null || sortVals == null) return {};
+    if (sortKeys!.isEmpty || sortVals!.isEmpty) return {};
+
+    final pairCount = sortKeys!.length < sortVals!.length
+        ? sortKeys!.length
+        : sortVals!.length;
+    if (pairCount == 0) return {};
+
+    return Map<String, String>.fromIterables(
+      sortKeys!.take(pairCount),
+      sortVals!.take(pairCount),
+    );
+  }
+
+  /// Returns sortMap with empty-value entries removed, or null if nothing meaningful remains.
+  /// Use this when building a DEpisode to avoid triggering broken mapper API paths.
+  Map<String, String>? get effectiveSortMap {
+    final map = Map<String, String>.from(sortMap)
+      ..removeWhere((_, v) => v.isEmpty);
+    return map.isEmpty ? null : map;
   }
 }
 
@@ -239,28 +282,66 @@ Episode mChapterToEpisode(dynamic item, dynamic episodeResult) {
 
   String? season;
   String? type;
+  List<String>? sortKeys;
+  List<String>? sortVals;
   try {
-    season = item.sortMap?['season']?.toString();
-    type = item.sortMap?['type']?.toString();
-  } catch (_) {}
+    final rawSortMap = item.sortMap as Map<String, String>?;
+    log('[EpisodeMap] DEpisode.sortMap = $rawSortMap (url=${item.url})');
+    if (rawSortMap != null && rawSortMap.isNotEmpty) {
+      sortKeys = rawSortMap.keys.toList();
+      sortVals = rawSortMap.values.toList();
+    }
+    season = rawSortMap?['season']?.toString();
+    type = rawSortMap?['type']?.toString();
+    log('[EpisodeMap] Stored sortKeys=$sortKeys sortVals=$sortVals');
+  } catch (e) {
+    log('[EpisodeMap] ERROR reading sortMap: $e');
+  }
 
   return Episode(
     title: itemName,
     url: item.url,
-    number:
-        (itemNumber != null && itemNumber.isNotEmpty)
-            ? itemNumber
-            : ChapterRecognition.parseChapterNumber(
-                episodeResultName ?? '',
-                itemName ?? '',
-              ).toString(),
+    number: (itemNumber != null && itemNumber.isNotEmpty)
+        ? itemNumber
+        : ChapterRecognition.parseChapterNumber(
+            episodeResultName ?? '',
+            itemName ?? '',
+          ).toString(),
     desc: item.scanlator ?? '',
     thumbnail: item.thumbnail,
     season: season,
     type: type,
+    sortKeys: sortKeys,
+    sortVals: sortVals,
   );
 }
 
-String calcTime(String timestamp, {String format = "dd-MM-yyyy"}) {
-  return timestamp;
+String calcTime(dynamic timestamp, {String format = "dd-MM-yyyy"}) {
+  if (timestamp == null) return '';
+  final String tsStr = timestamp.toString().trim();
+  if (tsStr.isEmpty) return '';
+  final parsedNum = num.tryParse(tsStr);
+  if (parsedNum == null) {
+    return tsStr;
+  }
+  final parsed = parsedNum.toInt();
+  try {
+    final dateTime = DateTime.fromMillisecondsSinceEpoch(parsed);
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays <= 14) {
+      if (difference.inDays == 0) {
+        if (difference.inHours < 1) {
+          return "${difference.inMinutes} minutes ago";
+        }
+        return "${difference.inHours} hours ago";
+      }
+      return "${difference.inDays} days ago";
+    }
+
+    return DateFormat(format).format(dateTime);
+  } catch (_) {
+    return tsStr;
+  }
 }
