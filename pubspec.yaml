@@ -50,7 +50,9 @@ dependencies:
   carousel_slider: ^5.0.0
   path_provider: ^2.1.5
   expandable_page_view: ^1.0.17
-  manga_page_view: ^1.0.5
+  photo_view: ^0.15.0
+  preload_page_view: ^0.2.0
+  scrollable_positioned_list: ^0.3.8
   lottie: ^3.3.1
   app_links: ^6.4.1
   readmore: ^3.0.0
