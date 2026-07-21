@@ -23,15 +23,18 @@ dependencies:
   dio: ^5.7.0
   media_kit:
     git:
-      url: https://github.com/Schnitzel5/media-kit.git
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11d02cb804b8faf944137834a1b0ac80880a4079
       path: media_kit
   media_kit_video:
     git:
-      url: https://github.com/Schnitzel5/media-kit.git
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11d02cb804b8faf944137834a1b0ac80880a4079
       path: media_kit_video
   media_kit_libs_video:
     git:
-      url: https://github.com/Schnitzel5/media-kit.git
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11d02cb804b8faf944137834a1b0ac80880a4079
       path: libs/universal/media_kit_libs_video
   wakelock_plus: ^1.2.8
   flutter_web_auth_2: ^4.0.2
@@ -72,6 +75,53 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.0
   isar_community_generator: ^3.3.0-dev.3
   build_runner: ^2.4.11
+
+dependency_overrides:
+  media_kit:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11d02cb804b8faf944137834a1b0ac80880a4079
+      path: ./media_kit
+  media_kit_video:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11d02cb804b8faf944137834a1b0ac80880a4079
+      path: ./media_kit_video
+  media_kit_libs_video:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11d02cb804b8faf944137834a1b0ac80880a4079
+      path: ./libs/universal/media_kit_libs_video
+  media_kit_libs_linux:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11d02cb804b8faf944137834a1b0ac80880a4079
+      path: ./libs/linux/media_kit_libs_linux
+  media_kit_libs_ios_video:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11d02cb804b8faf944137834a1b0ac80880a4079
+      path: ./libs/ios/media_kit_libs_ios_video
+  media_kit_libs_android_video:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11d02cb804b8faf944137834a1b0ac80880a4079
+      path: ./libs/android/media_kit_libs_android_video
+  media_kit_libs_windows_video:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11d02cb804b8faf944137834a1b0ac80880a4079
+      path: ./libs/windows/media_kit_libs_windows_video
+  media_kit_libs_macos_video:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11d02cb804b8faf944137834a1b0ac80880a4079
+      path: ./libs/macos/media_kit_libs_macos_video
+  media_kit_libs_ohos:
+    git:
+      url: https://github.com/Predidit/media-kit.git
+      ref: 11d02cb804b8faf944137834a1b0ac80880a4079
+      path: ./libs/ohos/media_kit_libs_ohos
 
 flutter_launcher_icons:
   android: "ic_launcher"

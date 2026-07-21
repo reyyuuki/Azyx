@@ -823,10 +823,10 @@ packages:
     dependency: transitive
     description:
       name: js
-      sha256: f2c445dce49627136094980615a031419f7f3eb393237e4ecd97ac15dea343f3
+      sha256: "53385261521cc4a0c4658fd0ad07a7d14591cf8fc33abbceae306ddb974888dc"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.7"
+    version: "0.7.2"
   js_packer:
     dependency: transitive
     description:
@@ -943,74 +943,83 @@ packages:
     dependency: "direct main"
     description:
       path: media_kit
-      ref: HEAD
-      resolved-ref: ef6279dddf85934faed673a41821c6dc5be59e5e
-      url: "https://github.com/Schnitzel5/media-kit.git"
+      ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      resolved-ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      url: "https://github.com/Predidit/media-kit.git"
     source: git
-    version: "1.2.2"
+    version: "1.1.11"
   media_kit_libs_android_video:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "libs/android/media_kit_libs_android_video"
-      ref: ef6279dddf85934faed673a41821c6dc5be59e5e
-      resolved-ref: ef6279dddf85934faed673a41821c6dc5be59e5e
-      url: "https://github.com/Schnitzel5/media-kit.git"
+      ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      resolved-ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      url: "https://github.com/Predidit/media-kit.git"
     source: git
-    version: "1.3.8"
+    version: "1.3.6"
   media_kit_libs_ios_video:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "libs/ios/media_kit_libs_ios_video"
-      ref: ef6279dddf85934faed673a41821c6dc5be59e5e
-      resolved-ref: ef6279dddf85934faed673a41821c6dc5be59e5e
-      url: "https://github.com/Schnitzel5/media-kit.git"
+      ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      resolved-ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.1.4"
   media_kit_libs_linux:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "libs/linux/media_kit_libs_linux"
-      ref: ef6279dddf85934faed673a41821c6dc5be59e5e
-      resolved-ref: ef6279dddf85934faed673a41821c6dc5be59e5e
-      url: "https://github.com/Schnitzel5/media-kit.git"
+      ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      resolved-ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      url: "https://github.com/Predidit/media-kit.git"
     source: git
-    version: "1.2.1"
+    version: "1.1.3"
   media_kit_libs_macos_video:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "libs/macos/media_kit_libs_macos_video"
-      ref: ef6279dddf85934faed673a41821c6dc5be59e5e
-      resolved-ref: ef6279dddf85934faed673a41821c6dc5be59e5e
-      url: "https://github.com/Schnitzel5/media-kit.git"
+      ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      resolved-ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      url: "https://github.com/Predidit/media-kit.git"
     source: git
     version: "1.1.4"
+  media_kit_libs_ohos:
+    dependency: "direct overridden"
+    description:
+      path: "libs/ohos/media_kit_libs_ohos"
+      ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      resolved-ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      url: "https://github.com/Predidit/media-kit.git"
+    source: git
+    version: "1.0.0"
   media_kit_libs_video:
     dependency: "direct main"
     description:
       path: "libs/universal/media_kit_libs_video"
-      ref: HEAD
-      resolved-ref: ef6279dddf85934faed673a41821c6dc5be59e5e
-      url: "https://github.com/Schnitzel5/media-kit.git"
+      ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      resolved-ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      url: "https://github.com/Predidit/media-kit.git"
     source: git
-    version: "1.0.7"
+    version: "1.0.5"
   media_kit_libs_windows_video:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "libs/windows/media_kit_libs_windows_video"
-      ref: ef6279dddf85934faed673a41821c6dc5be59e5e
-      resolved-ref: ef6279dddf85934faed673a41821c6dc5be59e5e
-      url: "https://github.com/Schnitzel5/media-kit.git"
+      ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      resolved-ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      url: "https://github.com/Predidit/media-kit.git"
     source: git
-    version: "1.0.11"
+    version: "1.0.10"
   media_kit_video:
     dependency: "direct main"
     description:
       path: media_kit_video
-      ref: HEAD
-      resolved-ref: ef6279dddf85934faed673a41821c6dc5be59e5e
-      url: "https://github.com/Schnitzel5/media-kit.git"
+      ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      resolved-ref: "11d02cb804b8faf944137834a1b0ac80880a4079"
+      url: "https://github.com/Predidit/media-kit.git"
     source: git
-    version: "2.0.0"
+    version: "1.2.5"
   meta:
     dependency: transitive
     description:
@@ -1684,18 +1693,26 @@ packages:
     dependency: "direct main"
     description:
       name: wakelock_plus
-      sha256: "36c88af0b930121941345306d259ec4cc4ecca3b151c02e3a9e71aede83c615e"
+      sha256: "61713aa82b7f85c21c9f4cd0a148abd75f38a74ec645fcb1e446f882c82fd09b"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.10"
+    version: "1.3.3"
+  wakelock_plus_ohos:
+    dependency: transitive
+    description:
+      name: wakelock_plus_ohos
+      sha256: b22af297411555b5ec0fe43ec2960cd5f019dd23b83853214ebe6dcc97b337bd
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.3"
   wakelock_plus_platform_interface:
     dependency: transitive
     description:
       name: wakelock_plus_platform_interface
-      sha256: "70e780bc99796e1db82fe764b1e7dcb89a86f1e5b3afb1db354de50f2e41eb7a"
+      sha256: b13f99e992e7ae6a152e16c5559d3c07ff445b13330192662494e614ca3e7d7b
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.2"
+    version: "1.5.1"
   watcher:
     dependency: transitive
     description:
