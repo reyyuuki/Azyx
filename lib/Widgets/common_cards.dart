@@ -21,6 +21,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
+
 class CalenderCard extends StatelessWidget {
   const CalenderCard({super.key, required this.userData});
   final Rx<User> userData;
@@ -149,6 +150,7 @@ class CalenderCard extends StatelessWidget {
     );
   }
 }
+
 class UserListsCard extends StatelessWidget {
   const UserListsCard({super.key, required this.userData});
   final Rx<User> userData;
@@ -259,6 +261,7 @@ class UserListsCard extends StatelessWidget {
     );
   }
 }
+
 Widget buildModernButton({
   required BuildContext context,
   required String title,
@@ -311,6 +314,7 @@ Widget buildModernButton({
     ),
   );
 }
+
 class AiSuggestionsCard extends StatelessWidget {
   const AiSuggestionsCard({super.key, required this.userData});
   final Rx<User> userData;
@@ -377,7 +381,7 @@ class AiSuggestionsCard extends StatelessWidget {
                               ),
                               const SizedBox(height: 12),
                               const AzyXText(
-                                text: "AI Media Hub",
+                                text: "AI Pics",
                                 fontSize: 22,
                                 color: Colors.white,
                                 fontVariant: FontVariant.bold,
@@ -433,6 +437,7 @@ class AiSuggestionsCard extends StatelessWidget {
     );
   }
 }
+
 class _SuggestionButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
@@ -481,6 +486,7 @@ class _SuggestionButton extends StatelessWidget {
     );
   }
 }
+
 class RecentlyWatchedCard extends StatelessWidget {
   const RecentlyWatchedCard({super.key});
   @override
@@ -562,6 +568,7 @@ class RecentlyWatchedCard extends StatelessWidget {
     );
   }
 }
+
 class RecentlyReadCard extends StatelessWidget {
   const RecentlyReadCard({super.key});
   @override
@@ -637,6 +644,7 @@ class RecentlyReadCard extends StatelessWidget {
     );
   }
 }
+
 class _RecentItemCard extends StatelessWidget {
   final String imageUrl;
   final String title;

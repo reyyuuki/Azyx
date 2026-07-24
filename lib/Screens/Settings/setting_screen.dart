@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get_instance/get_instance.dart';
 import 'package:get/state_manager.dart';
 import '../../Widgets/common/custom_app_bar.dart';
+
 class SettingScreen extends StatelessWidget {
   const SettingScreen({super.key});
   @override
@@ -110,28 +111,29 @@ class SettingScreen extends StatelessWidget {
                 const Icon(Broken.trash),
               ),
             ),
-            GestureDetector(
-              onTap: () {
-              },
-              child: settingTile(
-                context,
-                "About",
-                "Discover More: About Us",
-                const Icon(Broken.information),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                await Get.find<CommunityService>().fetchAll();
-              },
-              child: const Text("Testing"),
-            ),
+            // GestureDetector(
+            //   onTap: () {
+            //   },
+            //   child: settingTile(
+            //     context,
+            //     "About",
+            //     "Discover More: About Us",
+            //     const Icon(Broken.information),
+            //   ),
+            // ),
+            // const SizedBox(height: 20),
+            // ElevatedButton(
+            //   onPressed: () async {
+            //     await Get.find<CommunityService>().fetchAll();
+            //   },
+            //   child: const Text("Testing"),
+            // ),
           ],
         ),
       ),
     );
   }
+
   void openDialogBox(context) {
     showDialog(
       context: context,
@@ -191,6 +193,7 @@ class SettingScreen extends StatelessWidget {
       },
     );
   }
+
   ListTile settingTile(
     BuildContext context,
     String title,
