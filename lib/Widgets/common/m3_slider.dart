@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 @immutable
 class M3SliderTheme {
   final Color? activeColor;
@@ -14,7 +13,6 @@ class M3SliderTheme {
   final double thumbWidth;
   final double thumbHeight;
   final double thumbCornerRadius;
-
   const M3SliderTheme({
     this.activeColor,
     this.inactiveColor,
@@ -29,7 +27,6 @@ class M3SliderTheme {
     this.thumbHeight = 40,
     this.thumbCornerRadius = 2,
   });
-
   M3SliderTheme _resolve(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final resolvedActive = activeColor ?? scheme.primary;
@@ -49,7 +46,6 @@ class M3SliderTheme {
       thumbCornerRadius: thumbCornerRadius,
     );
   }
-
   M3SliderTheme copyWith({
     Color? activeColor,
     Color? inactiveColor,
@@ -80,7 +76,6 @@ class M3SliderTheme {
     );
   }
 }
-
 class M3Slider extends StatelessWidget {
   final double value;
   final double? secondaryTrackValue;
@@ -95,7 +90,6 @@ class M3Slider extends StatelessWidget {
   final bool? isLocked;
   final Color? inactiveColor;
   final M3SliderTheme theme;
-
   const M3Slider({
     super.key,
     required this.value,
@@ -112,14 +106,12 @@ class M3Slider extends StatelessWidget {
     this.inactiveColor,
     this.theme = const M3SliderTheme(),
   });
-
   @override
   Widget build(BuildContext context) {
     var resolvedTheme = theme._resolve(context);
     if (inactiveColor != null) {
       resolvedTheme = resolvedTheme.copyWith(inactiveColor: inactiveColor);
     }
-
     return SliderTheme(
       data: SliderThemeData(
         trackHeight: resolvedTheme.trackHeight,
@@ -158,7 +150,6 @@ class M3Slider extends StatelessWidget {
     );
   }
 }
-
 class _AnymeXSliderM3TrackShape extends SliderTrackShape {
   const _AnymeXSliderM3TrackShape({
     required this.outerRadius,
@@ -166,12 +157,10 @@ class _AnymeXSliderM3TrackShape extends SliderTrackShape {
     this.thumbGap = 10,
     this.edgeInset = 6,
   });
-
   final double outerRadius;
   final double innerRadius;
   final double thumbGap;
   final double edgeInset;
-
   Rect _baseTrackRect({
     required RenderBox parentBox,
     required Offset offset,
@@ -188,7 +177,6 @@ class _AnymeXSliderM3TrackShape extends SliderTrackShape {
     final trackWidth = parentBox.size.width - thumbWidth;
     return Rect.fromLTWH(trackLeft, trackTop, trackWidth, trackHeight);
   }
-
   @override
   Rect getPreferredRect({
     required RenderBox parentBox,
@@ -204,7 +192,6 @@ class _AnymeXSliderM3TrackShape extends SliderTrackShape {
       isEnabled: isEnabled,
       isDiscrete: isDiscrete,
     );
-
     final safeInset = edgeInset.clamp(0.0, baseTrackRect.width / 2).toDouble();
     return Rect.fromLTRB(
       baseTrackRect.left + safeInset,
@@ -213,7 +200,6 @@ class _AnymeXSliderM3TrackShape extends SliderTrackShape {
       baseTrackRect.bottom,
     );
   }
-
   @override
   void paint(
     PaintingContext context,
@@ -242,7 +228,6 @@ class _AnymeXSliderM3TrackShape extends SliderTrackShape {
       isEnabled: isEnabled,
       isDiscrete: isDiscrete,
     );
-
     final activeColor =
         ColorTween(
           begin: sliderTheme.disabledActiveTrackColor,
@@ -255,7 +240,6 @@ class _AnymeXSliderM3TrackShape extends SliderTrackShape {
           end: sliderTheme.inactiveTrackColor,
         ).evaluate(enableAnimation) ??
         Colors.transparent;
-
     if (secondaryOffset != null &&
         sliderTheme.secondaryActiveTrackColor != null) {
       final secondaryX = secondaryOffset.dx.clamp(
@@ -279,7 +263,6 @@ class _AnymeXSliderM3TrackShape extends SliderTrackShape {
         );
       }
     }
-
     final thumbX = thumbCenter.dx.clamp(
       effectiveTrackRect.left,
       effectiveTrackRect.right,
@@ -293,7 +276,6 @@ class _AnymeXSliderM3TrackShape extends SliderTrackShape {
     if (halfGap > rightRoom) {
       halfGap = rightRoom;
     }
-
     final leftEnd = (thumbX - halfGap).clamp(
       baseTrackRect.left,
       baseTrackRect.right,
@@ -302,7 +284,6 @@ class _AnymeXSliderM3TrackShape extends SliderTrackShape {
       baseTrackRect.left,
       baseTrackRect.right,
     );
-
     final leftRect = Rect.fromLTRB(
       baseTrackRect.left,
       baseTrackRect.top,
@@ -315,7 +296,6 @@ class _AnymeXSliderM3TrackShape extends SliderTrackShape {
       baseTrackRect.right,
       baseTrackRect.bottom,
     );
-
     final leftColor = textDirection == TextDirection.ltr
         ? activeColor
         : inactiveColor;
@@ -324,7 +304,6 @@ class _AnymeXSliderM3TrackShape extends SliderTrackShape {
         : activeColor;
     final hasLeftSegment = leftRect.width > 0;
     final hasRightSegment = rightRect.width > 0;
-
     if (hasLeftSegment) {
       _paintSegment(
         canvas: canvas,
@@ -335,7 +314,6 @@ class _AnymeXSliderM3TrackShape extends SliderTrackShape {
         anchorToStart: true,
       );
     }
-
     if (hasRightSegment) {
       _paintSegment(
         canvas: canvas,
@@ -347,7 +325,6 @@ class _AnymeXSliderM3TrackShape extends SliderTrackShape {
       );
     }
   }
-
   void _paintSegment({
     required Canvas canvas,
     required Rect segmentRect,
@@ -359,7 +336,6 @@ class _AnymeXSliderM3TrackShape extends SliderTrackShape {
     if (segmentRect.width <= 0) {
       return;
     }
-
     final minTemplateWidth = startRadius + endRadius;
     final templateWidth = segmentRect.width < minTemplateWidth
         ? minTemplateWidth
@@ -377,7 +353,6 @@ class _AnymeXSliderM3TrackShape extends SliderTrackShape {
             templateWidth,
             segmentRect.height,
           );
-
     canvas.save();
     canvas.clipRect(segmentRect);
     canvas.drawRRect(
@@ -393,23 +368,19 @@ class _AnymeXSliderM3TrackShape extends SliderTrackShape {
     canvas.restore();
   }
 }
-
 class _AnymeXSliderM3ThumbShape extends SliderComponentShape {
   const _AnymeXSliderM3ThumbShape({
     required this.width,
     required this.height,
     required this.cornerRadius,
   });
-
   final double width;
   final double height;
   final double cornerRadius;
-
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
     return Size(width, height);
   }
-
   @override
   void paint(
     PaintingContext context,
@@ -432,13 +403,11 @@ class _AnymeXSliderM3ThumbShape extends SliderComponentShape {
         ).evaluate(enableAnimation) ??
         Colors.transparent;
     final canvas = context.canvas;
-
     final thumbRect = Rect.fromCenter(
       center: center,
       width: width,
       height: height,
     );
-
     canvas.drawRRect(
       RRect.fromRectAndRadius(thumbRect, Radius.circular(cornerRadius)),
       Paint()..color = thumbColor,
