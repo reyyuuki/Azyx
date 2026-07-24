@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously, must_be_immutable
-
 import 'dart:developer';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
@@ -21,7 +19,6 @@ import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 class ReadSection extends StatefulWidget {
   final String image;
   final String id;
@@ -35,7 +32,6 @@ class ReadSection extends StatefulWidget {
   Function(List<DEpisode>) onChanged;
   Function(String) onTitleChanged;
   Function() onSourceChanged;
-
   ReadSection({
     super.key,
     required this.id,
@@ -51,11 +47,9 @@ class ReadSection extends StatefulWidget {
     required this.syncId,
     required this.animeTitle,
   });
-
   @override
   State<ReadSection> createState() => _WatchSectionState();
 }
-
 class _WatchSectionState extends State<ReadSection> {
   final RxList<WrongTitleSearch> wrongTitleSearchData = RxList();
   final RxList<Chapter> filteredList = RxList();
@@ -63,13 +57,11 @@ class _WatchSectionState extends State<ReadSection> {
   final Rx<int> searchNumber = 1.obs;
   final Rx<bool> isSearchLoading = false.obs;
   final Rx<bool> searchError = false.obs;
-
   @override
   void initState() {
     super.initState();
     filteredList.value = widget.chaptersList;
   }
-
   Future<void> wrongTitleSearch(String query, BuildContext context) async {
     isSearchLoading.value = true;
     searchError.value = false;
@@ -98,7 +90,6 @@ class _WatchSectionState extends State<ReadSection> {
       isSearchLoading.value = false;
     }
   }
-
   void handleEpisodes(String value) {
     if (value.isNotEmpty) {
       filteredList.value = widget.chaptersList
@@ -108,7 +99,6 @@ class _WatchSectionState extends State<ReadSection> {
       filteredList.value = widget.chaptersList;
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -223,6 +213,8 @@ class _WatchSectionState extends State<ReadSection> {
                   children: filteredList.map((ch) {
                     return GestureDetector(
                       onTap: () {
+                        log('[AzyX ReadSection] Tapped: title="${ch.title}" link="${ch.link}" number=${ch.number}');
+                        log('[AzyX ReadSection] chaptersList.length=${widget.chaptersList.length} filteredList.length=${filteredList.length}');
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -249,7 +241,6 @@ class _WatchSectionState extends State<ReadSection> {
       ],
     );
   }
-
   void wrongTitleSheet(context) {
     showModalBottomSheet(
       context: context,
@@ -315,7 +306,6 @@ class _WatchSectionState extends State<ReadSection> {
                       ),
                     );
                   }
-                  
                   if (searchError.value) {
                     return Expanded(
                       child: Center(
@@ -340,7 +330,6 @@ class _WatchSectionState extends State<ReadSection> {
                       ),
                     );
                   }
-                  
                   if (wrongTitleSearchData.isEmpty) {
                     return Expanded(
                       child: Center(
@@ -365,7 +354,6 @@ class _WatchSectionState extends State<ReadSection> {
                       ),
                     );
                   }
-
                   return Expanded(
                     child: GridView(
                       gridDelegate:
