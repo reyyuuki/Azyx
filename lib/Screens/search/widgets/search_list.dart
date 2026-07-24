@@ -8,16 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 class SearchList extends StatelessWidget {
   final List<Media> data;
   final bool isManga;
   const SearchList({super.key, required this.data, required this.isManga});
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
       color: colorScheme.surface,
       child: ListView.builder(
@@ -31,10 +28,8 @@ class SearchList extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildAnimeCard(BuildContext context, Media item, int index) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Material(
@@ -88,7 +83,6 @@ class SearchList extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildBackgroundImage(Media item, ColorScheme colorScheme) {
     return Positioned.fill(
       child: item.bannerImage != null
@@ -127,7 +121,6 @@ class SearchList extends StatelessWidget {
             ),
     );
   }
-
   Widget _buildGradientOverlay(ColorScheme colorScheme) {
     return Positioned.fill(
       child: Container(
@@ -145,7 +138,6 @@ class SearchList extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildContent(
       BuildContext context, Media item, ColorScheme colorScheme) {
     return Positioned.fill(
@@ -163,7 +155,6 @@ class SearchList extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildPosterImage(Media item) {
     return Hero(
       tag: 'anime_${item.id}',
@@ -209,7 +200,6 @@ class SearchList extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildAnimeInfo(Media item, ColorScheme colorScheme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,7 +248,6 @@ class SearchList extends StatelessWidget {
       ],
     );
   }
-
   Widget _buildInfoChip({
     required IconData icon,
     required String text,
@@ -268,11 +257,9 @@ class SearchList extends StatelessWidget {
     Color chipColor = isStatus
         ? _getStatusColor(text, colorScheme)
         : colorScheme.primaryContainer.withOpacity(0.8);
-
     Color textColor = isStatus
         ? _getStatusTextColor(text, colorScheme)
         : colorScheme.onPrimaryContainer;
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -300,7 +287,6 @@ class SearchList extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildGenreTag(String genre, ColorScheme colorScheme) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -321,10 +307,8 @@ class SearchList extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildRatingBadge(Media item, ColorScheme colorScheme) {
     if (item.rating == null) return const SizedBox.shrink();
-
     return Positioned(
       top: 12,
       right: 12,
@@ -356,11 +340,9 @@ class SearchList extends StatelessWidget {
       ),
     );
   }
-
   String _truncateTitle(String title) {
     return title.length > 45 ? '${title.substring(0, 42)}...' : title;
   }
-
   String _formatStatus(String status) {
     switch (status.toLowerCase()) {
       case 'completed':
@@ -373,7 +355,6 @@ class SearchList extends StatelessWidget {
         return status;
     }
   }
-
   Color _getStatusColor(String status, ColorScheme colorScheme) {
     switch (status.toLowerCase()) {
       case 'complete':
@@ -386,7 +367,6 @@ class SearchList extends StatelessWidget {
         return colorScheme.primaryContainer.withOpacity(0.8);
     }
   }
-
   Color _getStatusTextColor(String status, ColorScheme colorScheme) {
     switch (status.toLowerCase()) {
       case 'complete':

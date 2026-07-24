@@ -1,5 +1,4 @@
 import 'package:azyx/utils/time_formater.dart';
-
 class AnifyEpisodes {
   String? title;
   String? image;
@@ -10,7 +9,6 @@ class AnifyEpisodes {
   int? number;
   int? id;
   String? url;
-
   AnifyEpisodes({
     this.dateUpload,
     this.description,
@@ -21,7 +19,6 @@ class AnifyEpisodes {
     this.title,
     this.url
   });
-
   factory AnifyEpisodes.fromJson(Map<String,dynamic> json,Map<String,dynamic> episode,int number){
     return AnifyEpisodes(
       url: episode['url'] ?? "",

@@ -1,16 +1,13 @@
 import 'dart:io';
-
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-
 class CharacterCard extends StatelessWidget {
   final Character item;
   const CharacterCard({super.key, required this.item});
-
   @override
   Widget build(BuildContext context) {
     return Column(

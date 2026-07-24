@@ -5,19 +5,15 @@ import 'package:azyx/Widgets/theme_widgets/theme_template.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 class ThemeModes extends StatefulWidget {
   const ThemeModes({super.key});
-
   @override
   State<ThemeModes> createState() => _ThemeModesState();
 }
-
 class _ThemeModesState extends State<ThemeModes> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ThemeProvider>(context);
-    
     return AzyXContainer(
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(boxShadow: [

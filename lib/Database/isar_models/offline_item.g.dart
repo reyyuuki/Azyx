@@ -1,18 +1,7 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
 part of 'offline_item.dart';
-
-// **************************************************************************
-// IsarCollectionGenerator
-// **************************************************************************
-
-// coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
-
 extension GetOfflineItemCollection on Isar {
   IsarCollection<OfflineItem> get offlineItems => this.collection();
 }
-
 const OfflineItemSchema = CollectionSchema(
   name: r'OfflineItem',
   id: 2171157123690281263,
@@ -26,21 +15,18 @@ const OfflineItemSchema = CollectionSchema(
       id: 1,
       name: r'chaptersList',
       type: IsarType.objectList,
-
       target: r'Chapter',
     ),
     r'episodesList': PropertySchema(
       id: 2,
       name: r'episodesList',
       type: IsarType.objectList,
-
       target: r'Episode',
     ),
     r'mediaData': PropertySchema(
       id: 3,
       name: r'mediaData',
       type: IsarType.object,
-
       target: r'AnilistMediaData',
     ),
     r'mediaType': PropertySchema(
@@ -50,7 +36,6 @@ const OfflineItemSchema = CollectionSchema(
     ),
     r'number': PropertySchema(id: 5, name: r'number', type: IsarType.string),
   },
-
   estimateSize: _offlineItemEstimateSize,
   serialize: _offlineItemSerialize,
   deserialize: _offlineItemDeserialize,
@@ -91,13 +76,11 @@ const OfflineItemSchema = CollectionSchema(
     r'Episode': EpisodeSchema,
     r'Chapter': ChapterSchema,
   },
-
   getId: _offlineItemGetId,
   getLinks: _offlineItemGetLinks,
   attach: _offlineItemAttach,
   version: '3.3.0-dev.3',
 );
-
 int _offlineItemEstimateSize(
   OfflineItem object,
   List<int> offsets,
@@ -151,7 +134,6 @@ int _offlineItemEstimateSize(
   bytesCount += 3 + object.number.length * 3;
   return bytesCount;
 }
-
 void _offlineItemSerialize(
   OfflineItem object,
   IsarWriter writer,
@@ -180,7 +162,6 @@ void _offlineItemSerialize(
   writer.writeLong(offsets[4], object.mediaType);
   writer.writeString(offsets[5], object.number);
 }
-
 OfflineItem _offlineItemDeserialize(
   Id id,
   IsarReader reader,
@@ -212,7 +193,6 @@ OfflineItem _offlineItemDeserialize(
   object.id = id;
   return object;
 }
-
 P _offlineItemDeserializeProp<P>(
   IsarReader reader,
   int propertyId,
@@ -253,15 +233,12 @@ P _offlineItemDeserializeProp<P>(
       throw IsarError('Unknown property with id $propertyId');
   }
 }
-
 Id _offlineItemGetId(OfflineItem object) {
   return object.id;
 }
-
 List<IsarLinkBase<dynamic>> _offlineItemGetLinks(OfflineItem object) {
   return [];
 }
-
 void _offlineItemAttach(
   IsarCollection<dynamic> col,
   Id id,
@@ -269,7 +246,6 @@ void _offlineItemAttach(
 ) {
   object.id = id;
 }
-
 extension OfflineItemQueryWhereSort
     on QueryBuilder<OfflineItem, OfflineItem, QWhere> {
   QueryBuilder<OfflineItem, OfflineItem, QAfterWhere> anyId() {
@@ -277,7 +253,6 @@ extension OfflineItemQueryWhereSort
       return query.addWhereClause(const IdWhereClause.any());
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterWhere> anyMediaType() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
@@ -286,7 +261,6 @@ extension OfflineItemQueryWhereSort
     });
   }
 }
-
 extension OfflineItemQueryWhere
     on QueryBuilder<OfflineItem, OfflineItem, QWhereClause> {
   QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause> idEqualTo(Id id) {
@@ -294,7 +268,6 @@ extension OfflineItemQueryWhere
       return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause> idNotEqualTo(
     Id id,
   ) {
@@ -318,7 +291,6 @@ extension OfflineItemQueryWhere
       }
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause> idGreaterThan(
     Id id, {
     bool include = false,
@@ -329,7 +301,6 @@ extension OfflineItemQueryWhere
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause> idLessThan(
     Id id, {
     bool include = false,
@@ -340,7 +311,6 @@ extension OfflineItemQueryWhere
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause> idBetween(
     Id lowerId,
     Id upperId, {
@@ -358,7 +328,6 @@ extension OfflineItemQueryWhere
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause> numberEqualTo(
     String number,
   ) {
@@ -368,7 +337,6 @@ extension OfflineItemQueryWhere
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause> numberNotEqualTo(
     String number,
   ) {
@@ -412,7 +380,6 @@ extension OfflineItemQueryWhere
       }
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause> mediaTypeIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
@@ -420,7 +387,6 @@ extension OfflineItemQueryWhere
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause>
   mediaTypeIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -434,7 +400,6 @@ extension OfflineItemQueryWhere
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause> mediaTypeEqualTo(
     int? mediaType,
   ) {
@@ -444,7 +409,6 @@ extension OfflineItemQueryWhere
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause> mediaTypeNotEqualTo(
     int? mediaType,
   ) {
@@ -488,7 +452,6 @@ extension OfflineItemQueryWhere
       }
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause>
   mediaTypeGreaterThan(int? mediaType, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -502,7 +465,6 @@ extension OfflineItemQueryWhere
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause> mediaTypeLessThan(
     int? mediaType, {
     bool include = false,
@@ -518,7 +480,6 @@ extension OfflineItemQueryWhere
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterWhereClause> mediaTypeBetween(
     int? lowerMediaType,
     int? upperMediaType, {
@@ -538,7 +499,6 @@ extension OfflineItemQueryWhere
     });
   }
 }
-
 extension OfflineItemQueryFilter
     on QueryBuilder<OfflineItem, OfflineItem, QFilterCondition> {
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
@@ -549,7 +509,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   animeTitleIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -558,7 +517,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   animeTitleEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -571,7 +529,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   animeTitleGreaterThan(
     String? value, {
@@ -589,7 +546,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   animeTitleLessThan(
     String? value, {
@@ -607,7 +563,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   animeTitleBetween(
     String? lower,
@@ -629,7 +584,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   animeTitleStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -642,7 +596,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   animeTitleEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -655,7 +608,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   animeTitleContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -668,7 +620,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   animeTitleMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -681,7 +632,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   animeTitleIsEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -690,7 +640,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   animeTitleIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -699,7 +648,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   chaptersListIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -708,7 +656,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   chaptersListIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -717,42 +664,36 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   chaptersListLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'chaptersList', length, true, length, true);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   chaptersListIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'chaptersList', 0, true, 0, true);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   chaptersListIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'chaptersList', 0, false, 999999, true);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   chaptersListLengthLessThan(int length, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'chaptersList', 0, true, length, include);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   chaptersListLengthGreaterThan(int length, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'chaptersList', length, include, 999999, true);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   chaptersListLengthBetween(
     int lower,
@@ -770,7 +711,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   episodesListIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -779,7 +719,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   episodesListIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -788,42 +727,36 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   episodesListLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'episodesList', length, true, length, true);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   episodesListIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'episodesList', 0, true, 0, true);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   episodesListIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'episodesList', 0, false, 999999, true);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   episodesListLengthLessThan(int length, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'episodesList', 0, true, length, include);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   episodesListLengthGreaterThan(int length, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'episodesList', length, include, 999999, true);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   episodesListLengthBetween(
     int lower,
@@ -841,7 +774,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition> idEqualTo(
     Id value,
   ) {
@@ -851,7 +783,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition> idGreaterThan(
     Id value, {
     bool include = false,
@@ -866,7 +797,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition> idLessThan(
     Id value, {
     bool include = false,
@@ -881,7 +811,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition> idBetween(
     Id lower,
     Id upper, {
@@ -900,7 +829,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   mediaDataIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -909,7 +837,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   mediaDataIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -918,7 +845,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   mediaTypeIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -927,7 +853,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   mediaTypeIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -936,7 +861,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   mediaTypeEqualTo(int? value) {
     return QueryBuilder.apply(this, (query) {
@@ -945,7 +869,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   mediaTypeGreaterThan(int? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -958,7 +881,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   mediaTypeLessThan(int? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -971,7 +893,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   mediaTypeBetween(
     int? lower,
@@ -991,7 +912,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition> numberEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1006,7 +926,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   numberGreaterThan(
     String value, {
@@ -1024,7 +943,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition> numberLessThan(
     String value, {
     bool include = false,
@@ -1041,7 +959,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition> numberBetween(
     String lower,
     String upper, {
@@ -1062,7 +979,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   numberStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1075,7 +991,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition> numberEndsWith(
     String value, {
     bool caseSensitive = true,
@@ -1090,7 +1005,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition> numberContains(
     String value, {
     bool caseSensitive = true,
@@ -1105,7 +1019,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition> numberMatches(
     String pattern, {
     bool caseSensitive = true,
@@ -1120,7 +1033,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   numberIsEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -1129,7 +1041,6 @@ extension OfflineItemQueryFilter
       );
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   numberIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -1139,7 +1050,6 @@ extension OfflineItemQueryFilter
     });
   }
 }
-
 extension OfflineItemQueryObject
     on QueryBuilder<OfflineItem, OfflineItem, QFilterCondition> {
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
@@ -1148,14 +1058,12 @@ extension OfflineItemQueryObject
       return query.object(q, r'chaptersList');
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition>
   episodesListElement(FilterQuery<Episode> q) {
     return QueryBuilder.apply(this, (query) {
       return query.object(q, r'episodesList');
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterFilterCondition> mediaData(
     FilterQuery<AnilistMediaData> q,
   ) {
@@ -1164,10 +1072,8 @@ extension OfflineItemQueryObject
     });
   }
 }
-
 extension OfflineItemQueryLinks
     on QueryBuilder<OfflineItem, OfflineItem, QFilterCondition> {}
-
 extension OfflineItemQuerySortBy
     on QueryBuilder<OfflineItem, OfflineItem, QSortBy> {
   QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> sortByAnimeTitle() {
@@ -1175,38 +1081,32 @@ extension OfflineItemQuerySortBy
       return query.addSortBy(r'animeTitle', Sort.asc);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> sortByAnimeTitleDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'animeTitle', Sort.desc);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> sortByMediaType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mediaType', Sort.asc);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> sortByMediaTypeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mediaType', Sort.desc);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> sortByNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'number', Sort.asc);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> sortByNumberDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'number', Sort.desc);
     });
   }
 }
-
 extension OfflineItemQuerySortThenBy
     on QueryBuilder<OfflineItem, OfflineItem, QSortThenBy> {
   QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> thenByAnimeTitle() {
@@ -1214,50 +1114,42 @@ extension OfflineItemQuerySortThenBy
       return query.addSortBy(r'animeTitle', Sort.asc);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> thenByAnimeTitleDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'animeTitle', Sort.desc);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> thenByMediaType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mediaType', Sort.asc);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> thenByMediaTypeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mediaType', Sort.desc);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> thenByNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'number', Sort.asc);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QAfterSortBy> thenByNumberDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'number', Sort.desc);
     });
   }
 }
-
 extension OfflineItemQueryWhereDistinct
     on QueryBuilder<OfflineItem, OfflineItem, QDistinct> {
   QueryBuilder<OfflineItem, OfflineItem, QDistinct> distinctByAnimeTitle({
@@ -1267,13 +1159,11 @@ extension OfflineItemQueryWhereDistinct
       return query.addDistinctBy(r'animeTitle', caseSensitive: caseSensitive);
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QDistinct> distinctByMediaType() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'mediaType');
     });
   }
-
   QueryBuilder<OfflineItem, OfflineItem, QDistinct> distinctByNumber({
     bool caseSensitive = true,
   }) {
@@ -1282,7 +1172,6 @@ extension OfflineItemQueryWhereDistinct
     });
   }
 }
-
 extension OfflineItemQueryProperty
     on QueryBuilder<OfflineItem, OfflineItem, QQueryProperty> {
   QueryBuilder<OfflineItem, int, QQueryOperations> idProperty() {
@@ -1290,40 +1179,34 @@ extension OfflineItemQueryProperty
       return query.addPropertyName(r'id');
     });
   }
-
   QueryBuilder<OfflineItem, String?, QQueryOperations> animeTitleProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'animeTitle');
     });
   }
-
   QueryBuilder<OfflineItem, List<Chapter>?, QQueryOperations>
   chaptersListProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'chaptersList');
     });
   }
-
   QueryBuilder<OfflineItem, List<Episode>?, QQueryOperations>
   episodesListProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'episodesList');
     });
   }
-
   QueryBuilder<OfflineItem, AnilistMediaData?, QQueryOperations>
   mediaDataProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'mediaData');
     });
   }
-
   QueryBuilder<OfflineItem, int?, QQueryOperations> mediaTypeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'mediaType');
     });
   }
-
   QueryBuilder<OfflineItem, String, QQueryOperations> numberProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'number');

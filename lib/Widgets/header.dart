@@ -9,10 +9,8 @@ import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 class Header extends StatelessWidget {
   const Header({super.key});
-
   @override
   Widget build(BuildContext context) {
     return AzyXContainer(
@@ -67,7 +65,6 @@ class Header extends StatelessWidget {
       ),
     );
   }
-
   void showBottomSheet(context) {
     showModalBottomSheet(
       context: context,
@@ -130,13 +127,11 @@ class Header extends StatelessWidget {
                             const begin = Offset(1, 0);
                             const end = Offset.zero;
                             const curve = Curves.ease;
-
                             var tween = Tween(
                               begin: begin,
                               end: end,
                             ).chain(CurveTween(curve: curve));
                             var offsetAnimation = animation.drive(tween);
-
                             return SlideTransition(
                               position: offsetAnimation,
                               child: child,
@@ -169,13 +164,11 @@ class Header extends StatelessWidget {
                             const begin = Offset(1, 0);
                             const end = Offset.zero;
                             const curve = Curves.ease;
-
                             var tween = Tween(
                               begin: begin,
                               end: end,
                             ).chain(CurveTween(curve: curve));
                             var offsetAnimation = animation.drive(tween);
-
                             return SlideTransition(
                               position: offsetAnimation,
                               child: child,
@@ -198,9 +191,10 @@ class Header extends StatelessWidget {
                       child: _buildTile("LogOut", Icons.logout),
                     )
                   : InkWell(
-                      onTap: () {
-                        serviceHandler.login();
+                      onTap: () async {
                         Get.back();
+                        await Future.delayed(const Duration(milliseconds: 150));
+                        serviceHandler.login();
                       },
                       child: _buildTile("Login", Icons.login),
                     ),
@@ -210,7 +204,6 @@ class Header extends StatelessWidget {
       },
     );
   }
-
   Widget _buildTile(String name, IconData icon) {
     return AzyXContainer(
       padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),

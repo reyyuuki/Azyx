@@ -1,9 +1,7 @@
 import 'dart:io';
-
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 void azyxSnackBar(
   String title, {
   double? width,

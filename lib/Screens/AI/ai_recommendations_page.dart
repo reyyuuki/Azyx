@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:azyx/AI/ai_pics.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Models/carousale_data.dart';
@@ -16,25 +15,20 @@ import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 class AiRecommendationsPage extends StatefulWidget {
   final bool isManga;
   const AiRecommendationsPage({super.key, required this.isManga});
-
   @override
   State<AiRecommendationsPage> createState() => _AiRecommendationsPageState();
 }
-
 class _AiRecommendationsPageState extends State<AiRecommendationsPage> {
   final RxList<Media> recommendationsList = RxList();
   final RxBool isAdult = false.obs;
-
   @override
   void initState() {
     super.initState();
     loadData(isAdult.value);
   }
-
   void loadData(bool isAdult) async {
     recommendationsList.value = await getAiRecommendations(
       widget.isManga,
@@ -43,12 +37,10 @@ class _AiRecommendationsPageState extends State<AiRecommendationsPage> {
       isAdult: isAdult,
     );
   }
-
   @override
   Widget build(BuildContext context) {
     final isMobile = Platform.isAndroid || Platform.isIOS;
     final double itemHeight = isMobile ? 230 : 310;
-
     return Scaffold(
       body: AzyXGradientContainer(
         child: Column(
@@ -73,7 +65,6 @@ class _AiRecommendationsPageState extends State<AiRecommendationsPage> {
                           final itemWidth =
                               constraints.maxWidth / crossAxisCount;
                           final aspectRatio = itemWidth / itemHeight;
-
                           return GridView.builder(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
@@ -128,7 +119,6 @@ class _AiRecommendationsPageState extends State<AiRecommendationsPage> {
       ),
     );
   }
-
   void settingsBottomSheet() {
     showModalBottomSheet(
       context: context,

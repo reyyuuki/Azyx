@@ -7,7 +7,6 @@ class User {
   int? episodesWatched;
   int? minutesWatched;
   int? chaptersRead;
-
   User(
       {this.name,
       this.id,
@@ -17,7 +16,6 @@ class User {
       this.episodesWatched,
       this.minutesWatched,
       this.chaptersRead});
-
   factory User.fromJson(dynamic data) {
     return User(
       name: data['name'],
@@ -30,7 +28,6 @@ class User {
       chaptersRead: data['statistics']['manga']['chaptersRead'],
     );
   }
-
   factory User.fromMAL(Map<String, dynamic> json) {
     final animeStats = json['data']?['statistics']['anime'];
     final mangaStats = json['data']?['statistics']['manga'];

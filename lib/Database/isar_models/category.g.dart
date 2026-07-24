@@ -1,18 +1,7 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
 part of 'category.dart';
-
-// **************************************************************************
-// IsarCollectionGenerator
-// **************************************************************************
-
-// coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
-
 extension GetCategoryCollection on Isar {
   IsarCollection<Category> get categorys => this.collection();
 }
-
 const CategorySchema = CollectionSchema(
   name: r'Category',
   id: 5751694338128944171,
@@ -25,7 +14,6 @@ const CategorySchema = CollectionSchema(
     r'isManga': PropertySchema(id: 1, name: r'isManga', type: IsarType.bool),
     r'name': PropertySchema(id: 2, name: r'name', type: IsarType.string),
   },
-
   estimateSize: _categoryEstimateSize,
   serialize: _categorySerialize,
   deserialize: _categoryDeserialize,
@@ -48,13 +36,11 @@ const CategorySchema = CollectionSchema(
   },
   links: {},
   embeddedSchemas: {},
-
   getId: _categoryGetId,
   getLinks: _categoryGetLinks,
   attach: _categoryAttach,
   version: '3.3.0-dev.3',
 );
-
 int _categoryEstimateSize(
   Category object,
   List<int> offsets,
@@ -81,7 +67,6 @@ int _categoryEstimateSize(
   }
   return bytesCount;
 }
-
 void _categorySerialize(
   Category object,
   IsarWriter writer,
@@ -92,7 +77,6 @@ void _categorySerialize(
   writer.writeBool(offsets[1], object.isManga);
   writer.writeString(offsets[2], object.name);
 }
-
 Category _categoryDeserialize(
   Id id,
   IsarReader reader,
@@ -107,7 +91,6 @@ Category _categoryDeserialize(
   object.id = id;
   return object;
 }
-
 P _categoryDeserializeProp<P>(
   IsarReader reader,
   int propertyId,
@@ -125,19 +108,15 @@ P _categoryDeserializeProp<P>(
       throw IsarError('Unknown property with id $propertyId');
   }
 }
-
 Id _categoryGetId(Category object) {
   return object.id;
 }
-
 List<IsarLinkBase<dynamic>> _categoryGetLinks(Category object) {
   return [];
 }
-
 void _categoryAttach(IsarCollection<dynamic> col, Id id, Category object) {
   object.id = id;
 }
-
 extension CategoryQueryWhereSort on QueryBuilder<Category, Category, QWhere> {
   QueryBuilder<Category, Category, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
@@ -145,14 +124,12 @@ extension CategoryQueryWhereSort on QueryBuilder<Category, Category, QWhere> {
     });
   }
 }
-
 extension CategoryQueryWhere on QueryBuilder<Category, Category, QWhereClause> {
   QueryBuilder<Category, Category, QAfterWhereClause> idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
     });
   }
-
   QueryBuilder<Category, Category, QAfterWhereClause> idNotEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
@@ -174,7 +151,6 @@ extension CategoryQueryWhere on QueryBuilder<Category, Category, QWhereClause> {
       }
     });
   }
-
   QueryBuilder<Category, Category, QAfterWhereClause> idGreaterThan(
     Id id, {
     bool include = false,
@@ -185,7 +161,6 @@ extension CategoryQueryWhere on QueryBuilder<Category, Category, QWhereClause> {
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterWhereClause> idLessThan(
     Id id, {
     bool include = false,
@@ -196,7 +171,6 @@ extension CategoryQueryWhere on QueryBuilder<Category, Category, QWhereClause> {
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterWhereClause> idBetween(
     Id lowerId,
     Id upperId, {
@@ -214,7 +188,6 @@ extension CategoryQueryWhere on QueryBuilder<Category, Category, QWhereClause> {
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterWhereClause> nameIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
@@ -222,7 +195,6 @@ extension CategoryQueryWhere on QueryBuilder<Category, Category, QWhereClause> {
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterWhereClause> nameIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
@@ -235,7 +207,6 @@ extension CategoryQueryWhere on QueryBuilder<Category, Category, QWhereClause> {
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterWhereClause> nameEqualTo(
     String? name,
   ) {
@@ -245,7 +216,6 @@ extension CategoryQueryWhere on QueryBuilder<Category, Category, QWhereClause> {
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterWhereClause> nameNotEqualTo(
     String? name,
   ) {
@@ -290,7 +260,6 @@ extension CategoryQueryWhere on QueryBuilder<Category, Category, QWhereClause> {
     });
   }
 }
-
 extension CategoryQueryFilter
     on QueryBuilder<Category, Category, QFilterCondition> {
   QueryBuilder<Category, Category, QAfterFilterCondition> anilistIdsIsNull() {
@@ -300,7 +269,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition>
   anilistIdsIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -309,7 +277,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition>
   anilistIdsElementEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -322,7 +289,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition>
   anilistIdsElementGreaterThan(
     String value, {
@@ -340,7 +306,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition>
   anilistIdsElementLessThan(
     String value, {
@@ -358,7 +323,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition>
   anilistIdsElementBetween(
     String lower,
@@ -380,7 +344,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition>
   anilistIdsElementStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -393,7 +356,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition>
   anilistIdsElementEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -406,7 +368,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition>
   anilistIdsElementContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -419,7 +380,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition>
   anilistIdsElementMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -432,7 +392,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition>
   anilistIdsElementIsEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -441,7 +400,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition>
   anilistIdsElementIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -450,41 +408,35 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition>
   anilistIdsLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'anilistIds', length, true, length, true);
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> anilistIdsIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'anilistIds', 0, true, 0, true);
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition>
   anilistIdsIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'anilistIds', 0, false, 999999, true);
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition>
   anilistIdsLengthLessThan(int length, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'anilistIds', 0, true, length, include);
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition>
   anilistIdsLengthGreaterThan(int length, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'anilistIds', length, include, 999999, true);
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition>
   anilistIdsLengthBetween(
     int lower,
@@ -502,7 +454,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -510,7 +461,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> idGreaterThan(
     Id value, {
     bool include = false,
@@ -525,7 +475,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> idLessThan(
     Id value, {
     bool include = false,
@@ -540,7 +489,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> idBetween(
     Id lower,
     Id upper, {
@@ -559,7 +507,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> isMangaEqualTo(
     bool value,
   ) {
@@ -569,7 +516,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> nameIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -577,7 +523,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> nameIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -585,7 +530,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> nameEqualTo(
     String? value, {
     bool caseSensitive = true,
@@ -600,7 +544,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> nameGreaterThan(
     String? value, {
     bool include = false,
@@ -617,7 +560,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> nameLessThan(
     String? value, {
     bool include = false,
@@ -634,7 +576,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> nameBetween(
     String? lower,
     String? upper, {
@@ -655,7 +596,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> nameStartsWith(
     String value, {
     bool caseSensitive = true,
@@ -670,7 +610,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> nameEndsWith(
     String value, {
     bool caseSensitive = true,
@@ -685,7 +624,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> nameContains(
     String value, {
     bool caseSensitive = true,
@@ -700,7 +638,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> nameMatches(
     String pattern, {
     bool caseSensitive = true,
@@ -715,7 +652,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> nameIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -723,7 +659,6 @@ extension CategoryQueryFilter
       );
     });
   }
-
   QueryBuilder<Category, Category, QAfterFilterCondition> nameIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
@@ -732,39 +667,32 @@ extension CategoryQueryFilter
     });
   }
 }
-
 extension CategoryQueryObject
     on QueryBuilder<Category, Category, QFilterCondition> {}
-
 extension CategoryQueryLinks
     on QueryBuilder<Category, Category, QFilterCondition> {}
-
 extension CategoryQuerySortBy on QueryBuilder<Category, Category, QSortBy> {
   QueryBuilder<Category, Category, QAfterSortBy> sortByIsManga() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isManga', Sort.asc);
     });
   }
-
   QueryBuilder<Category, Category, QAfterSortBy> sortByIsMangaDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isManga', Sort.desc);
     });
   }
-
   QueryBuilder<Category, Category, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
     });
   }
-
   QueryBuilder<Category, Category, QAfterSortBy> sortByNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.desc);
     });
   }
 }
-
 extension CategoryQuerySortThenBy
     on QueryBuilder<Category, Category, QSortThenBy> {
   QueryBuilder<Category, Category, QAfterSortBy> thenById() {
@@ -772,38 +700,32 @@ extension CategoryQuerySortThenBy
       return query.addSortBy(r'id', Sort.asc);
     });
   }
-
   QueryBuilder<Category, Category, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
     });
   }
-
   QueryBuilder<Category, Category, QAfterSortBy> thenByIsManga() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isManga', Sort.asc);
     });
   }
-
   QueryBuilder<Category, Category, QAfterSortBy> thenByIsMangaDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isManga', Sort.desc);
     });
   }
-
   QueryBuilder<Category, Category, QAfterSortBy> thenByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
     });
   }
-
   QueryBuilder<Category, Category, QAfterSortBy> thenByNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.desc);
     });
   }
 }
-
 extension CategoryQueryWhereDistinct
     on QueryBuilder<Category, Category, QDistinct> {
   QueryBuilder<Category, Category, QDistinct> distinctByAnilistIds() {
@@ -811,13 +733,11 @@ extension CategoryQueryWhereDistinct
       return query.addDistinctBy(r'anilistIds');
     });
   }
-
   QueryBuilder<Category, Category, QDistinct> distinctByIsManga() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isManga');
     });
   }
-
   QueryBuilder<Category, Category, QDistinct> distinctByName({
     bool caseSensitive = true,
   }) {
@@ -826,7 +746,6 @@ extension CategoryQueryWhereDistinct
     });
   }
 }
-
 extension CategoryQueryProperty
     on QueryBuilder<Category, Category, QQueryProperty> {
   QueryBuilder<Category, int, QQueryOperations> idProperty() {
@@ -834,19 +753,16 @@ extension CategoryQueryProperty
       return query.addPropertyName(r'id');
     });
   }
-
   QueryBuilder<Category, List<String>?, QQueryOperations> anilistIdsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'anilistIds');
     });
   }
-
   QueryBuilder<Category, bool, QQueryOperations> isMangaProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isManga');
     });
   }
-
   QueryBuilder<Category, String?, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');

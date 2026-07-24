@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ionicons/ionicons.dart';
-
 class FilterBottomSheet extends StatefulWidget {
   final bool isManga;
   final Function(Map<String, dynamic>) onApplyFilters;
   final Map<String, dynamic>? initialFilters;
-
   const FilterBottomSheet({
     super.key,
     required this.isManga,
     required this.onApplyFilters,
     this.initialFilters,
   });
-
   @override
   State<FilterBottomSheet> createState() => _FilterBottomSheetState();
 }
-
 class _FilterBottomSheetState extends State<FilterBottomSheet>
     with TickerProviderStateMixin {
   String? selectedFormat;
@@ -27,12 +23,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   List<String> selectedGenres = [];
   List<String> selectedTags = [];
   String selectedSort = 'POPULARITY_DESC';
-
   late AnimationController _animationController;
   late Animation<double> _slideAnimation;
   late Animation<double> _fadeAnimation;
-
-  // AniList compatible formats
   final List<String> animeFormats = [
     'TV',
     'TV_SHORT',
@@ -42,9 +35,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     'ONA',
     'MUSIC'
   ];
-
   final List<String> mangaFormats = ['MANGA', 'LIGHT_NOVEL', 'ONE_SHOT'];
-
   final List<String> statusOptions = [
     'FINISHED',
     'RELEASING',
@@ -52,9 +43,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     'CANCELLED',
     'HIATUS'
   ];
-
   final List<String> seasonOptions = ['WINTER', 'SPRING', 'SUMMER', 'FALL'];
-
   final Map<String, String> sortOptions = {
     'POPULARITY_DESC': 'Most Popular',
     'SCORE_DESC': 'Highest Rated',
@@ -66,7 +55,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     'FAVOURITES_DESC': 'Most Favorited',
     'UPDATED_AT_DESC': 'Recently Updated',
   };
-
   final List<String> commonGenres = [
     'Action',
     'Adventure',
@@ -87,7 +75,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     'Supernatural',
     'Thriller'
   ];
-
   final List<String> commonTags = [
     'School',
     'Demons',
@@ -120,14 +107,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     'War',
     'Zombies'
   ];
-
   @override
   void initState() {
     super.initState();
     _initializeFilters();
     _setupAnimations();
   }
-
   void _initializeFilters() {
     if (widget.initialFilters != null) {
       final filters = widget.initialFilters!;
@@ -140,13 +125,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       selectedSort = filters['sort']?.first ?? 'POPULARITY_DESC';
     }
   }
-
   void _setupAnimations() {
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-
     _slideAnimation = Tween<double>(
       begin: 1.0,
       end: 0.0,
@@ -154,7 +137,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       parent: _animationController,
       curve: Curves.easeOutCubic,
     ));
-
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -162,21 +144,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       parent: _animationController,
       curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
     ));
-
     _animationController.forward();
   }
-
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final screenHeight = MediaQuery.of(context).size.height;
-
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
@@ -234,7 +212,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       },
     );
   }
-
   Widget _buildAnimatedSection(Widget child, int index) {
     return TweenAnimationBuilder<double>(
       duration: Duration(milliseconds: 300 + (index * 100)),
@@ -254,10 +231,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       ),
     );
   }
-
   Widget _buildHeader(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -356,7 +331,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       ),
     );
   }
-
   Widget _buildSectionTitle(String title, IconData icon) {
     final colorScheme = Theme.of(context).colorScheme;
     return Row(
@@ -387,10 +361,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       ],
     );
   }
-
   Widget _buildSortSection(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -433,10 +405,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       ],
     );
   }
-
   Widget _buildFormatSection(BuildContext context) {
     final formats = widget.isManga ? mangaFormats : animeFormats;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -461,7 +431,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       ],
     );
   }
-
   Widget _buildStatusSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -487,10 +456,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       ],
     );
   }
-
   Widget _buildSeasonSection(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -566,7 +533,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       ],
     );
   }
-
   Widget _buildGenresSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -597,7 +563,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       ],
     );
   }
-
   Widget _buildTagsSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -628,11 +593,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       ],
     );
   }
-
   Widget _buildSelectableChip(String label, bool isSelected, VoidCallback onTap,
       {bool isSmall = false}) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return GestureDetector(
       onTap: () {
         HapticFeedback.lightImpact();
@@ -681,10 +644,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       ),
     );
   }
-
   Widget _buildBottomActions(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -786,7 +747,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       ),
     );
   }
-
   void _clearFilters() {
     HapticFeedback.lightImpact();
     setState(() {
@@ -799,10 +759,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       selectedSort = 'POPULARITY_DESC';
     });
   }
-
   void _applyFilters() {
     HapticFeedback.lightImpact();
-
     final filters = <String, dynamic>{
       'sort': [selectedSort],
       if (selectedFormat != null) 'format': selectedFormat,
@@ -812,12 +770,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
       if (selectedGenres.isNotEmpty) 'genres': selectedGenres,
       if (selectedTags.isNotEmpty) 'tags': selectedTags,
     };
-
     widget.onApplyFilters(filters);
     Navigator.pop(context);
   }
 }
-
 void showFilterBottomSheet(
   BuildContext context,
   bool isManga,

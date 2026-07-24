@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:math';
-
 import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
@@ -8,11 +7,9 @@ import 'package:azyx/Widgets/common/shimmer_effect.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-
 class GridList extends StatelessWidget {
   final String tagg;
   final List<OfflineItem> data;
-
   final void Function(OfflineItem, String) ontap;
   const GridList({
     super.key,
@@ -20,7 +17,6 @@ class GridList extends StatelessWidget {
     required this.tagg,
     required this.ontap,
   });
-
   @override
   Widget build(BuildContext context) {
     if (data.isEmpty) {
@@ -55,7 +51,6 @@ class GridList extends StatelessWidget {
                   Stack(
                     children: [
                       AzyXContainer(
-                        // height: Platform.isAndroid || Platform.isIOS ? 150 : 230,
                         width: Platform.isAndroid || Platform.isIOS ? 103 : 160,
                         margin: const EdgeInsets.only(right: 10),
                         decoration: BoxDecoration(

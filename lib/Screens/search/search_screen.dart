@@ -10,15 +10,12 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 class SearchScreen extends StatefulWidget {
   final bool isManga;
   const SearchScreen({super.key, required this.isManga});
-
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
-
 class _SearchScreenState extends State<SearchScreen>
     with TickerProviderStateMixin {
   late final show.SearchController controller;
@@ -29,37 +26,31 @@ class _SearchScreenState extends State<SearchScreen>
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearchFocused = false;
   late String title;
-
   @override
   void initState() {
     super.initState();
     title = widget.isManga ? "Manga" : "Anime";
     controller = Get.put(show.SearchController(isManga: widget.isManga));
-
     _searchAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-
     _fadeAnimationController = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-
     _searchBarScale = Tween<double>(begin: 1.0, end: 1.02).animate(
       CurvedAnimation(
         parent: _searchAnimationController,
         curve: Curves.easeInOut,
       ),
     );
-
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _fadeAnimationController,
         curve: Curves.easeInOut,
       ),
     );
-
     _searchFocusNode.addListener(() {
       if (mounted) {
         setState(() {
@@ -72,10 +63,8 @@ class _SearchScreenState extends State<SearchScreen>
         }
       }
     });
-
     _fadeAnimationController.forward();
   }
-
   @override
   void dispose() {
     _searchAnimationController.dispose();
@@ -84,12 +73,10 @@ class _SearchScreenState extends State<SearchScreen>
     Get.delete<show.SearchController>();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
     return Scaffold(
       backgroundColor: colorScheme.surface,
       resizeToAvoidBottomInset: false,
@@ -100,7 +87,7 @@ class _SearchScreenState extends State<SearchScreen>
             children: [
               _buildModernAppBar(context),
               _buildSearchSection(context),
-              _buildFilterChips(context), // Add filter chips here
+              _buildFilterChips(context), 
               Expanded(child: _buildSearchResults(context)),
             ],
           ),
@@ -108,10 +95,8 @@ class _SearchScreenState extends State<SearchScreen>
       ),
     );
   }
-
   Widget _buildModernAppBar(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
       decoration: BoxDecoration(
@@ -191,7 +176,6 @@ class _SearchScreenState extends State<SearchScreen>
       ),
     );
   }
-
   Widget _buildSearchSection(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
@@ -215,10 +199,8 @@ class _SearchScreenState extends State<SearchScreen>
       ),
     );
   }
-
   Widget _buildModernSearchBar(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       decoration: BoxDecoration(
@@ -355,7 +337,6 @@ class _SearchScreenState extends State<SearchScreen>
       ),
     );
   }
-
   Widget _buildSearchActions(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Row(
@@ -482,15 +463,12 @@ class _SearchScreenState extends State<SearchScreen>
       ],
     );
   }
-
   Widget _buildFilterChips(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Obx(() {
       if (!controller.hasActiveFilters) {
         return const SizedBox.shrink();
       }
-
       return Container(
         margin: const EdgeInsets.only(left: 20, right: 20, bottom: 16),
         child: Column(
@@ -555,12 +533,8 @@ class _SearchScreenState extends State<SearchScreen>
       );
     });
   }
-
   List<Widget> _buildFilterChipsList(BuildContext context) {
-    // final colorScheme = Theme.of(context).colorScheme;
     List<Widget> chips = [];
-
-    // Format filter
     if (controller.activeFilters['format'] != null) {
       chips.add(
         _buildFilterChip(
@@ -573,8 +547,6 @@ class _SearchScreenState extends State<SearchScreen>
         ),
       );
     }
-
-    // Status filter
     if (controller.activeFilters['status'] != null) {
       chips.add(
         _buildFilterChip(
@@ -587,8 +559,6 @@ class _SearchScreenState extends State<SearchScreen>
         ),
       );
     }
-
-    // Season filter (only for anime)
     if (!widget.isManga && controller.activeFilters['season'] != null) {
       String seasonText = controller.activeFilters['season'].toString();
       if (controller.activeFilters['seasonYear'] != null) {
@@ -605,8 +575,6 @@ class _SearchScreenState extends State<SearchScreen>
         ),
       );
     }
-
-    // Genres filter
     if (controller.activeFilters['genres'] != null &&
         (controller.activeFilters['genres'] as List).isNotEmpty) {
       final genres = controller.activeFilters['genres'] as List;
@@ -621,8 +589,6 @@ class _SearchScreenState extends State<SearchScreen>
         );
       }
     }
-
-    // Tags filter
     if (controller.activeFilters['tags'] != null &&
         (controller.activeFilters['tags'] as List).isNotEmpty) {
       final tags = controller.activeFilters['tags'] as List;
@@ -637,10 +603,8 @@ class _SearchScreenState extends State<SearchScreen>
         );
       }
     }
-
     return chips;
   }
-
   Widget _buildFilterChip(
     BuildContext context, {
     required String label,
@@ -648,7 +612,6 @@ class _SearchScreenState extends State<SearchScreen>
     IconData? icon,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       decoration: BoxDecoration(
@@ -706,10 +669,8 @@ class _SearchScreenState extends State<SearchScreen>
       ),
     );
   }
-
   Widget _buildSearchResults(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
       margin: const EdgeInsets.only(top: 8),
       decoration: BoxDecoration(
@@ -728,15 +689,12 @@ class _SearchScreenState extends State<SearchScreen>
           if (controller.isLoading.value) {
             return _buildLoadingState(context);
           }
-
           if (controller.errorMessage.value.isNotEmpty) {
             return _buildErrorState(context);
           }
-
           if (controller.searchItemList.isEmpty) {
             return _buildEmptyState(context);
           }
-
           return AnimatedSwitcher(
             duration: const Duration(milliseconds: 400),
             child: controller.isGrid.value
@@ -755,10 +713,8 @@ class _SearchScreenState extends State<SearchScreen>
       ),
     );
   }
-
   Widget _buildLoadingState(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -784,10 +740,8 @@ class _SearchScreenState extends State<SearchScreen>
       ),
     );
   }
-
   Widget _buildErrorState(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -847,10 +801,8 @@ class _SearchScreenState extends State<SearchScreen>
       ),
     );
   }
-
   Widget _buildEmptyState(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),

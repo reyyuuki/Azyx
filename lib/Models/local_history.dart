@@ -1,7 +1,6 @@
 import 'package:azyx/Models/anime_all_data.dart';
 import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:anymex_extension_runtime_bridge/Models/Source.dart';
-
 class LocalHistory {
   int? mediaId;
   String? link;
@@ -15,7 +14,6 @@ class LocalHistory {
   AnimeAllData? animeData;
   Source? source;
   List<Chapter>? chapterList;
-
   LocalHistory({
     this.animeData,
     this.mediaId,
@@ -30,7 +28,6 @@ class LocalHistory {
     this.lastTime,
     this.title,
   });
-
   factory LocalHistory.fromJson(Map<dynamic, dynamic> json) {
     return LocalHistory(
       mediaId: json['mediaId'] as int?,
@@ -61,7 +58,6 @@ class LocalHistory {
           : null,
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'mediaId': mediaId,

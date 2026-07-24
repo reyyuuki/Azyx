@@ -4,13 +4,11 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 class EpisodeBottomSheet extends StatelessWidget {
   final List<Video> episodeUrls;
   final Rx<bool> hasError;
   final String number;
   final Function(BuildContext, String, String, String) serverAzyXContainer;
-
   const EpisodeBottomSheet({
     super.key,
     required this.episodeUrls,
@@ -18,7 +16,6 @@ class EpisodeBottomSheet extends StatelessWidget {
     required this.number,
     required this.serverAzyXContainer,
   });
-
   @override
   Widget build(BuildContext context) {
     return AzyXGradientContainer(
@@ -61,7 +58,6 @@ class EpisodeBottomSheet extends StatelessWidget {
     );
   }
 }
-
 void showEpisodeBottomSheet(
   BuildContext context,
   String number,

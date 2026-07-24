@@ -1,8 +1,5 @@
-// ignore_for_file: must_be_immutable
-
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Models/media.dart';
@@ -23,10 +20,8 @@ class MainCarousale extends StatefulWidget {
   State<MainCarousale> createState() => _MainCarousaleState();
 }
 
-class _MainCarousaleState extends State<MainCarousale>
-    with TickerProviderStateMixin {
+class _MainCarousaleState extends State<MainCarousale> {
   late PageController _pageController;
-  late AnimationController _entryController;
   Timer? _autoPlayTimer;
   int _currentIndex = 0;
   double _pageDelta = 0;
@@ -38,17 +33,10 @@ class _MainCarousaleState extends State<MainCarousale>
     _currentIndex = initialPage;
     _pageDelta = initialPage.toDouble();
     _pageController = PageController(
-      viewportFraction: 0.74,
+      viewportFraction: 0.9,
       initialPage: initialPage,
     );
     _pageController.addListener(_onScroll);
-
-    _entryController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 950),
-    );
-
-    _entryController.forward();
     _startAutoPlay();
   }
 
@@ -68,7 +56,7 @@ class _MainCarousaleState extends State<MainCarousale>
       final next = (_currentIndex + 1) % widget.data.length;
       _pageController.animateToPage(
         next,
-        duration: const Duration(milliseconds: 800),
+        duration: const Duration(milliseconds: 600),
         curve: Curves.easeInOutCubic,
       );
     });
@@ -81,7 +69,6 @@ class _MainCarousaleState extends State<MainCarousale>
     _autoPlayTimer?.cancel();
     _pageController.removeListener(_onScroll);
     _pageController.dispose();
-    _entryController.dispose();
     super.dispose();
   }
 
@@ -91,7 +78,7 @@ class _MainCarousaleState extends State<MainCarousale>
 
     if (widget.data.isEmpty) {
       return SizedBox(
-        height: 380,
+        height: 200,
         child: Center(
           child: SizedBox(
             width: 24,
@@ -102,83 +89,58 @@ class _MainCarousaleState extends State<MainCarousale>
       );
     }
 
-    return AnimatedBuilder(
-      animation: _entryController,
-      builder: (context, child) {
-        final entryValue = CurvedAnimation(
-          parent: _entryController,
-          curve: Curves.easeOutCubic,
-        ).value;
-
-        return Opacity(
-          opacity: entryValue,
-          child: Transform.translate(
-            offset: Offset(0, 24 * (1 - entryValue)),
-            child: child,
+    return Column(
+      children: [
+        const SizedBox(height: 6),
+        SizedBox(
+          height: 195,
+          child: PageView.builder(
+            controller: _pageController,
+            clipBehavior: Clip.none,
+            itemCount: widget.data.length,
+            onPageChanged: (i) {
+              _currentIndex = i;
+              setState(() {});
+            },
+            itemBuilder: (context, index) {
+              return _buildHeroCard(index);
+            },
           ),
-        );
-      },
-      child: Column(
-        children: [
-          const SizedBox(height: 6),
-          SizedBox(
-            height: 380,
-            child: PageView.builder(
-              controller: _pageController,
-              clipBehavior: Clip.none,
-              itemCount: widget.data.length,
-              onPageChanged: (i) {
-                _currentIndex = i;
-                setState(() {});
-              },
-              itemBuilder: (context, index) {
-                return _buildCard(index);
-              },
-            ),
+        ),
+        if (widget.data.length > 1) ...[
+          const SizedBox(height: 10),
+          _SlideIndicator(
+            count: widget.data.length,
+            current: _currentIndex,
+            onTap: (i) {
+              _pageController.animateToPage(
+                i,
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.easeOutCubic,
+              );
+            },
           ),
-          if (widget.data.length > 1) ...[
-            const SizedBox(height: 16),
-            _SlideIndicator(
-              count: widget.data.length,
-              current: _currentIndex,
-              onTap: (i) {
-                _pageController.animateToPage(
-                  i,
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.easeOutCubic,
-                );
-              },
-            ),
-          ],
-          const SizedBox(height: 8),
         ],
-      ),
+      ],
     );
   }
 
-  Widget _buildCard(int index) {
+  Widget _buildHeroCard(int index) {
     final anime = widget.data[index];
     double diff = (index - _pageDelta);
     double absDiff = diff.abs().clamp(0.0, 1.0);
 
-    double scale = 1.0 - (absDiff * 0.08);
-    double translateY = absDiff * 14;
-    double rotateY = diff * -0.06;
-    double cardOpacity = 1.0 - (absDiff * 0.35);
+    double scale = 1.0 - (absDiff * 0.04);
+    double cardOpacity = 1.0 - (absDiff * 0.2);
 
-    return Transform(
-      alignment: Alignment.center,
-      transform: Matrix4.identity()
-        ..setEntry(3, 2, 0.001)
-        ..rotateY(rotateY)
-        ..scale(scale)
-        ..translate(0.0, translateY),
+    return Transform.scale(
+      scale: scale,
       child: Opacity(
         opacity: cardOpacity.clamp(0.0, 1.0),
-        child: _CinematicCard(
+        child: _HeroCardContent(
           anime: anime,
           isManga: widget.isManga,
-          parallaxOffset: diff * 24,
+          index: index,
           onTap: () => _navigateToDetails(anime),
         ),
       ),
@@ -213,77 +175,89 @@ class _MainCarousaleState extends State<MainCarousale>
   }
 }
 
-class _CinematicCard extends StatelessWidget {
+class _HeroCardContent extends StatelessWidget {
   final Media anime;
   final bool isManga;
-  final double parallaxOffset;
+  final int index;
   final VoidCallback onTap;
 
-  const _CinematicCard({
+  const _HeroCardContent({
     required this.anime,
     required this.isManga,
-    required this.parallaxOffset,
+    required this.index,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final bgUrl = (anime.bannerImage != null && anime.bannerImage!.isNotEmpty)
+        ? anime.bannerImage!
+        : (anime.image ?? '');
+
+    final rating = _parseRating(anime.rating);
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white.withOpacity(0.08), width: 1.0),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: colorScheme.outline.withOpacity(0.12),
+            width: 1.0,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 18,
-              offset: const Offset(0, 10),
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 36,
-              offset: const Offset(0, 18),
+              color: Colors.black.withOpacity(0.28),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(18),
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Transform.translate(
-                offset: Offset(parallaxOffset, 0),
-                child: CachedNetworkImage(
-                  imageUrl: anime.image ?? anime.bannerImage ?? '',
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  placeholder: (_, __) => Container(
-                    color: colorScheme.surfaceContainerHighest,
-                    child: const ShimmerEffect(
-                      height: 380,
-                      width: double.infinity,
-                    ),
+              CachedNetworkImage(
+                imageUrl: bgUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                placeholder: (_, __) => Container(
+                  color: colorScheme.surfaceContainerHighest,
+                  child: const ShimmerEffect(
+                    height: 195,
+                    width: double.infinity,
                   ),
-                  errorWidget: (_, __, ___) =>
-                      Container(color: colorScheme.surfaceContainerHighest),
+                ),
+                errorWidget: (_, __, ___) =>
+                    Container(color: colorScheme.surfaceContainerHighest),
+              ),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Colors.black.withOpacity(0.92),
+                      Colors.black.withOpacity(0.7),
+                      Colors.black.withOpacity(0.15),
+                    ],
+                    stops: const [0.0, 0.5, 1.0],
+                  ),
                 ),
               ),
               DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
                     colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.05),
-                      Colors.black.withOpacity(0.4),
                       Colors.black.withOpacity(0.85),
+                      Colors.transparent,
                     ],
-                    stops: const [0.0, 0.35, 0.65, 1.0],
+                    stops: const [0.0, 0.6],
                   ),
                 ),
               ),
@@ -291,10 +265,167 @@ class _CinematicCard extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    _buildTopChips(),
-                    const Spacer(),
-                    _buildBottomInfo(context),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            "#${index + 1} SPOTLIGHT",
+                            style: TextStyle(
+                              color: colorScheme.onPrimary,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.6,
+                            ),
+                          ),
+                        ),
+                        if (rating > 0) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: Colors.amber.withOpacity(0.4),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.star_rounded,
+                                  color: Colors.amber,
+                                  size: 11,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  rating.toStringAsFixed(1),
+                                  style: const TextStyle(
+                                    color: Colors.amber,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      anime.title ?? "Unknown",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        if (anime.type != null && anime.type!.isNotEmpty) ...[
+                          Text(
+                            anime.type!.toUpperCase(),
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.75),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          _buildDot(),
+                        ],
+                        if (anime.episodes != null && anime.episodes! > 0) ...[
+                          Text(
+                            isManga
+                                ? "${anime.episodes} Chapters"
+                                : "${anime.episodes} Episodes",
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.75),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          _buildDot(),
+                        ],
+                        if (anime.status != null &&
+                            anime.status!.isNotEmpty) ...[
+                          Flexible(
+                            child: Text(
+                              anime.status!.toUpperCase(),
+                              style: TextStyle(
+                                color: colorScheme.primary,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: colorScheme.primary.withOpacity(0.4),
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isManga
+                                    ? Icons.auto_stories_rounded
+                                    : Icons.play_arrow_rounded,
+                                color: colorScheme.onPrimary,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                isManga ? "Read Now" : "Watch Now",
+                                style: TextStyle(
+                                  color: colorScheme.onPrimary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -305,160 +436,12 @@ class _CinematicCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTopChips() {
-    final rating = _parseRating(anime.rating);
-    return Row(
-      children: [
-        _GlassChip(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                isManga
-                    ? Icons.auto_stories_rounded
-                    : Icons.play_circle_rounded,
-                color: Colors.white,
-                size: 11,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                isManga ? "MANGA" : "ANIME",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.0,
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (rating > 0) ...[
-          const SizedBox(width: 6),
-          _GlassChip(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.star_rounded, color: Colors.amber, size: 12),
-                const SizedBox(width: 3),
-                Text(
-                  rating.toStringAsFixed(1),
-                  style: const TextStyle(
-                    color: Colors.amber,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildBottomInfo(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                anime.title ?? "Unknown",
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 19,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.4,
-                  height: 1.15,
-                ),
-              ),
-              const SizedBox(height: 5),
-              Row(
-                children: [
-                  if (anime.type != null && anime.type!.isNotEmpty) ...[
-                    Text(
-                      anime.type!.toUpperCase(),
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.75),
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    _buildDotSeparator(),
-                  ],
-                  if (anime.episodes != null && anime.episodes! > 0) ...[
-                    Text(
-                      isManga
-                          ? "${anime.episodes} Chs"
-                          : "${anime.episodes} Eps",
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.75),
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    _buildDotSeparator(),
-                  ],
-                  if (anime.status != null && anime.status!.isNotEmpty) ...[
-                    Flexible(
-                      child: Text(
-                        anime.status!.toUpperCase(),
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.75),
-                          fontSize: 9,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 12),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(22),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-            child: Container(
-              height: 44,
-              width: 44,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.22),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.25),
-                  width: 1,
-                ),
-              ),
-              child: Icon(
-                isManga ? Icons.auto_stories_rounded : Icons.play_arrow_rounded,
-                color: Colors.white,
-                size: 22,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDotSeparator() {
+  Widget _buildDot() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 5),
       child: Text(
         "•",
-        style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 7),
+        style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 8),
       ),
     );
   }
@@ -473,33 +456,6 @@ class _CinematicCard extends StatelessWidget {
     } catch (_) {
       return 0;
     }
-  }
-}
-
-class _GlassChip extends StatelessWidget {
-  final Widget child;
-  const _GlassChip({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.22),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.12),
-              width: 0.8,
-            ),
-          ),
-          child: child,
-        ),
-      ),
-    );
   }
 }
 
@@ -526,16 +482,16 @@ class _SlideIndicator extends StatelessWidget {
         return GestureDetector(
           onTap: () => onTap(i),
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 250),
             curve: Curves.easeInOut,
             margin: const EdgeInsets.symmetric(horizontal: 3),
             height: 4,
-            width: active ? 14 : 4,
+            width: active ? 16 : 4,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(2),
               color: active
                   ? colorScheme.primary
-                  : colorScheme.onSurface.withOpacity(0.15),
+                  : colorScheme.onSurface.withOpacity(0.2),
             ),
           ),
         );

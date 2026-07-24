@@ -1,8 +1,5 @@
-// ignore_for_file: invalid_use_of_protected_member
-
 import 'dart:io';
 import 'dart:math';
-
 import 'package:azyx/Controllers/anilist_data_controller.dart';
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
@@ -16,14 +13,11 @@ import 'package:azyx/utils/utils.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 class CalenderPage extends StatefulWidget {
   const CalenderPage({super.key});
-
   @override
   State<CalenderPage> createState() => _CalenderPageState();
 }
-
 class _CalenderPageState extends State<CalenderPage>
     with TickerProviderStateMixin {
   TabController? tabController;
@@ -32,20 +26,17 @@ class _CalenderPageState extends State<CalenderPage>
     super.initState();
     _initializeTabController();
   }
-
   void _initializeTabController() {
     tabController = TabController(
       length: anilistDataController.anilistSchedules.length,
       vsync: this,
     );
   }
-
   @override
   void dispose() {
     super.dispose();
     tabController?.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

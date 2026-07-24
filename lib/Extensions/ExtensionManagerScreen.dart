@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
     hide isar, SourceExecution;
 import 'package:azyx/Controllers/source/source_controller.dart';
@@ -12,21 +11,17 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 class ExtensionManagerScreen extends StatefulWidget {
   const ExtensionManagerScreen({super.key});
-
   @override
   State<ExtensionManagerScreen> createState() => _ExtensionManagerScreenState();
 }
-
 class _ExtensionManagerScreenState extends State<ExtensionManagerScreen>
     with TickerProviderStateMixin {
   bool _isRefreshing = false;
   final RxBool _isRuntimeLoaded = true.obs;
   TabController? _tabController;
   List<Extension> _managers = [];
-
   @override
   void initState() {
     super.initState();
@@ -42,7 +37,7 @@ class _ExtensionManagerScreenState extends State<ExtensionManagerScreen>
       if (sourceController.isExtensionManagerInitialized.value) {
         _rebuildTabController();
       }
-      if (Platform.isAndroid) {
+      if (mounted) {
         await PluginManager().ensurePluginLoaded(context);
         await _checkRuntime();
         if (_isRuntimeLoaded.value) {
@@ -51,13 +46,11 @@ class _ExtensionManagerScreenState extends State<ExtensionManagerScreen>
       }
     });
   }
-
   @override
   void dispose() {
     _tabController?.dispose();
     super.dispose();
   }
-
   void _rebuildTabController() {
     final all = sourceController.extensionManager.managers.toList();
     final filtered = _filterManagers(all);
@@ -70,19 +63,16 @@ class _ExtensionManagerScreenState extends State<ExtensionManagerScreen>
       _tabController = TabController(length: filtered.length, vsync: this);
     });
   }
-
   Future<void> _checkRuntime() async {
     final loaded = await AnymeXRuntimeBridge.isLoaded();
     _isRuntimeLoaded.value =
         loaded || AnymeXRuntimeBridge.controller.isReady.value;
   }
-
   Future<void> _refresh() async {
     setState(() => _isRefreshing = true);
     await sourceController.fetchRepos();
     if (mounted) setState(() => _isRefreshing = false);
   }
-
   List<Extension> _filterManagers(List<Extension> all) {
     return all.where((m) {
       if (!Platform.isAndroid &&
@@ -90,7 +80,6 @@ class _ExtensionManagerScreenState extends State<ExtensionManagerScreen>
       return true;
     }).toList();
   }
-
   String _managerLabel(String id) => switch (id) {
     'mangayomi' => 'MangaYomi',
     'aniyomi' => 'Aniyomi',
@@ -99,11 +88,9 @@ class _ExtensionManagerScreenState extends State<ExtensionManagerScreen>
     'cloudstream' => 'CloudStream',
     _ => id,
   };
-
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-
     return Scaffold(
       backgroundColor: cs.surface,
       body: Obx(() {
@@ -114,7 +101,6 @@ class _ExtensionManagerScreenState extends State<ExtensionManagerScreen>
         if (tc == null || _managers.isEmpty) {
           return const Center(child: LoadingIndicatorM3E());
         }
-
         return Scaffold(
           backgroundColor: cs.surface,
           appBar: AppBar(
@@ -134,6 +120,10 @@ class _ExtensionManagerScreenState extends State<ExtensionManagerScreen>
               ),
             ),
             actions: [
+              IconButton(
+                onPressed: () => PluginManager().showRuntimeSettingsSheet(context),
+                icon: Icon(Icons.tune_rounded, color: cs.onSurface, size: 24),
+              ),
               IconButton(
                 onPressed: () => PluginManager().checkForUpdates(context, showIfUpToDate: true),
                 icon: Icon(Icons.system_update_alt_rounded, color: cs.onSurface, size: 24),
@@ -198,7 +188,6 @@ class _ExtensionManagerScreenState extends State<ExtensionManagerScreen>
       }),
     );
   }
-
   Widget _buildRuntimeWarning(ColorScheme theme) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -228,7 +217,25 @@ class _ExtensionManagerScreenState extends State<ExtensionManagerScreen>
               if (_isRuntimeLoaded.value) await _refresh();
             },
             child: Text(
-              'Load Runtime',
+              'Load',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: theme.error,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          GestureDetector(
+            onTap: () async {
+              await PluginManager().forceReDownload(context);
+              if (!mounted) return;
+              await _checkRuntime();
+              if (_isRuntimeLoaded.value) await _refresh();
+            },
+            child: Text(
+              'Force Fix',
               style: TextStyle(
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.bold,
@@ -242,12 +249,9 @@ class _ExtensionManagerScreenState extends State<ExtensionManagerScreen>
     );
   }
 }
-
 class _ManagerPage extends StatelessWidget {
   final Extension manager;
-
   const _ManagerPage({required this.manager});
-
   List<ItemType> get _supportedTypes {
     final types = <ItemType>[];
     if (manager.supportsAnime) types.add(ItemType.anime);
@@ -255,7 +259,6 @@ class _ManagerPage extends StatelessWidget {
     if (manager.supportsNovel) types.add(ItemType.novel);
     return types;
   }
-
   @override
   Widget build(BuildContext context) {
     final types = _supportedTypes;
@@ -268,27 +271,21 @@ class _ManagerPage extends StatelessWidget {
     );
   }
 }
-
 class _RepoSection extends StatefulWidget {
   final Extension manager;
   final ItemType itemType;
-
   const _RepoSection({required this.manager, required this.itemType});
-
   @override
   State<_RepoSection> createState() => _RepoSectionState();
 }
-
 class _RepoSectionState extends State<_RepoSection> {
   final _urlController = TextEditingController();
   bool _adding = false;
-
   @override
   void dispose() {
     _urlController.dispose();
     super.dispose();
   }
-
   Future<void> _addRepo() async {
     final url = _urlController.text.trim();
     if (url.isEmpty) return;
@@ -297,23 +294,19 @@ class _RepoSectionState extends State<_RepoSection> {
     _urlController.clear();
     if (mounted) setState(() => _adding = false);
   }
-
   IconData get _typeIcon => switch (widget.itemType) {
     ItemType.anime => Icons.movie_creation_rounded,
     ItemType.manga => Broken.book,
     ItemType.novel => Broken.document,
   };
-
   String get _typeLabel => switch (widget.itemType) {
     ItemType.anime => 'Anime',
     ItemType.manga => 'Manga',
     ItemType.novel => 'Novel',
   };
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -433,32 +426,25 @@ class _RepoSectionState extends State<_RepoSection> {
     );
   }
 }
-
 class _RepoTile extends StatefulWidget {
   final Repo repo;
   final ItemType itemType;
-
   const _RepoTile({required this.repo, required this.itemType});
-
   @override
   State<_RepoTile> createState() => _RepoTileState();
 }
-
 class _RepoTileState extends State<_RepoTile> {
   bool _removing = false;
-
   Future<void> _remove() async {
     setState(() => _removing = true);
     await sourceController.removeRepo(widget.repo, widget.itemType);
     if (mounted) setState(() => _removing = false);
   }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
     final url = widget.repo.url;
     final name = widget.repo.name;
-
     return Dismissible(
       key: ValueKey('${widget.repo.url}_${widget.itemType}'),
       direction: DismissDirection.endToStart,

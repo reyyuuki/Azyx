@@ -1,9 +1,6 @@
-// ignore_for_file: must_be_immutable
-
 import 'dart:async';
 import 'dart:developer';
 import 'dart:math' hide log;
-
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
@@ -20,13 +17,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 class EpisodesList extends StatelessWidget {
   final List<Episode> episodeList;
   final String image;
   final String title;
   final String id;
-
   EpisodesList({
     super.key,
     required this.episodeList,
@@ -34,11 +29,9 @@ class EpisodesList extends StatelessWidget {
     required this.title,
     required this.id,
   });
-
   final Rx<String> episodeTitle = ''.obs;
   final Rx<bool> hasError = false.obs;
   final RxList<Video> episodeUrls = <Video>[].obs;
-
   Future<void> fetchEpisodeLink(
     String url,
     String number,
@@ -57,7 +50,6 @@ class EpisodesList extends StatelessWidget {
           );
       if (response.isNotEmpty) {
         log('response: ${response.first.quality}');
-
         episodeUrls.value = response;
         episodeTitle.value = setTitle;
       } else {
@@ -68,7 +60,6 @@ class EpisodesList extends StatelessWidget {
       log("Error while fetching episode url: $e");
     }
   }
-
   GestureDetector serverAzyXContainer(
     BuildContext context,
     String name,
@@ -119,18 +110,15 @@ class EpisodesList extends StatelessWidget {
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Column(
       children: episodeList.map((episode) {
         return GestureDetector(
           onTap: () {
             episodeTitle.value = episode.title ?? '';
             hasError.value = false;
-
             final scrapeToken =
                 'scrape_${DateTime.now().millisecondsSinceEpoch}_${episode.number}_${Random().nextInt(10000)}';
             final sourceEpisode = DEpisode(
@@ -141,7 +129,6 @@ class EpisodesList extends StatelessWidget {
             log(
               '[EpisodesList] Tapped EP ${episode.number} url=${episode.url} sortMap=${sourceEpisode.sortMap}',
             );
-
             final stream = () async* {
               try {
                 final list = await sourceController.activeSource.value!.methods
@@ -156,7 +143,6 @@ class EpisodesList extends StatelessWidget {
                 log('[EpisodesList] getVideoList error: $e');
               }
             }();
-
             showModalBottomSheet(
               context: context,
               shape: const RoundedRectangleBorder(
@@ -288,7 +274,6 @@ class EpisodesList extends StatelessWidget {
     );
   }
 }
-
 class StreamEpisodeSheet extends StatefulWidget {
   final Stream<Video>? stream;
   final String number;
@@ -298,7 +283,6 @@ class StreamEpisodeSheet extends StatefulWidget {
   final List<Episode> episodeList;
   final Rx<String> episodeTitle;
   final Rx<bool> hasError;
-
   const StreamEpisodeSheet({
     super.key,
     required this.stream,
@@ -310,17 +294,14 @@ class StreamEpisodeSheet extends StatefulWidget {
     required this.episodeTitle,
     required this.hasError,
   });
-
   @override
   State<StreamEpisodeSheet> createState() => _StreamEpisodeSheetState();
 }
-
 class _StreamEpisodeSheetState extends State<StreamEpisodeSheet> {
   final RxList<Video> videos = <Video>[].obs;
   final RxBool isFetching = true.obs;
   final Set<String> seenUrls = {};
   StreamSubscription<Video>? _sub;
-
   @override
   void initState() {
     super.initState();
@@ -344,13 +325,11 @@ class _StreamEpisodeSheetState extends State<StreamEpisodeSheet> {
       widget.hasError.value = true;
     }
   }
-
   @override
   void dispose() {
     _sub?.cancel();
     super.dispose();
   }
-
   String _videoLabel(Video video) {
     final t = video.title;
     if (t != null && t.isNotEmpty && t.toLowerCase() != 'null') return t;
@@ -358,11 +337,9 @@ class _StreamEpisodeSheetState extends State<StreamEpisodeSheet> {
     if (q.isNotEmpty && q != 'null') return q;
     return 'Stream';
   }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       decoration: BoxDecoration(
@@ -376,7 +353,6 @@ class _StreamEpisodeSheetState extends State<StreamEpisodeSheet> {
           final fetching = isFetching.value;
           final hasErr = widget.hasError.value;
           final videoList = videos.toList();
-
           return ListView(
             physics: const BouncingScrollPhysics(),
             children: [
@@ -526,22 +502,18 @@ class _StreamEpisodeSheetState extends State<StreamEpisodeSheet> {
     );
   }
 }
-
 class _StreamSheetLoading extends StatelessWidget {
   final String title;
   final String subtitle;
   final bool compact;
-
   const _StreamSheetLoading({
     required this.title,
     required this.subtitle,
     this.compact = false,
   });
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
       margin: EdgeInsets.only(bottom: compact ? 0 : 12),
       padding: EdgeInsets.symmetric(
@@ -585,24 +557,20 @@ class _StreamSheetLoading extends StatelessWidget {
     );
   }
 }
-
 class _StreamSheetMessage extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
   final Color color;
-
   const _StreamSheetMessage({
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.color,
   });
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
       decoration: BoxDecoration(

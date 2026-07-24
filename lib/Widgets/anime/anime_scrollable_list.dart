@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
 import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
@@ -9,7 +8,6 @@ import 'package:azyx/Widgets/anime/item_card.dart';
 import 'package:azyx/Widgets/common/gradient_title.dart';
 import 'package:azyx/utils/functions.dart';
 import 'package:flutter/material.dart';
-
 class AnimeScrollableList extends StatelessWidget {
   final List<dynamic> animeList;
   final String title;
@@ -22,7 +20,6 @@ class AnimeScrollableList extends StatelessWidget {
     required this.isManga,
     this.varient = CarousaleVarient.regular,
   });
-
   @override
   Widget build(BuildContext context) {
     final List<CarousaleData> data = getCarousaleData(animeList, varient);

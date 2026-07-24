@@ -15,7 +15,6 @@ class Simkl {
         return 'ALL';
     }
   }
-
   static String simklMovieToAL(String simklStatus) {
     switch (simklStatus) {
       case 'watching':
@@ -32,7 +31,6 @@ class Simkl {
         return 'ALL';
     }
   }
-
   static String alToSimklShow(String anilistStatus) {
     switch (anilistStatus) {
       case 'CURRENT':
@@ -49,7 +47,6 @@ class Simkl {
         return 'all';
     }
   }
-
   static String alToSimklMovie(String anilistStatus) {
     switch (anilistStatus) {
       case 'CURRENT':

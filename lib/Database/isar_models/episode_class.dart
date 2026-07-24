@@ -2,9 +2,7 @@ import 'dart:developer';
 import 'package:isar_community/isar.dart';
 import 'package:azyx/utils/time_formater.dart';
 import 'package:intl/intl.dart';
-
 part 'episode_class.g.dart';
-
 @embedded
 class Episode {
   String? title;
@@ -18,7 +16,6 @@ class Episode {
   String? type;
   List<String>? sortKeys;
   List<String>? sortVals;
-
   Episode({
     this.date,
     this.title,
@@ -32,11 +29,9 @@ class Episode {
     this.sortKeys,
     this.sortVals,
   });
-
   factory Episode.fromJson(Map<dynamic, dynamic> data) {
     final rawSortKeys = data['sortKeys'] as List<dynamic>?;
     final rawSortVals = data['sortVals'] as List<dynamic>?;
-
     return Episode(
       title: data['name'] ?? "",
       url: data['url'] ?? "",
@@ -55,7 +50,6 @@ class Episode {
       sortVals: rawSortVals?.map((e) => e.toString()).toList(),
     );
   }
-
   Map<dynamic, dynamic> toJson() {
     return {
       'name': title ?? '',
@@ -72,32 +66,25 @@ class Episode {
     };
   }
 }
-
 extension EpisodeMap on Episode {
   Map<String, String> get sortMap {
     if (sortKeys == null || sortVals == null) return {};
     if (sortKeys!.isEmpty || sortVals!.isEmpty) return {};
-
     final pairCount = sortKeys!.length < sortVals!.length
         ? sortKeys!.length
         : sortVals!.length;
     if (pairCount == 0) return {};
-
     return Map<String, String>.fromIterables(
       sortKeys!.take(pairCount),
       sortVals!.take(pairCount),
     );
   }
-
-  /// Returns sortMap with empty-value entries removed, or null if nothing meaningful remains.
-  /// Use this when building a DEpisode to avoid triggering broken mapper API paths.
   Map<String, String>? get effectiveSortMap {
     final map = Map<String, String>.from(sortMap)
       ..removeWhere((_, v) => v.isEmpty);
     return map.isEmpty ? null : map;
   }
 }
-
 @embedded
 class Chapter {
   String? title;
@@ -105,7 +92,6 @@ class Chapter {
   String? scanlator;
   double? number;
   String? releaseDate;
-
   Chapter({
     this.link,
     this.number,
@@ -113,7 +99,6 @@ class Chapter {
     this.scanlator,
     this.title,
   });
-
   factory Chapter.fromJson(Map<dynamic, dynamic> json) {
     return Chapter(
       title: json['title'],
@@ -123,7 +108,6 @@ class Chapter {
       releaseDate: json['releaseDate'],
     );
   }
-
   Map<dynamic, dynamic> toJson() {
     return {
       'title': title,
@@ -134,51 +118,37 @@ class Chapter {
     };
   }
 }
-
 class ChapterRecognition {
   static const _numberPattern = r"([0-9]+)(\.[0-9]+)?(\.?[a-z]+)?";
-
   static final _unwanted = RegExp(
     r"\b(?:v|ver|vol|version|volume|season|s)[^a-z]?[0-9]+",
   );
-
   static final _unwantedWhiteSpace = RegExp(r"\s(?=extra|special|omake)");
-
   static dynamic parseChapterNumber(String mangaTitle, String chapterName) {
     var name = chapterName.toLowerCase();
-
     name = name.replaceAll(mangaTitle.toLowerCase(), "").trim();
-
     name = name.replaceAll(',', '.').replaceAll('-', '.');
-
     name = name.replaceAll(_unwantedWhiteSpace, "");
-
     name = name.replaceAll(_unwanted, "");
-
     final episodeMatch = RegExp(r"e(\d+)").firstMatch(name);
     if (episodeMatch != null) {
       return int.parse(episodeMatch.group(1)!);
     }
-
     const numberPat = "*$_numberPattern";
     const ch = r"(?<=ch\.)";
     var match = RegExp("$ch $numberPat").firstMatch(name);
     if (match != null) {
       return _convertToIntIfWhole(_getChapterNumberFromMatch(match));
     }
-
     match = RegExp(_numberPattern).firstMatch(name);
     if (match != null) {
       return _convertToIntIfWhole(_getChapterNumberFromMatch(match));
     }
-
     return 0;
   }
-
   static dynamic _convertToIntIfWhole(double value) {
     return value % 1 == 0 ? value.toInt() : value;
   }
-
   static double _getChapterNumberFromMatch(Match match) {
     final initial = double.parse(match.group(1)!);
     final subChapterDecimal = match.group(2);
@@ -186,12 +156,10 @@ class ChapterRecognition {
     final addition = _checkForDecimal(subChapterDecimal, subChapterAlpha);
     return initial + addition;
   }
-
   static double _checkForDecimal(String? decimal, String? alpha) {
     if (decimal != null && decimal.isNotEmpty) {
       return double.parse(decimal);
     }
-
     if (alpha != null && alpha.isNotEmpty) {
       if (alpha.contains("extra")) {
         return 0.99;
@@ -207,17 +175,14 @@ class ChapterRecognition {
         return _parseAlphaPostFix(trimmedAlpha[0]);
       }
     }
-
     return 0.0;
   }
-
   static double _parseAlphaPostFix(String alpha) {
     final number = alpha.codeUnitAt(0) - ('a'.codeUnitAt(0) - 1);
     if (number >= 10) return 0.0;
     return number / 10.0;
   }
 }
-
 List<Chapter> mChapterToChapter(List<dynamic> chapters, String title) {
   return chapters.map((e) {
     String? eName;
@@ -230,7 +195,6 @@ List<Chapter> mChapterToChapter(List<dynamic> chapters, String title) {
         eName = null;
       }
     }
-
     return Chapter(
       title: eName,
       link: e.url,
@@ -243,7 +207,6 @@ List<Chapter> mChapterToChapter(List<dynamic> chapters, String title) {
     );
   }).toList();
 }
-
 Episode mChapterToEpisode(dynamic item, dynamic episodeResult) {
   String? itemNumber;
   try {
@@ -251,13 +214,11 @@ Episode mChapterToEpisode(dynamic item, dynamic episodeResult) {
   } catch (_) {
     itemNumber = null;
   }
-
   if (itemNumber == null || itemNumber.isEmpty) {
     try {
       itemNumber = item.episodeNumber;
     } catch (_) {}
   }
-
   String? itemName;
   try {
     itemName = item.name;
@@ -268,7 +229,6 @@ Episode mChapterToEpisode(dynamic item, dynamic episodeResult) {
       itemName = null;
     }
   }
-
   String? episodeResultName;
   try {
     episodeResultName = episodeResult.name;
@@ -279,7 +239,6 @@ Episode mChapterToEpisode(dynamic item, dynamic episodeResult) {
       episodeResultName = null;
     }
   }
-
   String? season;
   String? type;
   List<String>? sortKeys;
@@ -297,7 +256,6 @@ Episode mChapterToEpisode(dynamic item, dynamic episodeResult) {
   } catch (e) {
     log('[EpisodeMap] ERROR reading sortMap: $e');
   }
-
   return Episode(
     title: itemName,
     url: item.url,
@@ -315,7 +273,6 @@ Episode mChapterToEpisode(dynamic item, dynamic episodeResult) {
     sortVals: sortVals,
   );
 }
-
 String calcTime(dynamic timestamp, {String format = "dd-MM-yyyy"}) {
   if (timestamp == null) return '';
   final String tsStr = timestamp.toString().trim();
@@ -329,7 +286,6 @@ String calcTime(dynamic timestamp, {String format = "dd-MM-yyyy"}) {
     final dateTime = DateTime.fromMillisecondsSinceEpoch(parsed);
     final now = DateTime.now();
     final difference = now.difference(dateTime);
-
     if (difference.inDays <= 14) {
       if (difference.inDays == 0) {
         if (difference.inHours < 1) {
@@ -339,7 +295,6 @@ String calcTime(dynamic timestamp, {String format = "dd-MM-yyyy"}) {
       }
       return "${difference.inDays} days ago";
     }
-
     return DateFormat(format).format(dateTime);
   } catch (_) {
     return tsStr;

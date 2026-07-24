@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
-
 class SearchBox extends StatelessWidget {
   final void Function() ontap;
   final void Function(String value) onChanged;
   final String name;
   final EdgeInsets? margin;
   final TextEditingController? controller;
-
   const SearchBox({
     super.key,
     required this.ontap,
@@ -16,12 +14,10 @@ class SearchBox extends StatelessWidget {
     this.margin,
     this.controller,
   });
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
-
     return Container(
       margin: margin,
       decoration: BoxDecoration(

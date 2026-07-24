@@ -15,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 class WatchSection extends StatefulWidget {
   final String image;
   final String id;
@@ -28,7 +27,6 @@ class WatchSection extends StatefulWidget {
   final Function(String link) onChanged;
   final Function(String) onTitleChanged;
   final Function(String) onSourceChanged;
-
   const WatchSection({
     super.key,
     required this.id,
@@ -43,21 +41,17 @@ class WatchSection extends StatefulWidget {
     required this.mediaData,
     required this.animeTitle,
   });
-
   @override
   State<WatchSection> createState() => _WatchSectionState();
 }
-
 class _WatchSectionState extends State<WatchSection> {
   final RxList<WrongTitleSearch> wrongTitleSearchData = RxList();
   final RxList<Episode> filteredList = RxList();
   TextEditingController wrongTitle = TextEditingController();
   final Rx<bool> searchError = false.obs;
-  
   final RxString selectedSeason = ''.obs;
   final RxString selectedType = ''.obs;
   final RxString episodeSearchQuery = ''.obs;
-
   @override
   void initState() {
     super.initState();
@@ -68,13 +62,11 @@ class _WatchSectionState extends State<WatchSection> {
       _applyFilters();
     });
   }
-
   void _initFilters() {
     final availableSeasons = getAvailableSeasons();
     if (availableSeasons.isNotEmpty && !availableSeasons.contains(selectedSeason.value)) {
       selectedSeason.value = availableSeasons.first;
     }
-
     final availableTypes = getAvailableTypes();
     if (availableTypes.isNotEmpty && !availableTypes.contains(selectedType.value)) {
       if (availableTypes.any((t) => t.toLowerCase() == 'subbed')) {
@@ -84,7 +76,6 @@ class _WatchSectionState extends State<WatchSection> {
       }
     }
   }
-
   List<String> getAvailableSeasons() {
     final seasons = widget.episodelist
         .map((e) => e.season)
@@ -99,7 +90,6 @@ class _WatchSectionState extends State<WatchSection> {
     });
     return seasons;
   }
-
   List<String> getAvailableTypes() {
     final types = widget.episodelist
         .map((e) => e.type)
@@ -110,30 +100,24 @@ class _WatchSectionState extends State<WatchSection> {
     types.sort();
     return types;
   }
-
   void _applyFilters() {
     final query = episodeSearchQuery.value.toLowerCase();
-    
     var temp = widget.episodelist.where((episode) {
       if (query.isNotEmpty) {
         final titleMatch = episode.title?.toLowerCase().contains(query) ?? false;
         final numMatch = episode.number.toLowerCase().contains(query);
         if (!titleMatch && !numMatch) return false;
       }
-      
       if (selectedSeason.value.isNotEmpty) {
         final epSeason = episode.season ?? '1';
         if (epSeason != selectedSeason.value) return false;
       }
-      
       if (selectedType.value.isNotEmpty) {
         final epType = episode.type ?? 'Subbed';
         if (epType.toLowerCase() != selectedType.value.toLowerCase()) return false;
       }
-      
       return true;
     }).toList();
-    
     temp.sort((a, b) {
       final numA = double.tryParse(a.number);
       final numB = double.tryParse(b.number);
@@ -144,10 +128,8 @@ class _WatchSectionState extends State<WatchSection> {
       if (numB != null) return 1;
       return (a.title ?? '').compareTo(b.title ?? '');
     });
-
     filteredList.value = temp;
   }
-
   Future<void> wrongTitleSearch(String query, BuildContext context) async {
     try {
       final response = await sourceController.activeSource.value!.methods
@@ -171,16 +153,13 @@ class _WatchSectionState extends State<WatchSection> {
       azyxSnackBar("Something went wrong");
     }
   }
-
   void handleEpisodes(String value) {
     episodeSearchQuery.value = value;
     _applyFilters();
   }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
       shrinkWrap: true,
@@ -303,13 +282,10 @@ class _WatchSectionState extends State<WatchSection> {
       ],
     );
   }
-
   Widget _buildFilterChips(ColorScheme colorScheme) {
     final seasons = getAvailableSeasons();
     final types = getAvailableTypes();
-
     if (seasons.isEmpty && types.isEmpty) return const SizedBox.shrink();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -391,7 +367,6 @@ class _WatchSectionState extends State<WatchSection> {
       ],
     );
   }
-
   Widget _buildEmptyState(ColorScheme colorScheme) {
     return Center(
       child: Padding(
@@ -417,7 +392,6 @@ class _WatchSectionState extends State<WatchSection> {
       ),
     );
   }
-
   Widget _buildErrorState(ColorScheme colorScheme) {
     return Center(
       child: Container(
@@ -461,7 +435,6 @@ class _WatchSectionState extends State<WatchSection> {
       ),
     );
   }
-
   Widget _buildLoadingState(ColorScheme colorScheme) {
     return Center(
       child: Padding(
@@ -488,10 +461,8 @@ class _WatchSectionState extends State<WatchSection> {
       ),
     );
   }
-
   void _showWrongTitleSheet(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

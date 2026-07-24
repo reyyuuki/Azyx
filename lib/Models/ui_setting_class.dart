@@ -3,7 +3,6 @@ class UiSettingClass {
   double? blurMultiplier;
   double? radiusMultiplier;
   double? spreadMultiplier;
-
   UiSettingClass({
     this.blurMultiplier = 1.0,
     this.glowMultiplier = 0.6,

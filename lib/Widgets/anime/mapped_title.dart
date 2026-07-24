@@ -2,7 +2,6 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
-
 class MappedTitle extends StatelessWidget {
   const MappedTitle({
     super.key,
@@ -10,15 +9,12 @@ class MappedTitle extends StatelessWidget {
     required this.animeTitle,
     required this.totalEpisodes,
   });
-
   final Rx<String> animeTitle;
   final Rx<String> totalEpisodes;
   final String name;
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(

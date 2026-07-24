@@ -1,21 +1,18 @@
-import 'dart:developer';
-
-import 'package:azyx/Controllers/source/source_controller.dart';
-import 'package:azyx/Database/keys/data_keys.dart';
-import 'package:azyx/Database/kv_helper.dart';
+import 'package:azyx/Controllers/services/community_service.dart';
 import 'package:azyx/Screens/Settings/Pages/theme_setting.dart';
 import 'package:azyx/Screens/Settings/Pages/ui_settings.dart';
+import 'package:azyx/Extensions/ExtensionManagerScreen.dart';
+import 'package:azyx/Extensions/plugin_manager.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:flutter/material.dart';
-
+import 'package:get/get_instance/get_instance.dart';
+import 'package:get/state_manager.dart';
 import '../../Widgets/common/custom_app_bar.dart';
-
 class SettingScreen extends StatelessWidget {
   const SettingScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,13 +31,11 @@ class SettingScreen extends StatelessWidget {
                           const begin = Offset(1, 0);
                           const end = Offset.zero;
                           const curve = Curves.ease;
-
                           var tween = Tween(
                             begin: begin,
                             end: end,
                           ).chain(CurveTween(curve: curve));
                           var offsetAnimation = animation.drive(tween);
-
                           return SlideTransition(
                             position: offsetAnimation,
                             child: child,
@@ -70,13 +65,11 @@ class SettingScreen extends StatelessWidget {
                           const begin = Offset(1, 0);
                           const end = Offset.zero;
                           const curve = Curves.ease;
-
                           var tween = Tween(
                             begin: begin,
                             end: end,
                           ).chain(CurveTween(curve: curve));
                           var offsetAnimation = animation.drive(tween);
-
                           return SlideTransition(
                             position: offsetAnimation,
                             child: child,
@@ -97,6 +90,17 @@ class SettingScreen extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
+                PluginManager().showRuntimeSettingsSheet(context);
+              },
+              child: settingTile(
+                context,
+                "Extension Runtime Host",
+                "Update, Force Re-download or Load Runtime APK",
+                const Icon(Broken.category),
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
                 openDialogBox(context);
               },
               child: settingTile(
@@ -108,27 +112,6 @@ class SettingScreen extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
-                // Navigator.push(
-                //     context,
-                // PageRouteBuilder(
-                //     transitionDuration: const Duration(milliseconds: 300),
-                //     transitionsBuilder:
-                //         (context, animation, secondaryAnimation, child) {
-                //       const begin = Offset(1, 0);
-                //       const end = Offset.zero;
-                //       const curve = Curves.ease;
-
-                //       var tween = Tween(begin: begin, end: end)
-                //           .chain(CurveTween(curve: curve));
-                //       var offsetAnimation = animation.drive(tween);
-
-                //       return SlideTransition(
-                //           position: offsetAnimation, child: child);
-                //     },
-                //     pageBuilder:
-                //         (context, animation, secondaryAnimation) {
-                //       return const AboutSettings();
-                //     }));
               },
               child: settingTile(
                 context,
@@ -138,21 +121,17 @@ class SettingScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            // ElevatedButton(
-            //   onPressed: () async {
-            //     // log('activesource: ${sourceController.activeSource.value?.id}');
-            //     await sourceController.initExtensions();
-            //     log('activesource: ${sourceController.activeSource.value?.id}');
-            //     log('sources: ${SourceKeys.activeSourceId.get('')}');
-            //   },
-            //   child: Text("Testing"),
-            // ),
+            ElevatedButton(
+              onPressed: () async {
+                await Get.find<CommunityService>().fetchAll();
+              },
+              child: const Text("Testing"),
+            ),
           ],
         ),
       ),
     );
   }
-
   void openDialogBox(context) {
     showDialog(
       context: context,
@@ -197,10 +176,6 @@ class SettingScreen extends StatelessWidget {
                       ),
                       onPressed: () {
                         Navigator.pop(context);
-                        // Provider.of<ThemeProvider>(
-                        //   context,
-                        //   listen: false,
-                        // ).resetSettings();
                       },
                       child: AzyXText(
                         text: "Reset",
@@ -216,7 +191,6 @@ class SettingScreen extends StatelessWidget {
       },
     );
   }
-
   ListTile settingTile(
     BuildContext context,
     String title,

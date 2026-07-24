@@ -4,7 +4,6 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/utils/assets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 class ServiceBottomSheet {
   static void showServiceBottomSheet(BuildContext context) {
     showModalBottomSheet(
@@ -28,31 +27,25 @@ class ServiceBottomSheet {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-
               const AzyXText(
                 text: 'Select Service',
                 fontSize: 20,
                 fontVariant: FontVariant.bold,
               ),
-
               const SizedBox(height: 20),
-
               _buildServiceTile(
                 context,
                 name: 'Anilist',
                 image: Assets.anilistLogo,
                 serviceType: ServicesType.anilist,
               ),
-
               const SizedBox(height: 12),
-
               _buildServiceTile(
                 context,
                 name: 'MAL',
                 image: Assets.malLogo,
                 serviceType: ServicesType.mal,
               ),
-
               const SizedBox(height: 20),
               _buildServiceTile(
                 context,
@@ -67,7 +60,6 @@ class ServiceBottomSheet {
       },
     );
   }
-
   static Widget _buildServiceTile(
     BuildContext context, {
     required String name,
@@ -76,7 +68,6 @@ class ServiceBottomSheet {
   }) {
     return Obx(() {
       final isSelected = serviceHandler.serviceType.value == serviceType;
-
       return AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
@@ -101,7 +92,6 @@ class ServiceBottomSheet {
                 serviceHandler.changeService(serviceType);
                 serviceHandler.refresh();
                 Navigator.of(context).pop();
-
                 Get.snackbar(
                   'Service Changed',
                   'Switched to $name',
@@ -137,10 +127,7 @@ class ServiceBottomSheet {
                             ).colorScheme.onSurface.withOpacity(0.7),
                     ),
                   ),
-
                   const SizedBox(width: 16),
-
-                  // Service name
                   Expanded(
                     child: AzyXText(
                       text: name,
@@ -153,8 +140,6 @@ class ServiceBottomSheet {
                           : null,
                     ),
                   ),
-
-                  // Selection indicator
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
                     child: isSelected

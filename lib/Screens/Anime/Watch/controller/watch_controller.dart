@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as max;
-
 import 'package:anymex_extension_runtime_bridge/ExtensionManager.dart';
 import 'package:anymex_extension_runtime_bridge/Models/DEpisode.dart';
 import 'package:azyx/Constants/constants.dart';
@@ -37,9 +36,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:volume_controller/volume_controller.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 enum ResizeModes { contain, cover, fill }
-
 class WatchController extends GetxController with WidgetsBindingObserver {
   late Player player;
   late VideoController controller;
@@ -70,7 +67,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   final Rx<bool> _brightnessIndicator = false.obs;
   final Rx<bool> isPressed = false.obs;
   final currentVisualProfile = 'natural'.obs;
-
   Timer? updateTimer;
   Timer? doubleTapTimer;
   Timer? hideControlsTimer;
@@ -78,7 +74,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   Timer? _brightnessTimer;
   Timer? _positionUpdateTimer;
   Duration _lastPosition = Duration.zero;
-
   void initializePlayer(AnimeAllData playerData) {
     WidgetsBinding.instance.addObserver(this);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
@@ -86,7 +81,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       DeviceOrientation.landscapeRight,
       DeviceOrientation.landscapeLeft,
     ]);
-
     updateEntry();
     player = Player();
     controller = VideoController(
@@ -95,14 +89,11 @@ class WatchController extends GetxController with WidgetsBindingObserver {
         androidAttachSurfaceAfterVideoParameters: true,
       ),
     );
-
     intializeData(playerData);
-    
     final firstVideo = playerData.episodeUrls.isNotEmpty ? playerData.episodeUrls.first : null;
     final referer = firstVideo?.headers?['referer'] ?? firstVideo?.headers?['Referer'] ?? (sourceController.activeSource.value?.baseUrl ?? '');
     final origin = firstVideo?.headers?['origin'] ?? firstVideo?.headers?['Origin'] ?? (sourceController.activeSource.value?.baseUrl ?? '');
     final userAgent = firstVideo?.headers?['user-agent'] ?? firstVideo?.headers?['User-Agent'] ?? 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
-
     player.open(
       Media(
         playerData.url!,
@@ -116,15 +107,12 @@ class WatchController extends GetxController with WidgetsBindingObserver {
         },
       ),
     );
-
     _handleVolumeAndBrightness();
     _setupPlayerListeners();
     updateTimer = Timer.periodic(
       const Duration(minutes: 1),
       (timer) => localHistoryEntry(),
     );
-
-    // Fetch fresh episode links in the background
     final currentEpisode = playerData.episodeList?.firstWhereOrNull(
       (e) => e.number == playerData.number,
     );
@@ -132,7 +120,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       _fetchFreshEpisodeUrls(currentEpisode);
     }
   }
-
   Future<void> _fetchFreshEpisodeUrls(Episode episode) async {
     final url = episode.url!;
     log("fetching fresh links in background: $url");
@@ -148,11 +135,9 @@ class WatchController extends GetxController with WidgetsBindingObserver {
         final quality = response.firstWhereOrNull(
           (i) => i.url == animeData.value.url,
         ) ?? response.first;
-        
         animeData.value.episodeUrls = response;
         animeData.value.url = quality.url;
         localHistoryEntry();
-        
         player.open(
           Media(
             quality.url,
@@ -178,20 +163,16 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       log("Error fetching fresh links in background: $e , $stack");
     }
   }
-
   void _setupPlayerListeners() {
     player.stream.playing.listen((p) {
       isPlaying.value = p;
     });
-
     player.stream.buffering.listen((b) {
       isBuffering.value = b;
     });
-
     player.stream.buffer.listen((d) {
       buffered.value = d;
     });
-
     player.stream.position.listen((p) {
       if ((p - _lastPosition).abs().inSeconds >= 1) {
         _lastPosition = p;
@@ -201,20 +182,16 @@ class WatchController extends GetxController with WidgetsBindingObserver {
         });
       }
     });
-
     player.stream.duration.listen((d) {
       totalDuration.value = d;
     });
   }
-
   void localHistoryEntry() {
     final data = animeData.value;
     if (data.id == null) return;
-
     final String episodeUrlsJson = jsonEncode(
       data.episodeUrls.map((e) => e.toJson()).toList(),
     );
-
     final entry = LocalHistoryItem()
       ..mediaId = int.tryParse(data.id ?? '')
       ..title = data.title
@@ -231,7 +208,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ..episodeUrlsJson = episodeUrlsJson;
     Future.microtask(() => localHistoryController.addToWatchingHistory(entry));
   }
-
   void updateEntry() async {
     Utils.log(
       'aando: ${animeData.value.id}  ${serviceHandler.currentMedia.value.id ?? ''}',
@@ -241,7 +217,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       isAnime: true,
     );
   }
-
   Future<void> _handleVolumeAndBrightness() async {
     final volumeController = VolumeController.instance;
     volumeController.showSystemUI = false;
@@ -258,7 +233,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       });
     }
   }
-
   void intializeData(AnimeAllData playerData) {
     animeData.value = playerData;
     episodeNumber.value = playerData.number!;
@@ -266,13 +240,11 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     filteredEpisodes.value = playerData.episodeList!;
     localHistoryEntry();
   }
-
   void changeResizeMode() {
     currentMode.value =
         ResizeModes.values[(ResizeModes.values.indexOf(currentMode.value) + 1) %
             ResizeModes.values.length];
   }
-
   BoxFit getMode(Rx<ResizeModes> mode) {
     switch (mode.value) {
       case ResizeModes.contain:
@@ -283,7 +255,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
         return BoxFit.fill;
     }
   }
-
   IconData getModeIcon(Rx<ResizeModes> mode) {
     switch (mode.value) {
       case ResizeModes.contain:
@@ -294,7 +265,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
         return Icons.fullscreen;
     }
   }
-
   Future<void> loadEpisodeurl(String url) async {
     log("new ${sourceController.activeSource.value!.name!}");
     try {
@@ -344,12 +314,10 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       log("Error while loading episode url: $e , $stack");
     }
   }
-
   void applySavedProfile() => ColorProfileManager().applyColorProfile(
     currentVisualProfile.value,
     player,
   );
-
   void showColorProfileSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -368,21 +336,18 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ),
     );
   }
-
   void doubleTap(TapDownDetails details, BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final tapPosition = details.globalPosition;
     final isLeft = tapPosition.dx < screenWidth / 2;
     seek10Seconds(isLeft);
   }
-
   void seek10Seconds(bool isLeft) {
     player.pause();
     isSeeking.value = true;
     isLeftSide.value = isLeft;
     doubleTapLable.value += 10;
     skipDuration.value += 10;
-
     final newPosition = isLeft
         ? max.max(0, position.value.inSeconds - skipDuration.value).seconds
         : max
@@ -391,7 +356,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
                 position.value.inSeconds + skipDuration.value,
               )
               .seconds;
-
     position.value = newPosition;
     player.seek(Duration(seconds: newPosition.inSeconds));
     player.play();
@@ -406,7 +370,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       skipDuration.value = 0;
     });
   }
-
   Future<void> setVolume(double value) async {
     try {
       VolumeController.instance.setVolume(value);
@@ -420,7 +383,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       _volumeInterceptEventStream.value = false;
     });
   }
-
   Future<void> setBrightness(double value) async {
     try {
       if (Platform.isAndroid || Platform.isIOS) {
@@ -435,7 +397,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       });
     }
   }
-
   void handleControlsTap() {
     showControls.value = !showControls.value;
     hideControlsTimer?.cancel();
@@ -446,7 +407,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       );
     }
   }
-
   void handleVerticalDrag(DragUpdateDetails e, BuildContext context) async {
     if (!isControlsLocked.value) {
       final delta = e.primaryDelta ?? 0.0;
@@ -462,7 +422,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       }
     }
   }
-
   void changeEpisode(bool isNext) {
     if (anilistAuthController.userData.value.name != null) {
       anilistAddToListController.updateAnimeProgress(
@@ -494,7 +453,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       log("No episode");
     }
   }
-
   void onEpisodeSelected(Episode item) {
     if (anilistAuthController.userData.value.name != null) {
       anilistAddToListController.updateAnimeProgress(
@@ -511,12 +469,10 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     showEpisodesBox.value = false;
     loadEpisodeurl(item.url!);
   }
-
   String getFormattedTime(int timeInSeconds) {
     String formatTime(int val) {
       return val.toString().padLeft(2, '0');
     }
-
     int hours = timeInSeconds ~/ 3600;
     int minutes = (timeInSeconds % 3600) ~/ 60;
     int seconds = timeInSeconds % 60;
@@ -525,7 +481,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     String formattedSeconds = formatTime(seconds);
     return "${formattedHours.isNotEmpty ? "$formattedHours:" : ''}$formattedMins:$formattedSeconds";
   }
-
   Widget backButton(BuildContext context) {
     return GestureDetector(
       onTap: () {
@@ -542,7 +497,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ),
     );
   }
-
   Widget topRightControls(BuildContext context) {
     return AzyXContainer(
       decoration: BoxDecoration(
@@ -591,7 +545,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ),
     );
   }
-
   Widget episodeTitleWidget(BuildContext context) {
     return Expanded(
       child: Column(
@@ -623,7 +576,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ),
     );
   }
-
   Widget topControls(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -635,7 +587,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ],
     );
   }
-
   Widget bottomRightControls() {
     return AzyXContainer(
       decoration: BoxDecoration(
@@ -698,7 +649,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ),
     );
   }
-
   Widget seek10Widget() {
     return AzyXContainer(
       margin: const EdgeInsets.only(right: 10),
@@ -724,7 +674,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ),
     );
   }
-
   Widget speedButton(BuildContext context) {
     return AzyXContainer(
       margin: const EdgeInsets.only(right: 10),
@@ -747,7 +696,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ),
     );
   }
-
   Widget seek85(bool isLeft) {
     return AzyXContainer(
       margin: const EdgeInsets.only(right: 10),
@@ -790,7 +738,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ),
     );
   }
-
   Widget bottomPotraitControls(BuildContext context) {
     return Column(
       children: [
@@ -810,13 +757,11 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ],
     );
   }
-
   Widget bottomLeftControls(BuildContext context) {
     return isControlsLocked.value
         ? const SizedBox.shrink()
         : Row(children: [seek85(true), speedButton(context)]);
   }
-
   Widget bottomControls(BuildContext context) {
     return isPotraitOrientaion.value
         ? bottomPotraitControls(context)
@@ -836,7 +781,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
             ],
           );
   }
-
   Widget buildIconButton({
     required VoidCallback ontap,
     required IconData icon,
@@ -855,7 +799,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ),
     );
   }
-
   Widget centerControls(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -892,7 +835,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ],
     );
   }
-
   Widget lockedCenterControls() {
     return AzyXContainer(
       alignment: Alignment.center,
@@ -901,7 +843,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
           : const SizedBox.shrink(),
     );
   }
-
   Widget customControls(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -1003,7 +944,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ),
     );
   }
-
   Widget buildRippleEffect(BuildContext context) {
     return Obx(
       () => AnimatedPositioned(
@@ -1052,7 +992,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ),
     );
   }
-
   Widget preesedBar() {
     return AnimatedPositioned(
       top: isPotraitOrientaion.value ? 100 : 40,
@@ -1079,7 +1018,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ),
     );
   }
-
   Widget volumeIndicator() {
     return Positioned.fill(
       child: Obx(
@@ -1095,7 +1033,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ),
     );
   }
-
   Widget brightnessIndicator() {
     return Positioned.fill(
       child: Obx(
@@ -1111,7 +1048,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ),
     );
   }
-
   Widget episodeListDrawer() {
     return EpisodeListDrawer(
       ontap: onEpisodeSelected,
@@ -1122,7 +1058,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       filteredEpisodes: filteredEpisodes,
     );
   }
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
@@ -1130,7 +1065,6 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       localHistoryEntry();
     }
   }
-
   @override
   void onClose() {
     WidgetsBinding.instance.removeObserver(this);

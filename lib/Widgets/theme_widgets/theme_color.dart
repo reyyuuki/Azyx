@@ -1,6 +1,5 @@
 import 'dart:developer';
 import 'dart:ui';
-
 import 'package:azyx/Providers/theme_provider.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
@@ -8,14 +7,11 @@ import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:checkmark/checkmark.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 class ThemeColor extends StatefulWidget {
   const ThemeColor({super.key});
-
   @override
   State<ThemeColor> createState() => _ThemeModesState();
 }
-
 class _ThemeModesState extends State<ThemeColor> {
   String? seedColor;
   List<String> paletteList = [
@@ -29,7 +25,6 @@ class _ThemeModesState extends State<ThemeColor> {
     "TonalSpot",
     "Vibrant",
   ];
-
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ThemeProvider>(context);
@@ -136,13 +131,11 @@ class _ThemeModesState extends State<ThemeColor> {
       ),
     );
   }
-
   void paletteBox(BuildContext context) {
     String selectedPalette = Provider.of<ThemeProvider>(
       context,
       listen: false,
     ).variant!;
-
     showDialog(
       context: context,
       barrierColor: Colors.transparent,

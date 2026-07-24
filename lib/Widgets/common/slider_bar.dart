@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:azyx/Widgets/common/m3_slider.dart';
-
 class CustomSlider extends StatelessWidget {
   final double min;
   final double max;
@@ -14,7 +13,6 @@ class CustomSlider extends StatelessWidget {
   final Color? inactveColor;
   final String? indiactorTime;
   final bool? isLocked;
-
   const CustomSlider({
     super.key,
     required this.onChanged,
@@ -30,7 +28,6 @@ class CustomSlider extends StatelessWidget {
     this.indiactorTime,
     this.isLocked,
   });
-
   @override
   Widget build(BuildContext context) {
     return M3Slider(

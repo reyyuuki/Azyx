@@ -5,14 +5,11 @@ import 'package:azyx/Widgets/theme_widgets/custom_color.dart';
 import 'package:azyx/Widgets/theme_widgets/theme_color.dart';
 import 'package:azyx/Widgets/theme_widgets/theme_modes.dart';
 import 'package:flutter/material.dart';
-
 class ThemeSetting extends StatefulWidget {
   const ThemeSetting({super.key});
-
   @override
   State<ThemeSetting> createState() => _ThemeSettingState();
 }
-
 class _ThemeSettingState extends State<ThemeSetting> {
   @override
   Widget build(BuildContext context) {

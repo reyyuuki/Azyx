@@ -15,24 +15,19 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
-
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
-
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
 }
-
 class _HistoryScreenState extends State<HistoryScreen>
     with SingleTickerProviderStateMixin {
   late final LocalHistoryController _controller;
   late final TabController _tabController;
-
   final RxString _searchQuery = ''.obs;
   final RxString _selectedFilter = 'All'.obs;
   final RxBool _isSearching = false.obs;
   final TextEditingController _searchController = TextEditingController();
-
   void handleTap(LocalHistoryItem item, bool isAnime) {
     if (item.mediaId != null) {
       if (isAnime) {
@@ -42,7 +37,6 @@ class _HistoryScreenState extends State<HistoryScreen>
         final List<Video> episodeUrls = decodedList
             .map((e) => Video.fromJson(e as Map<String, dynamic>))
             .toList();
-
         Get.to(
           () => WatchScreen(
             playerData: AnimeAllData(
@@ -62,12 +56,10 @@ class _HistoryScreenState extends State<HistoryScreen>
       } else {
         final sourceIndex = sourceController.installedMangaExtensions
             .indexWhere((e) => e.name == item.sourceName);
-
         if (sourceIndex != -1 || item.mangaSourceJson != null) {
           final Source source = sourceIndex != -1
               ? sourceController.installedMangaExtensions[sourceIndex]
               : Source.fromJson(jsonDecode(item.mangaSourceJson!));
-
           Get.to(
             () => ReadPage(
               source: source,
@@ -86,7 +78,6 @@ class _HistoryScreenState extends State<HistoryScreen>
       log('no media id: ${item.mediaId}');
     }
   }
-
   @override
   void initState() {
     super.initState();
@@ -98,21 +89,18 @@ class _HistoryScreenState extends State<HistoryScreen>
       }
     });
   }
-
   @override
   void dispose() {
     _tabController.dispose();
     _searchController.dispose();
     super.dispose();
   }
-
   String _formatDuration(int seconds) {
     if (seconds <= 0) return '0:00';
     final minutes = seconds ~/ 60;
     final remainingSeconds = seconds % 60;
     return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }
-
   String _formatLastWatched(DateTime? dateTime) {
     if (dateTime == null) return '';
     final difference = DateTime.now().difference(dateTime);
@@ -121,18 +109,14 @@ class _HistoryScreenState extends State<HistoryScreen>
     if (difference.inMinutes > 0) return '${difference.inMinutes}m ago';
     return 'Just now';
   }
-
   List<LocalHistoryItem> _getFilteredItems(List<LocalHistoryItem> originalItems) {
     var items = originalItems.toList();
-
-    // 1. Time-based filtering
     if (_selectedFilter.value != 'All') {
       final now = DateTime.now();
       items = items.where((e) {
         if (e.lastWatched == null) return false;
         final localLastWatched = e.lastWatched!.toLocal();
         final localNow = now.toLocal();
-
         switch (_selectedFilter.value) {
           case 'Today':
             return localLastWatched.year == localNow.year &&
@@ -149,16 +133,12 @@ class _HistoryScreenState extends State<HistoryScreen>
         }
       }).toList();
     }
-
-    // 2. Search query filtering
     if (_searchQuery.value.isNotEmpty) {
       final query = _searchQuery.value.toLowerCase();
       items = items.where((e) => e.title?.toLowerCase().contains(query) ?? false).toList();
     }
-
     return items;
   }
-
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -198,7 +178,6 @@ class _HistoryScreenState extends State<HistoryScreen>
       ),
     );
   }
-
   Widget _buildTopBar(ColorScheme cs) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
@@ -299,7 +278,6 @@ class _HistoryScreenState extends State<HistoryScreen>
       }),
     );
   }
-
   Widget _buildTabBar(ColorScheme cs) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -332,7 +310,6 @@ class _HistoryScreenState extends State<HistoryScreen>
       ),
     );
   }
-
   Widget _buildFilterChips(ColorScheme cs) {
     final filterOptions = ['All', 'Today', 'This Week', 'This Month'];
     return Container(
@@ -382,7 +359,6 @@ class _HistoryScreenState extends State<HistoryScreen>
       ),
     );
   }
-
   Widget _buildEmptyState(BuildContext context, String type) {
     final cs = Theme.of(context).colorScheme;
     return Center(
@@ -430,7 +406,6 @@ class _HistoryScreenState extends State<HistoryScreen>
       ),
     );
   }
-
   Widget _buildHistoryList(
     BuildContext context,
     List<LocalHistoryItem> items,
@@ -444,7 +419,6 @@ class _HistoryScreenState extends State<HistoryScreen>
       },
     );
   }
-
   Widget _buildHistoryCard(
     BuildContext context,
     LocalHistoryItem item,
@@ -455,7 +429,6 @@ class _HistoryScreenState extends State<HistoryScreen>
     int totalSecs = item.totalDurationSeconds ?? 1;
     if (totalSecs == 0) totalSecs = 1;
     final watchProgress = (currentSecs / totalSecs).clamp(0.0, 1.0);
-
     return GestureDetector(
       onTap: () => handleTap(item, isAnime),
       child: Container(
@@ -494,7 +467,6 @@ class _HistoryScreenState extends State<HistoryScreen>
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Poster image with progress/status overlay on top of shadow container
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
@@ -535,7 +507,6 @@ class _HistoryScreenState extends State<HistoryScreen>
                           ),
                         ),
                       ),
-                      // Play Store style circular progress indicator overlayed
                       Positioned(
                         bottom: 8,
                         right: 8,
@@ -555,7 +526,6 @@ class _HistoryScreenState extends State<HistoryScreen>
                   ),
                 ),
                 const SizedBox(width: 16),
-                // Information Section
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -569,8 +539,6 @@ class _HistoryScreenState extends State<HistoryScreen>
                         color: cs.onSurface,
                       ),
                       const SizedBox(height: 6),
-
-                      // Progress text details
                       if (isAnime) ...[
                         if (item.progress != null && item.progress!.isNotEmpty)
                           AzyXText(
@@ -619,8 +587,6 @@ class _HistoryScreenState extends State<HistoryScreen>
                         ],
                       ],
                       const SizedBox(height: 8),
-
-                      // Badges/Metadata row
                       Row(
                         children: [
                           if (item.sourceName != null && item.sourceName!.isNotEmpty) ...[
@@ -660,7 +626,6 @@ class _HistoryScreenState extends State<HistoryScreen>
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Delete button
                 IconButton(
                   style: IconButton.styleFrom(
                     backgroundColor: cs.errorContainer.withOpacity(0.12),
@@ -690,7 +655,6 @@ class _HistoryScreenState extends State<HistoryScreen>
       ),
     );
   }
-
   void _showClearHistoryDialog(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isAnime = _tabController.index == 0;
@@ -758,18 +722,15 @@ class _HistoryScreenState extends State<HistoryScreen>
     );
   }
 }
-
 class _PlayStoreProgressIndicator extends StatelessWidget {
   final double progress;
   final IconData icon;
   final double size;
-
   const _PlayStoreProgressIndicator({
     required this.progress,
     required this.icon,
     this.size = 32,
   });
-
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -790,7 +751,6 @@ class _PlayStoreProgressIndicator extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Background track
           SizedBox(
             width: size - 6,
             height: size - 6,
@@ -802,7 +762,6 @@ class _PlayStoreProgressIndicator extends StatelessWidget {
               ),
             ),
           ),
-          // Progress track
           SizedBox(
             width: size - 6,
             height: size - 6,

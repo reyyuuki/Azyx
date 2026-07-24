@@ -1,49 +1,42 @@
-import 'dart:io';
-
 import 'package:anymex_extension_runtime_bridge/Models/Source.dart';
-import 'package:azyx/Controllers/settings_controller.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Extensions/extensionList.dart';
 import 'package:azyx/Extensions/ExtensionManagerScreen.dart';
 import 'package:azyx/Widgets/ScrollConfig.dart';
-import 'package:azyx/Widgets/language.dart';
-import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
+import 'package:azyx/core/icons/icons_broken.dart';
+import 'package:azyx/Extensions/plugin_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
 import '../../main.dart';
 import '../storage_provider.dart';
-
 class ExtensionScreen extends StatefulWidget {
   const ExtensionScreen({super.key});
-
   @override
   State<ExtensionScreen> createState() => _BrowseScreenState();
 }
-
 class _BrowseScreenState extends State<ExtensionScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabBarController;
-
   @override
   void initState() {
     super.initState();
     _checkPermission();
     _tabBarController = TabController(length: 4, vsync: this);
     sourceController.checkRuntimeHost();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        PluginManager().ensurePluginLoaded(context);
+      }
+    });
   }
-
   @override
   void dispose() {
     _tabBarController.dispose();
     super.dispose();
   }
-
   Future<void> _checkPermission() async {
     await StorageProvider().requestPermission();
   }
-
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -113,7 +106,7 @@ class _BrowseScreenState extends State<ExtensionScreen>
         body: AzyXGradientContainer(
           child: TabBarView(
             controller: _tabBarController,
-            children: [
+            children: const [
               Extension(installed: true, query: '', itemType: ItemType.anime),
               Extension(installed: false, query: '', itemType: ItemType.anime),
               Extension(installed: true, query: '', itemType: ItemType.manga),

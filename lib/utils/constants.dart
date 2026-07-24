@@ -2,7 +2,6 @@ import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Screens/Home/UserLists/widgets/grid_list.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
-
 final List<double> scoresItems = [
   0.0,
   0.5,
@@ -34,7 +33,6 @@ BoxShadow glowingShadow(context) {
     blurRadius: 10.blurMultiplier(),
   );
 }
-
 final List<String> items = [
   "CURRENT",
   "PLANNING",
@@ -43,81 +41,6 @@ final List<String> items = [
   "PAUSED",
   "DROPPED",
 ];
-
-// List<Map<String, dynamic>> get animeCategories {
-//   final list = serviceHandler.userAnimeList.value;
-
-//   return [
-//     {
-//       "name": "All",
-//       "data": list.allList,
-//       "isManga": false,
-//     },
-//     {
-//       "name": "Completed",
-//       "data": list.completed,
-//       "isManga": false,
-//     },
-//     {
-//       "name": "Planning",
-//       "data": list.planning,
-//       "isManga": false,
-//     },
-//     {
-//       "name": "Watching",
-//       "data": list.currentlyWatching,
-//       "isManga": false,
-//     },
-//     {
-//       "name": list.repeating.isEmpty ? "Dropped" : "Repeating",
-//       "data": list.repeating.isEmpty ? list.dropped : list.repeating,
-//       "isManga": false,
-//     },
-//     {
-//       "name": "Paused",
-//       "data": list.paused,
-//       "isManga": false,
-//     },
-//   ];
-// }
-
-// List<Map<String, dynamic>> get mangaCategories {
-//   final list = serviceHandler.userMangaList.value;
-
-//   return [
-//     {
-//       "name": "All",
-//       "data": list.allList,
-//       "isManga": true,
-//     },
-//     {
-//       "name": "Completed",
-//       "data": list.completed,
-//       "isManga": true,
-//     },
-//     {
-//       "name": "Planning",
-//       "data": list.planning,
-//       "isManga": true,
-//     },
-//     {
-//       "name": "Reading",
-//       "data": list.currentlyWatching,
-//       "isManga": true,
-//     },
-//     {
-//       "name": list.repeating.isEmpty ? "Dropped" : "Repeating",
-//       "data": list.repeating.isEmpty ? list.dropped : list.repeating,
-//       "isManga": true,
-//     },
-//     {
-//       "name": "Paused",
-//       "data": list.paused,
-//       "isManga": true,
-//     },
-//   ];
-// }
-
 String getAniListStatusEquivalent(String status) {
   switch (status.toLowerCase()) {
     case 'watching':
@@ -134,7 +57,6 @@ String getAniListStatusEquivalent(String status) {
       return 'UNKNOWN';
   }
 }
-
 String returnConvertedStatus(String status) {
   switch (status) {
     case 'watching' || 'reading':
@@ -151,7 +73,6 @@ String returnConvertedStatus(String status) {
       return '';
   }
 }
-
 String getMALStatusEquivalent(String status, {bool isAnime = true}) {
   switch (status.toUpperCase()) {
     case 'CURRENT':

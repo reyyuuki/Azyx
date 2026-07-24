@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
     hide isar;
 import 'package:azyx/Database/isar_models/category.dart';
@@ -9,7 +8,6 @@ import 'package:isar_community/isar.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-
 class StorageProvider {
   Future<bool> requestPermission() async {
     Permission permission = Permission.manageExternalStorage;
@@ -26,7 +24,6 @@ class StorageProvider {
     }
     return true;
   }
-
   Future<Directory?> getDatabaseDirectory() async {
     final dir = await getApplicationDocumentsDirectory();
     if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
@@ -37,7 +34,6 @@ class StorageProvider {
       return Directory(dbDir);
     }
   }
-
   Future<Isar> initDB(String? path, {bool inspector = false}) async {
     Directory? dir;
     if (path == null) {
@@ -45,7 +41,6 @@ class StorageProvider {
     } else {
       dir = Directory(path);
     }
-
     final isar = Isar.openSync(
       [
         ...AnymeXExtensionBridge.isarSchema,
@@ -57,7 +52,6 @@ class StorageProvider {
       name: "AzyX",
       inspector: inspector,
     );
-
     return isar;
   }
 }

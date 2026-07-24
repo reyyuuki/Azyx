@@ -1,12 +1,10 @@
-// ignore_for_file: invalid_use_of_protected_member
-
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:math' as show;
-
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/models/online_service.dart';
+import 'package:azyx/Controllers/source/source_mapper.dart';
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
@@ -20,44 +18,36 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/anime/anime_scrollable_list.dart';
 import 'package:azyx/Widgets/anime/main_carousale.dart';
 import 'package:azyx/Widgets/common_cards.dart';
+import 'package:azyx/Widgets/common/community_scrollable_list.dart';
 import 'package:azyx/Widgets/header.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:azyx/utils/functions.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' hide MediaType;
+import 'package:azyx/utils/oauth_helper.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 final MalService malService = Get.find<MalService>();
-
 class MalService extends GetxController implements BaseService, OnlineService {
-  // Media
   RxList<Media> spotlight = RxList();
   RxList<Media> popular = RxList();
   RxList<Media> trending = RxList();
   RxList<Media> topUpcoming = RxList();
-
-  // Manga
   RxList<Media> spotlightM = RxList();
   RxList<Media> popularM = RxList();
   RxList<Media> trendingM = RxList();
   RxList<Media> topUpcomingM = RxList();
-
   @override
   Rx<UserMedia> currentMedia = UserMedia().obs;
-
   @override
   RxBool isLoggedIn = false.obs;
-
   @override
   Future<void> autoLogin() async {
     try {
       final token = AuthKeys.malAuthToken.get<String>('');
       final refreshToken = AuthKeys.malRefreshToken.get<String>('');
-
       if (token.isNotEmpty) {
         final isValid = await _validateToken(token);
         if (isValid) {
@@ -68,7 +58,6 @@ class MalService extends GetxController implements BaseService, OnlineService {
           return;
         }
       }
-
       if (refreshToken.isNotEmpty) {
         await _refreshTokenWithMAL(refreshToken);
       } else {
@@ -78,25 +67,21 @@ class MalService extends GetxController implements BaseService, OnlineService {
       log("Auto-login failed: $e");
     }
   }
-
   Future<bool> _validateToken(String token) async {
     try {
       final response = await get(
         Uri.parse('https://api.myanimelist.net/v2/users/@me'),
         headers: {'Authorization': 'Bearer $token'},
       );
-
       return response.statusCode == 200;
     } catch (e) {
       log("Token validation failed: $e");
       return false;
     }
   }
-
   Future<void> _refreshTokenWithMAL(String refreshToken) async {
     final clientId = dotenv.env['MAL_CLIENT_ID'] ?? '';
     final clientSecret = dotenv.env['MAL_CLIENT_SECRET'] ?? '';
-
     final response = await post(
       Uri.parse('https://myanimelist.net/v1/oauth2/token'),
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -107,26 +92,24 @@ class MalService extends GetxController implements BaseService, OnlineService {
         'refresh_token': refreshToken,
       },
     );
-
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final newToken = data['access_token'];
       final newRefreshToken = data['refresh_token'];
-
       AuthKeys.malAuthToken.set(newToken);
       if (newRefreshToken != null) {
         AuthKeys.malRefreshToken.set(newRefreshToken);
       }
-
       log("Token refreshed successfully.");
       await fetchUserInfo(token: newToken);
     } else {
       throw Exception('Failed to refresh token: ${response.body}');
     }
   }
-
   @override
   Future<void> login() async {
+    final context = Get.context;
+    if (context == null) return;
     String clientId = dotenv.get("MAL_CLIENT_ID");
     String secret = dotenv.get("MAL_CLIENT_SECRET");
     final secureRandom = show.Random.secure();
@@ -139,22 +122,23 @@ class MalService extends GetxController implements BaseService, OnlineService {
     ).replaceAll('=', '').replaceAll('+', '-').replaceAll('/', '_');
     final url =
         'https://myanimelist.net/v1/oauth2/authorize?response_type=code&client_id=$clientId&code_challenge=$codeChallenge';
+
     try {
-      final authCode = await FlutterWebAuth2.authenticate(
+      final authCode = await OauthHelper.authenticate(
+        context: context,
         url: url,
         callbackUrlScheme: 'azyx',
       );
-      log(authCode.toString());
-      final code = Uri.parse(authCode).queryParameters['code'];
-      if (code != null) {
-        log("Authorization code: $code");
-        await _exchangeCodeForTokenMAL(code, clientId, codeChallenge, secret);
+      if (authCode != null) {
+        final code = Uri.parse(authCode).queryParameters['code'];
+        if (code != null) {
+          await _exchangeCodeForTokenMAL(code, clientId, codeChallenge, secret);
+        }
       }
     } catch (e) {
       log(e.toString());
     }
   }
-
   Future<void> _exchangeCodeForTokenMAL(
     String code,
     String clientId,
@@ -171,17 +155,14 @@ class MalService extends GetxController implements BaseService, OnlineService {
         'grant_type': 'authorization_code',
       },
     );
-
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final token = data['access_token'];
       final refreshToken = data['refresh_token'];
-
       AuthKeys.malAuthToken.set(token);
       if (refreshToken != null) {
         AuthKeys.malRefreshToken.set(refreshToken);
       }
-
       log("MAL Access token: $token");
       await fetchUserInfo();
       log("Login Succesfull!");
@@ -191,7 +172,6 @@ class MalService extends GetxController implements BaseService, OnlineService {
       );
     }
   }
-
   Future<dynamic> fetchMAL(
     String url, {
     bool auth = false,
@@ -210,7 +190,6 @@ class MalService extends GetxController implements BaseService, OnlineService {
             ? {'Authorization': 'Bearer $tokenn'}
             : {'X-MAL-CLIENT-ID': clientId},
       );
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (auth) {
@@ -231,7 +210,6 @@ class MalService extends GetxController implements BaseService, OnlineService {
       return [];
     }
   }
-
   static const field = "fields=mean,status,media_type,synopsis";
   Future<List<Media>> fetchDataFromApi(
     String url, {
@@ -239,24 +217,20 @@ class MalService extends GetxController implements BaseService, OnlineService {
   }) async {
     final newField = customFields ?? field;
     final data = await fetchMAL('$url&$newField') as Map<String, dynamic>;
-
     return (data['data'] as List<dynamic>)
         .map((e) => Media.fromMAL(e))
         .toList();
   }
-
   Future<String?> fetchBanner(int malId) async {
     final response = await get(
       Uri.parse('https://api.jikan.moe/v4/anime/$malId'),
     );
-
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       return data['data']['images']['jpg']['large_image_url'];
     }
     return null;
   }
-
   @override
   Rx<Widget> animeWidgets(BuildContext context) {
     return Obx(
@@ -327,7 +301,6 @@ class MalService extends GetxController implements BaseService, OnlineService {
             ),
     ).obs;
   }
-
   @override
   Future<AnilistMediaData> fetchDetails(FetchDetailsParams params) async {
     try {
@@ -339,7 +312,6 @@ class MalService extends GetxController implements BaseService, OnlineService {
       return AnilistMediaData();
     }
   }
-
   @override
   Future<void> fetchhomeData() async {
     try {
@@ -355,7 +327,6 @@ class MalService extends GetxController implements BaseService, OnlineService {
       topUpcoming.value = await fetchDataFromApi(
         'https://api.myanimelist.net/v2/anime/ranking?ranking_type=upcoming&limit=15',
       );
-
       spotlightM.value = await fetchDataFromApi(
         'https://api.myanimelist.net/v2/manga/ranking?ranking_type=all&limit=15',
       );
@@ -372,15 +343,12 @@ class MalService extends GetxController implements BaseService, OnlineService {
       log('Error fetching home page data: $e', error: e);
     }
   }
-
   Future<AnilistMediaData> fetchWithToken(String url) async {
     const newField =
         "fields=mean,status,media_type,synopsis,genres,type,num_episodes,num_chapters,start_date,end_date,source,rating,rank,popularity,favorites,statistics,recommendations,alternative_titles";
-
     final data = await fetchMAL('$url?$newField') as Map<String, dynamic>;
     return AnilistMediaData.fromMAL(data);
   }
-
   @override
   Rx<Widget> homeWidgets(BuildContext context) => CustomScrollView(
     physics: const BouncingScrollPhysics(),
@@ -432,7 +400,6 @@ class MalService extends GetxController implements BaseService, OnlineService {
                         isManga: true,
                         title: "Trending Manga",
                       ),
-
                 100.height,
               ],
             ),
@@ -441,7 +408,6 @@ class MalService extends GetxController implements BaseService, OnlineService {
       ),
     ],
   ).obs;
-
   @override
   Future<void> logout() async {
     AuthKeys.malAuthToken.set('');
@@ -451,7 +417,6 @@ class MalService extends GetxController implements BaseService, OnlineService {
     userAnimeList.value.clear();
     userMangaList.value.clear();
   }
-
   @override
   Rx<Widget> mangaWidgets(BuildContext context) => Obx(
     () =>
@@ -474,18 +439,18 @@ class MalService extends GetxController implements BaseService, OnlineService {
                   Get.to(() => const SearchScreen(isManga: true));
                 }, 'manga'),
                 const SizedBox(height: 10),
-                 MainCarousale(isManga: true, data: spotlightM),
-                 const SizedBox(height: 20),
-                 if (userMangaList.currentlyReading.isNotEmpty) ...[
-                   AnimeScrollableList(
-                     varient: CarousaleVarient.userList,
-                     isManga: true,
-                     animeList: userMangaList.currentlyReading,
-                     title: "Currently Reading",
-                   ),
-                   const SizedBox(height: 10),
-                 ],
-                 AnimeScrollableList(
+                MainCarousale(isManga: true, data: spotlightM),
+                const SizedBox(height: 20),
+                if (userMangaList.currentlyReading.isNotEmpty) ...[
+                  AnimeScrollableList(
+                    varient: CarousaleVarient.userList,
+                    isManga: true,
+                    animeList: userMangaList.currentlyReading,
+                    title: "Currently Reading",
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                AnimeScrollableList(
                   animeList: popularM,
                   isManga: true,
                   title: "Popular Manga",
@@ -508,12 +473,10 @@ class MalService extends GetxController implements BaseService, OnlineService {
   ).obs;
   @override
   Rx<User> userData = User().obs;
-
   @override
   Future<List<Media>> fetchsearchData(SearchParams query) {
     throw UnimplementedError();
   }
-
   @override
   Future<void> updateEntry(
     UserMedia params, {
@@ -529,7 +492,6 @@ class MalService extends GetxController implements BaseService, OnlineService {
     final url = Uri.parse(
       'https://api.myanimelist.net/v2/${isAnime ? 'anime' : 'manga'}/$listId/my_list_status',
     );
-
     final body = {
       if (status != null) 'status': status,
       if (score != null) 'score': score.toString(),
@@ -538,7 +500,6 @@ class MalService extends GetxController implements BaseService, OnlineService {
       if (progress != null && !isAnime)
         'num_chapters_read': progress.toString(),
     };
-
     final req = await put(
       url,
       headers: {
@@ -547,7 +508,6 @@ class MalService extends GetxController implements BaseService, OnlineService {
       },
       body: body,
     );
-
     if (syncId != null) {
       await anilistAuthController.updateEntry(
         UserMedia(id: listId, score: score, status: status, progress: progress),
@@ -555,12 +515,10 @@ class MalService extends GetxController implements BaseService, OnlineService {
         syncId: syncId,
       );
     }
-
     if (req.statusCode == 200) {
       azyxSnackBar(
         "${isAnime ? 'Anime' : 'Manga'} Tracked to ${isAnime ? 'Episode' : 'Chapter'} $progress Successfully!",
       );
-
       currentMedia.update((val) {
         val?.progress = progress;
         val?.status = status;
@@ -577,15 +535,12 @@ class MalService extends GetxController implements BaseService, OnlineService {
       log('$isAnime: $body');
     }
   }
-
   @override
   Future<void> deleteEntry(String listId, {bool isAnime = true}) async {
     final token = AuthKeys.malAuthToken.get<String>('');
-
     final url = Uri.parse(
       'https://api.myanimelist.net/v2/${isAnime ? 'anime' : 'manga'}/$listId/my_list_status',
     );
-
     final req = await delete(
       url,
       headers: {
@@ -593,12 +548,10 @@ class MalService extends GetxController implements BaseService, OnlineService {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
     );
-
     if (req.statusCode == 200) {
       azyxSnackBar(
         "${isAnime ? "Anime" : "Manga"} successfully deleted from your list!",
       );
-
       currentMedia.value = UserMedia();
       if (isAnime) {
         fetchUserAnimeList();
@@ -612,13 +565,10 @@ class MalService extends GetxController implements BaseService, OnlineService {
       );
     }
   }
-
   @override
   RxList<UserMedia> userAnimeList = RxList();
-
   @override
   RxList<UserMedia> userMangaList = RxList();
-
   Future<void> fetchUserAnimeList() async {
     final data = await fetchMAL(
       'https://api.myanimelist.net/v2/users/@me/animelist?fields=num_episodes,mean,list_status&limit=1000&sort=list_updated_at&nsfw=1',
@@ -630,7 +580,6 @@ class MalService extends GetxController implements BaseService, OnlineService {
         .toList();
     log("animeList: ${data['data']}");
   }
-
   Future<void> fetchUserMangaList() async {
     final data = await fetchMAL(
       'https://api.myanimelist.net/v2/users/@me/mangalist?fields=num_chapters,mean,list_status&limit=1000&sort=list_updated_at&nsfw=1',
@@ -643,7 +592,6 @@ class MalService extends GetxController implements BaseService, OnlineService {
         .toList();
     log("animeList: ${data['data']}");
   }
-
   Future<void> fetchUserInfo({String? token}) async {
     final tokenn = token ?? AuthKeys.malAuthToken.get<String>('');
     final data = await fetchMAL(
@@ -657,7 +605,6 @@ class MalService extends GetxController implements BaseService, OnlineService {
     isLoggedIn.value = true;
     Future.wait([fetchUserAnimeList(), fetchUserMangaList()]);
   }
-
   @override
   Future<void> refresh() async {
     Future.wait([fetchhomeData(), fetchUserAnimeList(), fetchUserMangaList()]);

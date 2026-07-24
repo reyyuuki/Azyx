@@ -6,25 +6,20 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
-
 class AnimeHistoryScreen extends StatefulWidget {
   const AnimeHistoryScreen({super.key});
-
   @override
   State<AnimeHistoryScreen> createState() => _AnimeHistoryScreenState();
 }
-
 class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
   late final LocalHistoryController _controller;
   final RxString selectedFilter = RxString('All');
   final List<String> filterOptions = ['All', 'Today', 'This Week', 'This Month'];
-
   @override
   void initState() {
     super.initState();
     _controller = localHistoryController;
   }
-
   List<LocalHistoryItem> _getFilteredItems() {
     final items = _controller.animeWatchingHistory;
     final now = DateTime.now();
@@ -51,13 +46,11 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
         return items.toList();
     }
   }
-
   String _formatDuration(int seconds) {
     final minutes = seconds ~/ 60;
     final remainingSeconds = seconds % 60;
     return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }
-
   String _formatLastWatched(DateTime? dateTime) {
     if (dateTime == null) return '';
     final difference = DateTime.now().difference(dateTime);
@@ -66,7 +59,6 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
     if (difference.inMinutes > 0) return '${difference.inMinutes}m ago';
     return 'Just now';
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -147,7 +139,6 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
       ),
     );
   }
-
   Widget _buildFilterChips(BuildContext context) {
     return Container(
       height: 60,
@@ -202,7 +193,6 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
       ),
     );
   }
-
   Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Padding(
@@ -288,7 +278,6 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
       ),
     );
   }
-
   Widget _buildHistoryList(BuildContext context, List<LocalHistoryItem> items) {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -302,7 +291,6 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
       },
     );
   }
-
   Widget _buildHistoryCard(BuildContext context, LocalHistoryItem item) {
     final currentSecs = item.currentTimeSeconds ?? 0;
     final totalSecs = item.totalDurationSeconds ?? 1;
@@ -311,7 +299,6 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
     final formattedCurrentTime = _formatDuration(currentSecs);
     final formattedTotalTime = _formatDuration(totalSecs);
     final formattedLastWatched = _formatLastWatched(item.lastWatched);
-
     return GestureDetector(
       onTap: () {
         if (item.mediaId != null) Get.toNamed('/anime-details/${item.mediaId}');
@@ -560,7 +547,6 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
       ),
     );
   }
-
   Widget _imagePlaceholder(BuildContext context) {
     return Container(
       width: 100,
@@ -576,7 +562,6 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
       ),
     );
   }
-
   void _showOptionsBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -623,7 +608,6 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
       ),
     );
   }
-
   Widget _buildOptionTile(
     BuildContext context,
     IconData icon,
@@ -666,7 +650,6 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
-
   void _showClearHistoryDialog(BuildContext context) {
     showDialog(
       context: context,

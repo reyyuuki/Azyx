@@ -1,13 +1,9 @@
-// ignore_for_file: deprecated_member_use
-
 import 'dart:developer';
 import 'dart:math' as math;
-
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 class ColorProfileManager {
   static const Map<String, Map<String, int>> profiles = {
     "cinema": {
@@ -109,7 +105,6 @@ class ColorProfileManager {
       "hue": 0,
     },
   };
-
   static const Map<String, String> profileDescriptions = {
     "cinema": "Balanced colors for movie watching",
     "cinema_dark": "Optimized for dark room cinema viewing",
@@ -126,7 +121,6 @@ class ColorProfileManager {
     "cool": "Cooler tones for clarity",
     "grayscale": "Black and white viewing",
   };
-
   static const Map<String, IconData> profileIcons = {
     "cinema": Icons.movie,
     "cinema_dark": Icons.movie_outlined,
@@ -143,7 +137,6 @@ class ColorProfileManager {
     "cool": Icons.ac_unit,
     "grayscale": Icons.gradient,
   };
-
   Future<void> applyColorProfile(String profile, dynamic player) async {
     final settings = profiles[profile.toLowerCase()];
     if (settings != null && player.platform != null) {
@@ -158,7 +151,6 @@ class ColorProfileManager {
       }
     }
   }
-
   Future<void> applyCustomSettings(
       Map<String, int> customSettings, dynamic player) async {
     if (player.platform != null) {
@@ -173,13 +165,11 @@ class ColorProfileManager {
     }
   }
 }
-
 class ColorProfileBottomSheet extends StatefulWidget {
   final String currentProfile;
   final Function(String) onProfileSelected;
   final Function(Map<String, int>) onCustomSettingsChanged;
   final dynamic player;
-
   const ColorProfileBottomSheet({
     super.key,
     required this.currentProfile,
@@ -187,19 +177,16 @@ class ColorProfileBottomSheet extends StatefulWidget {
     required this.onCustomSettingsChanged,
     required this.player,
   });
-
   @override
   State<ColorProfileBottomSheet> createState() =>
       _ColorProfileBottomSheetState();
 }
-
 class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
     with TickerProviderStateMixin {
   late AnimationController _backgroundController;
   late AnimationController _slideController;
   late Animation<double> _backgroundAnimation;
   late Animation<Offset> _slideAnimation;
-
   int _currentPage = 0;
   PageController _pageController = PageController();
   String _selectedProfile = '';
@@ -210,7 +197,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
     "gamma": 0,
     "hue": 0,
   };
-
   @override
   void initState() {
     super.initState();
@@ -222,7 +208,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-
     _backgroundAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -230,7 +215,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
       parent: _backgroundController,
       curve: Curves.easeInOut,
     ));
-
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 1),
       end: Offset.zero,
@@ -238,14 +222,11 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
       parent: _slideController,
       curve: Curves.elasticOut,
     ));
-
     _selectedProfile = widget.currentProfile;
     _customSettings = Map.from(ColorProfileManager.profiles['natural']!);
-
     _backgroundController.repeat();
     _slideController.forward();
   }
-
   @override
   void dispose() {
     _backgroundController.dispose();
@@ -253,17 +234,14 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
     _pageController.dispose();
     super.dispose();
   }
-
   void _showProfileAppliedFeedback(String profileName) {
     HapticFeedback.lightImpact();
     log('Applied ${profileName.toUpperCase()} profile');
   }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
-
     return SlideTransition(
       position: _slideAnimation,
       child: Container(
@@ -283,7 +261,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
           borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
           child: Stack(
             children: [
-              // Animated background
               AnimatedBuilder(
                 animation: _backgroundAnimation,
                 builder: (context, child) {
@@ -310,17 +287,10 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
                   );
                 },
               ),
-
-              // Main content
               Column(
                 children: [
-                  // Floating header
                   _buildFloatingHeader(theme),
-
-                  // Page indicator dots
                   _buildPageIndicators(theme),
-
-                  // Content pages
                   Expanded(
                     child: PageView(
                       controller: _pageController,
@@ -343,7 +313,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
       ),
     );
   }
-
   Widget _buildFloatingHeader(ThemeData theme) {
     return Container(
       margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -361,7 +330,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
       ),
       child: Row(
         children: [
-          // Animated icon
           AnimatedBuilder(
             animation: _backgroundAnimation,
             builder: (context, child) {
@@ -387,10 +355,7 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
               );
             },
           ),
-
           const SizedBox(width: 20),
-
-          // Title section
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -419,8 +384,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
               ],
             ),
           ),
-
-          // Close button
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
@@ -440,7 +403,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
       ),
     );
   }
-
   Widget _buildPageIndicators(ThemeData theme) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 30),
@@ -454,11 +416,9 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
       ),
     );
   }
-
   Widget _buildIndicatorDot(
       int index, String label, IconData icon, ThemeData theme) {
     final isActive = _currentPage == index;
-
     return GestureDetector(
       onTap: () {
         _pageController.animateToPage(
@@ -521,7 +481,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
       ),
     );
   }
-
   Widget _buildPresetsPage(ThemeData theme) {
     Map<String, List<String>> groupedProfiles = {
       'Cinema': ['cinema', 'cinema_dark', 'cinema_hdr'],
@@ -529,7 +488,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
       'Vivid': ['vivid', 'vivid_pop', 'vivid_warm'],
       'Essential': ['natural', 'dark', 'warm', 'cool', 'grayscale'],
     };
-
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       children: [
@@ -539,7 +497,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Category header
                 Padding(
                   padding: const EdgeInsets.only(left: 10, bottom: 15),
                   child: Text(
@@ -551,8 +508,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
                     maxLines: 2,
                   ),
                 ),
-
-                // Horizontal scrollable profiles
                 SizedBox(
                   height: 180,
                   child: ListView.builder(
@@ -561,7 +516,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
                     itemBuilder: (context, index) {
                       final profileKey = category.value[index];
                       final isSelected = _selectedProfile == profileKey;
-
                       return _buildProfileCard(profileKey, isSelected, theme);
                     },
                   ),
@@ -574,7 +528,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
       ],
     );
   }
-
   Widget _buildProfileCard(
       String profileKey, bool isSelected, ThemeData theme) {
     final profileColors = {
@@ -593,7 +546,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
       'cool': Colors.lightBlue,
       'grayscale': Colors.blueGrey,
     };
-
     return Container(
       width: 140,
       margin: const EdgeInsets.only(right: 15),
@@ -632,7 +584,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
           ),
           child: Stack(
             children: [
-              // Background pattern
               if (isSelected)
                 Positioned.fill(
                   child: ClipRRect(
@@ -644,14 +595,11 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
                     ),
                   ),
                 ),
-
-              // Content
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Icon
                     Container(
                       padding: const EdgeInsets.all(15),
                       decoration: BoxDecoration(
@@ -668,10 +616,7 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
                             : theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
-
                     const SizedBox(height: 15),
-
-                    // Title
                     Text(
                       profileKey.replaceAll('_', ' ').toUpperCase(),
                       textAlign: TextAlign.center,
@@ -684,10 +629,7 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-
                     const SizedBox(height: 8),
-
-                    // Description
                     Text(
                       ColorProfileManager.profileDescriptions[profileKey] ?? '',
                       textAlign: TextAlign.center,
@@ -702,8 +644,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
                   ],
                 ),
               ),
-
-              // Selection indicator
               if (isSelected)
                 Positioned(
                   top: 15,
@@ -727,14 +667,12 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
       ),
     );
   }
-
   Widget _buildCustomPage(ThemeData theme) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Text(
             'Fine-tune Your Experience',
             style: theme.textTheme.headlineSmall?.copyWith(
@@ -750,27 +688,19 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
             ),
           ),
           const SizedBox(height: 30),
-
-          // Sliders
           ..._customSettings.keys.map((setting) {
             return _buildModernSlider(setting, theme);
           }),
-
           const SizedBox(height: 40),
-
-          // Action buttons
           _buildActionButtons(theme),
-
           const SizedBox(height: 30),
         ],
       ),
     );
   }
-
   Widget _buildModernSlider(String setting, ThemeData theme) {
     final value = _customSettings[setting]!;
     final displayName = setting[0].toUpperCase() + setting.substring(1);
-
     final sliderColors = {
       'brightness': Colors.yellow,
       'contrast': Colors.blue,
@@ -778,7 +708,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
       'gamma': Colors.green,
       'hue': Colors.orange,
     };
-
     final sliderIcons = {
       'brightness': Icons.brightness_6_rounded,
       'contrast': Icons.contrast_rounded,
@@ -786,13 +715,11 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
       'gamma': Icons.gamepad,
       'hue': Icons.color_lens_rounded,
     };
-
     return Container(
       margin: const EdgeInsets.only(bottom: 30),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(
             children: [
               Container(
@@ -822,7 +749,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
                   ),
                 ),
               ),
-              // Value display
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
@@ -843,10 +769,7 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
               ),
             ],
           ),
-
           const SizedBox(height: 20),
-
-          // Custom slider
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -862,7 +785,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
             ),
             child: Column(
               children: [
-                // Slider
                 SliderTheme(
                   data: SliderTheme.of(context).copyWith(
                     trackHeight: 8,
@@ -887,10 +809,7 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
                     },
                   ),
                 ),
-
                 const SizedBox(height: 10),
-
-                // Range labels
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -906,7 +825,6 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
       ),
     );
   }
-
   Widget _buildActionButtons(ThemeData theme) {
     return Row(
       children: [
@@ -1003,17 +921,13 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
     );
   }
 }
-
 class CustomSliderThumb extends SliderComponentShape {
   final Color color;
-
   CustomSliderThumb({required this.color});
-
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
     return const Size(24, 24);
   }
-
   @override
   void paint(
     PaintingContext context,
@@ -1030,39 +944,29 @@ class CustomSliderThumb extends SliderComponentShape {
     required Size sizeWithOverflow,
   }) {
     final Canvas canvas = context.canvas;
-
-    // Outer ring
     final Paint outerPaint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3;
     canvas.drawCircle(center, 12, outerPaint);
-
-    // Inner fill
     final Paint innerPaint = Paint()
       ..color = color.withOpacity(0.3)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, 8, innerPaint);
-
-    // Center dot
     final Paint centerPaint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, 4, centerPaint);
   }
 }
-
 class PatternPainter extends CustomPainter {
   final Color color;
-
   PatternPainter({required this.color});
-
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
-
     const double spacing = 20;
     for (double x = 0; x < size.width; x += spacing) {
       for (double y = 0; y < size.height; y += spacing) {
@@ -1070,7 +974,6 @@ class PatternPainter extends CustomPainter {
       }
     }
   }
-
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

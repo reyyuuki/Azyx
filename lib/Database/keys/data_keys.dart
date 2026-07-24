@@ -1,7 +1,5 @@
 enum ThemeKeys { seedColor, varient, isMaterial, isDarkMode, isLightMode }
-
 enum AppKeys { gradient }
-
 enum AuthKeys {
   anilistToken,
   malAuthToken,
@@ -9,7 +7,6 @@ enum AuthKeys {
   simklAuthToken,
   serviceType,
 }
-
 enum SourceKeys {
   activeSourceId,
   activeMangaSourceId,
@@ -23,14 +20,12 @@ enum SourceKeys {
   aniyomiAnimeRepos,
   aniyomiMangaRepos,
 }
-
 enum UiKeys {
   glowMultiplier,
   blurMultiplier,
   radiusMultiplier,
   spreadMultiplier,
 }
-
 enum PluginKeys {
   runtimeHostInstalledVersion,
   runtimeHostInstalledReleaseTitle,

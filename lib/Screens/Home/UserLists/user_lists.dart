@@ -10,22 +10,18 @@ import 'package:azyx/utils/assets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-
 class UserListPage extends StatefulWidget {
   final bool isManga;
   const UserListPage({super.key, required this.isManga});
-
   @override
   State<UserListPage> createState() => _UserListScreenState();
 }
-
 class _UserListScreenState extends State<UserListPage>
     with TickerProviderStateMixin {
   TabController? tabController;
   RxList<Map<String, dynamic>> filterCategories = RxList();
   Set<String> statusList = {'All'};
   RxList<UserMedia> list = RxList();
-
   @override
   void initState() {
     super.initState();
@@ -35,29 +31,24 @@ class _UserListScreenState extends State<UserListPage>
     _initializeTabController();
     initializeList();
   }
-
   void _initializeTabController() {
     statusList = {'All', ...list.map((e) => e.status!).toSet()};
     tabController = TabController(length: statusList.length, vsync: this);
   }
-
   void initializeList() {
     for (var status in statusList) {
       final data = list.where((item) => item.status == status).toList();
-
       filterCategories.add({
         'name': status,
         'data': status == 'All' ? list : data,
       });
     }
   }
-
   @override
   void dispose() {
     super.dispose();
     tabController?.dispose();
   }
-
   Widget buildEmpty(BuildContext context) {
     return Container(
       alignment: Alignment.center,
@@ -88,7 +79,6 @@ class _UserListScreenState extends State<UserListPage>
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -175,7 +165,6 @@ class _UserListScreenState extends State<UserListPage>
     );
   }
 }
-
 class ListAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final String subtitle;
@@ -186,7 +175,6 @@ class ListAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.ontap,
     required this.subtitle,
   });
-
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -227,7 +215,6 @@ class ListAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
   }
-
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

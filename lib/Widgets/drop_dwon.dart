@@ -1,6 +1,5 @@
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:flutter/material.dart';
-
 class CustomDropdown<T> extends StatefulWidget {
   final List<T> items;
   final T? selectedValue;
@@ -8,7 +7,6 @@ class CustomDropdown<T> extends StatefulWidget {
   final String labelText;
   final String Function(T) displayText;
   final String hintText;
-
   const CustomDropdown({
     super.key,
     required this.items,
@@ -18,11 +16,9 @@ class CustomDropdown<T> extends StatefulWidget {
     this.selectedValue,
     this.hintText = 'Select option...',
   });
-
   @override
   State<CustomDropdown<T>> createState() => _CustomDropdownState<T>();
 }
-
 class _CustomDropdownState<T> extends State<CustomDropdown<T>>
     with SingleTickerProviderStateMixin {
   bool isOpen = false;
@@ -31,7 +27,6 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
   late ScrollController _scrollController;
   OverlayEntry? _overlayEntry;
   final GlobalKey _dropdownKey = GlobalKey();
-
   @override
   void initState() {
     super.initState();
@@ -45,7 +40,6 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
     );
     _scrollController = ScrollController();
   }
-
   @override
   void dispose() {
     _animationController.dispose();
@@ -53,7 +47,6 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
     _overlayEntry?.remove();
     super.dispose();
   }
-
   void _toggleDropdown() {
     if (isOpen) {
       _closeDropdown();
@@ -61,15 +54,12 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
       _openDropdown();
     }
   }
-
   void _openDropdown() {
     if (isOpen) return;
     final renderBox =
         _dropdownKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
-
     FocusScope.of(context).unfocus();
-
     setState(() {
       isOpen = true;
     });
@@ -77,7 +67,6 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
     _overlayEntry = _createOverlayEntry();
     Overlay.of(context).insert(_overlayEntry!);
   }
-
   void _closeDropdown() {
     if (!isOpen) return;
     setState(() {
@@ -88,7 +77,6 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
       _overlayEntry = null;
     });
   }
-
   OverlayEntry _createOverlayEntry() {
     final RenderBox renderBox =
         _dropdownKey.currentContext!.findRenderObject() as RenderBox;
@@ -99,13 +87,11 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
     final spaceBelow = screenHeight - offset.dy - size.height - 16;
     final spaceAbove = offset.dy - 16;
     final maxDropdownHeight = screenHeight * 0.4;
-
     final shouldShowAbove =
         spaceBelow < maxDropdownHeight && spaceAbove > spaceBelow;
     final availableSpace = shouldShowAbove ? spaceAbove : spaceBelow;
     final dropdownHeight = (widget.items.length * 48.0 + 16)
         .clamp(0.0, availableSpace.clamp(100.0, maxDropdownHeight));
-
     return OverlayEntry(
       builder: (context) => Stack(
         children: [
@@ -164,7 +150,6 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
                                     final item = entry.value;
                                     final isSelected =
                                         widget.selectedValue == item;
-
                                     return GestureDetector(
                                       behavior: HitTestBehavior.opaque,
                                       onTap: () {
@@ -227,7 +212,6 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
                                       final item = widget.items[index];
                                       final isSelected =
                                           widget.selectedValue == item;
-
                                       return GestureDetector(
                                         behavior: HitTestBehavior.opaque,
                                         onTap: () {
@@ -281,11 +265,9 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>>
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
-
     return GestureDetector(
       onTap: _toggleDropdown,
       child: Container(

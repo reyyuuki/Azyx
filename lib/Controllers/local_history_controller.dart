@@ -1,22 +1,17 @@
 import 'dart:developer';
-
 import 'package:azyx/Database/isar_models/local_history_item.dart';
 import 'package:azyx/main.dart';
 import 'package:get/get.dart';
 import 'package:isar_community/isar.dart';
-
 final localHistoryController = Get.find<LocalHistoryController>();
-
 class LocalHistoryController extends GetxController {
   final RxList<LocalHistoryItem> animeWatchingHistory = RxList();
   final RxList<LocalHistoryItem> mangaReadingHistory = RxList();
-
   @override
   void onInit() {
     super.onInit();
     _loadHistory();
   }
-
   void _loadHistory() {
     final all = isar.localHistoryItems.where().findAllSync();
     animeWatchingHistory.assignAll(
@@ -37,7 +32,6 @@ class LocalHistoryController extends GetxController {
       'History loaded — anime: ${animeWatchingHistory.length}, manga: ${mangaReadingHistory.length}',
     );
   }
-
   int _generateStableId(String title, HistoryMediaType type) {
     final key = '${type.name}_$title';
     int hash = 0;
@@ -46,7 +40,6 @@ class LocalHistoryController extends GetxController {
     }
     return hash;
   }
-
   void addToWatchingHistory(LocalHistoryItem data) {
     data.mediaType = HistoryMediaType.anime;
     data.lastWatched = DateTime.now();
@@ -72,7 +65,6 @@ class LocalHistoryController extends GetxController {
     animeWatchingHistory.insert(0, data);
     log('Added to anime history: ${data.title}');
   }
-
   void removeFromWatchingHistory(int mediaId) {
     isar.writeTxnSync(() {
       final item = isar.localHistoryItems
@@ -83,7 +75,6 @@ class LocalHistoryController extends GetxController {
     });
     animeWatchingHistory.removeWhere((h) => h.mediaId == mediaId);
   }
-
   void addToReadingHistory(LocalHistoryItem data) {
     data.mediaType = HistoryMediaType.manga;
     data.lastWatched = DateTime.now();
@@ -109,7 +100,6 @@ class LocalHistoryController extends GetxController {
     mangaReadingHistory.insert(0, data);
     log('Added to manga history: ${data.title}');
   }
-
   void removeFromReadingHistory(int mediaId) {
     isar.writeTxnSync(() {
       final item = isar.localHistoryItems
@@ -120,7 +110,6 @@ class LocalHistoryController extends GetxController {
     });
     mangaReadingHistory.removeWhere((h) => h.mediaId == mediaId);
   }
-
   void clearAnimeHistory() {
     isar.writeTxnSync(() {
       final ids = animeWatchingHistory.map((e) => e.id).toList();
@@ -128,7 +117,6 @@ class LocalHistoryController extends GetxController {
     });
     animeWatchingHistory.clear();
   }
-
   void clearMangaHistory() {
     isar.writeTxnSync(() {
       final ids = mangaReadingHistory.map((e) => e.id).toList();

@@ -2,7 +2,6 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 class CustomAppBar extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -14,7 +13,6 @@ class CustomAppBar extends StatelessWidget {
       required this.icon,
       this.size,
       this.ontap});
-
   @override
   Widget build(BuildContext context) {
     return Column(

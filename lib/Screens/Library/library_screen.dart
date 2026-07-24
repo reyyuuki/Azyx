@@ -22,15 +22,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
-
 enum LibraryContentType { anime, manga }
-
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
   @override
   State<LibraryScreen> createState() => _LibraryScreenState();
 }
-
 class _LibraryScreenState extends State<LibraryScreen>
     with TickerProviderStateMixin {
   LibraryContentType _contentType = LibraryContentType.anime;
@@ -40,7 +37,6 @@ class _LibraryScreenState extends State<LibraryScreen>
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-
   @override
   void initState() {
     super.initState();
@@ -51,14 +47,12 @@ class _LibraryScreenState extends State<LibraryScreen>
     _heroFade = CurvedAnimation(parent: _heroController, curve: Curves.easeOut);
     _heroController.forward();
   }
-
   @override
   void dispose() {
     _heroController.dispose();
     _searchController.dispose();
     super.dispose();
   }
-
   void _switchContentType(LibraryContentType type) {
     if (_contentType == type) return;
     _heroController.reset();
@@ -68,7 +62,6 @@ class _LibraryScreenState extends State<LibraryScreen>
     });
     _heroController.forward();
   }
-
   List<OfflineItem> _filterItems(List<OfflineItem> all) {
     List<OfflineItem> result = all;
     if (_selectedCategory != null) {
@@ -95,7 +88,6 @@ class _LibraryScreenState extends State<LibraryScreen>
     }
     return result;
   }
-
   void _handleContinueTap(LocalHistoryItem item) {
     final isAnime = _contentType == LibraryContentType.anime;
     if (item.mediaId != null) {
@@ -106,7 +98,6 @@ class _LibraryScreenState extends State<LibraryScreen>
         final List<Video> episodeUrls = decodedList
             .map((e) => Video.fromJson(e as Map<String, dynamic>))
             .toList();
-
         Get.to(
           () => WatchScreen(
             playerData: AnimeAllData(
@@ -126,12 +117,10 @@ class _LibraryScreenState extends State<LibraryScreen>
       } else {
         final sourceIndex = sourceController.installedMangaExtensions
             .indexWhere((e) => e.name == item.sourceName);
-
         if (sourceIndex != -1 || item.mangaSourceJson != null) {
           final Source source = sourceIndex != -1
               ? sourceController.installedMangaExtensions[sourceIndex]
               : Source.fromJson(jsonDecode(item.mangaSourceJson!));
-
           Get.to(
             () => ReadPage(
               source: source,
@@ -148,7 +137,6 @@ class _LibraryScreenState extends State<LibraryScreen>
       }
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -185,22 +173,17 @@ class _LibraryScreenState extends State<LibraryScreen>
                 builder: (context, itemSnap) {
                   final allItems = itemSnap.data ?? [];
                   final filtered = _filterItems(allItems);
-
                   return Obx(() {
                     final histList = _contentType == LibraryContentType.anime
                         ? localHistoryController.animeWatchingHistory
                         : localHistoryController.mangaReadingHistory;
-                    final histHero = histList.isNotEmpty
-                        ? histList.first
-                        : null;
-
                     return CustomScrollView(
                       physics: const BouncingScrollPhysics(),
                       slivers: [
                         SliverToBoxAdapter(child: _buildTopBar(cs)),
                         SliverToBoxAdapter(child: _buildTypeChips(cs)),
                         SliverToBoxAdapter(
-                          child: _buildHeroCard(cs, histHero, allItems),
+                          child: _buildHistorySection(cs, histList, allItems),
                         ),
                         SliverToBoxAdapter(
                           child: _buildStatsRow(cs, allItems, categories),
@@ -248,7 +231,6 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
-
   Widget _buildTopBar(ColorScheme cs) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -369,7 +351,6 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
-
   Widget _iconBtn(
     ColorScheme cs, {
     required IconData icon,
@@ -389,7 +370,6 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
-
   Widget _buildTypeChips(ColorScheme cs) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
@@ -414,7 +394,6 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
-
   Widget _typeChip(
     ColorScheme cs, {
     required String label,
@@ -459,271 +438,284 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
-
-  Widget _buildHeroCard(
+  Widget _buildHistorySection(
     ColorScheme cs,
-    LocalHistoryItem? histItem,
+    List<LocalHistoryItem> histList,
     List<OfflineItem> allItems,
   ) {
-    if (histItem == null) return const SizedBox(height: 14);
-    final String? imageUrl = histItem.image;
-    final String title = histItem.title ?? '';
-    final String progress = histItem.progress ?? '';
-    final int mediaId = histItem.mediaId ?? 0;
-    final OfflineItem? offlineMatch = allItems.firstWhereOrNull(
-      (i) => i.mediaData?.id == mediaId.toString(),
-    );
-
-    double prog = 0.0;
-    if (histItem.totalDurationSeconds != null &&
-        histItem.totalDurationSeconds! > 0) {
-      prog =
-          ((histItem.currentTimeSeconds ?? 0) / histItem.totalDurationSeconds!)
-              .clamp(0.0, 1.0);
-    } else if (offlineMatch != null) {
-      final int cur = int.tryParse(offlineMatch.number) ?? 0;
-      final int total = offlineMatch.mediaData?.episodes ?? 0;
-      prog = total > 0 ? (cur / total).clamp(0.0, 1.0) : 0.0;
-    }
-
-    final tagg = '$mediaId&hero';
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+    if (histList.isEmpty) return const SizedBox(height: 14);
+    return SizedBox(
+      height: 210,
       child: FadeTransition(
         opacity: _heroFade,
-        child: GestureDetector(
-          onTap: () {
-            if (offlineMatch != null) {
-              _contentType == LibraryContentType.anime
-                  ? Get.to(
-                      () => AnimeDetailsScreen(
-                        tagg: tagg,
-                        allData: offlineMatch,
-                        isOffline: true,
-                      ),
-                    )
-                  : Get.to(
-                      () => MangaDetailsScreen(
-                        tagg: tagg,
-                        allData: offlineMatch,
-                        isOffline: true,
-                      ),
-                    );
-            } else {
-              _contentType == LibraryContentType.anime
-                  ? Get.to(
-                      () => AnimeDetailsScreen(
-                        tagg: tagg,
-                        smallMedia: CarousaleData(
-                          id: mediaId.toString(),
-                          image: imageUrl ?? '',
-                          title: title,
-                        ),
-                      ),
-                    )
-                  : Get.to(
-                      () => MangaDetailsScreen(
-                        tagg: tagg,
-                        smallMedia: CarousaleData(
-                          id: mediaId.toString(),
-                          image: imageUrl ?? '',
-                          title: title,
-                        ),
-                      ),
-                    );
+        child: ListView.builder(
+          physics: const BouncingScrollPhysics(),
+          scrollDirection: Axis.horizontal,
+          itemCount: histList.length,
+          itemBuilder: (context, index) {
+            final histItem = histList[index];
+            final String? imageUrl = histItem.image;
+            final String title = histItem.title ?? '';
+            final String progress = histItem.progress ?? '';
+            final int mediaId = histItem.mediaId ?? 0;
+            final OfflineItem? offlineMatch = allItems.firstWhereOrNull(
+              (i) => i.mediaData?.id == mediaId.toString(),
+            );
+            double prog = 0.0;
+            if (histItem.totalDurationSeconds != null &&
+                histItem.totalDurationSeconds! > 0) {
+              prog = ((histItem.currentTimeSeconds ?? 0) /
+                      histItem.totalDurationSeconds!)
+                  .clamp(0.0, 1.0);
+            } else if (offlineMatch != null) {
+              final int cur = int.tryParse(offlineMatch.number) ?? 0;
+              final int total = offlineMatch.mediaData?.episodes ?? 0;
+              prog = total > 0 ? (cur / total).clamp(0.0, 1.0) : 0.0;
             }
-          },
-          child: Container(
-            height: 190,
-            decoration: BoxDecoration(
-              gradient: settingsController.isGradient.value
-                  ? LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        cs.surfaceContainerHigh.withOpacity(0.7),
-                        cs.surfaceContainerLow.withOpacity(0.5),
-                      ],
-                    )
-                  : null,
-              color: settingsController.isGradient.value
-                  ? null
-                  : cs.surfaceContainerHigh.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: cs.outlineVariant.withOpacity(0.2),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            clipBehavior: Clip.hardEdge,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                if (imageUrl != null)
-                  CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) =>
-                        Container(color: cs.surfaceContainerHighest),
-                    errorWidget: (_, __, ___) =>
-                        Container(color: cs.surfaceContainerHighest),
-                  ),
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        cs.surfaceContainerHigh,
-                        cs.surfaceContainerHigh.withOpacity(0.85),
-                        cs.surfaceContainerHigh.withOpacity(0.2),
-                      ],
-                      stops: const [0.0, 0.4, 1.0],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: cs.primaryContainer,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 5,
-                              height: 5,
-                              decoration: BoxDecoration(
-                                color: cs.primary,
-                                shape: BoxShape.circle,
-                              ),
+            final tagg = '$mediaId&hero_$index';
+            final isLast = index == histList.length - 1;
+            return GestureDetector(
+              onTap: () {
+                if (offlineMatch != null) {
+                  _contentType == LibraryContentType.anime
+                      ? Get.to(
+                          () => AnimeDetailsScreen(
+                            tagg: tagg,
+                            allData: offlineMatch,
+                            isOffline: true,
+                          ),
+                        )
+                      : Get.to(
+                          () => MangaDetailsScreen(
+                            tagg: tagg,
+                            allData: offlineMatch,
+                            isOffline: true,
+                          ),
+                        );
+                } else {
+                  _contentType == LibraryContentType.anime
+                      ? Get.to(
+                          () => AnimeDetailsScreen(
+                            tagg: tagg,
+                            smallMedia: CarousaleData(
+                              id: mediaId.toString(),
+                              image: imageUrl ?? '',
+                              title: title,
                             ),
-                            const SizedBox(width: 5),
-                            Text(
-                              _contentType == LibraryContentType.anime
-                                  ? 'CONTINUE WATCHING'
-                                  : 'CONTINUE READING',
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 1.0,
-                                color: cs.onPrimaryContainer,
-                              ),
+                          ),
+                        )
+                      : Get.to(
+                          () => MangaDetailsScreen(
+                            tagg: tagg,
+                            smallMedia: CarousaleData(
+                              id: mediaId.toString(),
+                              image: imageUrl ?? '',
+                              title: title,
                             ),
+                          ),
+                        );
+                }
+              },
+              child: Container(
+                width: Get.width * 0.85,
+                margin: EdgeInsets.only(
+                  left: 20,
+                  right: isLast ? 20 : 0,
+                  top: 14,
+                  bottom: 6,
+                ),
+                decoration: BoxDecoration(
+                  gradient: settingsController.isGradient.value
+                      ? LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            cs.surfaceContainerHigh.withOpacity(0.7),
+                            cs.surfaceContainerLow.withOpacity(0.5),
                           ],
+                        )
+                      : null,
+                  color: settingsController.isGradient.value
+                      ? null
+                      : cs.surfaceContainerHigh.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: cs.outlineVariant.withOpacity(0.2),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                clipBehavior: Clip.hardEdge,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (imageUrl != null)
+                      CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) =>
+                            Container(color: cs.surfaceContainerHighest),
+                        errorWidget: (_, __, ___) =>
+                            Container(color: cs.surfaceContainerHighest),
+                      ),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            cs.surfaceContainerHigh,
+                            cs.surfaceContainerHigh.withOpacity(0.85),
+                            cs.surfaceContainerHigh.withOpacity(0.2),
+                          ],
+                          stops: const [0.0, 0.4, 1.0],
                         ),
                       ),
-                      Column(
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            title,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                              color: cs.onSurface,
-                              height: 1.15,
-                              letterSpacing: -0.3,
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            progress.isNotEmpty ? progress : 'Progress unknown',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: cs.onSurfaceVariant,
-                              fontWeight: FontWeight.w600,
+                            decoration: BoxDecoration(
+                              color: cs.primaryContainer,
+                              borderRadius: BorderRadius.circular(6),
                             ),
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(2),
-                                  child: LinearProgressIndicator(
-                                    value: prog,
-                                    backgroundColor: cs.outlineVariant
-                                        .withOpacity(0.3),
-                                    valueColor: AlwaysStoppedAnimation(
-                                      cs.primary,
-                                    ),
-                                    minHeight: 4,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 5,
+                                  height: 5,
+                                  decoration: BoxDecoration(
+                                    color: cs.primary,
+                                    shape: BoxShape.circle,
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 10),
-                              Text(
-                                '${(prog * 100).round()}%',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w800,
-                                  color: cs.primary,
+                                const SizedBox(width: 5),
+                                Text(
+                                  _contentType == LibraryContentType.anime
+                                      ? 'CONTINUE WATCHING'
+                                      : 'CONTINUE READING',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 1.0,
+                                    color: cs.onPrimaryContainer,
+                                  ),
                                 ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: cs.onSurface,
+                                  height: 1.15,
+                                  letterSpacing: -0.3,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                progress.isNotEmpty
+                                    ? progress
+                                    : 'Progress unknown',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: cs.onSurfaceVariant,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(2),
+                                      child: LinearProgressIndicator(
+                                        value: prog,
+                                        backgroundColor: cs.outlineVariant
+                                            .withOpacity(0.3),
+                                        valueColor: AlwaysStoppedAnimation(
+                                          cs.primary,
+                                        ),
+                                        minHeight: 4,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    '${(prog * 100).round()}%',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: cs.primary,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  right: 16,
-                  bottom: 16,
-                  child: GestureDetector(
-                    onTap: () => _handleContinueTap(histItem),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: cs.primary,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: cs.primary.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
+                    ),
+                    Positioned(
+                      right: 16,
+                      bottom: 16,
+                      child: GestureDetector(
+                        onTap: () => _handleContinueTap(histItem),
+                        child: Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: cs.primary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: cs.primary.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: Icon(
-                        _contentType == LibraryContentType.anime
-                            ? Icons.play_arrow_rounded
-                            : Icons.menu_book_rounded,
-                        color: cs.onPrimary,
-                        size: 22,
+                          child: Icon(
+                            _contentType == LibraryContentType.anime
+                                ? Icons.play_arrow_rounded
+                                : Icons.menu_book_rounded,
+                            color: cs.onPrimary,
+                            size: 22,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
-
   Widget _buildStatsRow(
     ColorScheme cs,
     List<OfflineItem> items,
@@ -762,7 +754,6 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
-
   Widget _statChip(
     ColorScheme cs, {
     required String value,
@@ -807,7 +798,6 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
-
   Widget _buildCategorySection(
     ColorScheme cs,
     List<Category> categories,
@@ -872,7 +862,6 @@ class _LibraryScreenState extends State<LibraryScreen>
       ],
     );
   }
-
   Widget _categoryPill(ColorScheme cs, Category? cat, String label, int count) {
     final selected =
         _selectedCategory?.id == cat?.id &&
@@ -907,7 +896,6 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
-
   Widget _buildMediaCard(ColorScheme cs, OfflineItem item) {
     final media = item.mediaData;
     final tagg = '${media?.id}&library';
@@ -920,7 +908,6 @@ class _LibraryScreenState extends State<LibraryScreen>
         ? media!.genres!.first
         : '';
     final formattedRating = _formatRating(media?.rating);
-
     return GestureDetector(
       onTap: () => _contentType == LibraryContentType.anime
           ? Get.to(
@@ -1154,7 +1141,6 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
-
   String? _formatRating(String? r) {
     if (r == null || r.isEmpty || r == 'null' || r == '??') return null;
     try {
@@ -1169,7 +1155,6 @@ class _LibraryScreenState extends State<LibraryScreen>
     } catch (_) {}
     return r;
   }
-
   Widget _statusBadge(ColorScheme cs, bool isReleasing, String? status) {
     if (status == 'FINISHED' || status == 'Completed') {
       return const SizedBox.shrink();
@@ -1203,7 +1188,6 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
-
   Widget _buildEmptyState(ColorScheme cs) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 60),

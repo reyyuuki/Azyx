@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-
 int maxMobileWidth = 600;
 double getResponsiveSize(context,
     {required double mobileSize,
@@ -21,7 +20,6 @@ double getResponsiveSize(context,
     }
   }
 }
-
 dynamic getResponsiveValueWithTablet(
   BuildContext context, {
   required dynamic mobileValue,
@@ -33,7 +31,6 @@ dynamic getResponsiveValueWithTablet(
   const double maxMobileWidth = 600;
   const double maxTabletWidth = 1024;
   final bool isMobilePlatform = Platform.isAndroid || Platform.isIOS;
-
   if (strictMode) {
     if (!isMobilePlatform) {
       return desktopValue;
@@ -50,7 +47,6 @@ dynamic getResponsiveValueWithTablet(
     }
   }
 }
-
 dynamic getResponsiveValue(context,
     {required dynamic mobileValue,
     required dynamic desktopValue,
@@ -71,7 +67,6 @@ dynamic getResponsiveValue(context,
     }
   }
 }
-
 int getResponsiveCrossAxisCount(
   BuildContext context, {
   int baseColumns = 2,
@@ -85,7 +80,6 @@ int getResponsiveCrossAxisCount(
   final currentWidth = MediaQuery.of(context).size.width;
   const mobileBreakpoint = 600;
   const tabletBreakpoint = 1200;
-
   int crossAxisCount;
   if (currentWidth < mobileBreakpoint) {
     crossAxisCount = (currentWidth / mobileItemWidth).floor();
@@ -94,10 +88,8 @@ int getResponsiveCrossAxisCount(
   } else {
     crossAxisCount = (currentWidth / desktopItemWidth).floor();
   }
-
   return crossAxisCount.clamp(baseColumns, maxColumns);
 }
-
 class PlatformBuilder extends StatelessWidget {
   final Widget androidBuilder;
   final Widget desktopBuilder;
@@ -107,7 +99,6 @@ class PlatformBuilder extends StatelessWidget {
       required this.androidBuilder,
       required this.desktopBuilder,
       this.strictMode = false});
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
@@ -127,7 +118,6 @@ class PlatformBuilder extends StatelessWidget {
     });
   }
 }
-
 class PlatformBuilderWithTablet extends StatelessWidget {
   final Widget androidBuilder;
   final Widget tabletBuilder;
@@ -135,7 +125,6 @@ class PlatformBuilderWithTablet extends StatelessWidget {
   final bool strictMode;
   static const double maxMobileWidth = 500;
   static const double maxTabletWidth = 1024;
-
   const PlatformBuilderWithTablet({
     super.key,
     required this.androidBuilder,
@@ -143,7 +132,6 @@ class PlatformBuilderWithTablet extends StatelessWidget {
     required this.desktopBuilder,
     this.strictMode = false,
   });
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -169,7 +157,6 @@ class PlatformBuilderWithTablet extends StatelessWidget {
     );
   }
 }
-
 class ConditionalBuilder extends StatelessWidget {
   final Widget falseBuilder;
   final Widget trueBuilder;
@@ -179,7 +166,6 @@ class ConditionalBuilder extends StatelessWidget {
       required this.falseBuilder,
       required this.trueBuilder,
       required this.condition});
-
   @override
   Widget build(BuildContext context) {
     return condition ? trueBuilder : falseBuilder;

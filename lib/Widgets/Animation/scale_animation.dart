@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 class SlideAndScaleAnimation extends StatefulWidget {
   final Widget child;
   final Duration duration;
@@ -7,7 +6,6 @@ class SlideAndScaleAnimation extends StatefulWidget {
   final double finalScale;
   final Offset initialOffset;
   final Offset finalOffset;
-
   const SlideAndScaleAnimation({
     super.key,
     required this.child,
@@ -17,17 +15,14 @@ class SlideAndScaleAnimation extends StatefulWidget {
     this.initialOffset = const Offset(0.0, 0.0),
     this.finalOffset = const Offset(0.0, 0.0),
   });
-
   @override
   SlideAndScaleAnimationState createState() => SlideAndScaleAnimationState();
 }
-
 class SlideAndScaleAnimationState extends State<SlideAndScaleAnimation>
     with SingleTickerProviderStateMixin {
   late final AnimationController _animationController;
   late final Animation<double> _scaleAnimation;
   late final Animation<Offset> _slideAnimation;
-
   @override
   void initState() {
     super.initState();
@@ -35,7 +30,6 @@ class SlideAndScaleAnimationState extends State<SlideAndScaleAnimation>
       duration: widget.duration,
       vsync: this,
     );
-
     _scaleAnimation =
         Tween<double>(
           begin: widget.initialScale,
@@ -46,7 +40,6 @@ class SlideAndScaleAnimationState extends State<SlideAndScaleAnimation>
             curve: Curves.easeInOut,
           ),
         );
-
     _slideAnimation =
         Tween<Offset>(
           begin: widget.initialOffset,
@@ -57,20 +50,17 @@ class SlideAndScaleAnimationState extends State<SlideAndScaleAnimation>
             curve: Curves.easeInOut,
           ),
         );
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _animationController.forward();
       }
     });
   }
-
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(

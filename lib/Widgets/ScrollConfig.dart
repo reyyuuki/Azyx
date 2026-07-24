@@ -1,9 +1,5 @@
-// ignore_for_file: file_names, non_constant_identifier_names
-
 import 'dart:ui';
-
 import 'package:flutter/cupertino.dart';
-
 Widget ScrollConfig(BuildContext context, {required Widget child}) {
   return ScrollConfiguration(
     behavior: ScrollConfiguration.of(context).copyWith(
@@ -16,7 +12,6 @@ Widget ScrollConfig(BuildContext context, {required Widget child}) {
     child: child,
   );
 }
-
 Widget CustomScrollConfig(BuildContext context,
     {required List<Widget> children,
     Axis scrollDirection = Axis.vertical,

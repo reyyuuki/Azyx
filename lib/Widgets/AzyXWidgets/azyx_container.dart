@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 class AzyXContainer extends StatelessWidget {
   final Widget? child;
   final AlignmentGeometry? alignment;
@@ -14,7 +13,6 @@ class AzyXContainer extends StatelessWidget {
   final Matrix4? transform;
   final AlignmentGeometry? transformAlignment;
   final Clip clipBehavior;
-
   const AzyXContainer({
     super.key,
     this.child,
@@ -31,7 +29,6 @@ class AzyXContainer extends StatelessWidget {
     this.transformAlignment,
     this.clipBehavior = Clip.none,
   });
-
   @override
   Widget build(BuildContext context) {
     return Container(

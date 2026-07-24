@@ -1,8 +1,6 @@
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:flutter/material.dart';
-
-// ignore: must_be_immutable
 class CustomColorTemplate extends StatelessWidget {
   final Color color;
   bool? isBorder = false;
@@ -12,7 +10,6 @@ class CustomColorTemplate extends StatelessWidget {
       required this.color,
       required this.isBorder,
       required this.name});
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -92,7 +89,6 @@ class CustomColorTemplate extends StatelessWidget {
       ],
     );
   }
-
   AzyXContainer ball() {
     return AzyXContainer(
       height: 10,

@@ -7,7 +7,6 @@ class AnilistSearchData {
   String? rating;
   String? type;
   String? status;
-
   AnilistSearchData(
       {this.id,
       this.title,
@@ -17,7 +16,6 @@ class AnilistSearchData {
       this.rating,
       this.status,
       this.type});
-
   factory AnilistSearchData.fromJson(Map<String, dynamic> json, isManga) {
     return AnilistSearchData(
         id: json['id'],

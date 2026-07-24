@@ -4,7 +4,6 @@ class CarouselData {
   String? poster;
   String? extraData;
   String? source;
-
   CarouselData({
     this.id,
     this.title,

@@ -5,14 +5,11 @@ import 'package:azyx/Widgets/theme_widgets/custom_color_template.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 class CustomColor extends StatefulWidget {
   const CustomColor({super.key});
-
   @override
   State<CustomColor> createState() => _ThemeModesState();
 }
-
 class _ThemeModesState extends State<CustomColor> {
   final List<Map<String, dynamic>> colors = [
     {"name": "Blue", "color": Colors.blue},
@@ -33,7 +30,6 @@ class _ThemeModesState extends State<CustomColor> {
     {"name": "Lime", "color": Colors.lime},
     {"name": "PinkAccent", "color": Colors.pinkAccent},
   ];
-
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ThemeProvider>(context);

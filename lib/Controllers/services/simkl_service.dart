@@ -1,9 +1,7 @@
-// ignore_for_file: invalid_use_of_protected_member
-
 import 'dart:convert';
-
 import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/models/online_service.dart';
+import 'package:azyx/Controllers/source/source_mapper.dart';
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
@@ -20,6 +18,7 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/anime/anime_scrollable_list.dart';
 import 'package:azyx/Widgets/anime/main_carousale.dart';
 import 'package:azyx/Widgets/common_cards.dart';
+import 'package:azyx/Widgets/common/community_scrollable_list.dart';
 import 'package:azyx/Widgets/header.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:azyx/utils/functions.dart';
@@ -28,11 +27,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' hide MediaType;
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 final SimklService simklService = Get.find();
-
 class SimklService extends GetxController
     implements BaseService, OnlineService {
   RxList<Media> spotlight = RxList();
@@ -40,7 +37,6 @@ class SimklService extends GetxController
   RxList<Media> trendingMovies = RxList();
   RxList<Media> trendingSeries = RxList();
   RxList<Media> topUpcoming = RxList();
-
   @override
   Future<AnilistMediaData> fetchDetails(FetchDetailsParams params) async {
     final id = params.id;
@@ -60,7 +56,6 @@ class SimklService extends GetxController
       throw Exception('Failed to fetch trending movies: ${resp.statusCode}');
     }
   }
-
   Future<void> fetchMovies() async {
     final url =
         "https://api.simkl.com/movies/trending?extended=overview&client_id=${dotenv.env['SIMKL_CLIENT_ID']}&perPage=20";
@@ -77,14 +72,12 @@ class SimklService extends GetxController
       throw Exception('Failed to fetch trending movies: ${resp.statusCode}');
     }
   }
-
   Future<void> fetchSeries() async {
     final resp = await get(
       Uri.parse(
         "https://api.simkl.com/tv/trending?extended=overview&client_id=${dotenv.env['SIMKL_CLIENT_ID']}",
       ),
     );
-
     if (resp.statusCode == 200) {
       final data = jsonDecode(resp.body) as List<dynamic>;
       final list = data.map((e) {
@@ -95,11 +88,9 @@ class SimklService extends GetxController
       throw Exception('Failed to fetch trending series: ${resp.statusCode}');
     }
   }
-
   @override
   Future<void> fetchhomeData() async =>
       Future.wait([fetchMovies(), fetchSeries()]);
-
   Future<List<Media>> searchMovies(String query) async {
     final movieUrl = Uri.parse(
       'https://api.simkl.com/search/movie?q=$query&extended=full&client_id=${dotenv.env['SIMKL_CLIENT_ID']}',
@@ -114,7 +105,6 @@ class SimklService extends GetxController
     }
     return [];
   }
-
   Future<List<Media>> searchSeries(String query) async {
     final movieUrl = Uri.parse(
       'https://api.simkl.com/search/tv?q=$query&extended=full&client_id=${dotenv.env['SIMKL_CLIENT_ID']}',
@@ -125,20 +115,15 @@ class SimklService extends GetxController
       List<Media> list = data
           .map((e) => Media.fromSmallSimkl(e, true))
           .toList();
-
       return list;
     }
     return [];
   }
-
   @override
   RxBool isLoggedIn = false.obs;
-
   @override
   Rx<User> userData = User().obs;
-
   Rx<UserMedia> currentMedia = UserMedia().obs;
-
   @override
   Future<void> updateEntry(UserMedia params, {required bool isAnime}) async {
     final listId = params.id;
@@ -147,29 +132,23 @@ class SimklService extends GetxController
     try {
       final isMovie = listId?.split('*').last == 'MOVIE';
       final id = listId?.split('*').first;
-
       String? newStatus = isMovie
           ? Simkl.alToSimklMovie(status ?? '')
           : Simkl.alToSimklShow(status ?? '');
-
       final token = AuthKeys.simklAuthToken.get<String>('');
       final apiKey = dotenv.env['SIMKL_CLIENT_ID'];
-
       if (token.isEmpty || apiKey == null) {
         Utils.log('Authentication token or API key missing');
         return;
       }
-
       final alrExist = (isMovie ? userAnimeList : userMangaList).any(
         (e) => e.id == listId,
       );
-
       final url = Uri.parse(
         alrExist
             ? 'https://api.simkl.com/sync/history'
             : 'https://api.simkl.com/sync/add-to-list',
       );
-
       final body = isMovie
           ? {
               'movies': [
@@ -190,7 +169,6 @@ class SimklService extends GetxController
                 },
               ],
             };
-
       final response = await post(
         url,
         headers: {
@@ -213,7 +191,6 @@ class SimklService extends GetxController
       azyxSnackBar('An unexpected error occurred');
     }
   }
-
   @override
   Future<void> deleteEntry(String listId, {bool isAnime = true}) async {
     final isMovie = listId.split('*').last == 'MOVIE';
@@ -247,18 +224,14 @@ class SimklService extends GetxController
       ),
     );
     Utils.log(response.body);
-
     azyxSnackBar('${isMovie ? "Movie" : "Series"} Deleted Successfully');
-    // currentMedia.value = TrackedMedia();
     fetchUserMovieList();
     fetchUserSeriesList();
   }
-
   @override
   Future<void> login() async {
     final clientId = dotenv.env['SIMKL_CLIENT_ID'];
     final redirectUri = dotenv.env['REDIRECT_URL'];
-
     final url =
         'https://simkl.com/oauth/authorize?response_type=code&client_id=$clientId&redirect_uri=$redirectUri';
     try {
@@ -266,7 +239,6 @@ class SimklService extends GetxController
         url: url,
         callbackUrlScheme: 'azyx',
       );
-
       final code = Uri.parse(result).queryParameters['code'];
       if (code != null) {
         await _exchangeCodeForToken(code);
@@ -275,12 +247,10 @@ class SimklService extends GetxController
       Utils.log(e.toString());
     }
   }
-
   Future<void> _exchangeCodeForToken(String code) async {
     final clientId = dotenv.env['SIMKL_CLIENT_ID'];
     final redirectUri = dotenv.env['REDIRECT_URL'];
     final clientSecret = dotenv.env['SIMKL_CLIENT_SECRET'];
-
     final url = Uri.parse('https://api.simkl.com/oauth/token');
     final req = await post(
       url,
@@ -293,7 +263,6 @@ class SimklService extends GetxController
         "grant_type": "authorization_code",
       }),
     );
-
     if (req.statusCode == 200) {
       final data = json.decode(req.body);
       final token = data['access_token'];
@@ -306,7 +275,6 @@ class SimklService extends GetxController
       azyxSnackBar("Yep, Failed");
     }
   }
-
   Future<void> fetchUserInfo() async {
     final token = AuthKeys.simklAuthToken.get<String>('');
     final apiKey = dotenv.env['SIMKL_CLIENT_ID'];
@@ -336,7 +304,6 @@ class SimklService extends GetxController
         name: data['user']['name'] ?? 'Guest',
         avatar: data['user']['avatar'],
         animeCount: stats['movies']?['completed']?['count'] ?? 0,
-
         mangaCount: stats['tv']?['completed']?['count'] ?? 0,
       );
       fetchUserMovieList();
@@ -345,13 +312,10 @@ class SimklService extends GetxController
       azyxSnackBar("User Info Fetching Failed!");
     }
   }
-
   @override
   RxList<UserMedia> userAnimeList = RxList();
-
   @override
   RxList<UserMedia> userMangaList = RxList();
-
   Future<void> fetchUserMovieList() async {
     final token = AuthKeys.simklAuthToken.get<String>('');
     final apiKey = dotenv.env['SIMKL_CLIENT_ID'];
@@ -374,7 +338,6 @@ class SimklService extends GetxController
       Utils.log(response.body);
     }
   }
-
   Future<void> fetchUserSeriesList() async {
     final token = AuthKeys.simklAuthToken.get<String>('');
     final apiKey = dotenv.env['SIMKL_CLIENT_ID'];
@@ -398,14 +361,12 @@ class SimklService extends GetxController
       Utils.log(response.body);
     }
   }
-
   @override
   Future<void> logout() async {
     AuthKeys.simklAuthToken.remove();
     isLoggedIn.value = false;
     userData.value = User();
   }
-
   @override
   Future<void> autoLogin() async {
     final token = AuthKeys.simklAuthToken.get<String>('');
@@ -413,14 +374,12 @@ class SimklService extends GetxController
       await fetchUserInfo();
     }
   }
-
   @override
   Future<void> refresh() async => Future.wait([
     fetchUserMovieList(),
     fetchUserSeriesList(),
     fetchhomeData(),
   ]);
-
   @override
   Rx<Widget> animeWidgets(BuildContext context) {
     return Obx(
@@ -456,7 +415,6 @@ class SimklService extends GetxController
                         title: "Currently Watching",
                       ),
                     ),
-                  const SizedBox(height: 10),
                   Padding(
                     padding: const EdgeInsets.all(10),
                     child: AnimeScrollableList(
@@ -470,12 +428,10 @@ class SimklService extends GetxController
             ),
     ).obs;
   }
-
   @override
   Future<List<Media>> fetchsearchData(SearchParams query) {
     throw UnimplementedError();
   }
-
   @override
   Rx<Widget> homeWidgets(BuildContext context) {
     return CustomScrollView(
@@ -643,7 +599,6 @@ class SimklService extends GetxController
       ],
     ).obs;
   }
-
   @override
   Rx<Widget> mangaWidgets(BuildContext context) {
     return Obx(
@@ -679,18 +634,6 @@ class SimklService extends GetxController
                     isManga: false,
                     title: "Popular Series",
                   ),
-                  // const SizedBox(height: 10),
-                  // AnimeScrollableList(
-                  //   animeList: topUpcomingM,
-                  //   isManga: true,
-                  //   title: "TopUpcoming Manga",
-                  // ),
-                  // const SizedBox(height: 10),
-                  // AnimeScrollableList(
-                  //   animeList: trendingM,
-                  //   isManga: true,
-                  //   title: "Completed Manga",
-                  // ),
                 ],
               ),
             ),

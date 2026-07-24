@@ -4,7 +4,6 @@ class CarousaleData {
   String id;
   String? other;
   String? extraData;
-
   CarousaleData({
     required this.id,
     required this.image,

@@ -2,28 +2,23 @@ import 'dart:ui';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
-
 class FloaterWidget extends StatelessWidget {
   final String title;
   final String name;
   final IconData icon;
   final int? index;
-
   const FloaterWidget(
       {super.key,
       required this.title,
       required this.icon,
       required this.name,
       this.index});
-
   @override
   Widget build(BuildContext context) {
-    // Adding a delay based on index to stagger the animations
     final double positionOffset = (index ?? 0) *
-        10.0; // Adjust the multiplier to control the gap between floaters
+        10.0; 
     final double opacity =
         (index != null) ? (1.0 - index! * 0.1).clamp(0.0, 1.0) : 1.0;
-
     return AnimatedPositioned(
       bottom: positionOffset,
       left: 0,
@@ -32,7 +27,7 @@ class FloaterWidget extends StatelessWidget {
       curve: Curves.easeInOut,
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 1000),
-        opacity: opacity, // Apply opacity change based on index
+        opacity: opacity, 
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 1000),
           margin: const EdgeInsets.fromLTRB(10, 0, 10, 20),

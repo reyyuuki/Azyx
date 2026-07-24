@@ -8,30 +8,25 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:grouped_list/sliver_grouped_list.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 class Extension extends StatefulWidget {
   final bool installed;
   final String query;
   final ItemType itemType;
-
   const Extension({
     required this.installed,
     required this.query,
     required this.itemType,
     super.key,
   });
-
   @override
   State<Extension> createState() => _ExtensionScreenState();
 }
-
 class _ExtensionScreenState extends State<Extension> {
   late final ScrollController _scrollController;
   late final TextEditingController _searchController;
   late final FocusNode _searchFocusNode;
   bool _isUpdatingAll = false;
   String _currentSearchQuery = '';
-
   @override
   void initState() {
     super.initState();
@@ -40,7 +35,6 @@ class _ExtensionScreenState extends State<Extension> {
     _searchFocusNode = FocusNode();
     _currentSearchQuery = widget.query;
   }
-
   @override
   void dispose() {
     _scrollController.dispose();
@@ -48,19 +42,16 @@ class _ExtensionScreenState extends State<Extension> {
     _searchFocusNode.dispose();
     super.dispose();
   }
-
   Future<void> _refreshData() async {
     await sourceController.fetchRepos();
     setState(() {});
     Utils.log('get extensions: ${_installedExtensions.length}');
   }
-
   void _onSearchChanged(String value) {
     setState(() {
       _currentSearchQuery = value;
     });
   }
-
   void _clearSearch() {
     _searchController.clear();
     _searchFocusNode.unfocus();
@@ -68,7 +59,6 @@ class _ExtensionScreenState extends State<Extension> {
       _currentSearchQuery = '';
     });
   }
-
   List<Source> get _allAvailableExtensions {
     final extensions = sourceController.getAvailableExtensions(widget.itemType);
     if (_currentSearchQuery.isEmpty) return extensions;
@@ -79,7 +69,6 @@ class _ExtensionScreenState extends State<Extension> {
         )
         .toList();
   }
-
   List<Source> get _installedExtensions {
     final extensions = sourceController.getInstalledExtensions(widget.itemType);
     if (_currentSearchQuery.isEmpty) return extensions;
@@ -90,11 +79,9 @@ class _ExtensionScreenState extends State<Extension> {
         )
         .toList();
   }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
-
     return RefreshIndicator.adaptive(
       onRefresh: () => _refreshData(),
       backgroundColor: theme.primaryContainer,
@@ -114,8 +101,6 @@ class _ExtensionScreenState extends State<Extension> {
                     physics: const BouncingScrollPhysics(),
                     slivers: [
                       const SliverToBoxAdapter(child: SizedBox(height: 8)),
-                      // if (widget.installed)
-                      //   _buildUpdatePendingList(updateEntries),
                       if (widget.installed)
                         _buildInstalledList(_installedExtensions),
                       if (!widget.installed)
@@ -131,7 +116,6 @@ class _ExtensionScreenState extends State<Extension> {
       ),
     );
   }
-
   Widget _buildSearchBar(ColorScheme theme) {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -185,14 +169,12 @@ class _ExtensionScreenState extends State<Extension> {
       ),
     );
   }
-
   Widget _buildSectionHeader({
     required String title,
     Widget? action,
     int? count,
   }) {
     final theme = Theme.of(context).colorScheme;
-
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
       child: Row(
@@ -232,10 +214,8 @@ class _ExtensionScreenState extends State<Extension> {
       ),
     );
   }
-
   Widget _buildUpdateAllButton(List<Source> updateEntries) {
     final theme = Theme.of(context).colorScheme;
-
     return TextButton.icon(
       onPressed: _isUpdatingAll ? null : () => _updateAllSources(updateEntries),
       style: TextButton.styleFrom(
@@ -261,7 +241,6 @@ class _ExtensionScreenState extends State<Extension> {
       ),
     );
   }
-
   SliverGroupedListView<Source, String> _buildUpdatePendingList(
     List<Source> updateEntries,
   ) {
@@ -280,7 +259,6 @@ class _ExtensionScreenState extends State<Extension> {
       order: GroupedListOrder.ASC,
     );
   }
-
   SliverGroupedListView<Source, String> _buildInstalledList(
     List<Source> installedEntries,
   ) {
@@ -292,7 +270,6 @@ class _ExtensionScreenState extends State<Extension> {
         itemBuilder: (context, element) => const SizedBox.shrink(),
       );
     }
-
     return SliverGroupedListView<Source, String>(
       elements: installedEntries,
       groupBy: (element) => "Installed",
@@ -307,7 +284,6 @@ class _ExtensionScreenState extends State<Extension> {
       order: GroupedListOrder.ASC,
     );
   }
-
   SliverGroupedListView<Source, String> _buildNotInstalledList(
     List<Source> notInstalledEntries,
   ) {
@@ -319,7 +295,6 @@ class _ExtensionScreenState extends State<Extension> {
         itemBuilder: (context, element) => const SizedBox.shrink(),
       );
     }
-
     return SliverGroupedListView<Source, String>(
       elements: notInstalledEntries,
       groupBy: (element) => completeLanguageName(element.lang!.toLowerCase()),
@@ -330,7 +305,6 @@ class _ExtensionScreenState extends State<Extension> {
                   completeLanguageName(e.lang!.toLowerCase()) == groupByValue,
             )
             .length;
-
         return _buildSectionHeader(
           title: groupByValue,
           count: countForLanguage,
@@ -343,7 +317,6 @@ class _ExtensionScreenState extends State<Extension> {
       order: GroupedListOrder.ASC,
     );
   }
-
   Future<void> _updateAllSources(List<Source> sources) async {
     for (var source in sources) {
       await source.update();

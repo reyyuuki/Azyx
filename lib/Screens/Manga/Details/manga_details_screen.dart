@@ -1,12 +1,8 @@
-// ignore_for_file: deprecated_member_use, invalid_use_of_protected_member
-
 import 'dart:developer';
-
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
-
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Database/isar_models/offline_item.dart'
@@ -19,16 +15,15 @@ import 'package:azyx/Screens/Manga/Details/tabs/widgets/manga_add_to_list.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/scrollable_app_bar.dart';
+import 'package:azyx/Widgets/common/comments_section.dart';
 import 'package:azyx/utils/mapper.dart';
 import 'package:azyx/utils/source_mapper.dart';
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
 import 'package:expandable_page_view/expandable_page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../utils/utils.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 class MangaDetailsScreen extends StatefulWidget {
   final String tagg;
   final CarousaleData? smallMedia;
@@ -41,11 +36,9 @@ class MangaDetailsScreen extends StatefulWidget {
     this.smallMedia,
     this.allData,
   });
-
   @override
   State<MangaDetailsScreen> createState() => _DetailsScreenState();
 }
-
 class _DetailsScreenState extends State<MangaDetailsScreen>
     with SingleTickerProviderStateMixin {
   final RxString title = ''.obs;
@@ -65,7 +58,6 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
   final Rx<bool> _extenstionError = false.obs;
   final Rx<String> syncId = ''.obs;
   final RxInt _currentIndex = 0.obs;
-
   Future<void> loadData() async {
     try {
       final response = await serviceHandler.fetchAnimeDetails(
@@ -81,7 +73,6 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
     }
     await loadDetails();
   }
-
   void getMediaStatus() {
     if (serviceHandler.isLoggedIn.value) {
       serviceHandler.currentMedia.value = serviceHandler.userMangaList
@@ -92,7 +83,6 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
     }
     Utils.log('st; ${serviceHandler.currentMedia.value.status} / $id');
   }
-
   Future<void> _syncMedia() async {
     final response = await MediaSyncer.mapMediaId(
       id.value.toString(),
@@ -101,7 +91,6 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
     syncId.value = response ?? '';
     Utils.log('MAL ${syncId.value} / ${id.value}');
   }
-
   void convertData() {
     if (widget.isOffline) {
       anilistAddToListController.findManga(widget.allData!.mediaData!);
@@ -130,7 +119,6 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
       loadData();
     }
   }
-
   Future<void> getChapters(String link) async {
     final token = "manga_detail_${id.value}";
     sourceController.updateToken('manga_detail', token);
@@ -153,7 +141,6 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
       _extenstionError.value = true;
     }
   }
-
   Future<void> loadDetails() async {
     try {
       final result = await SourceMapper.mapMedia(
@@ -175,16 +162,14 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
       _extenstionError.value = true;
     }
   }
-
   List<String> formatTitles(AnilistMediaData media) {
     return [media.title ?? '', media.titleRomaji ?? ''];
   }
-
   @override
   void initState() {
     super.initState();
-    _tabBarController = TabController(length: 2, vsync: this);
-
+    final length = sourceController.installedMangaExtensions.isNotEmpty ? 3 : 2;
+    _tabBarController = TabController(length: length, vsync: this);
     _tabBarController.addListener(() {
       if (_tabBarController.indexIsChanging) {
         _currentIndex.value = _tabBarController.index;
@@ -199,7 +184,6 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
     convertData();
     getMediaStatus();
   }
-
   @override
   void dispose() {
     _tabBarController.dispose();
@@ -209,7 +193,6 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
     SourceMapper.cancelMapping();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -239,53 +222,54 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
               image: image.value,
               tagg: widget.tagg,
             ),
-            if (sourceController.installedMangaExtensions.isNotEmpty)
-              Container(
-                margin: const EdgeInsets.fromLTRB(24, 32, 24, 16),
-                height: 52,
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withOpacity(0.6),
-                  borderRadius: BorderRadius.circular(26),
-                  border: Border.all(
-                    color: colorScheme.outlineVariant.withOpacity(0.3),
-                    width: 0.5,
-                  ),
-                ),
-                child: TabBar(
-                  controller: _tabBarController,
-                  splashBorderRadius: BorderRadius.circular(26),
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  dividerColor: Colors.transparent,
-                  indicatorPadding: const EdgeInsets.all(4),
-                  indicator: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  labelColor: colorScheme.primary,
-                  unselectedLabelColor: colorScheme.onSurfaceVariant,
-                  labelStyle: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                    fontFamily: theme.textTheme.titleMedium?.fontFamily,
-                  ),
-                  unselectedLabelStyle: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                    fontFamily: theme.textTheme.titleMedium?.fontFamily,
-                  ),
-                  tabs: const [
-                    Tab(text: "Overview"),
-                    Tab(text: "Chapters"),
-                  ],
+            Container(
+              margin: const EdgeInsets.fromLTRB(24, 32, 24, 16),
+              height: 52,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest.withOpacity(0.6),
+                borderRadius: BorderRadius.circular(26),
+                border: Border.all(
+                  color: colorScheme.outlineVariant.withOpacity(0.3),
+                  width: 0.5,
                 ),
               ),
+              child: TabBar(
+                controller: _tabBarController,
+                splashBorderRadius: BorderRadius.circular(26),
+                indicatorSize: TabBarIndicatorSize.tab,
+                dividerColor: Colors.transparent,
+                indicatorPadding: const EdgeInsets.all(4),
+                indicator: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                labelColor: colorScheme.primary,
+                unselectedLabelColor: colorScheme.onSurfaceVariant,
+                labelStyle: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  fontFamily: theme.textTheme.titleMedium?.fontFamily,
+                ),
+                unselectedLabelStyle: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                  fontFamily: theme.textTheme.titleMedium?.fontFamily,
+                ),
+                tabs: [
+                  const Tab(text: "Overview"),
+                  if (sourceController.installedMangaExtensions.isNotEmpty)
+                    const Tab(text: "Chapters"),
+                  const Tab(text: "Comments"),
+                ],
+              ),
+            ),
             const SizedBox(height: 20),
             ExpandablePageView(
               controller: pageController,
@@ -298,7 +282,7 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
                                   text: _anilistError.value,
                                   textAlign: TextAlign.center,
                                   fontSize: 20,
-                                )
+                                  )
                               : const LoadingIndicatorM3E(),
                         )
                       : DetailsSection(
@@ -309,42 +293,47 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
                           chapterList: chaptersList.toList(),
                         ),
                 ),
-                Obx(
-                  () => sourceController.installedMangaExtensions.value.isEmpty
-                      ? const SizedBox.shrink()
-                      : ReadSection(
-                          syncId: syncId,
-                          onChanged: (value) {
-                            int total = 0;
-                            for (var item in value) {
-                              final match = RegExp(
-                                r'\b(?:Chap(?:ter)?|Ch)\s*(\d+)\b',
-                                caseSensitive: false,
-                              ).firstMatch(item.name ?? '');
-                              if (match != null) {
-                                int episodeNumber = int.parse(match.group(1)!);
-                                total++;
-                                log(episodeNumber.toString());
-                              }
-                            }
-                            totalChapters.value = total.toString();
-                          },
-                          onTitleChanged: (value) {
-                            mangaTitle.value = value;
-                          },
-                          onSourceChanged: () {
-                            _extenstionError.value = false;
-                            loadDetails();
-                          },
-                          hasError: _extenstionError,
-                          id: id.value,
-                          image: mediaData.value.coverImage ?? image.value,
-                          animeTitle: mangaTitle,
-                          installedExtensions: installedExtensions,
-                          selectedSource: selectedSource,
-                          totalEpisodes: totalChapters,
-                          chaptersList: chaptersList,
-                        ),
+                if (sourceController.installedMangaExtensions.isNotEmpty)
+                  Obx(
+                    () => ReadSection(
+                      syncId: syncId,
+                      onChanged: (value) {
+                        int total = 0;
+                        for (var item in value) {
+                          final match = RegExp(
+                            r'\b(?:Chap(?:ter)?|Ch)\s*(\d+)\b',
+                            caseSensitive: false,
+                          ).firstMatch(item.name ?? '');
+                          if (match != null) {
+                            int episodeNumber = int.parse(match.group(1)!);
+                            total++;
+                            log(episodeNumber.toString());
+                          }
+                        }
+                        totalChapters.value = total.toString();
+                      },
+                      onTitleChanged: (value) {
+                        mangaTitle.value = value;
+                      },
+                      onSourceChanged: () {
+                        _extenstionError.value = false;
+                        loadDetails();
+                      },
+                      hasError: _extenstionError,
+                      id: id.value,
+                      image: mediaData.value.coverImage ?? image.value,
+                      animeTitle: mangaTitle,
+                      installedExtensions: installedExtensions,
+                      selectedSource: selectedSource,
+                      totalEpisodes: totalChapters,
+                      chaptersList: chaptersList,
+                    ),
+                  ),
+                CommentsSection(
+                  mediaId: id.value,
+                  mediaTitle: title.value,
+                  mediaPoster: image.value,
+                  isManga: true,
                 ),
               ],
             ),

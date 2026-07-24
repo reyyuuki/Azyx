@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-
 enum FontVariant {
   regular,
+  semiBold,
   bold,
 }
-
 class AzyXText extends StatelessWidget {
   final String text;
   final FontVariant fontVariant;
@@ -15,7 +14,6 @@ class AzyXText extends StatelessWidget {
   final TextOverflow? overflow;
   final double? lineHeight;
   final FontStyle? fontStyle;
-
   const AzyXText(
       {super.key,
       required this.text,
@@ -27,10 +25,16 @@ class AzyXText extends StatelessWidget {
       this.fontSize,
       this.fontStyle,
       this.lineHeight});
-
   TextStyle _getTextStyle() {
     switch (fontVariant) {
       case FontVariant.bold:
+        return TextStyle(
+            fontFamily: "Poppins-Bold",
+            fontSize: fontSize,
+            color: color,
+            fontStyle: fontStyle,
+            height: lineHeight);
+      case FontVariant.semiBold:
         return TextStyle(
             fontFamily: "Poppins-Bold",
             fontSize: fontSize,
@@ -46,7 +50,6 @@ class AzyXText extends StatelessWidget {
             height: lineHeight);
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Text(

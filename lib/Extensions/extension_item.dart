@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
     hide isar;
 import 'package:azyx/Controllers/source/source_controller.dart';
@@ -10,29 +9,24 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 class ExtensionListTileWidget extends StatefulWidget {
   final Source source;
   final ItemType mediaType;
-
   const ExtensionListTileWidget({
     super.key,
     required this.source,
     required this.mediaType,
   });
-
   @override
   State<ExtensionListTileWidget> createState() =>
       _ExtensionListTileWidgetState();
 }
-
 class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
     with SingleTickerProviderStateMixin {
   bool _isLoading = false;
   double _installProgress = 0.0;
   late final AnimationController _pulseController;
   late final Animation<double> _pulseAnimation;
-
   @override
   void initState() {
     super.initState();
@@ -44,19 +38,16 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
   }
-
   @override
   void dispose() {
     _pulseController.dispose();
     super.dispose();
   }
-
   Future<void> _handleSourceAction() async {
     setState(() {
       _isLoading = true;
       _installProgress = 0.0;
     });
-
     try {
       for (int i = 0; i <= 90; i += 15) {
         await Future.delayed(const Duration(milliseconds: 80));
@@ -82,7 +73,6 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
       }
     }
   }
-
   List<Source> get _installedExtensions {
     switch (widget.mediaType) {
       case ItemType.manga:
@@ -93,13 +83,11 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
         return sourceController.installedNovelExtensions;
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
     final updateAvailable = widget.source.hasUpdate ?? false;
     final isInstalled = _installedExtensions.any((e) => e.id == widget.source.id);
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
@@ -162,7 +150,6 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
       ),
     );
   }
-
   Widget _buildIcon(ColorScheme theme, bool updateAvailable) {
     return AnimatedBuilder(
       animation: _pulseAnimation,
@@ -223,7 +210,6 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
       },
     );
   }
-
   Widget _buildMeta(ColorScheme theme) {
     return Row(
       children: [
@@ -291,7 +277,6 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
       ],
     );
   }
-
   Widget _buildActions(
     bool isInstalled,
     bool updateAvailable,
@@ -304,7 +289,6 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
         child: LoadingIndicatorM3E(color: theme.primary),
       );
     }
-
     if (!isInstalled) {
       return IconButton(
         onPressed: _handleSourceAction,
@@ -318,7 +302,6 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
         ),
       );
     }
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -349,7 +332,6 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
       ],
     );
   }
-
   void _onInstalledTap(bool updateAvailable) {
     if (updateAvailable) {
       setState(() => _isLoading = true);

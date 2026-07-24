@@ -6,7 +6,6 @@ import 'package:azyx/Widgets/anime/characters_list.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
-
 class DetailsSection extends StatelessWidget {
   final Rx<AnilistMediaData> mediaData;
   final int index;
@@ -14,7 +13,6 @@ class DetailsSection extends StatelessWidget {
   final List<Chapter>? chapterList;
   final String animeTitle;
   final bool isManga;
-
   const DetailsSection({
     super.key,
     required this.mediaData,
@@ -24,11 +22,9 @@ class DetailsSection extends StatelessWidget {
     this.chapterList,
     this.episodesList,
   });
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -127,7 +123,6 @@ class DetailsSection extends StatelessWidget {
       ),
     );
   }
-
   String _formatPopularity(int? number) {
     if (number == null) return 'N/A';
     if (number >= 1000000) {
@@ -137,20 +132,17 @@ class DetailsSection extends StatelessWidget {
     return number.toString();
   }
 }
-
 class _StatChip extends StatelessWidget {
   final IconData icon;
   final String value;
   final Color bgColor;
   final Color fgColor;
-
   const _StatChip({
     required this.icon,
     required this.value,
     required this.bgColor,
     required this.fgColor,
   });
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -178,22 +170,17 @@ class _StatChip extends StatelessWidget {
     );
   }
 }
-
 class _ExpandableDescription extends StatefulWidget {
   final String description;
   const _ExpandableDescription({required this.description});
-
   @override
   State<_ExpandableDescription> createState() => _ExpandableDescriptionState();
 }
-
 class _ExpandableDescriptionState extends State<_ExpandableDescription> {
   bool _expanded = false;
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return GestureDetector(
       onTap: () => setState(() => _expanded = !_expanded),
       child: AnimatedContainer(

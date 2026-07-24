@@ -3,7 +3,6 @@ import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Providers/theme.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
-
 class ThemeProvider with ChangeNotifier {
   late ThemeData _themeData;
   bool? _isLightMode;
@@ -12,9 +11,7 @@ class ThemeProvider with ChangeNotifier {
   Color? _seedColor;
   bool? _isMaterial;
   String? _colorName;
-
   DynamicSchemeVariant palette = DynamicSchemeVariant.tonalSpot;
-
   ThemeData get themeData => _themeData;
   Color? get seedColor => _seedColor;
   bool? get isMaterial => _isMaterial;
@@ -22,7 +19,6 @@ class ThemeProvider with ChangeNotifier {
   String? get colorName => _colorName;
   bool? get isDarkMode => _isDarkMode;
   bool? get isLightMode => _isLightMode;
-
   ThemeProvider() {
     _isMaterial = ThemeKeys.isMaterial.get<bool>(true);
     _isLightMode = ThemeKeys.isLightMode.get<bool>(false);
@@ -37,7 +33,6 @@ class ThemeProvider with ChangeNotifier {
     }
     updateTheme();
   }
-
   void updateBox() {
     ThemeKeys.isDarkMode.set(_isDarkMode);
     ThemeKeys.seedColor.set(_colorName);
@@ -45,19 +40,6 @@ class ThemeProvider with ChangeNotifier {
     ThemeKeys.isLightMode.set(_isLightMode);
     ThemeKeys.isMaterial.set(_isMaterial);
   }
-
-  // void resetSettings() {
-  //   theme.isDarkMode = true;
-  //   Hive.box('theme-data').clear();
-  //   theme = ThemeClass(
-  //     isDarkMode: true,
-  //     isLightMode: false,
-  //     isMaterial: true,
-  //     seedColor: 'Purple',
-  //     varient: 'Vibrant',
-  //   );
-  // }
-
   Future<void> loadDynamicColors() async {
     final corePalette = await DynamicColorPlugin.getCorePalette();
     _seedColor = corePalette != null
@@ -66,7 +48,6 @@ class ThemeProvider with ChangeNotifier {
     _isMaterial = true;
     updateTheme();
   }
-
   void updateTheme() {
     final color = _seedColor ?? Colors.purple;
     if (_isLightMode!) {
@@ -95,47 +76,30 @@ class ThemeProvider with ChangeNotifier {
         ),
       );
     }
-    // syncStatusBar();
     updateBox();
     notifyListeners();
   }
-
   void setLightMode() {
     _isLightMode = true;
     _isDarkMode = false;
     updateTheme();
   }
-
   void setDarkMode() {
     _isLightMode = false;
     _isDarkMode = true;
     updateTheme();
   }
-
   void oledTheme() {
     _isLightMode = false;
     _isDarkMode = false;
     updateTheme();
   }
-
-  // void syncStatusBar() {
-  //   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  //   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-  //       systemNavigationBarColor: Colors.transparent,
-  //       statusBarColor: Colors.transparent,
-  //       statusBarBrightness:
-  //           !_isLightMode! ? Brightness.dark : Brightness.light,
-  //       statusBarIconBrightness:
-  //           !_isLightMode! ? Brightness.dark : Brightness.light));
-  // }
-
   void updateSeedColor(String newColor) {
     _colorName = newColor;
     _seedColor = getSeedColor(newColor);
     _isMaterial = false;
     updateTheme();
   }
-
   void setPaletteColor(String newVariant) {
     switch (newVariant) {
       case "Content":
@@ -171,7 +135,6 @@ class ThemeProvider with ChangeNotifier {
     _variant = newVariant;
     updateTheme();
   }
-
   Color getSeedColor(String color) {
     Color newColor;
     switch (color) {
@@ -232,7 +195,6 @@ class ThemeProvider with ChangeNotifier {
     }
     return newColor;
   }
-
   Map<int, Color> getMaterialColorSwatch(int colorValue) {
     Color color = Color(colorValue);
     return {

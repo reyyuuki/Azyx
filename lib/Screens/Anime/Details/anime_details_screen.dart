@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
@@ -15,6 +14,7 @@ import 'package:azyx/Screens/Anime/Details/tabs/add_to_list_floater.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/details_section.dart';
 import 'package:azyx/Screens/Anime/Details/tabs/watch_section.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
+import 'package:azyx/Widgets/common/comments_section.dart';
 import 'package:azyx/Widgets/common/scrollable_app_bar.dart';
 import 'package:azyx/utils/mapper.dart';
 import 'package:azyx/utils/source_mapper.dart';
@@ -24,7 +24,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 class AnimeDetailsScreen extends StatefulWidget {
   final String tagg;
   final CarousaleData? smallMedia;
@@ -37,11 +36,9 @@ class AnimeDetailsScreen extends StatefulWidget {
     this.smallMedia,
     this.allData,
   });
-
   @override
   State<AnimeDetailsScreen> createState() => _DetailsScreenState();
 }
-
 class _DetailsScreenState extends State<AnimeDetailsScreen>
     with SingleTickerProviderStateMixin {
   final RxString title = ''.obs;
@@ -54,19 +51,17 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
   final Rx<String> animeTitle = "??".obs;
   final Rx<String> totalEpisodes = "??".obs;
   final RxList<Episode> episodesList = RxList();
-
   late TabController _tabBarController;
   late PageController _pageController;
-
   final Rx<String> _anilistError = ''.obs;
   final Rx<bool> _extenstionError = false.obs;
   final Rx<String> syncId = ''.obs;
   final RxInt _currentIndex = 0.obs;
-
   @override
   void initState() {
     super.initState();
-    _tabBarController = TabController(length: 2, vsync: this);
+    final length = sourceController.installedExtensions.isNotEmpty ? 3 : 2;
+    _tabBarController = TabController(length: length, vsync: this);
     _pageController = PageController();
     _tabBarController.addListener(() {
       if (_tabBarController.indexIsChanging) {
@@ -81,7 +76,6 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
     convertData();
     getMediaStatus();
   }
-
   @override
   void dispose() {
     _tabBarController.dispose();
@@ -91,7 +85,6 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
     SourceMapper.cancelMapping();
     super.dispose();
   }
-
   void getMediaStatus() {
     if (serviceHandler.isLoggedIn.value) {
       serviceHandler.currentMedia.value = serviceHandler.userAnimeList
@@ -101,7 +94,6 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
           );
     }
   }
-
   Future<void> loadData() async {
     try {
       final response = await serviceHandler.fetchAnimeDetails(
@@ -116,7 +108,6 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
     _syncMedia();
     loadDetails();
   }
-
   Future<void> _syncMedia() async {
     final response = await MediaSyncer.mapMediaId(
       id.value.toString(),
@@ -124,7 +115,6 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
     );
     syncId.value = response ?? '';
   }
-
   void convertData() {
     if (widget.isOffline) {
       anilistAddToListController.findAnime(widget.allData!.mediaData!);
@@ -151,7 +141,6 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
       loadData();
     }
   }
-
   Future<void> getEpisodes(String link) async {
     final token = "detail_${id.value}";
     sourceController.updateToken('detail', token);
@@ -165,26 +154,22 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
       episodes.sort((a, b) {
         final typeA = a.sortMap?['type']?.toLowerCase() ?? '';
         final typeB = b.sortMap?['type']?.toLowerCase() ?? '';
-
         int typeRank(String type) {
           if (type == 'subbed') return 0;
           if (type == 'dubbed') return 1;
           if (type.isNotEmpty) return 2;
           return 3;
         }
-
         final rankA = typeRank(typeA);
         final rankB = typeRank(typeB);
         if (rankA != rankB) {
           return rankA.compareTo(rankB);
         }
-
         final seasonA = int.tryParse(a.sortMap?['season'] ?? '') ?? 1;
         final seasonB = int.tryParse(b.sortMap?['season'] ?? '') ?? 1;
         if (seasonA != seasonB) {
           return seasonA.compareTo(seasonB);
         }
-
         final numA = double.tryParse(a.episodeNumber);
         final numB = double.tryParse(b.episodeNumber);
         if (numA != null && numB != null) {
@@ -203,7 +188,6 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
         if (mediaData.value.episodes == episodesList.length) {
           await getAnifyEpisodes();
         }
-
         if (mounted) setState(() {});
       }
     } catch (e) {
@@ -211,15 +195,6 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
       _extenstionError.value = true;
     }
   }
-
-  // void test() async {
-  //   log('episodesList: ${episodesList.length}');
-  //   log('mediaData.value.episodes: ${mediaData.value.episodes}');
-  //   // if (mediaData.value.episodes == episodesList.length) {
-  //   await getAnifyEpisodes();
-  //   // }
-  // }
-
   bool matchesAnyTitle(String query) {
     final q = query.toLowerCase().trim();
     return [
@@ -232,7 +207,6 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
           q.contains(t.toLowerCase().trim()),
     );
   }
-
   Future<void> getAnifyEpisodes() async {
     final resp = await get(
       Uri.parse(
@@ -274,7 +248,6 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
       episodesList.value = ep;
     }
   }
-
   Future<void> loadDetails() async {
     try {
       final result = await SourceMapper.mapMedia(
@@ -295,21 +268,17 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
       _extenstionError.value = true;
     }
   }
-
   List<String> formatTitles(AnilistMediaData media) {
     return [media.title ?? '', media.titleRomaji ?? ''];
   }
-
   void _onPageChanged(int index) {
     _currentIndex.value = index;
     _tabBarController.animateTo(index);
   }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
     return Scaffold(
       backgroundColor: colorScheme.surface,
       extendBody: true,
@@ -336,54 +305,54 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
               image: image.value,
               tagg: widget.tagg,
             ),
-            // ElevatedButton(onPressed: test, child: Text("Test")),
-            if (sourceController.installedExtensions.isNotEmpty)
-              Container(
-                margin: const EdgeInsets.fromLTRB(24, 32, 24, 16),
-                height: 52,
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withOpacity(0.6),
-                  borderRadius: BorderRadius.circular(26),
-                  border: Border.all(
-                    color: colorScheme.outlineVariant.withOpacity(0.3),
-                    width: 0.5,
-                  ),
-                ),
-                child: TabBar(
-                  controller: _tabBarController,
-                  splashBorderRadius: BorderRadius.circular(26),
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  dividerColor: Colors.transparent,
-                  indicatorPadding: const EdgeInsets.all(4),
-                  indicator: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  labelColor: colorScheme.primary,
-                  unselectedLabelColor: colorScheme.onSurfaceVariant,
-                  labelStyle: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                    fontFamily: theme.textTheme.titleMedium?.fontFamily,
-                  ),
-                  unselectedLabelStyle: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                    fontFamily: theme.textTheme.titleMedium?.fontFamily,
-                  ),
-                  tabs: const [
-                    Tab(text: "Overview"),
-                    Tab(text: "Episodes"),
-                  ],
+            Container(
+              margin: const EdgeInsets.fromLTRB(24, 32, 24, 16),
+              height: 52,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest.withOpacity(0.6),
+                borderRadius: BorderRadius.circular(26),
+                border: Border.all(
+                  color: colorScheme.outlineVariant.withOpacity(0.3),
+                  width: 0.5,
                 ),
               ),
+              child: TabBar(
+                controller: _tabBarController,
+                splashBorderRadius: BorderRadius.circular(26),
+                indicatorSize: TabBarIndicatorSize.tab,
+                dividerColor: Colors.transparent,
+                indicatorPadding: const EdgeInsets.all(4),
+                indicator: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                labelColor: colorScheme.primary,
+                unselectedLabelColor: colorScheme.onSurfaceVariant,
+                labelStyle: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  fontFamily: theme.textTheme.titleMedium?.fontFamily,
+                ),
+                unselectedLabelStyle: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                  fontFamily: theme.textTheme.titleMedium?.fontFamily,
+                ),
+                tabs: [
+                  const Tab(text: "Overview"),
+                  if (sourceController.installedExtensions.isNotEmpty)
+                    const Tab(text: "Episodes"),
+                  const Tab(text: "Comments"),
+                ],
+              ),
+            ),
             ExpandablePageView(
               controller: _pageController,
               onPageChanged: _onPageChanged,
@@ -409,10 +378,8 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
                                   ),
                                   child: AzyXText(
                                     text: _anilistError.value,
-
                                     color: colorScheme.onErrorContainer,
                                     fontSize: 14,
-
                                     textAlign: TextAlign.center,
                                   ),
                                 )
@@ -426,35 +393,40 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
                           isManga: false,
                         ),
                 ),
-                Obx(
-                  () => sourceController.installedExtensions.isEmpty
-                      ? const SizedBox.shrink()
-                      : WatchSection(
-                          onChanged: (value) {
-                            totalEpisodes.value = '??';
-                            getEpisodes(value);
-                            _extenstionError.value = false;
-                          },
-                          onTitleChanged: (value) {
-                            animeTitle.value = value;
-                          },
-                          onSourceChanged: (value) {
-                            animeTitle.value = '??';
-                            totalEpisodes.value = '??';
-                            episodesList.value = [];
-                            _extenstionError.value = false;
-                            loadDetails();
-                          },
-                          mediaData: mediaData.value,
-                          hasError: _extenstionError,
-                          id: id.value,
-                          image: coverImage.value,
-                          animeTitle: animeTitle,
-                          installedExtensions:
-                              sourceController.installedExtensions,
-                          totalEpisodes: totalEpisodes,
-                          episodelist: episodesList,
-                        ),
+                if (sourceController.installedExtensions.isNotEmpty)
+                  Obx(
+                    () => WatchSection(
+                      onChanged: (value) {
+                        totalEpisodes.value = '??';
+                        getEpisodes(value);
+                        _extenstionError.value = false;
+                      },
+                      onTitleChanged: (value) {
+                        animeTitle.value = value;
+                      },
+                      onSourceChanged: (value) {
+                        animeTitle.value = '??';
+                        totalEpisodes.value = '??';
+                        episodesList.value = [];
+                        _extenstionError.value = false;
+                        loadDetails();
+                      },
+                      mediaData: mediaData.value,
+                      hasError: _extenstionError,
+                      id: id.value,
+                      image: coverImage.value,
+                      animeTitle: animeTitle,
+                      installedExtensions:
+                          sourceController.installedExtensions,
+                      totalEpisodes: totalEpisodes,
+                      episodelist: episodesList,
+                    ),
+                  ),
+                CommentsSection(
+                  mediaId: id.value,
+                  mediaTitle: title.value,
+                  mediaPoster: image.value,
+                  isManga: false,
                 ),
               ],
             ),

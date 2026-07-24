@@ -1,12 +1,9 @@
 import 'dart:developer';
-
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Models/media.dart';
 import 'package:azyx/Models/user_media.dart';
-
 enum CarousaleVarient { userList, regular, other }
-
 List<CarousaleData> getCarousaleData(
   List<dynamic> data,
   CarousaleVarient varient,
@@ -21,7 +18,6 @@ List<CarousaleData> getCarousaleData(
         other: e.status ?? '??',
       );
     }
-
     switch (varient) {
       case CarousaleVarient.userList:
         if (e is! UserMedia)
@@ -58,14 +54,12 @@ List<CarousaleData> getCarousaleData(
     }
   }).toList();
 }
-
 extension Utility on String {
   String ellipsis([args]) {
     log(args.toString());
     if (args.length > 2) {
       throw Exception('You can only pass 2 max params');
     }
-
     if (args.length == 1) {
       return substring(0, args[0]);
     } else {

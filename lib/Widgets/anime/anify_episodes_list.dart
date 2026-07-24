@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:math' hide log;
-
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
@@ -17,14 +16,12 @@ import 'package:azyx/Widgets/common/shimmer_effect.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 class AnifyEpisodesWidget extends StatelessWidget {
   final RxList<Episode> anifyEpisodes;
   final String title;
   final String id;
   final String image;
   final AnilistMediaData data;
-
   AnifyEpisodesWidget({
     super.key,
     required this.title,
@@ -33,11 +30,9 @@ class AnifyEpisodesWidget extends StatelessWidget {
     required this.image,
     required this.data,
   });
-
   final Rx<String> episodeTitle = ''.obs;
   final Rx<bool> hasError = false.obs;
   final RxList<Video> episodeUrls = <Video>[].obs;
-
   Future<void> fetchEpisodeLink(
     String url,
     String number,
@@ -66,7 +61,6 @@ class AnifyEpisodesWidget extends StatelessWidget {
       log("Error while fetching episode url: $e");
     }
   }
-
   GestureDetector serverAzyXContainer(
     BuildContext context,
     String name,
@@ -117,18 +111,15 @@ class AnifyEpisodesWidget extends StatelessWidget {
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Column(
       children: anifyEpisodes.map((entry) {
         return GestureDetector(
           onTap: () {
             episodeTitle.value = entry.title ?? '';
             hasError.value = false;
-
             final scrapeToken =
                 'scrape_${DateTime.now().millisecondsSinceEpoch}_${entry.number}_${Random().nextInt(10000)}';
             final sourceEpisode = DEpisode(
@@ -139,7 +130,6 @@ class AnifyEpisodesWidget extends StatelessWidget {
             log(
               '[AnifyEpisodesList] Tapped EP ${entry.number} url=${entry.url} sortMap=${sourceEpisode.sortMap}',
             );
-
             final stream = () async* {
               try {
                 final list = await sourceController.activeSource.value!.methods
@@ -154,7 +144,6 @@ class AnifyEpisodesWidget extends StatelessWidget {
                 log('[AnifyEpisodesList] getVideoList error: $e');
               }
             }();
-
             showModalBottomSheet(
               context: context,
               shape: const RoundedRectangleBorder(

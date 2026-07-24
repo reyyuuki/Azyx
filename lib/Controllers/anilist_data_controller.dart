@@ -6,9 +6,7 @@ import 'package:get/get.dart';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:http/http.dart' as http;
-
 final AnilistDataController anilistDataController = Get.find();
-
 class AnilistDataController extends GetxController {
   final String graphqlEndpoint = 'https://graphql.anilist.co';
   final RxList<AnilistSchedules> anilistSchedules = RxList();
@@ -17,7 +15,6 @@ class AnilistDataController extends GetxController {
     super.onInit();
     await fetchCalendarData(anilistSchedules);
   }
-
   Future<AnilistMediaData> fetchAnilistAnimeDetails(
     int animeId, {
     dynamic offlineData,
@@ -106,7 +103,6 @@ class AnilistDataController extends GetxController {
       }
     }
   ''';
-
     try {
       final response = await http.post(
         Uri.parse(graphqlEndpoint),
@@ -116,9 +112,7 @@ class AnilistDataController extends GetxController {
           "variables": {"id": animeId},
         }),
       );
-
       log('Request to AniList: id=$animeId, statusCode=${response.statusCode}');
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final media = data['data']['Media'];
@@ -133,7 +127,6 @@ class AnilistDataController extends GetxController {
       throw Exception('Failed to load anime details: $error');
     }
   }
-
   Future<AnilistMediaData> fetchAnilistMangaDetails(int mangaId) async {
     const String graphqlEndpoint = 'https://graphql.anilist.co';
     const String query = '''
@@ -224,7 +217,6 @@ class AnilistDataController extends GetxController {
     }
   }
   ''';
-
     try {
       final response = await http.post(
         Uri.parse(graphqlEndpoint),
@@ -234,13 +226,10 @@ class AnilistDataController extends GetxController {
           "variables": {"id": mangaId},
         }),
       );
-
       log('Request to AniList: id=$mangaId, statusCode=${response.statusCode}');
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final media = data['data']['Media'];
-
         return AnilistMediaData.fromJson(media, true);
       } else {
         log('Error response: ${response.body}');
@@ -251,7 +240,6 @@ class AnilistDataController extends GetxController {
       throw Exception('Failed to load manga details: $error');
     }
   }
-
   Future<List<Media>> searchAnilistAnime({
     String? query,
     String? type = "ANIME",
@@ -330,9 +318,7 @@ class AnilistDataController extends GetxController {
       }
     }
   ''';
-
     try {
-      // Prepare variables, filtering out null values
       final variables = <String, dynamic>{
         if (query != null && query.trim().isNotEmpty) "search": query.trim(),
         "type": type,
@@ -344,10 +330,7 @@ class AnilistDataController extends GetxController {
         if (tags != null && tags.isNotEmpty) "tag_in": tags,
         if (sort != null && sort.isNotEmpty) "sort": sort,
       };
-
-      // Log the variables being sent
       log('AniList request variables: $variables');
-
       final response = await http.post(
         Uri.parse('https://graphql.anilist.co'),
         headers: {
@@ -356,26 +339,18 @@ class AnilistDataController extends GetxController {
         },
         body: json.encode({"query": searchQuery, "variables": variables}),
       );
-
       log('Request to AniList: statusCode=${response.statusCode}');
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-
-        // Check for GraphQL errors
         if (data['errors'] != null) {
           log('GraphQL errors: ${data['errors']}');
           throw Exception('GraphQL error: ${data['errors']}');
         }
-
         final animeList = data['data']['Page']['media'] as List<dynamic>;
         log('Found ${animeList.length} results');
-
-        // Log first result if available
         if (animeList.isNotEmpty) {
           log('First result: ${animeList.first}');
         }
-
         return animeList.map<Media>((anime) => Media.fromJson(anime)).toList();
       } else {
         log('Error response: ${response.body}');
@@ -388,8 +363,6 @@ class AnilistDataController extends GetxController {
       rethrow;
     }
   }
-
-  // Similar method for manga search
   Future<List<Media>> searchAnilistManga({
     String? query,
     String? type = "MANGA",
@@ -461,9 +434,7 @@ class AnilistDataController extends GetxController {
       }
     }
   ''';
-
     try {
-      // Prepare variables, filtering out null values
       final variables = <String, dynamic>{
         if (query != null && query.trim().isNotEmpty) "search": query.trim(),
         "type": type,
@@ -473,9 +444,7 @@ class AnilistDataController extends GetxController {
         if (tags != null && tags.isNotEmpty) "tag_in": tags,
         if (sort != null && sort.isNotEmpty) "sort": sort,
       };
-
       log('AniList manga request variables: $variables');
-
       final response = await http.post(
         Uri.parse('https://graphql.anilist.co'),
         headers: {
@@ -484,21 +453,15 @@ class AnilistDataController extends GetxController {
         },
         body: json.encode({"query": searchQuery, "variables": variables}),
       );
-
       log('Request to AniList: statusCode=${response.statusCode}');
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-
-        // Check for GraphQL errors
         if (data['errors'] != null) {
           log('GraphQL errors: ${data['errors']}');
           throw Exception('GraphQL error: ${data['errors']}');
         }
-
         final mangaList = data['data']['Page']['media'] as List<dynamic>;
         log('Found ${mangaList.length} manga results');
-
         return mangaList.map<Media>((manga) => Media.fromJson(manga)).toList();
       } else {
         log('Error response: ${response.body}');
@@ -511,68 +474,4 @@ class AnilistDataController extends GetxController {
       rethrow;
     }
   }
-
-  // Future<List<AnilistSchedules>> fetchAniListCalendar() async {
-  //   const String url = 'https://graphql.anilist.co';
-  //   const String query = r'''
-  //   query {
-  //     Page(page: 1, perPage: 50) {
-  //       airingSchedules(notYetAired: true, sort: TIME) {
-  //         id
-  //         airingAt
-  //         episode
-  //         media {
-  //           id
-  //           title {
-  //             romaji
-  //             english
-  //             native
-  //           }
-  //           coverImage {
-  //             large
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  // ''';
-
-  //   final response = await http.post(
-  //     Uri.parse(url),
-  //     headers: {'Content-Type': 'application/json'},
-  //     body: jsonEncode({'query': query}),
-  //   );
-
-  //   if (response.statusCode == 200) {
-  //     final data = jsonDecode(response.body);
-  //     final List<dynamic> schedules = data['data']['Page']['airingSchedules'];
-
-  //     Map<String, List<Media>> dateToAnimeList = {};
-
-  //     for (var schedule in schedules) {
-  //       int airingAt = schedule['airingAt'];
-  //       DateTime dateTime =
-  //           DateTime.fromMillisecondsSinceEpoch(airingAt * 1000);
-  //       String formattedDate = DateFormat('EEEE, MMMM d, y').format(dateTime);
-
-  //       var media = schedule['media'];
-
-  //       if (!dateToAnimeList.containsKey(formattedDate)) {
-  //         dateToAnimeList[formattedDate] = [];
-  //       }
-  //       dateToAnimeList[formattedDate]!.add(Media.fromJson(media));
-  //     }
-
-  //     List<AnilistSchedules> result = dateToAnimeList.entries.map((entry) {
-  //       return AnilistSchedules(
-  //         date: entry.key,
-  //         animeList: entry.value,
-  //       );
-  //     }).toList();
-
-  //     return result;
-  //   } else {
-  //     throw Exception('Failed to fetch AniList calendar');
-  //   }
-  // }
 }

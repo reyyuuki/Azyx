@@ -1,9 +1,7 @@
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_mapper.dart';
 import 'package:isar_community/isar.dart';
-
 part 'anime_details_data.g.dart';
-
 @embedded
 class AnilistMediaData {
   String? id;
@@ -21,17 +19,13 @@ class AnilistMediaData {
   int? timeUntilAiring;
   List<String>? genres;
   List<String>? synonyms;
-
   List<Character>? characters;
   List<AnilistMediaData>? relations;
   List<AnilistMediaData>? recommendations;
-
   @Enumerated(EnumType.ordinal32)
   ServicesType? servicesType;
-
   @Enumerated(EnumType.ordinal32)
   MediaType? mediaType;
-
   AnilistMediaData({
     this.id,
     this.title,
@@ -54,7 +48,6 @@ class AnilistMediaData {
     this.servicesType,
     this.mediaType,
   });
-
   factory AnilistMediaData.fromMAL(
     Map<String, dynamic> json, {
     bool isManga = false,
@@ -81,7 +74,6 @@ class AnilistMediaData {
           .toList(),
     );
   }
-
   factory AnilistMediaData.fromSimkl(
     Map<String, dynamic> json, [
     bool isMovie = false,
@@ -99,7 +91,6 @@ class AnilistMediaData {
       type: json['type'],
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -121,7 +112,6 @@ class AnilistMediaData {
       'mediaType': mediaType?.name,
     };
   }
-
   factory AnilistMediaData.fromJson(
     Map<String, dynamic> json, [
     bool isManga = false,
@@ -141,7 +131,6 @@ class AnilistMediaData {
     } else {
       title = titleJson?.toString() ?? '??';
     }
-
     final coverImageJson = json['coverImage'];
     String? image;
     if (coverImageJson is Map) {
@@ -149,7 +138,6 @@ class AnilistMediaData {
     } else {
       image = json['image']?.toString() ?? coverImageJson?.toString();
     }
-
     return AnilistMediaData(
       id: json['id']?.toString(),
       episodes: json['episodes'],
@@ -194,15 +182,12 @@ class AnilistMediaData {
     );
   }
 }
-
 @embedded
 class Character {
   String? image;
   String? name;
   int? popularity;
-
   Character({this.image, this.name, this.popularity});
-
   factory Character.fromJson(Map<String, dynamic> json) {
     final nameJson = json['name'];
     String? name;
@@ -211,7 +196,6 @@ class Character {
     } else {
       name = nameJson?.toString();
     }
-
     final imageJson = json['image'];
     String? image;
     if (imageJson is Map) {
@@ -219,14 +203,12 @@ class Character {
     } else {
       image = imageJson?.toString();
     }
-
     return Character(
       image: image,
       name: name,
       popularity: json['popularity'] ?? json['favourites'],
     );
   }
-
   Map<String, dynamic> toJson() {
     return {'image': image, 'name': name, 'popularity': popularity};
   }

@@ -3,11 +3,9 @@ import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 class GradientTitle extends StatelessWidget {
   final String title;
   const GradientTitle({super.key, required this.title});
-
   @override
   Widget build(BuildContext context) {
     return Row(

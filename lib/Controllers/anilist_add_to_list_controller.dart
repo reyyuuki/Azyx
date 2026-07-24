@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Models/anime_all_data.dart';
@@ -12,13 +11,10 @@ import 'package:azyx/utils/constants.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 final AnilistAddToListController anilistAddToListController =
     Get.find<AnilistAddToListController>();
-
 class AnilistAddToListController extends GetxController {
   TextEditingController? controller;
-
   void findAnime(AnilistMediaData data) {
     for (var i in serviceHandler.userAnimeList) {
       Utils.log(i.id.toString());
@@ -42,7 +38,6 @@ class AnilistAddToListController extends GetxController {
     }
     log("status: ${serviceHandler.currentMedia.value.id}");
   }
-
   void findManga(AnilistMediaData data) {
     if (serviceHandler.userMangaList.isNotEmpty) {
       serviceHandler.currentMedia.value = serviceHandler.userMangaList
@@ -64,7 +59,6 @@ class AnilistAddToListController extends GetxController {
       log("nothing found");
     }
   }
-
   void updateAnimeProgress(AnimeAllData data, int number) {
     if (serviceHandler.userAnimeList.isNotEmpty) {
       try {
@@ -99,7 +93,6 @@ class AnilistAddToListController extends GetxController {
       log("User serviceHandler.currentMedia list is empty.");
     }
   }
-
   void addToListSheet(
     BuildContext context,
     String image,
@@ -342,7 +335,6 @@ class AnilistAddToListController extends GetxController {
                                           .status ??
                                       "CURRENT";
                                   serviceHandler.currentMedia.value.id = id;
-
                                   serviceHandler.updateListEntry(
                                     UserMedia(
                                       id: serviceHandler.currentMedia.value.id!,
@@ -432,7 +424,6 @@ class AnilistAddToListController extends GetxController {
       },
     );
   }
-
   void addToMangaListSheet(
     BuildContext context,
     String image,
@@ -756,7 +747,6 @@ class AnilistAddToListController extends GetxController {
       },
     );
   }
-
   Container customButton(BuildContext context, String buttonText) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
@@ -775,7 +765,6 @@ class AnilistAddToListController extends GetxController {
       ),
     );
   }
-
   SizedBox inputbox(
     BuildContext context,
     controller,

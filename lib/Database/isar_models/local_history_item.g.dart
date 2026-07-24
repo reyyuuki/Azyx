@@ -1,18 +1,7 @@
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
 part of 'local_history_item.dart';
-
-// **************************************************************************
-// IsarCollectionGenerator
-// **************************************************************************
-
-// coverage:ignore-file
-// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
-
 extension GetLocalHistoryItemCollection on Isar {
   IsarCollection<LocalHistoryItem> get localHistoryItems => this.collection();
 }
-
 const LocalHistoryItemSchema = CollectionSchema(
   name: r'LocalHistoryItem',
   id: -4354684500416878768,
@@ -21,7 +10,6 @@ const LocalHistoryItemSchema = CollectionSchema(
       id: 0,
       name: r'chapterList',
       type: IsarType.objectList,
-
       target: r'Chapter',
     ),
     r'currentPage': PropertySchema(
@@ -38,7 +26,6 @@ const LocalHistoryItemSchema = CollectionSchema(
       id: 3,
       name: r'episodeList',
       type: IsarType.objectList,
-
       target: r'Episode',
     ),
     r'episodeUrlsJson': PropertySchema(
@@ -67,7 +54,6 @@ const LocalHistoryItemSchema = CollectionSchema(
       id: 10,
       name: r'mediaData',
       type: IsarType.object,
-
       target: r'AnilistMediaData',
     ),
     r'mediaId': PropertySchema(id: 11, name: r'mediaId', type: IsarType.long),
@@ -99,7 +85,6 @@ const LocalHistoryItemSchema = CollectionSchema(
       type: IsarType.long,
     ),
   },
-
   estimateSize: _localHistoryItemEstimateSize,
   serialize: _localHistoryItemSerialize,
   deserialize: _localHistoryItemDeserialize,
@@ -127,13 +112,11 @@ const LocalHistoryItemSchema = CollectionSchema(
     r'Chapter': ChapterSchema,
     r'Episode': EpisodeSchema,
   },
-
   getId: _localHistoryItemGetId,
   getLinks: _localHistoryItemGetLinks,
   attach: _localHistoryItemAttach,
   version: '3.3.0-dev.3',
 );
-
 int _localHistoryItemEstimateSize(
   LocalHistoryItem object,
   List<int> offsets,
@@ -228,7 +211,6 @@ int _localHistoryItemEstimateSize(
   }
   return bytesCount;
 }
-
 void _localHistoryItemSerialize(
   LocalHistoryItem object,
   IsarWriter writer,
@@ -269,7 +251,6 @@ void _localHistoryItemSerialize(
   writer.writeString(offsets[16], object.title);
   writer.writeLong(offsets[17], object.totalDurationSeconds);
 }
-
 LocalHistoryItem _localHistoryItemDeserialize(
   Id id,
   IsarReader reader,
@@ -313,7 +294,6 @@ LocalHistoryItem _localHistoryItemDeserialize(
   object.totalDurationSeconds = reader.readLongOrNull(offsets[17]);
   return object;
 }
-
 P _localHistoryItemDeserializeProp<P>(
   IsarReader reader,
   int propertyId,
@@ -381,21 +361,17 @@ P _localHistoryItemDeserializeProp<P>(
       throw IsarError('Unknown property with id $propertyId');
   }
 }
-
 const _LocalHistoryItemmediaTypeEnumValueMap = {'anime': 0, 'manga': 1};
 const _LocalHistoryItemmediaTypeValueEnumMap = {
   0: HistoryMediaType.anime,
   1: HistoryMediaType.manga,
 };
-
 Id _localHistoryItemGetId(LocalHistoryItem object) {
   return object.id;
 }
-
 List<IsarLinkBase<dynamic>> _localHistoryItemGetLinks(LocalHistoryItem object) {
   return [];
 }
-
 void _localHistoryItemAttach(
   IsarCollection<dynamic> col,
   Id id,
@@ -403,56 +379,44 @@ void _localHistoryItemAttach(
 ) {
   object.id = id;
 }
-
 extension LocalHistoryItemByIndex on IsarCollection<LocalHistoryItem> {
   Future<LocalHistoryItem?> getByMediaId(int? mediaId) {
     return getByIndex(r'mediaId', [mediaId]);
   }
-
   LocalHistoryItem? getByMediaIdSync(int? mediaId) {
     return getByIndexSync(r'mediaId', [mediaId]);
   }
-
   Future<bool> deleteByMediaId(int? mediaId) {
     return deleteByIndex(r'mediaId', [mediaId]);
   }
-
   bool deleteByMediaIdSync(int? mediaId) {
     return deleteByIndexSync(r'mediaId', [mediaId]);
   }
-
   Future<List<LocalHistoryItem?>> getAllByMediaId(List<int?> mediaIdValues) {
     final values = mediaIdValues.map((e) => [e]).toList();
     return getAllByIndex(r'mediaId', values);
   }
-
   List<LocalHistoryItem?> getAllByMediaIdSync(List<int?> mediaIdValues) {
     final values = mediaIdValues.map((e) => [e]).toList();
     return getAllByIndexSync(r'mediaId', values);
   }
-
   Future<int> deleteAllByMediaId(List<int?> mediaIdValues) {
     final values = mediaIdValues.map((e) => [e]).toList();
     return deleteAllByIndex(r'mediaId', values);
   }
-
   int deleteAllByMediaIdSync(List<int?> mediaIdValues) {
     final values = mediaIdValues.map((e) => [e]).toList();
     return deleteAllByIndexSync(r'mediaId', values);
   }
-
   Future<Id> putByMediaId(LocalHistoryItem object) {
     return putByIndex(r'mediaId', object);
   }
-
   Id putByMediaIdSync(LocalHistoryItem object, {bool saveLinks = true}) {
     return putByIndexSync(r'mediaId', object, saveLinks: saveLinks);
   }
-
   Future<List<Id>> putAllByMediaId(List<LocalHistoryItem> objects) {
     return putAllByIndex(r'mediaId', objects);
   }
-
   List<Id> putAllByMediaIdSync(
     List<LocalHistoryItem> objects, {
     bool saveLinks = true,
@@ -460,7 +424,6 @@ extension LocalHistoryItemByIndex on IsarCollection<LocalHistoryItem> {
     return putAllByIndexSync(r'mediaId', objects, saveLinks: saveLinks);
   }
 }
-
 extension LocalHistoryItemQueryWhereSort
     on QueryBuilder<LocalHistoryItem, LocalHistoryItem, QWhere> {
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterWhere> anyId() {
@@ -468,7 +431,6 @@ extension LocalHistoryItemQueryWhereSort
       return query.addWhereClause(const IdWhereClause.any());
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterWhere> anyMediaId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
@@ -477,7 +439,6 @@ extension LocalHistoryItemQueryWhereSort
     });
   }
 }
-
 extension LocalHistoryItemQueryWhere
     on QueryBuilder<LocalHistoryItem, LocalHistoryItem, QWhereClause> {
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterWhereClause> idEqualTo(
@@ -487,7 +448,6 @@ extension LocalHistoryItemQueryWhere
       return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterWhereClause>
   idNotEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
@@ -510,7 +470,6 @@ extension LocalHistoryItemQueryWhere
       }
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterWhereClause>
   idGreaterThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -519,7 +478,6 @@ extension LocalHistoryItemQueryWhere
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterWhereClause>
   idLessThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -528,7 +486,6 @@ extension LocalHistoryItemQueryWhere
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterWhereClause> idBetween(
     Id lowerId,
     Id upperId, {
@@ -546,7 +503,6 @@ extension LocalHistoryItemQueryWhere
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterWhereClause>
   mediaIdIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -555,7 +511,6 @@ extension LocalHistoryItemQueryWhere
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterWhereClause>
   mediaIdIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -569,7 +524,6 @@ extension LocalHistoryItemQueryWhere
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterWhereClause>
   mediaIdEqualTo(int? mediaId) {
     return QueryBuilder.apply(this, (query) {
@@ -578,7 +532,6 @@ extension LocalHistoryItemQueryWhere
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterWhereClause>
   mediaIdNotEqualTo(int? mediaId) {
     return QueryBuilder.apply(this, (query) {
@@ -621,7 +574,6 @@ extension LocalHistoryItemQueryWhere
       }
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterWhereClause>
   mediaIdGreaterThan(int? mediaId, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -635,7 +587,6 @@ extension LocalHistoryItemQueryWhere
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterWhereClause>
   mediaIdLessThan(int? mediaId, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -649,7 +600,6 @@ extension LocalHistoryItemQueryWhere
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterWhereClause>
   mediaIdBetween(
     int? lowerMediaId,
@@ -670,7 +620,6 @@ extension LocalHistoryItemQueryWhere
     });
   }
 }
-
 extension LocalHistoryItemQueryFilter
     on QueryBuilder<LocalHistoryItem, LocalHistoryItem, QFilterCondition> {
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
@@ -681,7 +630,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   chapterListIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -690,42 +638,36 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   chapterListLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'chapterList', length, true, length, true);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   chapterListIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'chapterList', 0, true, 0, true);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   chapterListIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'chapterList', 0, false, 999999, true);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   chapterListLengthLessThan(int length, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'chapterList', 0, true, length, include);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   chapterListLengthGreaterThan(int length, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'chapterList', length, include, 999999, true);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   chapterListLengthBetween(
     int lower,
@@ -743,7 +685,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   currentPageIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -752,7 +693,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   currentPageIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -761,7 +701,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   currentPageEqualTo(int? value) {
     return QueryBuilder.apply(this, (query) {
@@ -770,7 +709,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   currentPageGreaterThan(int? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -783,7 +721,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   currentPageLessThan(int? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -796,7 +733,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   currentPageBetween(
     int? lower,
@@ -816,7 +752,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   currentTimeSecondsIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -825,7 +760,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   currentTimeSecondsIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -834,7 +768,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   currentTimeSecondsEqualTo(int? value) {
     return QueryBuilder.apply(this, (query) {
@@ -843,7 +776,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   currentTimeSecondsGreaterThan(int? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -856,7 +788,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   currentTimeSecondsLessThan(int? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -869,7 +800,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   currentTimeSecondsBetween(
     int? lower,
@@ -889,7 +819,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeListIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -898,7 +827,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeListIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -907,42 +835,36 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeListLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'episodeList', length, true, length, true);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeListIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'episodeList', 0, true, 0, true);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeListIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'episodeList', 0, false, 999999, true);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeListLengthLessThan(int length, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'episodeList', 0, true, length, include);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeListLengthGreaterThan(int length, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.listLength(r'episodeList', length, include, 999999, true);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeListLengthBetween(
     int lower,
@@ -960,7 +882,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeUrlsJsonIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -969,7 +890,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeUrlsJsonIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -978,7 +898,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeUrlsJsonEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -991,7 +910,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeUrlsJsonGreaterThan(
     String? value, {
@@ -1009,7 +927,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeUrlsJsonLessThan(
     String? value, {
@@ -1027,7 +944,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeUrlsJsonBetween(
     String? lower,
@@ -1049,7 +965,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeUrlsJsonStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1062,7 +977,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeUrlsJsonEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1075,7 +989,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeUrlsJsonContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1088,7 +1001,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeUrlsJsonMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1101,7 +1013,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeUrlsJsonIsEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -1110,7 +1021,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeUrlsJsonIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -1119,7 +1029,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
@@ -1128,7 +1037,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   idGreaterThan(Id value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -1141,7 +1049,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   idLessThan(Id value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -1154,7 +1061,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   idBetween(
     Id lower,
@@ -1174,7 +1080,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   imageIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1183,7 +1088,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   imageIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1192,7 +1096,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   imageEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1205,7 +1108,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   imageGreaterThan(
     String? value, {
@@ -1223,7 +1125,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   imageLessThan(
     String? value, {
@@ -1241,7 +1142,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   imageBetween(
     String? lower,
@@ -1263,7 +1163,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   imageStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1276,7 +1175,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   imageEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1289,7 +1187,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   imageContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1302,7 +1199,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   imageMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1315,7 +1211,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   imageIsEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -1324,7 +1219,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   imageIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -1333,7 +1227,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   lastTimeSecondsIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1342,7 +1235,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   lastTimeSecondsIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1351,7 +1243,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   lastTimeSecondsEqualTo(int? value) {
     return QueryBuilder.apply(this, (query) {
@@ -1360,7 +1251,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   lastTimeSecondsGreaterThan(int? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -1373,7 +1263,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   lastTimeSecondsLessThan(int? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -1386,7 +1275,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   lastTimeSecondsBetween(
     int? lower,
@@ -1406,7 +1294,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   lastWatchedIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1415,7 +1302,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   lastWatchedIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1424,7 +1310,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   lastWatchedEqualTo(DateTime? value) {
     return QueryBuilder.apply(this, (query) {
@@ -1433,7 +1318,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   lastWatchedGreaterThan(DateTime? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -1446,7 +1330,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   lastWatchedLessThan(DateTime? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -1459,7 +1342,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   lastWatchedBetween(
     DateTime? lower,
@@ -1479,7 +1361,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   linkIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1488,7 +1369,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   linkIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1497,7 +1377,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   linkEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1510,7 +1389,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   linkGreaterThan(
     String? value, {
@@ -1528,7 +1406,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   linkLessThan(
     String? value, {
@@ -1546,7 +1423,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   linkBetween(
     String? lower,
@@ -1568,7 +1444,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   linkStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1581,7 +1456,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   linkEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1594,7 +1468,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   linkContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1607,7 +1480,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   linkMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1620,7 +1492,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   linkIsEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -1629,7 +1500,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   linkIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -1638,7 +1508,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mangaSourceJsonIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1647,7 +1516,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mangaSourceJsonIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1656,7 +1524,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mangaSourceJsonEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1669,7 +1536,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mangaSourceJsonGreaterThan(
     String? value, {
@@ -1687,7 +1553,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mangaSourceJsonLessThan(
     String? value, {
@@ -1705,7 +1570,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mangaSourceJsonBetween(
     String? lower,
@@ -1727,7 +1591,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mangaSourceJsonStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1740,7 +1603,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mangaSourceJsonEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1753,7 +1615,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mangaSourceJsonContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1766,7 +1627,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mangaSourceJsonMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1779,7 +1639,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mangaSourceJsonIsEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -1788,7 +1647,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mangaSourceJsonIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -1797,7 +1655,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mediaDataIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1806,7 +1663,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mediaDataIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1815,7 +1671,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mediaIdIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1824,7 +1679,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mediaIdIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1833,7 +1687,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mediaIdEqualTo(int? value) {
     return QueryBuilder.apply(this, (query) {
@@ -1842,7 +1695,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mediaIdGreaterThan(int? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -1855,7 +1707,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mediaIdLessThan(int? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -1868,7 +1719,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mediaIdBetween(
     int? lower,
@@ -1888,7 +1738,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mediaTypeIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1897,7 +1746,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mediaTypeIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1906,7 +1754,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mediaTypeEqualTo(HistoryMediaType? value) {
     return QueryBuilder.apply(this, (query) {
@@ -1915,7 +1762,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mediaTypeGreaterThan(HistoryMediaType? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -1928,7 +1774,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mediaTypeLessThan(HistoryMediaType? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -1941,7 +1786,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mediaTypeBetween(
     HistoryMediaType? lower,
@@ -1961,7 +1805,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   progressIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1970,7 +1813,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   progressIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1979,7 +1821,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   progressEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1992,7 +1833,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   progressGreaterThan(
     String? value, {
@@ -2010,7 +1850,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   progressLessThan(
     String? value, {
@@ -2028,7 +1867,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   progressBetween(
     String? lower,
@@ -2050,7 +1888,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   progressStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2063,7 +1900,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   progressEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2076,7 +1912,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   progressContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2089,7 +1924,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   progressMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2102,7 +1936,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   progressIsEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -2111,7 +1944,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   progressIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -2120,7 +1952,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceIdIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -2129,7 +1960,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceIdIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -2138,7 +1968,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceIdEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2151,7 +1980,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceIdGreaterThan(
     String? value, {
@@ -2169,7 +1997,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceIdLessThan(
     String? value, {
@@ -2187,7 +2014,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceIdBetween(
     String? lower,
@@ -2209,7 +2035,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceIdStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2222,7 +2047,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceIdEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2235,7 +2059,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceIdContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2248,7 +2071,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceIdMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2261,7 +2083,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -2270,7 +2091,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -2279,7 +2099,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceNameIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -2288,7 +2107,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceNameIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -2297,7 +2115,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceNameEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2310,7 +2127,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceNameGreaterThan(
     String? value, {
@@ -2328,7 +2144,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceNameLessThan(
     String? value, {
@@ -2346,7 +2161,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceNameBetween(
     String? lower,
@@ -2368,7 +2182,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceNameStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2381,7 +2194,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceNameEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2394,7 +2206,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceNameContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2407,7 +2218,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceNameMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2420,7 +2230,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceNameIsEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -2429,7 +2238,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   sourceNameIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -2438,7 +2246,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   titleIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -2447,7 +2254,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   titleIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -2456,7 +2262,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   titleEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2469,7 +2274,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   titleGreaterThan(
     String? value, {
@@ -2487,7 +2291,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   titleLessThan(
     String? value, {
@@ -2505,7 +2308,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   titleBetween(
     String? lower,
@@ -2527,7 +2329,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   titleStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2540,7 +2341,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   titleEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2553,7 +2353,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   titleContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2566,7 +2365,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   titleMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -2579,7 +2377,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   titleIsEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -2588,7 +2385,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   titleIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
@@ -2597,7 +2393,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   totalDurationSecondsIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -2606,7 +2401,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   totalDurationSecondsIsNotNull() {
     return QueryBuilder.apply(this, (query) {
@@ -2615,7 +2409,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   totalDurationSecondsEqualTo(int? value) {
     return QueryBuilder.apply(this, (query) {
@@ -2627,7 +2420,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   totalDurationSecondsGreaterThan(int? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -2640,7 +2432,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   totalDurationSecondsLessThan(int? value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
@@ -2653,7 +2444,6 @@ extension LocalHistoryItemQueryFilter
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   totalDurationSecondsBetween(
     int? lower,
@@ -2674,7 +2464,6 @@ extension LocalHistoryItemQueryFilter
     });
   }
 }
-
 extension LocalHistoryItemQueryObject
     on QueryBuilder<LocalHistoryItem, LocalHistoryItem, QFilterCondition> {
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
@@ -2683,14 +2472,12 @@ extension LocalHistoryItemQueryObject
       return query.object(q, r'chapterList');
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   episodeListElement(FilterQuery<Episode> q) {
     return QueryBuilder.apply(this, (query) {
       return query.object(q, r'episodeList');
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterFilterCondition>
   mediaData(FilterQuery<AnilistMediaData> q) {
     return QueryBuilder.apply(this, (query) {
@@ -2698,10 +2485,8 @@ extension LocalHistoryItemQueryObject
     });
   }
 }
-
 extension LocalHistoryItemQueryLinks
     on QueryBuilder<LocalHistoryItem, LocalHistoryItem, QFilterCondition> {}
-
 extension LocalHistoryItemQuerySortBy
     on QueryBuilder<LocalHistoryItem, LocalHistoryItem, QSortBy> {
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
@@ -2710,200 +2495,171 @@ extension LocalHistoryItemQuerySortBy
       return query.addSortBy(r'currentPage', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByCurrentPageDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentPage', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByCurrentTimeSeconds() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentTimeSeconds', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByCurrentTimeSecondsDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentTimeSeconds', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByEpisodeUrlsJson() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'episodeUrlsJson', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByEpisodeUrlsJsonDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'episodeUrlsJson', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy> sortByImage() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'image', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByImageDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'image', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByLastTimeSeconds() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastTimeSeconds', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByLastTimeSecondsDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastTimeSeconds', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByLastWatched() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastWatched', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByLastWatchedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastWatched', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy> sortByLink() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'link', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByLinkDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'link', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByMangaSourceJson() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mangaSourceJson', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByMangaSourceJsonDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mangaSourceJson', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByMediaId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mediaId', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByMediaIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mediaId', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByMediaType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mediaType', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByMediaTypeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mediaType', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByProgress() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'progress', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByProgressDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'progress', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortBySourceId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'sourceId', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortBySourceIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'sourceId', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortBySourceName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'sourceName', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortBySourceNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'sourceName', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy> sortByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByTitleDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByTotalDurationSeconds() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'totalDurationSeconds', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   sortByTotalDurationSecondsDesc() {
     return QueryBuilder.apply(this, (query) {
@@ -2911,7 +2667,6 @@ extension LocalHistoryItemQuerySortBy
     });
   }
 }
-
 extension LocalHistoryItemQuerySortThenBy
     on QueryBuilder<LocalHistoryItem, LocalHistoryItem, QSortThenBy> {
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
@@ -2920,213 +2675,182 @@ extension LocalHistoryItemQuerySortThenBy
       return query.addSortBy(r'currentPage', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByCurrentPageDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentPage', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByCurrentTimeSeconds() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentTimeSeconds', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByCurrentTimeSecondsDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'currentTimeSeconds', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByEpisodeUrlsJson() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'episodeUrlsJson', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByEpisodeUrlsJsonDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'episodeUrlsJson', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy> thenByImage() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'image', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByImageDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'image', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByLastTimeSeconds() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastTimeSeconds', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByLastTimeSecondsDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastTimeSeconds', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByLastWatched() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastWatched', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByLastWatchedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastWatched', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy> thenByLink() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'link', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByLinkDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'link', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByMangaSourceJson() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mangaSourceJson', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByMangaSourceJsonDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mangaSourceJson', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByMediaId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mediaId', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByMediaIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mediaId', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByMediaType() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mediaType', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByMediaTypeDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'mediaType', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByProgress() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'progress', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByProgressDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'progress', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenBySourceId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'sourceId', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenBySourceIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'sourceId', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenBySourceName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'sourceName', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenBySourceNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'sourceName', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy> thenByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByTitleDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.desc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByTotalDurationSeconds() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'totalDurationSeconds', Sort.asc);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QAfterSortBy>
   thenByTotalDurationSecondsDesc() {
     return QueryBuilder.apply(this, (query) {
@@ -3134,7 +2858,6 @@ extension LocalHistoryItemQuerySortThenBy
     });
   }
 }
-
 extension LocalHistoryItemQueryWhereDistinct
     on QueryBuilder<LocalHistoryItem, LocalHistoryItem, QDistinct> {
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QDistinct>
@@ -3143,14 +2866,12 @@ extension LocalHistoryItemQueryWhereDistinct
       return query.addDistinctBy(r'currentPage');
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QDistinct>
   distinctByCurrentTimeSeconds() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'currentTimeSeconds');
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QDistinct>
   distinctByEpisodeUrlsJson({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -3160,7 +2881,6 @@ extension LocalHistoryItemQueryWhereDistinct
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QDistinct> distinctByImage({
     bool caseSensitive = true,
   }) {
@@ -3168,21 +2888,18 @@ extension LocalHistoryItemQueryWhereDistinct
       return query.addDistinctBy(r'image', caseSensitive: caseSensitive);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QDistinct>
   distinctByLastTimeSeconds() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lastTimeSeconds');
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QDistinct>
   distinctByLastWatched() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lastWatched');
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QDistinct> distinctByLink({
     bool caseSensitive = true,
   }) {
@@ -3190,7 +2907,6 @@ extension LocalHistoryItemQueryWhereDistinct
       return query.addDistinctBy(r'link', caseSensitive: caseSensitive);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QDistinct>
   distinctByMangaSourceJson({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -3200,42 +2916,36 @@ extension LocalHistoryItemQueryWhereDistinct
       );
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QDistinct>
   distinctByMediaId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'mediaId');
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QDistinct>
   distinctByMediaType() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'mediaType');
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QDistinct>
   distinctByProgress({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'progress', caseSensitive: caseSensitive);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QDistinct>
   distinctBySourceId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'sourceId', caseSensitive: caseSensitive);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QDistinct>
   distinctBySourceName({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'sourceName', caseSensitive: caseSensitive);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QDistinct> distinctByTitle({
     bool caseSensitive = true,
   }) {
@@ -3243,7 +2953,6 @@ extension LocalHistoryItemQueryWhereDistinct
       return query.addDistinctBy(r'title', caseSensitive: caseSensitive);
     });
   }
-
   QueryBuilder<LocalHistoryItem, LocalHistoryItem, QDistinct>
   distinctByTotalDurationSeconds() {
     return QueryBuilder.apply(this, (query) {
@@ -3251,7 +2960,6 @@ extension LocalHistoryItemQueryWhereDistinct
     });
   }
 }
-
 extension LocalHistoryItemQueryProperty
     on QueryBuilder<LocalHistoryItem, LocalHistoryItem, QQueryProperty> {
   QueryBuilder<LocalHistoryItem, int, QQueryOperations> idProperty() {
@@ -3259,119 +2967,101 @@ extension LocalHistoryItemQueryProperty
       return query.addPropertyName(r'id');
     });
   }
-
   QueryBuilder<LocalHistoryItem, List<Chapter>?, QQueryOperations>
   chapterListProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'chapterList');
     });
   }
-
   QueryBuilder<LocalHistoryItem, int?, QQueryOperations> currentPageProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'currentPage');
     });
   }
-
   QueryBuilder<LocalHistoryItem, int?, QQueryOperations>
   currentTimeSecondsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'currentTimeSeconds');
     });
   }
-
   QueryBuilder<LocalHistoryItem, List<Episode>?, QQueryOperations>
   episodeListProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'episodeList');
     });
   }
-
   QueryBuilder<LocalHistoryItem, String?, QQueryOperations>
   episodeUrlsJsonProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'episodeUrlsJson');
     });
   }
-
   QueryBuilder<LocalHistoryItem, String?, QQueryOperations> imageProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'image');
     });
   }
-
   QueryBuilder<LocalHistoryItem, int?, QQueryOperations>
   lastTimeSecondsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'lastTimeSeconds');
     });
   }
-
   QueryBuilder<LocalHistoryItem, DateTime?, QQueryOperations>
   lastWatchedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'lastWatched');
     });
   }
-
   QueryBuilder<LocalHistoryItem, String?, QQueryOperations> linkProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'link');
     });
   }
-
   QueryBuilder<LocalHistoryItem, String?, QQueryOperations>
   mangaSourceJsonProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'mangaSourceJson');
     });
   }
-
   QueryBuilder<LocalHistoryItem, AnilistMediaData?, QQueryOperations>
   mediaDataProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'mediaData');
     });
   }
-
   QueryBuilder<LocalHistoryItem, int?, QQueryOperations> mediaIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'mediaId');
     });
   }
-
   QueryBuilder<LocalHistoryItem, HistoryMediaType?, QQueryOperations>
   mediaTypeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'mediaType');
     });
   }
-
   QueryBuilder<LocalHistoryItem, String?, QQueryOperations> progressProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'progress');
     });
   }
-
   QueryBuilder<LocalHistoryItem, String?, QQueryOperations> sourceIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'sourceId');
     });
   }
-
   QueryBuilder<LocalHistoryItem, String?, QQueryOperations>
   sourceNameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'sourceName');
     });
   }
-
   QueryBuilder<LocalHistoryItem, String?, QQueryOperations> titleProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'title');
     });
   }
-
   QueryBuilder<LocalHistoryItem, int?, QQueryOperations>
   totalDurationSecondsProperty() {
     return QueryBuilder.apply(this, (query) {

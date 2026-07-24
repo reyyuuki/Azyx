@@ -1,7 +1,6 @@
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 class CustomInputField extends StatefulWidget {
   final TextEditingController controller;
   final String labelText;
@@ -10,7 +9,6 @@ class CustomInputField extends StatefulWidget {
   final Function(int?)? onChanged;
   final TextInputType keyboardType;
   final String? suffixText;
-
   const CustomInputField({
     super.key,
     required this.controller,
@@ -21,15 +19,12 @@ class CustomInputField extends StatefulWidget {
     this.keyboardType = TextInputType.number,
     this.suffixText,
   });
-
   @override
   State<CustomInputField> createState() => _CustomInputFieldState();
 }
-
 class _CustomInputFieldState extends State<CustomInputField> {
   bool _isFocused = false;
   final FocusNode _focusNode = FocusNode();
-
   @override
   void initState() {
     super.initState();
@@ -39,17 +34,14 @@ class _CustomInputFieldState extends State<CustomInputField> {
       });
     });
   }
-
   @override
   void dispose() {
     _focusNode.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
-
     return Container(
       decoration: BoxDecoration(
         color: theme.surface,
@@ -137,12 +129,9 @@ class _CustomInputFieldState extends State<CustomInputField> {
     );
   }
 }
-
 class _MaxValueInputFormatter extends TextInputFormatter {
   final int maxValue;
-
   _MaxValueInputFormatter(this.maxValue);
-
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
@@ -151,12 +140,10 @@ class _MaxValueInputFormatter extends TextInputFormatter {
     if (newValue.text.isEmpty) {
       return newValue;
     }
-
     final intValue = int.tryParse(newValue.text);
     if (intValue == null || intValue > maxValue) {
       return oldValue;
     }
-
     return newValue;
   }
 }

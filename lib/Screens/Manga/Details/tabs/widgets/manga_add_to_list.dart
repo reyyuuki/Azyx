@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/offline_controller.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
@@ -12,13 +11,11 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 class MangaAddToList extends StatelessWidget {
   final int? index;
   final OfflineItem data;
   final AnilistMediaData mediaData;
   final RxBool isLoading;
-
   const MangaAddToList({
     super.key,
     this.index,
@@ -26,14 +23,11 @@ class MangaAddToList extends StatelessWidget {
     required this.mediaData,
     required this.isLoading,
   });
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Obx(() {
       final isLoggedIn = serviceHandler.userData.value.name != null;
-
       return Container(
         margin: const EdgeInsets.only(bottom: 28, left: 20, right: 20),
         height: 70,
@@ -106,12 +100,10 @@ class MangaAddToList extends StatelessWidget {
       );
     });
   }
-
   void _openLibrarySheet(BuildContext context) {
     HapticFeedback.mediumImpact();
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -138,7 +130,6 @@ class MangaAddToList extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Row(
@@ -183,14 +174,12 @@ class MangaAddToList extends StatelessWidget {
                   ],
                 ),
               ),
-
               const SizedBox(height: 16),
               Divider(
                 color: colorScheme.outlineVariant.withOpacity(0.3),
                 height: 1,
               ),
               const SizedBox(height: 8),
-
               Flexible(
                 child: StreamBuilder<List<Category>>(
                   stream: offlineController.getMangaCategoriesStream(),
@@ -198,7 +187,6 @@ class MangaAddToList extends StatelessWidget {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: LoadingIndicatorM3E());
                     }
-
                     final categories = snapshot.data ?? [];
                     return ListView.builder(
                       shrinkWrap: true,
@@ -212,7 +200,6 @@ class MangaAddToList extends StatelessWidget {
                             },
                           );
                         }
-
                         final category = categories[index];
                         final isSelected =
                             (category.anilistIds?.contains(
@@ -220,7 +207,6 @@ class MangaAddToList extends StatelessWidget {
                                     ) ??
                                     false)
                                 .obs;
-
                         return _CollectionTile(
                           name: category.name ?? 'Unknown',
                           isSelected: isSelected,
@@ -252,11 +238,9 @@ class MangaAddToList extends StatelessWidget {
       },
     );
   }
-
   void _showCreateDialog(BuildContext context) {
     final controller = TextEditingController();
     final colorScheme = Theme.of(context).colorScheme;
-
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -338,17 +322,13 @@ class MangaAddToList extends StatelessWidget {
     );
   }
 }
-
 class _LibraryButton extends StatelessWidget {
   final bool isCompact;
   final VoidCallback onTap;
-
   const _LibraryButton({required this.isCompact, required this.onTap});
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     final child = GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -411,21 +391,16 @@ class _LibraryButton extends StatelessWidget {
         ),
       ),
     );
-
     return isCompact ? child : Expanded(child: child);
   }
 }
-
 class _AddToListButton extends StatelessWidget {
   final AnilistMediaData mediaData;
   final VoidCallback onTap;
-
   const _AddToListButton({required this.mediaData, required this.onTap});
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -453,7 +428,6 @@ class _AddToListButton extends StatelessWidget {
         child: Obx(() {
           final status = serviceHandler.currentMedia.value.status;
           final hasStatus = status != null;
-
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -483,22 +457,18 @@ class _AddToListButton extends StatelessWidget {
     );
   }
 }
-
 class _CollectionTile extends StatelessWidget {
   final String name;
   final RxBool isSelected;
   final VoidCallback onTap;
-
   const _CollectionTile({
     required this.name,
     required this.isSelected,
     required this.onTap,
   });
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Obx(
       () => AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -566,15 +536,12 @@ class _CollectionTile extends StatelessWidget {
     );
   }
 }
-
 class _CreateCollectionTile extends StatelessWidget {
   final VoidCallback onTap;
   const _CreateCollectionTile({required this.onTap});
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(

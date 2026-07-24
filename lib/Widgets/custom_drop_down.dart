@@ -4,7 +4,6 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 class CustomSourceDropdown extends StatefulWidget {
   final RxList<Source> items;
   final Function(String?) onChanged;
@@ -12,7 +11,6 @@ class CustomSourceDropdown extends StatefulWidget {
   final dynamic sourceController;
   final Source? selectedSource;
   final Rx<Source>? customSelectedSource;
-
   const CustomSourceDropdown({
     super.key,
     required this.items,
@@ -22,11 +20,9 @@ class CustomSourceDropdown extends StatefulWidget {
     this.customSelectedSource,
     this.labelText = 'Choose Source',
   });
-
   @override
   State<CustomSourceDropdown> createState() => _CustomSourceDropdownState();
 }
-
 class _CustomSourceDropdownState extends State<CustomSourceDropdown>
     with SingleTickerProviderStateMixin {
   bool isOpen = false;
@@ -34,7 +30,6 @@ class _CustomSourceDropdownState extends State<CustomSourceDropdown>
   late Animation<double> _animation;
   OverlayEntry? _overlayEntry;
   final GlobalKey _dropdownKey = GlobalKey();
-
   @override
   void initState() {
     super.initState();
@@ -47,14 +42,12 @@ class _CustomSourceDropdownState extends State<CustomSourceDropdown>
       curve: Curves.easeInOutCubicEmphasized,
     );
   }
-
   @override
   void dispose() {
     _animationController.dispose();
     _overlayEntry?.remove();
     super.dispose();
   }
-
   Source? get selectedSource {
     if (widget.customSelectedSource != null) {
       return widget.customSelectedSource!.value;
@@ -67,13 +60,11 @@ class _CustomSourceDropdownState extends State<CustomSourceDropdown>
     }
     return null;
   }
-
   String? get selectedValue {
     final source = selectedSource;
     if (source == null) return null;
     return "${source.name}_${source.extensionType}";
   }
-
   void _toggleDropdown() {
     if (isOpen) {
       _closeDropdown();
@@ -81,7 +72,6 @@ class _CustomSourceDropdownState extends State<CustomSourceDropdown>
       _openDropdown();
     }
   }
-
   void _openDropdown() {
     if (isOpen) return;
     final renderBox =
@@ -94,7 +84,6 @@ class _CustomSourceDropdownState extends State<CustomSourceDropdown>
     _overlayEntry = _createOverlayEntry();
     Overlay.of(context).insert(_overlayEntry!);
   }
-
   void _closeDropdown() {
     if (!isOpen) return;
     setState(() {
@@ -105,14 +94,12 @@ class _CustomSourceDropdownState extends State<CustomSourceDropdown>
       _overlayEntry = null;
     });
   }
-
   OverlayEntry _createOverlayEntry() {
     final RenderBox renderBox =
         _dropdownKey.currentContext!.findRenderObject() as RenderBox;
     final Size size = renderBox.size;
     final Offset offset = renderBox.localToGlobal(Offset.zero);
     final colorScheme = Theme.of(context).colorScheme;
-
     return OverlayEntry(
       builder: (context) => GestureDetector(
         onTap: _closeDropdown,
@@ -180,7 +167,6 @@ class _CustomSourceDropdownState extends State<CustomSourceDropdown>
                                       : null;
                                   final isSelected =
                                       currentSelectedValue == itemValue;
-
                                   return GestureDetector(
                                     onTap: () {
                                       widget.onChanged(itemValue);
@@ -357,12 +343,10 @@ class _CustomSourceDropdownState extends State<CustomSourceDropdown>
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
-
     return Obx(() {
       final Rxn<Source> selectedSource = Rxn(this.selectedSource);
       return GestureDetector(

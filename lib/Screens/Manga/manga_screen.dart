@@ -1,13 +1,13 @@
 import 'package:azyx/Controllers/services/service_handler.dart';
+import 'package:azyx/Controllers/source/source_mapper.dart';
 import 'package:azyx/Widgets/Animation/drop_animation.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
+import 'package:azyx/Widgets/common/community_scrollable_list.dart';
 import 'package:azyx/Widgets/header.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 class MangaScreen extends StatelessWidget {
   const MangaScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
     return AzyXGradientContainer(
@@ -15,46 +15,11 @@ class MangaScreen extends StatelessWidget {
         child: ListView(
           children: [
             const Header(),
-            Obx(
-              () => serviceHandler.mangaWidgets(context).value,
-              // buildSearchButton(context, () {
-              //   Get.to(() => const SearchScreen(
-              //         isManga: true,
-              //       ));
-              // }),
-              // const SizedBox(
-              //   height: 10,
-              // ),
-              // MainCarousale(
-              //     isManga: true,
-              //     data: anilistAuthController
-              //         .mangaData.value.spotLightAnimes!),
-              // const SizedBox(
-              //   height: 20,
-              // ),
-              // const SizedBox(
-              //   height: 10,
-              // ),
-              // AnimeScrollableList(
-              //   animeList:
-              //       anilistAuthController.mangaData.value.popularAnimes!,
-              //   isManga: true,
-              //   title: "Popular Mangas",
-              // ),
-              // AnimeScrollableList(
-              //   isManga: true,
-              //   animeList: anilistAuthController
-              //       .mangaData.value.topUpcomingAnimes!,
-              //   title: "TopUpcoming Manga",
-              // ),
-              // const SizedBox(
-              //   height: 10,
-              // ),
-              // AnimeScrollableList(
-              //   animeList: anilistAuthController.mangaData.value.completed!,
-              //   isManga: true,
-              //   title: "Completed Manga",
-              // ),
+            Obx(() => serviceHandler.mangaWidgets(context).value),
+            const CommunityScrollableList(
+              title: "Community Recommendations",
+              mediaType: MediaType.manga,
+              category: "manga",
             ),
           ],
         ),

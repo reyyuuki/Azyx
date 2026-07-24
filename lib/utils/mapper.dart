@@ -1,12 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:http/http.dart';
-
 enum MappingType { anilist, mal }
-
 class MediaSyncer {
   static Future<String?> mapMediaId(String id,
       {MappingType? type, bool isManga = false}) async {
@@ -15,14 +12,12 @@ class MediaSyncer {
         (serviceHandler.serviceType.value == ServicesType.anilist
             ? MappingType.anilist
             : MappingType.mal);
-
     if (!isManga) {
       return await getMappedAnimeId(id, mappingType);
     } else {
       return await getMappedMangaId(id, mappingType);
     }
   }
-
   static Future<String?> getMappedAnimeId(String id, MappingType type) async {
     final url =
         'https://raw.githubusercontent.com/bal-mackup/mal-backup/refs/heads/master/${type.name}/anime/$id.json';
@@ -40,7 +35,6 @@ class MediaSyncer {
     }
     return null;
   }
-
   static Future<String?> getMappedMangaId(String id, MappingType type) async {
     final resp = await get(Uri.parse(
         'https://raw.githubusercontent.com/bal-mackup/mal-backup/refs/heads/master/${type.name}/manga/$id.json'));

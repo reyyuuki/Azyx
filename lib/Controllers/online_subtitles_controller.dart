@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:azyx/Models/anime_all_data.dart';
 import 'package:azyx/Models/subtitle.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
@@ -9,23 +8,19 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart';
 import 'package:media_kit/media_kit.dart';
-
 class EnhancedSubtitleBottomSheet extends StatelessWidget {
   final Rx<AnimeAllData> animeData;
   final Rx<String> selectedSbt;
   final Player player;
-
   const EnhancedSubtitleBottomSheet({
     super.key,
     required this.animeData,
     required this.selectedSbt,
     required this.player,
   });
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return DraggableScrollableSheet(
       initialChildSize: 0.85,
       minChildSize: 0.3,
@@ -241,7 +236,6 @@ class EnhancedSubtitleBottomSheet extends StatelessWidget {
       },
     );
   }
-
   Widget _buildQuickOption(
     BuildContext context,
     String title,
@@ -308,7 +302,6 @@ class EnhancedSubtitleBottomSheet extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildSubtitleTile(
     String title,
     String url,
@@ -425,20 +418,7 @@ class EnhancedSubtitleBottomSheet extends StatelessWidget {
       ),
     );
   }
-
-  // void _showOnlineSearchBottomSheet(
-  //   BuildContext context,
-  //   OnlineSubtitlesController controller,
-  // ) {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     isScrollControlled: true,
-  //     backgroundColor: Colors.transparent,
-  //     builder: (context) => _buildOnlineSearchSheet(context, controller),
-  //   );
-  // }
 }
-
 void showEnhancedSubtitleSheet(
   Rx<AnimeAllData> animeData,
   Rx<String> selectedSbt,

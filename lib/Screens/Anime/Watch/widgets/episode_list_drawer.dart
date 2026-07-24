@@ -7,7 +7,6 @@ import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 class EpisodeListDrawer extends StatelessWidget {
   final Function(Episode) ontap;
   final Rx<bool> showEpisodesBox;
@@ -15,7 +14,6 @@ class EpisodeListDrawer extends StatelessWidget {
   final Rx<AnimeAllData> animeData;
   final Rx<String> episodeNumber;
   final Rx<bool> isPotraitOrientaion;
-
   const EpisodeListDrawer({
     super.key,
     required this.ontap,
@@ -25,7 +23,6 @@ class EpisodeListDrawer extends StatelessWidget {
     required this.isPotraitOrientaion,
     required this.filteredEpisodes,
   });
-
   @override
   Widget build(BuildContext context) {
     return Obx(

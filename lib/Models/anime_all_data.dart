@@ -1,6 +1,5 @@
 import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
-
 class AnimeAllData {
   String? url;
   String? episodeTitle;
@@ -12,7 +11,6 @@ class AnimeAllData {
   List<Episode>? episodeList;
   String? source;
   int? startFromSeconds;
-
   AnimeAllData({
     this.episodeList,
     this.episodeTitle,
@@ -25,7 +23,6 @@ class AnimeAllData {
     this.url,
     this.startFromSeconds,
   });
-
   factory AnimeAllData.fromJson(Map<String, dynamic> json) {
     return AnimeAllData(
       url: json['url'] as String?,
@@ -46,7 +43,6 @@ class AnimeAllData {
       startFromSeconds: json['startFromSeconds'] as int?,
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'url': url,

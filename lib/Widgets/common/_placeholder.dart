@@ -1,13 +1,10 @@
 import 'dart:developer';
-
 import 'package:azyx/Extensions/extensionScreen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:flutter/material.dart';
-
 class PlaceholderExtensions extends StatelessWidget {
   const PlaceholderExtensions({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Padding(

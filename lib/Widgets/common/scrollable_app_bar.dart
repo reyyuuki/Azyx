@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:ui';
-
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Providers/theme_provider.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
@@ -9,7 +8,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-
 class ScrollableAppBar extends StatelessWidget {
   final Rx<AnilistMediaData> mediaData;
   final String image;
@@ -20,7 +18,6 @@ class ScrollableAppBar extends StatelessWidget {
     required this.image,
     required this.tagg,
   });
-
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Provider.of<ThemeProvider>(

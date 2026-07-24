@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:azyx/Models/wrong_title_search.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
@@ -7,11 +6,9 @@ import 'package:azyx/Widgets/common/shimmer_effect.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_utils/get_utils.dart';
-
 class AzyXCard extends StatelessWidget {
   final WrongTitleSearch item;
   const AzyXCard({super.key, required this.item});
-
   @override
   Widget build(BuildContext context) {
     return Column(

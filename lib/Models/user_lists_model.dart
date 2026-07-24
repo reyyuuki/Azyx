@@ -1,8 +1,6 @@
 import 'dart:developer';
-
 import 'package:azyx/Models/user_media.dart';
 import 'package:get/get.dart';
-
 class UserListsModel {
   RxList<UserMedia> currentlyWatching = <UserMedia>[].obs;
   RxList<UserMedia> planning = <UserMedia>[].obs;
@@ -11,12 +9,9 @@ class UserListsModel {
   RxList<UserMedia> paused = <UserMedia>[].obs;
   RxList<UserMedia> dropped = <UserMedia>[].obs;
   RxList<UserMedia> allList = RxList<UserMedia>();
-
   UserListsModel();
-
   factory UserListsModel.fromJson(List<dynamic> jsonList) {
     final model = UserListsModel();
-
     for (var item in jsonList) {
       final entries = item['entries'] as List<dynamic>?;
       if (entries == null) continue;
@@ -48,10 +43,8 @@ class UserListsModel {
     }
     return model;
   }
-
   factory UserListsModel.fromMAl(List<dynamic> jsonList) {
     final model = UserListsModel();
-
     for (var item in jsonList) {
       final entry = item['node'];
       log("check => ${entry.toString()}");

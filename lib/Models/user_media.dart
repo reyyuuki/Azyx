@@ -1,5 +1,4 @@
 import 'package:azyx/Models/simkl.dart';
-
 class UserMedia {
   String? title;
   String? image;
@@ -12,7 +11,6 @@ class UserMedia {
   String? totalEpisodes;
   String? type;
   String? medialistIds;
-
   UserMedia({
     this.id,
     this.image,
@@ -26,7 +24,6 @@ class UserMedia {
     this.episodes,
     this.medialistIds,
   });
-
   factory UserMedia.fromJson(Map<String, dynamic> data) {
     return UserMedia(
       id: data['media']['id'].toString(),
@@ -57,15 +54,11 @@ class UserMedia {
       totalEpisodes: '1',
       status: Simkl.simklMovieToAL(json['status']),
       type: "movie",
-      // mediaStatus: json['not_aired_episodes_count'] == 0
-      //     ? "COMPLETED"
-      //     : "AIRING",
       rating: null,
       score: null,
       medialistIds: '${ids['simkl']}*MOVIE',
     );
   }
-
   factory UserMedia.fromSimklShow(Map<String, dynamic> json) {
     final show = json['show'];
     final ids = show['ids'] ?? {};
@@ -79,16 +72,11 @@ class UserMedia {
       episodes: json['total_episodes_count'],
       status: Simkl.simklShowToAL(json['status']),
       type: "show",
-      // mediaStatus: json['not_aired_episodes_count'] == 0
-      //     ? "completed"
-      //     : "airing",
       rating: null,
       score: null,
-      // format: null,
       medialistIds: '${ids['simkl']}*SERIES',
     );
   }
-
   factory UserMedia.fromMAL(Map<String, dynamic> json) {
     return UserMedia(
       id: json['node']['id'].toString(),
@@ -106,13 +94,11 @@ class UserMedia {
     );
   }
 }
-
 extension UserMediaListFilter on List<UserMedia> {
   List<UserMedia> get currentlyWatching => where((e) {
         final s = e.status?.toUpperCase() ?? '';
         return s == 'CURRENT' || s == 'WATCHING';
       }).toList();
-
   List<UserMedia> get currentlyReading => where((e) {
         final s = e.status?.toUpperCase() ?? '';
         return s == 'CURRENT' || s == 'READING';

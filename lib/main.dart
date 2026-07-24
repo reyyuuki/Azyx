@@ -1,7 +1,5 @@
-// ignore_for_file: must_be_immutable, depend_on_referenced_packages
 import 'dart:async';
 import 'dart:io';
-
 import 'package:app_links/app_links.dart';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';
@@ -9,8 +7,10 @@ import 'package:azyx/Controllers/anilist_data_controller.dart';
 import 'package:azyx/Controllers/local_history_controller.dart';
 import 'package:azyx/Controllers/offline_controller.dart';
 import 'package:azyx/Controllers/services/mal_service.dart';
+import 'package:azyx/Controllers/services/community_service.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/services/simkl_service.dart';
+import 'package:azyx/Controllers/services/comments_backend_service.dart';
 import 'package:azyx/Controllers/settings_controller.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Controllers/ui_setting_controller.dart';
@@ -36,9 +36,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:isar_community/isar.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:provider/provider.dart';
-
 late Isar isar;
-
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   @override
   Set<PointerDeviceKind> get dragDevices => {
@@ -48,7 +46,6 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
     PointerDeviceKind.stylus,
   };
 }
-
 void main(List<String> args) async {
   runZonedGuarded(
     () async {
@@ -56,7 +53,6 @@ void main(List<String> args) async {
       if (Platform.isAndroid) {
         await FlutterDisplayMode.setHighRefreshRate();
       }
-
       if (Platform.isAndroid || Platform.isIOS) {
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
         SystemChrome.setSystemUIOverlayStyle(
@@ -70,7 +66,6 @@ void main(List<String> args) async {
           ),
         );
       }
-
       MediaKit.ensureInitialized();
       await Database().init();
       await Hive.initFlutter();
@@ -82,6 +77,8 @@ void main(List<String> args) async {
       Get.put(MalService());
       Get.put(SimklService());
       Get.put(ServiceHandler());
+      Get.put(CommunityService());
+      Get.put(CommentsBackendService());
       Get.put(AnilistDataController());
       Get.put(OfflineController());
       Get.put(UiSettingController());
@@ -101,13 +98,10 @@ void main(List<String> args) async {
     },
   );
 }
-
 bool _isDeepLinkInitialized = false;
-
 void deepLink() async {
   if (_isDeepLinkInitialized) return;
   _isDeepLinkInitialized = true;
-
   final appLink = AppLinks();
   try {
     final initLink = await appLink.getInitialLink();
@@ -120,15 +114,11 @@ void deepLink() async {
     onError: (err) => azyxSnackBar('Error Opening link: $err'),
   );
 }
-
 Rx<int> index = 2.obs;
-
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
-
   bool get isDesktop =>
       Platform.isWindows || Platform.isLinux || Platform.isMacOS;
-
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ThemeProvider>(context);
@@ -140,14 +130,11 @@ class MainApp extends StatelessWidget {
     );
   }
 }
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
   @override
   State<HomePage> createState() => _HomePageState();
 }
-
 class _HomePageState extends State<HomePage> {
   @override
   void initState() {
@@ -156,17 +143,14 @@ class _HomePageState extends State<HomePage> {
       deepLink();
     });
   }
-
   final List<Widget> _screens = [
     const HomeScreen(),
     const LibraryScreen(),
     const AnimeScreen(),
     const MangaScreen(),
   ];
-
   bool get isDesktop =>
       Platform.isWindows || Platform.isLinux || Platform.isMacOS;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,26 +1,21 @@
-// ignore_for_file: must_be_immutable
 import 'package:azyx/Widgets/Animation/animation.dart';
 import 'package:azyx/Widgets/helper/platform_builder.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 class CustomNavBar extends StatefulWidget {
   final List<Widget> screens;
   int index;
   final Function(int) onChanged;
-
   CustomNavBar({
     super.key,
     required this.screens,
     required this.index,
     required this.onChanged,
   });
-
   @override
   State<CustomNavBar> createState() => _CustomNavBarState();
 }
-
 class _CustomNavBarState extends State<CustomNavBar>
     with TickerProviderStateMixin {
   late AnimationController _slideController;
@@ -29,24 +24,20 @@ class _CustomNavBarState extends State<CustomNavBar>
   List<AnimationController> _bounceControllers = [];
   List<Animation<double>> _bounceScaleAnimations = [];
   List<Animation<double>> _bounceOpacityAnimations = [];
-
   final List<IconData> _icons = [
     Broken.home_1,
     Broken.element_4,
     Icons.movie_filter,
     Broken.book,
   ];
-
   @override
   void initState() {
     super.initState();
     _previousIndex = widget.index;
-
     _slideController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-
     _slideAnimation =
         Tween<double>(
           begin: widget.index.toDouble(),
@@ -57,33 +48,27 @@ class _CustomNavBarState extends State<CustomNavBar>
             curve: Curves.easeInOutCubicEmphasized,
           ),
         );
-
     for (int i = 0; i < widget.screens.length; i++) {
       final controller = AnimationController(
         duration: const Duration(milliseconds: 800),
         vsync: this,
       );
-
       final scaleAnimation = Tween<double>(
         begin: 0.7,
         end: 1.0,
       ).animate(CurvedAnimation(parent: controller, curve: Curves.elasticOut));
-
       final opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
         CurvedAnimation(
           parent: controller,
           curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
         ),
       );
-
       _bounceControllers.add(controller);
       _bounceScaleAnimations.add(scaleAnimation);
       _bounceOpacityAnimations.add(opacityAnimation);
     }
-
     _bounceControllers[widget.index].forward();
   }
-
   @override
   void didUpdateWidget(CustomNavBar oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -92,7 +77,6 @@ class _CustomNavBarState extends State<CustomNavBar>
       _triggerBounceAnimation(widget.index);
     }
   }
-
   void _updateSlideAnimation() {
     _previousIndex = widget.index == 0
         ? _slideAnimation.value.round()
@@ -110,12 +94,10 @@ class _CustomNavBarState extends State<CustomNavBar>
     _slideController.forward(from: 0);
     _previousIndex = widget.index;
   }
-
   void _triggerBounceAnimation(int index) {
     _bounceControllers[index].reset();
     _bounceControllers[index].forward();
   }
-
   @override
   void dispose() {
     _slideController.dispose();
@@ -124,7 +106,6 @@ class _CustomNavBarState extends State<CustomNavBar>
     }
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -135,7 +116,6 @@ class _CustomNavBarState extends State<CustomNavBar>
     );
     final availableWidth = screenWidth - (horizontalMargin * 2) - 8;
     final itemWidth = availableWidth / widget.screens.length;
-
     return AnimatedItemWrapper(
       child: Container(
         margin: EdgeInsets.fromLTRB(horizontalMargin, 0, horizontalMargin, 20),

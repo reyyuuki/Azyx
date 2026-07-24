@@ -1,30 +1,19 @@
 import 'dart:developer';
-
 import 'package:isar_community/isar.dart';
-
 import 'anime_details_data.dart';
 import 'episode_class.dart';
-
 part 'offline_item.g.dart';
-
 @collection
 class OfflineItem {
   Id id = Isar.autoIncrement;
-
   @Index()
   late String number;
-
   @Index()
   int? mediaType;
-
   String? animeTitle;
-
   AnilistMediaData? mediaData;
-
   List<Episode>? episodesList;
-
   List<Chapter>? chaptersList;
-
   OfflineItem({
     required this.number,
     this.mediaType,
@@ -33,7 +22,6 @@ class OfflineItem {
     this.episodesList,
     this.chaptersList,
   });
-
   Map<String, dynamic> toJson() {
     return {
       'number': number,
@@ -44,7 +32,6 @@ class OfflineItem {
       'chaptersList': chaptersList?.map((e) => e.toJson()).toList(),
     };
   }
-
   factory OfflineItem.fromJson(Map<String, dynamic> json) {
     log('offline: ${json['mediaType']}');
     return OfflineItem(

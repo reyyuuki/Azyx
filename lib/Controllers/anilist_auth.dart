@@ -1,11 +1,9 @@
-// ignore_for_file: invalid_use_of_protected_member
-
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:azyx/Controllers/anilist_data_controller.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/models/online_service.dart';
+import 'package:azyx/Controllers/source/source_mapper.dart';
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
@@ -26,9 +24,10 @@ import 'package:azyx/utils/functions.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher_string.dart';
+import 'package:azyx/utils/oauth_helper.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 final AnilistService anilistAuthController = Get.find();
@@ -43,24 +42,18 @@ class AnilistService extends GetxController
   RxList<UserMedia> userAnimeList = RxList();
   @override
   RxList<UserMedia> userMangaList = RxList();
-
   RxList<Media> spotlight = RxList();
   RxList<Media> popular = RxList();
   RxList<Media> trending = RxList();
   RxList<Media> topUpcoming = RxList();
-
-  // Manga
   RxList<Media> spotlightM = RxList();
   RxList<Media> popularM = RxList();
   RxList<Media> trendingM = RxList();
   RxList<Media> topUpcomingM = RxList();
-
   @override
   Rx<UserMedia> currentMedia = UserMedia().obs;
-
   @override
   RxBool isLoggedIn = false.obs;
-
   @override
   Future<void> autoLogin() async {
     final token = AuthKeys.anilistToken.get<String>('');
@@ -72,26 +65,262 @@ class AnilistService extends GetxController
 
   @override
   Future<void> login() async {
+    final context = Get.context;
+    if (context == null) return;
+    final selectedMethod = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => _buildLoginBottomSheet(ctx),
+    );
+    if (selectedMethod == null) return;
+
     String clientId = dotenv.get('CLIENT_ID');
     String clientSecret = dotenv.get('CLIENT_SECRET');
     String redirectUri = dotenv.get('REDIRECT_URL');
 
-    final url =
-        'https://anilist.co/api/v2/oauth/authorize?client_id=$clientId&redirect_uri=$redirectUri&response_type=code';
-
-    try {
-      final result = await FlutterWebAuth2.authenticate(
-        url: url,
-        callbackUrlScheme: 'azyx',
-      );
-
-      final code = Uri.parse(result).queryParameters['code'];
-      if (code != null) {
-        await _exchangeCodeForToken(code, clientId, clientSecret, redirectUri);
+    if (selectedMethod == 'browser') {
+      final url =
+          'https://anilist.co/api/v2/oauth/authorize?client_id=$clientId&redirect_uri=$redirectUri&response_type=code';
+      try {
+        final result = await OauthHelper.authenticate(
+          context: context,
+          url: url,
+          callbackUrlScheme: 'azyx',
+        );
+        if (result != null) {
+          final code = Uri.parse(result).queryParameters['code'];
+          if (code != null) {
+            await _exchangeCodeForToken(
+              code,
+              clientId,
+              clientSecret,
+              redirectUri,
+            );
+          }
+        }
+      } catch (e) {
+        log('Error during login: $e');
       }
-    } catch (e) {
-      log('Error during login: $e');
+    } else if (selectedMethod == 'token') {
+      _showTokenInputDialog(context, clientId);
     }
+  }
+
+  Widget _buildLoginBottomSheet(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surfaceContainer,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(28),
+          topRight: Radius.circular(28),
+        ),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colors.outline.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Login to AniList',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: colors.onSurface,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            _buildLoginOptionTile(
+              context,
+              onPressed: () => Navigator.pop(context, 'browser'),
+              icon: Icons.language_rounded,
+              title: 'Login from Browser',
+              subtitle: 'Authenticate securely via browser interface',
+            ),
+            const SizedBox(height: 12),
+            _buildLoginOptionTile(
+              context,
+              onPressed: () => Navigator.pop(context, 'token'),
+              icon: Icons.vpn_key_rounded,
+              title: 'Login with Token',
+              subtitle: 'Paste an existing AniList access token manually',
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginOptionTile(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    final colors = Theme.of(context).colorScheme;
+    return Material(
+      color: colors.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: colors.primary.withOpacity(0.15),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: colors.primary.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  size: 22,
+                  color: colors.primary,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: colors.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: colors.onSurfaceVariant.withOpacity(0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+                color: colors.onSurfaceVariant.withOpacity(0.5),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showTokenInputDialog(BuildContext context, String clientId) async {
+    final TextEditingController controller = TextEditingController();
+    final colors = Theme.of(context).colorScheme;
+
+    final tokenUrl =
+        'https://anilist.co/api/v2/oauth/authorize?client_id=$clientId&response_type=token';
+    await launchUrlString(tokenUrl, mode: LaunchMode.externalApplication);
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: colors.surfaceContainer,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'Paste AniList Token',
+          style: TextStyle(
+            color: colors.onSurface,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Paste the access token obtained from the AniList authorization page:',
+              style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: controller,
+              style: TextStyle(color: colors.onSurface, fontSize: 13),
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: 'eyJhbGciOi...',
+                hintStyle: TextStyle(
+                  color: colors.onSurfaceVariant.withOpacity(0.5),
+                ),
+                filled: true,
+                fillColor: colors.surfaceContainerLow,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: colors.outline.withOpacity(0.2),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: colors.primary),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: colors.onSurfaceVariant),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () async {
+              final token = controller.text.trim();
+              if (token.isNotEmpty) {
+                Navigator.pop(dialogCtx);
+                AuthKeys.anilistToken.set(token);
+                await fetchUserProfile();
+              }
+            },
+            child: Text('Login', style: TextStyle(color: colors.onPrimary)),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _exchangeCodeForToken(
@@ -111,7 +340,6 @@ class AnilistService extends GetxController
         'code': code,
       },
     );
-
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final token = data['access_token'];
@@ -128,7 +356,6 @@ class AnilistService extends GetxController
     if (token.isEmpty) {
       return;
     }
-
     const query = '''
   query {
     Viewer {
@@ -151,7 +378,6 @@ class AnilistService extends GetxController
     }
   }
   ''';
-
     final response = await http.post(
       Uri.parse('https://graphql.anilist.co'),
       headers: {
@@ -161,7 +387,6 @@ class AnilistService extends GetxController
       },
       body: json.encode({'query': query}),
     );
-
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       userData.value = User.fromJson(data['data']['Viewer']);
@@ -179,7 +404,6 @@ class AnilistService extends GetxController
     if (token.isEmpty) {
       return;
     }
-
     const query = '''
     query GetUserAnimeList(\$userId: Int) {
       MediaListCollection(userId: \$userId, type: ANIME) {
@@ -210,18 +434,15 @@ class AnilistService extends GetxController
       }
     }
     ''';
-
     try {
       if (userData.value.id == null) {
         log('User ID is not available. Fetching user profile first.');
         await fetchUserProfile();
       }
-
       final userId = userData.value.id;
       if (userId == null) {
         throw Exception('Failed to get user ID');
       }
-
       final response = await http.post(
         Uri.parse('https://graphql.anilist.co'),
         headers: {
@@ -234,7 +455,6 @@ class AnilistService extends GetxController
           'variables': {'userId': userId},
         }),
       );
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['data'] != null &&
@@ -295,18 +515,15 @@ class AnilistService extends GetxController
       }
     }
     ''';
-
     try {
       if (userData.value.id == null) {
         log('User ID is not available. Fetching user profile first.');
         await fetchUserProfile();
       }
-
       final userId = userData.value.id;
       if (userId == null) {
         throw Exception('Failed to get user ID');
       }
-
       final response = await http.post(
         Uri.parse('https://graphql.anilist.co'),
         headers: {
@@ -319,14 +536,12 @@ class AnilistService extends GetxController
           'variables': {'userId': userId},
         }),
       );
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['data'] != null &&
             data['data']['MediaListCollection'] != null) {
           final lists =
               data['data']['MediaListCollection']['lists'] as List<dynamic>;
-          // userMangaList.value = UserListsModel.fromJson(lists);
           userMangaList.assignAll(
             lists
                 .expand(
@@ -431,7 +646,6 @@ class AnilistService extends GetxController
     }
   }
   ''';
-
     final response = await http.post(
       Uri.parse(url),
       headers: headers,
@@ -464,7 +678,6 @@ class AnilistService extends GetxController
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
-
     String query = r'''
   query {
     trending: Page {
@@ -533,13 +746,11 @@ class AnilistService extends GetxController
   }
 }
 ''';
-
     final response = await http.post(
       Uri.parse(url),
       headers: headers,
       body: jsonEncode({'query': query}),
     );
-
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       spotlightM.value = (data['data']['trending']['media'] as List<dynamic>)
@@ -573,7 +784,6 @@ class AnilistService extends GetxController
       'Authorization': 'Bearer $accessToken',
       'Content-Type': 'application/json',
     };
-
     const String mutation = '''
     mutation SaveMediaListEntry(\$mediaId: Int!, \$status: MediaListStatus!, \$score: Float, \$progress: Int) {
       SaveMediaListEntry(mediaId: \$mediaId, status: \$status, score: \$score, progress: \$progress) {
@@ -598,13 +808,11 @@ class AnilistService extends GetxController
       if (anime.score != null) 'score': anime.score,
       if (anime.progress != null) 'progress': anime.progress,
     };
-
     final response = await http.post(
       Uri.parse(url),
       headers: headers,
       body: jsonEncode({'query': mutation, 'variables': variables}),
     );
-
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       log('Successfully added to list: ${data['data']['SaveMediaListEntry']}');
@@ -768,7 +976,6 @@ class AnilistService extends GetxController
                         isManga: true,
                         title: "Trending Manga",
                       ),
-
                 100.height,
               ],
             ),
@@ -777,7 +984,6 @@ class AnilistService extends GetxController
       ),
     ],
   ).obs;
-
   @override
   Rx<Widget> mangaWidgets(BuildContext context) => Obx(
     () =>
@@ -800,18 +1006,18 @@ class AnilistService extends GetxController
                   Get.to(() => const SearchScreen(isManga: true));
                 }, 'manga'),
                 const SizedBox(height: 10),
-                 MainCarousale(isManga: true, data: spotlightM),
-                 const SizedBox(height: 20),
-                 if (userMangaList.currentlyReading.isNotEmpty) ...[
-                   AnimeScrollableList(
-                     varient: CarousaleVarient.userList,
-                     isManga: true,
-                     animeList: userMangaList.currentlyReading,
-                     title: "Currently Reading",
-                   ),
-                   const SizedBox(height: 10),
-                 ],
-                 AnimeScrollableList(
+                MainCarousale(isManga: true, data: spotlightM),
+                const SizedBox(height: 20),
+                if (userMangaList.currentlyReading.isNotEmpty) ...[
+                  AnimeScrollableList(
+                    varient: CarousaleVarient.userList,
+                    isManga: true,
+                    animeList: userMangaList.currentlyReading,
+                    title: "Currently Reading",
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                AnimeScrollableList(
                   animeList: popularM,
                   isManga: true,
                   title: "Popular Manga",
@@ -832,7 +1038,6 @@ class AnilistService extends GetxController
             ),
           ),
   ).obs;
-
   @override
   Future<void> refresh() async {
     Future.wait([fetchhomeData(), fetchUserAnimeList(), fetchUserMangaList()]);

@@ -1,12 +1,10 @@
 import 'dart:io';
-
 import 'package:azyx/Controllers/settings_controller.dart';
 import 'package:azyx/Providers/theme_provider.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:provider/provider.dart';
-
 class AzyXGradientContainer extends StatelessWidget {
   final Widget child;
   final double? height;
@@ -19,7 +17,6 @@ class AzyXGradientContainer extends StatelessWidget {
     this.padding,
     this.borderRadius,
   });
-
   @override
   Widget build(BuildContext context) {
     final widget = Platform.isAndroid || Platform.isIOS

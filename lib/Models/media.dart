@@ -1,7 +1,6 @@
 import 'package:anymex_extension_runtime_bridge/Models/DMedia.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_mapper.dart';
-
 class Media {
   String? title;
   String? url;
@@ -31,7 +30,6 @@ class Media {
     this.servicesType,
     this.genres,
   });
-
   factory Media.fromJson(Map<dynamic, dynamic> data) {
     return Media(
       id: serviceHandler.serviceType.value == ServicesType.mal
@@ -49,7 +47,6 @@ class Media {
           : "5.0",
     );
   }
-
   factory Media.fromSmallSimkl(Map<String?, dynamic> json, bool isMovie) {
     MediaType type = MediaType.anime;
     return Media(
@@ -66,7 +63,6 @@ class Media {
       mediaType: type,
       servicesType: ServicesType.simkl,
       description: json['overview'],
-      // aired: json['year']?.toString() ?? 'Unknown air date',
     );
   }
   factory Media.fromJsonToHive(Map<String, dynamic> data) {
@@ -82,7 +78,6 @@ class Media {
       episodes: data['episodes'],
     );
   }
-
   factory Media.froDMedia(DMedia manga, MediaType type) {
     return Media(
       url: manga.url ?? '',
@@ -110,10 +105,8 @@ class Media {
       'episodes': episodes,
     };
   }
-
   factory Media.fromMAL(Map<String, dynamic> json, {bool isManga = false}) {
     final node = json['node'] ?? {};
-
     return Media(
       id: node['id']?.toString() ?? '0',
       title: node['title'] ?? node['alternative_titles']?['en'] ?? '??',
@@ -122,31 +115,13 @@ class Media {
       bannerImage: node['main_picture']?['large'] ?? '??',
       episodes: isManga ? node['num_chapters'] : node['num_episodes'],
       type: node['media_type'] ?? '??',
-      // sea: node['start_season']?['season'] ?? '??',
-      // premiered: node['start_date'] ?? '??',
-      // duration: node['average_episode_duration']?.toString() ?? '??',
       status: node['status'],
       rating: node['mean']?.toString() ?? '??',
-      // popularity: node['popularity']?.toString() ?? '??',
-      // format: node['media_type'] ?? '??',
-      // aired: node['start_date'] ?? '??',
-      // totalChapters: node['num_chapters']?.toString() ?? '??',
       genres:
           (node['genres'] as List<dynamic>?)
               ?.map((genre) => genre['name']?.toString() ?? '??')
               .toList() ??
           [],
-      // studios: (node['studios'] as List<dynamic>?)
-      //     ?.map((studio) => studio['name']?.toString() ?? '??')
-      //     .toList(),
-      // characters: [],
-      // relations: [],
-      // recommendations: [],
-      // nextAiringEpisode: null,
-      // rankings: [],
-      // mediaContent: [],
-      // mediaType: node['media_type'] == 'tv' ? MediaType.anime : MediaType.manga,
-      // serviceType: ServicesType.mal,
     );
   }
 }

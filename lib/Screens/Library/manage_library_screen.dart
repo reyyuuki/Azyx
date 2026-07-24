@@ -4,15 +4,12 @@ import 'package:azyx/Database/isar_models/category.dart';
 import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-
 class ManageLibraryScreen extends StatefulWidget {
   final bool isManga;
   const ManageLibraryScreen({super.key, required this.isManga});
-
   @override
   State<ManageLibraryScreen> createState() => _ManageLibraryScreenState();
 }
-
 class _ManageLibraryScreenState extends State<ManageLibraryScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
@@ -20,7 +17,6 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
   late final Stream<List<Category>> _categoriesStream1;
   late final Stream<List<Category>> _categoriesStream2;
   late final Stream<List<OfflineItem>> _itemsStream;
-
   @override
   void initState() {
     super.initState();
@@ -35,13 +31,11 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
         ? offlineController.getOfflineMangaStream()
         : offlineController.getOfflineAnimeStream();
   }
-
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
-
   void _showAddCategoryDialog(BuildContext context, ColorScheme cs) {
     final textCtrl = TextEditingController();
     showDialog(
@@ -121,7 +115,6 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
       ),
     );
   }
-
   void _showRenameCategoryDialog(
     BuildContext context,
     ColorScheme cs,
@@ -201,7 +194,6 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
       ),
     );
   }
-
   void _showDeleteCategoryDialog(
     BuildContext context,
     ColorScheme cs,
@@ -262,7 +254,6 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
       ),
     );
   }
-
   void _showRemoveItemDialog(
     BuildContext context,
     ColorScheme cs,
@@ -327,7 +318,6 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -389,7 +379,6 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
       ),
     );
   }
-
   Widget _buildCategoriesTab(ColorScheme cs) {
     return StreamBuilder<List<Category>>(
       stream: _categoriesStream1,
@@ -397,7 +386,6 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
         final rawList = snapshot.data ?? [];
         final order = offlineController.getCategoryOrder(widget.isManga);
         final list = List<Category>.from(rawList);
-
         if (order.isNotEmpty) {
           list.sort((a, b) {
             final idxA = order.indexOf(a.id);
@@ -408,7 +396,6 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
             return idxA.compareTo(idxB);
           });
         }
-
         if (list.isEmpty) {
           return Center(
             child: Column(
@@ -424,7 +411,6 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
             ),
           );
         }
-
         return Theme(
           data: Theme.of(context).copyWith(
             canvasColor: Colors.transparent,
@@ -504,7 +490,6 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
       },
     );
   }
-
   Widget _buildItemsTab(ColorScheme cs) {
     return StreamBuilder<List<Category>>(
       stream: _categoriesStream2,
@@ -512,7 +497,6 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
         final rawCats = catSnapshot.data ?? [];
         final order = offlineController.getCategoryOrder(widget.isManga);
         final categories = List<Category>.from(rawCats);
-
         if (order.isNotEmpty) {
           categories.sort((a, b) {
             final idxA = order.indexOf(a.id);
@@ -523,7 +507,6 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
             return idxA.compareTo(idxB);
           });
         }
-
         if (categories.isEmpty) {
           return Center(
             child: Text(
@@ -532,7 +515,6 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
             ),
           );
         }
-
         if (_selectedCategoryForItems == null ||
             !categories.any((c) => c.id == _selectedCategoryForItems!.id)) {
           _selectedCategoryForItems = categories.first;
@@ -541,9 +523,7 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
             (c) => c.id == _selectedCategoryForItems!.id,
           );
         }
-
         final currentCat = _selectedCategoryForItems!;
-
         return StreamBuilder<List<OfflineItem>>(
           stream: _itemsStream,
           builder: (context, itemSnapshot) {
@@ -556,7 +536,6 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
                 .map((id) => itemsMap[id])
                 .whereType<OfflineItem>()
                 .toList();
-
             return Column(
               children: [
                 Container(
@@ -718,20 +697,16 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
     );
   }
 }
-
 class _KeepAliveTab extends StatefulWidget {
   final Widget child;
   const _KeepAliveTab({super.key, required this.child});
-
   @override
   State<_KeepAliveTab> createState() => _KeepAliveTabState();
 }
-
 class _KeepAliveTabState extends State<_KeepAliveTab>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-
   @override
   Widget build(BuildContext context) {
     super.build(context);

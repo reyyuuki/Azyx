@@ -1,7 +1,4 @@
-// ignore_for_file: depend_on_referenced_packages
-
 import 'dart:convert';
-
 import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/get_navigation.dart';
@@ -12,17 +9,14 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 class UpdateNotifier extends GetxController {
   @override
   void onInit() {
     super.onInit();
     checkUpdate();
   }
-
   String fileName = '';
   String downloadLink = '';
-
   static Future<void> downloadFile() async {
     if (await Permission.storage.request().isGranted) {
       final directory = await getExternalStorageDirectory();
@@ -31,7 +25,6 @@ class UpdateNotifier extends GetxController {
       Utils.log('no permission');
     }
   }
-
   static Future<void> checkUpdate() async {
     const url = "https://api.github.com/repos/reyyuuki/AzyX/releases/latest";
     try {
@@ -44,7 +37,6 @@ class UpdateNotifier extends GetxController {
         );
         String changelog = data['body'];
         String releaseTitle = data['name'];
-
         PackageInfo packageInfo = await PackageInfo.fromPlatform();
         String currentVersion = packageInfo.version;
         Utils.log("$latestVersion == $currentVersion");
@@ -58,7 +50,6 @@ class UpdateNotifier extends GetxController {
       Utils.log("error when checking update: $e");
     }
   }
-
   static Future<void> autoCheckUpdate(context) async {
     const url = "https://api.github.com/repos/reyyuuki/AzyX/releases/latest";
     try {
@@ -71,7 +62,6 @@ class UpdateNotifier extends GetxController {
         );
         String changelog = data['body'];
         String releaseTitle = data['name'];
-
         PackageInfo packageInfo = await PackageInfo.fromPlatform();
         String currentVersion = packageInfo.version;
         Utils.log("$latestVersion == $currentVersion");
@@ -83,22 +73,18 @@ class UpdateNotifier extends GetxController {
       Utils.log("error when checking update: $e");
     }
   }
-
   static Map<String, List<String>> _parseChangelog(String changelog) {
     Map<String, List<String>> parsedChanges = {};
     List<String> sections = changelog.split(
       RegExp(r'(?<=\r\n)\*\*[^*]+(?=\*\*)'),
     );
-
     for (var section in sections) {
       if (section.trim().isEmpty) continue;
-
       List<String> lines = section
           .split('\r\n')
           .where((line) => line.isNotEmpty)
           .toList();
       String header = lines.first.trim();
-
       List<String> body = lines
           .sublist(1)
           .map(
@@ -109,13 +95,10 @@ class UpdateNotifier extends GetxController {
           )
           .where((line) => line.isNotEmpty)
           .toList();
-
       parsedChanges[header] = body;
     }
-
     return parsedChanges;
   }
-
   static void _showUpdateBottomSheet(
     BuildContext context,
     String changelog,

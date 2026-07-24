@@ -1,8 +1,5 @@
-// ignore_for_file: file_names
-
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:flutter/material.dart';
-
 class AlertDialogBuilder {
   final BuildContext context;
   String? _title;
@@ -27,49 +24,36 @@ class AlertDialogBuilder {
   VoidCallback? _onAttach;
   VoidCallback? _onDismiss;
   bool _cancelable = true;
-
   AlertDialogBuilder(this.context);
-
   AlertDialogBuilder setCancelable(bool cancelable) =>
       _with(() => _cancelable = cancelable);
-
   AlertDialogBuilder setOnShowListener(VoidCallback onShow) =>
       _with(() => _onShow = onShow);
-
   AlertDialogBuilder setOnAttachListener(VoidCallback attach) =>
       _with(() => _onAttach = attach);
-
   AlertDialogBuilder setOnDismissListener(VoidCallback onDismiss) =>
       _with(() => _onDismiss = onDismiss);
-
   AlertDialogBuilder setTitle(String? title) => _with(() => _title = title);
-
   AlertDialogBuilder setTitleWidget(Widget? w) => _with(() => _titleWidget = w);
-
   AlertDialogBuilder setMessage(String? message) =>
       _with(() => _message = message);
-
   AlertDialogBuilder setCustomView(Widget customView) =>
       _with(() => _customView = customView);
-
   AlertDialogBuilder setPositiveButton(String? title, VoidCallback? onClick) =>
       _with(() {
         _positiveButtonTitle = title;
         _onPositiveButtonClick = onClick;
       });
-
   AlertDialogBuilder setNegativeButton(String? title, VoidCallback? onClick) =>
       _with(() {
         _negativeButtonTitle = title;
         _onNegativeButtonClick = onClick;
       });
-
   AlertDialogBuilder setNeutralButton(String? title, VoidCallback? onClick) =>
       _with(() {
         _neutralButtonTitle = title;
         _onNeutralButtonClick = onClick;
       });
-
   AlertDialogBuilder singleChoiceItems(List<String> items,
           int selectedItemIndex, ValueChanged<int> onItemSelected) =>
       _with(() {
@@ -77,7 +61,6 @@ class AlertDialogBuilder {
         _selectedItemIndex = selectedItemIndex;
         _onItemSelected = onItemSelected;
       });
-
   AlertDialogBuilder multiChoiceItems(List<String> items,
           List<bool>? checkedItems, ValueChanged<List<bool>> onItemsSelected) =>
       _with(() {
@@ -85,14 +68,12 @@ class AlertDialogBuilder {
         _checkedItems = checkedItems ?? List<bool>.filled(items.length, false);
         _onItemsSelected = onItemsSelected;
       });
-
   AlertDialogBuilder reorderableItems(
           List<String> items, ValueChanged<List<String>> onReorderedItems) =>
       _with(() {
         _reorderableItems = items;
         _onReorderedItems = onReorderedItems;
       });
-
   AlertDialogBuilder reorderableMultiSelectableItems(
           List<String> items,
           List<bool>? checkedItems,
@@ -105,7 +86,6 @@ class AlertDialogBuilder {
         _onItemsSelected = onReorderedItemsSelected;
         _isReorderableMultiSelectable = true;
       });
-
   void show() {
     var theme = Theme.of(context).colorScheme;
     showDialog(
@@ -126,7 +106,6 @@ class AlertDialogBuilder {
     ).then((_) => _onDismiss?.call());
     _onAttach?.call();
   }
-
   Widget _buildContent(StateSetter setState) {
     if (_reorderableItems != null) {
       return _isReorderableMultiSelectable
@@ -139,7 +118,6 @@ class AlertDialogBuilder {
     }
     return _buildDefaultContent();
   }
-
   Widget _buildReorderableContent(StateSetter setState) =>
       _buildReorderableWidget(setState, (oldIndex, newIndex) {
         if (newIndex > oldIndex) newIndex -= 1;
@@ -149,7 +127,6 @@ class AlertDialogBuilder {
         setState(() => _reorderableItems = items);
         _onReorderedItems?.call(items);
       });
-
   Widget _buildReorderableSelectableContent(StateSetter setState) =>
       _buildReorderableWithCheckBoxWidget(setState, (oldIndex, newIndex) {
         if (newIndex > oldIndex) newIndex -= 1;
@@ -166,7 +143,6 @@ class AlertDialogBuilder {
         _onReorderedItems?.call(items);
         _onItemsSelected?.call(checkedStates);
       });
-
   Widget _buildReorderableWithCheckBoxWidget(
           StateSetter setState, void Function(int, int) onReorder) =>
       SizedBox(
@@ -202,7 +178,6 @@ class AlertDialogBuilder {
           ],
         ),
       );
-
   Widget _buildReorderableWidget(
           StateSetter setState, void Function(int, int) onReorder) =>
       SizedBox(
@@ -228,7 +203,6 @@ class AlertDialogBuilder {
           ],
         ),
       );
-
   Widget _buildRadioListContent(StateSetter setState) => _buildListContent(
         (item) => RadioListTile<int>(
           title: AzyXText(
@@ -245,7 +219,6 @@ class AlertDialogBuilder {
           },
         ),
       );
-
   Widget _buildCheckboxListContent(StateSetter setState) => _buildListContent(
         (item) {
           final index = _items!.indexOf(item);
@@ -264,7 +237,6 @@ class AlertDialogBuilder {
           );
         },
       );
-
   Widget _buildListContent(Widget Function(String) itemBuilder) =>
       ConstrainedBox(
         constraints:
@@ -275,13 +247,11 @@ class AlertDialogBuilder {
               children: _items!.map(itemBuilder).toList()),
         ),
       );
-
   Widget _buildDefaultContent() => ConstrainedBox(
         constraints:
             BoxConstraints(minWidth: MediaQuery.of(context).size.width * 0.7),
         child: _customView ?? AzyXText(text: _message ?? ''),
       );
-
   List<Widget> _buildActions() {
     var theme = Theme.of(context).colorScheme;
     final actions = <Widget>[];
@@ -299,7 +269,6 @@ class AlertDialogBuilder {
     }
     return actions;
   }
-
   Widget _buildButton(String title, VoidCallback? onClick, ColorScheme theme) =>
       TextButton(
         onPressed: () {
@@ -312,7 +281,6 @@ class AlertDialogBuilder {
             fontVariant: FontVariant.bold,
             color: theme.primary),
       );
-
   AlertDialogBuilder _with(VoidCallback action) {
     action();
     return this;

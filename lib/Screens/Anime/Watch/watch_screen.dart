@@ -4,30 +4,24 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-
 class WatchScreen extends StatefulWidget {
   final AnimeAllData playerData;
   const WatchScreen({super.key, required this.playerData});
-
   @override
   State<WatchScreen> createState() => _WatchScreenState();
 }
-
 class _WatchScreenState extends State<WatchScreen> {
   final WatchController watchController = Get.put(WatchController());
-
   @override
   void initState() {
     super.initState();
     watchController.initializePlayer(widget.playerData);
   }
-
   @override
   void dispose() {
     Get.delete<WatchController>();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

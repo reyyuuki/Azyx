@@ -1,17 +1,14 @@
 import 'dart:io';
-
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Widgets/Animation/scale_animation.dart';
 import 'package:azyx/Widgets/anime/character_card.dart';
 import 'package:azyx/Widgets/common/gradient_title.dart';
 import 'package:flutter/material.dart';
-
 class CharactersList extends StatelessWidget {
   final List<Character> characterList;
   final String title;
   const CharactersList(
       {super.key, required this.characterList, required this.title});
-
   @override
   Widget build(BuildContext context) {
     return characterList.isEmpty

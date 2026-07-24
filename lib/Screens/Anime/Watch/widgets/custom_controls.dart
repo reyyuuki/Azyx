@@ -8,14 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 class CustomControls extends StatelessWidget {
   final Player player;
   final Widget topBar;
   final Widget bottomBar;
   final bool Function() isControlsLocked;
   final void Function(bool isNext) changeEpisode;
-
   const CustomControls({
     super.key,
     required this.player,
@@ -24,11 +22,9 @@ class CustomControls extends StatelessWidget {
     required this.changeEpisode,
     required this.isControlsLocked,
   });
-
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<WatchController>();
-
     return Padding(
       padding: EdgeInsets.symmetric(
         vertical: controller.isPotraitOrientaion.value ? 20 : 12,
@@ -141,7 +137,6 @@ class CustomControls extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildIconButton({
     required VoidCallback ontap,
     required IconData icon,
@@ -160,7 +155,6 @@ class CustomControls extends StatelessWidget {
       ),
     );
   }
-
   Widget _centerControls(WatchController controller, BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -197,7 +191,6 @@ class CustomControls extends StatelessWidget {
       ],
     );
   }
-
   Widget _lockedCenterControls(WatchController controller) {
     return AzyXContainer(
       alignment: Alignment.center,

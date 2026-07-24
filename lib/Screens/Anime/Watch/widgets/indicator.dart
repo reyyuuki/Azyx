@@ -1,14 +1,10 @@
-
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:flutter/material.dart';
-
 class MediaIndicatorBuilder extends StatelessWidget {
   final bool isVolumeIndicator;
   final double value;
-
   const MediaIndicatorBuilder(
       {super.key, required this.value, required this.isVolumeIndicator});
-
   @override
   Widget build(BuildContext context) {
         return Padding(

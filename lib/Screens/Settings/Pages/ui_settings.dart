@@ -1,5 +1,3 @@
-// ignore_for_file: non_constant_identifier_names
-
 import 'package:azyx/Controllers/settings_controller.dart';
 import 'package:azyx/Controllers/ui_setting_controller.dart';
 import 'package:azyx/Providers/theme_provider.dart';
@@ -13,12 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
-
 import '../../../Widgets/common/custom_app_bar.dart';
-
 class UiSettings extends StatelessWidget {
   const UiSettings({super.key});
-
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ThemeProvider>(context, listen: false);
@@ -87,7 +82,6 @@ class UiSettings extends StatelessWidget {
       ),
     );
   }
-
   AzyXContainer glow_setting(BuildContext context, ThemeProvider provider) {
     return AzyXContainer(
       margin: const EdgeInsets.all(12),
@@ -228,7 +222,6 @@ class UiSettings extends StatelessWidget {
       ),
     );
   }
-
   AzyXContainer settingTitle(
       BuildContext context, String title, IconData icon) {
     return AzyXContainer(
