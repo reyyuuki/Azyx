@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/get_navigation.dart';
@@ -9,12 +10,14 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 class UpdateNotifier extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    checkUpdate();
+    // checkUpdate();
   }
+
   String fileName = '';
   String downloadLink = '';
   static Future<void> downloadFile() async {
@@ -25,9 +28,13 @@ class UpdateNotifier extends GetxController {
       Utils.log('no permission');
     }
   }
-  static Future<void> checkUpdate() async {
+
+  static Future<void> checkUpdate({bool showFeedback = false}) async {
     const url = "https://api.github.com/repos/reyyuuki/AzyX/releases/latest";
     try {
+      if (showFeedback) {
+        azyxSnackBar("Checking for updates...");
+      }
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -35,22 +42,35 @@ class UpdateNotifier extends GetxController {
           "v",
           "",
         );
-        String changelog = data['body'];
-        String releaseTitle = data['name'];
+        String changelog = data['body'] ?? '';
+        String releaseTitle = data['name'] ?? '';
         PackageInfo packageInfo = await PackageInfo.fromPlatform();
         String currentVersion = packageInfo.version;
         Utils.log("$latestVersion == $currentVersion");
         if (latestVersion != currentVersion) {
-          _showUpdateBottomSheet(Get.context!, changelog, releaseTitle);
+          if (Get.context != null) {
+            _showUpdateBottomSheet(Get.context!, changelog, releaseTitle);
+          }
         } else {
           Utils.log("You are on latest update");
+          if (showFeedback) {
+            azyxSnackBar("You are on the latest version ($currentVersion)");
+          }
+        }
+      } else {
+        if (showFeedback) {
+          azyxSnackBar("Failed to check for updates");
         }
       }
     } catch (e) {
       Utils.log("error when checking update: $e");
+      if (showFeedback) {
+        azyxSnackBar("Error checking for updates");
+      }
     }
   }
-  static Future<void> autoCheckUpdate(context) async {
+
+  static Future<void> autoCheckUpdate(BuildContext? context) async {
     const url = "https://api.github.com/repos/reyyuuki/AzyX/releases/latest";
     try {
       final response = await http.get(Uri.parse(url));
@@ -66,13 +86,16 @@ class UpdateNotifier extends GetxController {
         String currentVersion = packageInfo.version;
         Utils.log("$latestVersion == $currentVersion");
         if (latestVersion != currentVersion) {
-          _showUpdateBottomSheet(context, changelog, releaseTitle);
+          if (Get.context != null) {
+            _showUpdateBottomSheet(Get.context!, changelog, releaseTitle);
+          }
         }
       }
     } catch (e) {
       Utils.log("error when checking update: $e");
     }
   }
+
   static Map<String, List<String>> _parseChangelog(String changelog) {
     Map<String, List<String>> parsedChanges = {};
     List<String> sections = changelog.split(
@@ -99,6 +122,7 @@ class UpdateNotifier extends GetxController {
     }
     return parsedChanges;
   }
+
   static void _showUpdateBottomSheet(
     BuildContext context,
     String changelog,

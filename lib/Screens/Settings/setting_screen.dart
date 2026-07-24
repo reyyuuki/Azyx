@@ -1,15 +1,12 @@
-import 'package:azyx/Controllers/services/community_service.dart';
 import 'package:azyx/Screens/Settings/Pages/theme_setting.dart';
 import 'package:azyx/Screens/Settings/Pages/ui_settings.dart';
-import 'package:azyx/Extensions/ExtensionManagerScreen.dart';
 import 'package:azyx/Extensions/plugin_manager.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_instance/get_instance.dart';
-import 'package:get/state_manager.dart';
+import 'package:azyx/utils/update_notifier.dart';
 import '../../Widgets/common/custom_app_bar.dart';
 
 class SettingScreen extends StatelessWidget {
@@ -109,6 +106,17 @@ class SettingScreen extends StatelessWidget {
                 "Clear Cache",
                 "Reset All Cached Settings",
                 const Icon(Broken.trash),
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                UpdateNotifier.checkUpdate(showFeedback: true);
+              },
+              child: settingTile(
+                context,
+                "Check for Update",
+                "Check if a new version of AzyX is available",
+                const Icon(Icons.system_update_outlined),
               ),
             ),
             // GestureDetector(
