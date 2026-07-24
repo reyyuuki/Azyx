@@ -1,28 +1,22 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:http/http.dart' as http;
-
 class AniListProvider with ChangeNotifier {
   dynamic _userData = {};
   dynamic _anilistData = {};
   dynamic _mangalistData = {};
   bool _isLoading = false;
   dynamic _favorites = {};
-
   dynamic get userData => _userData;
   dynamic get favorites => _favorites;
   dynamic get anilistData => _anilistData;
   dynamic get mangalistData => _mangalistData;
   bool get isLoading => _isLoading;
-
   Future<void> tryAutoLogin() async {
     _anilistData = await fetchAnilistAnimes();
     _mangalistData = await fetchAnilistManga();
@@ -33,24 +27,19 @@ class AniListProvider with ChangeNotifier {
       await fetchUserMangaList();
       await fetchAniListFavorites();
     }
-
     return log('Auth token not available!');
   }
-
   Future<void> login(BuildContext context) async {
     String clientId = dotenv.get('CLIENT_ID');
     String clientSecret = dotenv.get('CLIENT_SECRET');
     String redirectUri = dotenv.get('REDIRECT_URL');
-
     final url =
         'https://anilist.co/api/v2/oauth/authorize?client_id=$clientId&redirect_uri=$redirectUri&response_type=code';
-
     try {
       final result = await FlutterWebAuth2.authenticate(
         url: url,
         callbackUrlScheme: 'azyx',
       );
-
       final code = Uri.parse(result).queryParameters['code'];
       if (code != null) {
         await _exchangeCodeForToken(
@@ -65,7 +54,6 @@ class AniListProvider with ChangeNotifier {
       log('Error during login: $e');
     }
   }
-
   Future<void> _exchangeCodeForToken(
     String code,
     String clientId,
@@ -84,7 +72,6 @@ class AniListProvider with ChangeNotifier {
         'code': code,
       },
     );
-
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final token = data['access_token'];
@@ -95,18 +82,15 @@ class AniListProvider with ChangeNotifier {
       throw Exception('Failed to exchange code for token: ${response.body}');
     }
   }
-
   Future<void> fetchUserProfile() async {
     _isLoading = true;
     notifyListeners();
-
     final token = AuthKeys.anilistToken.get<String>('');
     if (token.isEmpty) {
       _isLoading = false;
       notifyListeners();
       return;
     }
-
     const query = '''
   query {
     Viewer {
@@ -129,7 +113,6 @@ class AniListProvider with ChangeNotifier {
     }
   }
   ''';
-
     final response = await http.post(
       Uri.parse('https://graphql.anilist.co'),
       headers: {
@@ -139,7 +122,6 @@ class AniListProvider with ChangeNotifier {
       },
       body: json.encode({'query': query}),
     );
-
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       _userData = data['data']['Viewer'];
@@ -150,18 +132,15 @@ class AniListProvider with ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
-
   Future<void> fetchUserAnimeList() async {
     _isLoading = true;
     notifyListeners();
-
     final token = AuthKeys.anilistToken.get<String>('');
     if (token.isEmpty) {
       _isLoading = false;
       notifyListeners();
       return;
     }
-
     const query = '''
     query GetUserAnimeList(\$userId: Int) {
       MediaListCollection(userId: \$userId, type: ANIME) {
@@ -191,18 +170,15 @@ class AniListProvider with ChangeNotifier {
       }
     }
     ''';
-
     try {
       if (_userData['id'] == null) {
         log('User ID is not available. Fetching user profile first.');
         await fetchUserProfile();
       }
-
       final userId = _userData['id'];
       if (userId == null) {
         throw Exception('Failed to get user ID');
       }
-
       final response = await http.post(
         Uri.parse('https://graphql.anilist.co'),
         headers: {
@@ -215,7 +191,6 @@ class AniListProvider with ChangeNotifier {
           'variables': {'userId': userId},
         }),
       );
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['data'] != null &&
@@ -235,22 +210,18 @@ class AniListProvider with ChangeNotifier {
     } catch (e) {
       log('Failed to load anime list: $e');
     }
-
     _isLoading = false;
     notifyListeners();
   }
-
   Future<void> fetchUserMangaList() async {
     _isLoading = true;
     notifyListeners();
-
     final token = AuthKeys.anilistToken.get<String>('');
     if (token.isEmpty) {
       _isLoading = false;
       notifyListeners();
       return;
     }
-
     const query = '''
     query GetUserMangaList(\$userId: Int) {
       MediaListCollection(userId: \$userId, type: MANGA) {
@@ -281,18 +252,15 @@ class AniListProvider with ChangeNotifier {
       }
     }
     ''';
-
     try {
       if (_userData['id'] == null) {
         log('User ID is not available. Fetching user profile first.');
         await fetchUserProfile();
       }
-
       final userId = _userData['id'];
       if (userId == null) {
         throw Exception('Failed to get user ID');
       }
-
       final response = await http.post(
         Uri.parse('https://graphql.anilist.co'),
         headers: {
@@ -305,7 +273,6 @@ class AniListProvider with ChangeNotifier {
           'variables': {'userId': userId},
         }),
       );
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['data'] != null &&
@@ -328,13 +295,11 @@ class AniListProvider with ChangeNotifier {
     _isLoading = false;
     notifyListeners();
   }
-
   Future<void> logout(BuildContext context) async {
     AuthKeys.anilistToken.set('');
     _userData = {};
     notifyListeners();
   }
-
   Future<Map<String, List<Map<String, dynamic>>>> fetchAnilistAnimes() async {
     String url = 'https://graphql.anilist.co/';
     Map<String, String> headers = {
@@ -392,7 +357,7 @@ class AniListProvider with ChangeNotifier {
       }
     }
     latestReleasing: Page {
-      media(type: ANIME, status: RELEASING, sort: START_DATE_DESC, isAdult: false) {
+      media(type: ANIME, status: NOT_YET_RELEASED, sort: [POPULARITY_DESC, TRENDING_DESC], isAdult: false) {
         id
         title {
           english
@@ -439,17 +404,13 @@ class AniListProvider with ChangeNotifier {
     }
   }
   ''';
-
     final response = await http.post(
       Uri.parse(url),
       headers: headers,
       body: jsonEncode({'query': query}),
     );
-
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-
-      // Extract sections into a map
       Map<String, List<Map<String, dynamic>>> sections = {
         'trending': (data['data']['trending']['media'] as List)
             .map(
@@ -539,21 +500,18 @@ class AniListProvider with ChangeNotifier {
             )
             .toList(),
       };
-
       notifyListeners();
       return sections;
     } else {
       throw Exception('Failed to load data');
     }
   }
-
   Future<Map<String, List<Map<String, dynamic>>>> fetchAnilistManga() async {
     String url = 'https://graphql.anilist.co/';
     Map<String, String> headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
-
     String query = r'''
   query {
     trending: Page {
@@ -608,7 +566,7 @@ class AniListProvider with ChangeNotifier {
       }
     }
     latest: Page {
-      media(type: MANGA, status: RELEASING, sort: START_DATE_DESC) {
+      media(type: MANGA, status: NOT_YET_RELEASED, sort: [POPULARITY_DESC, TRENDING_DESC]) {
         id
         title {
           english
@@ -659,16 +617,13 @@ class AniListProvider with ChangeNotifier {
     }
   }
   ''';
-
     final response = await http.post(
       Uri.parse(url),
       headers: headers,
       body: jsonEncode({'query': query}),
     );
-
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-
       Map<String, List<Map<String, dynamic>>> sections = {
         'trending': (data['data']['trending']['media'] as List)
             .map(
@@ -762,7 +717,6 @@ class AniListProvider with ChangeNotifier {
       throw Exception('Failed to load data');
     }
   }
-
   Future<void> addToAniList({
     required int mediaId,
     String? status,
@@ -775,7 +729,6 @@ class AniListProvider with ChangeNotifier {
       'Authorization': 'Bearer $accessToken',
       'Content-Type': 'application/json',
     };
-
     const String mutation = '''
     mutation SaveMediaListEntry(\$mediaId: Int!, \$status: MediaListStatus!, \$score: Float, \$progress: Int) {
       SaveMediaListEntry(mediaId: \$mediaId, status: \$status, score: \$score, progress: \$progress) {
@@ -793,20 +746,17 @@ class AniListProvider with ChangeNotifier {
       }
     }
   ''';
-
     final Map<String, dynamic> variables = {
       'mediaId': mediaId,
       'status': status ?? "CURRENT",
       'score': score ?? 5.0,
       'progress': progress,
     };
-
     final response = await http.post(
       Uri.parse(url),
       headers: headers,
       body: jsonEncode({'query': mutation, 'variables': variables}),
     );
-
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       log('Successfully added to list: ${data['data']['SaveMediaListEntry']}');
@@ -817,11 +767,9 @@ class AniListProvider with ChangeNotifier {
     await fetchUserAnimeList();
     await fetchUserMangaList();
   }
-
   Future<void> fetchAniListFavorites() async {
     const String url = 'https://graphql.anilist.co';
     String username = _userData['name'];
-
     const query = '''
   query (\$username: String) {
     User(name: \$username) {
@@ -856,7 +804,6 @@ class AniListProvider with ChangeNotifier {
     }
   }
   ''';
-
     final response = await http.post(
       Uri.parse(url),
       headers: {"Content-Type": "application/json"},
@@ -865,11 +812,8 @@ class AniListProvider with ChangeNotifier {
         "variables": {"username": username},
       }),
     );
-
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-
-      // Mapping the data and extracting only anime and manga favorites with titles
       _favorites = {
         'userId': data['data']['User']['id'],
         'anime': (data['data']['User']['favourites']['anime']['nodes'] as List)
@@ -896,29 +840,23 @@ class AniListProvider with ChangeNotifier {
     }
     notifyListeners();
   }
-
   Future<bool> addFavorite(int mediaId, String type) async {
     const String url = 'https://api.anilist.co/v2/user/6611206/favorites';
-
-    log('Adding to favorites: $url'); // Debug log
-    log('Media ID: $mediaId, Type: $type'); // Log details
-
+    log('Adding to favorites: $url'); 
+    log('Media ID: $mediaId, Type: $type'); 
     try {
       final response = await http.post(
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
-          // Add any additional headers (e.g., authentication token) if needed
         },
         body: jsonEncode({
           'mediaId': mediaId,
           'type': type == 'anime' ? 'anime' : 'manga',
         }),
       );
-
       log('Response status: ${response.statusCode}');
       log('Response body: ${response.body}');
-
       if (response.statusCode == 200) {
         return true;
       } else {
@@ -931,15 +869,4 @@ class AniListProvider with ChangeNotifier {
       throw Exception('Network request failed');
     }
   }
-
-  // void migratefavoritesdata(BuildContext context) {
-  //   final dataProvider = Provider.of<Data>(context, listen: false);
-  //   final bool isLoogedIn = _userData['name'] != null;
-  //   dataProvider.favoriteManga =
-  //       isLoogedIn ? _favorites['manga'] + dataProvider.favoriteManga : dataProvider.favoriteManga;
-  //   var box = Hive.box("app-data");
-  //   box.put("favoriteManga", dataProvider.favoriteManga);
-  //   log(dataProvider.favoriteManga.toString());
-  //   notifyListeners();
-  // }
 }
