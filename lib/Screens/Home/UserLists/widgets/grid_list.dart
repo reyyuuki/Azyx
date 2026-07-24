@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Models/user_media.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
@@ -8,18 +7,15 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
-
 class UserGridList extends StatelessWidget {
   final List<UserMedia> data;
   final bool isManga;
   const UserGridList({super.key, required this.data, required this.isManga});
-
   @override
   Widget build(BuildContext context) {
     int itemCount = (MediaQuery.of(context).size.width ~/ 120).toInt();
     int minCount = 3;
     int crossAxisCount = max(itemCount, minCount);
-
     double horizontalPadding = 16;
     double gridWidth =
         (MediaQuery.of(context).size.width -
@@ -27,7 +23,6 @@ class UserGridList extends StatelessWidget {
             ((crossAxisCount - 1) * 10)) /
         crossAxisCount;
     double gridHeight = (gridWidth * 1.5) + 65;
-
     return GridView.builder(
       padding: EdgeInsets.symmetric(
         horizontal: horizontalPadding,
