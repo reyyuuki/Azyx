@@ -1,6 +1,6 @@
 import 'package:anymex_extension_runtime_bridge/Models/Source.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
-import 'package:azyx/Extensions/extensionList.dart';
+import 'package:azyx/Extensions/ExtensionList.dart';
 import 'package:azyx/Extensions/ExtensionManagerScreen.dart';
 import 'package:azyx/Widgets/ScrollConfig.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
