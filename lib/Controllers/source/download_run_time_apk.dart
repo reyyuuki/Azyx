@@ -1,8 +1,5 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:developer';
 import 'dart:io';
-
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
     hide isar;
 import 'package:azyx/Controllers/source/source_controller.dart';
@@ -23,7 +20,6 @@ class DownloadRunTimeApk {
   static CancelToken? _cancelToken;
   static DateTime? _lastSpeedCheck;
   static int _lastBytes = 0;
-
   static String _formatBytes(int bytes) {
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
     return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
@@ -34,16 +30,38 @@ class DownloadRunTimeApk {
     return '${(bps / (1024 * 1024)).toStringAsFixed(1)} MB/s';
   }
 
-  static Future<String> downloadRuntimeApk() async {
+  static Future<String> downloadRuntimeApk({bool force = false}) async {
     try {
       isDownloading.value = true;
       downloadProgress.value = 0;
-      _cancelToken = CancelToken();
       _lastSpeedCheck = null;
       _lastBytes = 0;
-
+      if (!Platform.isAndroid) {
+        final bridge = AnymeXRuntimeBridge.controller;
+        final worker = ever(bridge.downloadProgress, (val) {
+          downloadProgress.value = val;
+          downloadedBytes.value = '${(val * 100).toStringAsFixed(0)}%';
+          totalBytes.value = '100%';
+          downloadSpeed.value = bridge.isDownloading.value
+              ? 'Downloading...'
+              : 'Done';
+        });
+        await AnymeXRuntimeBridge.setupRuntime(force: force);
+        worker.dispose();
+        downloadProgress.value = 1.0;
+        downloadedBytes.value = '100%';
+        totalBytes.value = '100%';
+        downloadSpeed.value = 'Done';
+        if (bridge.isReady.value) {
+          await sourceController.extensionManager.onRuntimeBridgeInitialization(
+            force: true,
+          );
+        }
+        isDownloading.value = false;
+        return bridge.isReady.value ? "desktop_runtime_ready" : "";
+      }
+      _cancelToken = CancelToken();
       const savePath = "/storage/emulated/0/Download/anymex_runtime_host.apk";
-
       await Dio().download(
         "https://github.com/RyanYuuki/AnymeXExtensionRuntimeBridge/releases/latest/download/anymex_runtime_host.apk",
         savePath,
@@ -63,15 +81,13 @@ class DownloadRunTimeApk {
           downloadProgress.value = total > 0 ? received / total : 0;
           downloadedBytes.value = _formatBytes(received);
           totalBytes.value = total > 0 ? _formatBytes(total) : '-- MB';
-          log('received: $received, total: $total');
         },
       );
-
       isDownloading.value = false;
       return savePath;
     } catch (e) {
       isDownloading.value = false;
-      log('error while downloading runtime apk: $e');
+      log('Error while setting up runtime: $e');
       return "";
     }
   }
@@ -81,23 +97,30 @@ class DownloadRunTimeApk {
     isDownloading.value = false;
   }
 
-  static Future<bool> showDownloadDialog(BuildContext context, {bool force = false}) async {
-    final file = File("/storage/emulated/0/Download/anymex_runtime_host.apk");
-    if (force && await file.exists()) {
-      try {
-        await file.delete();
-      } catch (e) {
-        log('Error deleting old apk: $e');
+  static Future<bool> showDownloadDialog(
+    BuildContext context, {
+    bool force = false,
+  }) async {
+    bool alreadyDownloaded = false;
+    if (Platform.isAndroid) {
+      final file = File("/storage/emulated/0/Download/anymex_runtime_host.apk");
+      if (force && await file.exists()) {
+        try {
+          await file.delete();
+        } catch (e) {
+          log('Error deleting old apk: $e');
+        }
       }
+      alreadyDownloaded = !force && await file.exists();
+    } else {
+      alreadyDownloaded =
+          !force && AnymeXRuntimeBridge.controller.isReady.value;
     }
-    final alreadyDownloaded = !force && await file.exists();
-
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (_) => _ApkDownloadDialog(alreadyDownloaded: alreadyDownloaded),
     );
-
     return result ?? false;
   }
 }
@@ -114,7 +137,6 @@ enum _DownloadStatus {
 class _ApkDownloadDialog extends StatefulWidget {
   final bool alreadyDownloaded;
   const _ApkDownloadDialog({required this.alreadyDownloaded});
-
   @override
   State<_ApkDownloadDialog> createState() => _ApkDownloadDialogState();
 }
@@ -124,7 +146,6 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
   _DownloadStatus _status = _DownloadStatus.confirm;
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
-
   @override
   void initState() {
     super.initState();
@@ -148,11 +169,15 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
 
   Future<void> _startDownload() async {
     setState(() => _status = _DownloadStatus.downloading);
-    final result = await DownloadRunTimeApk.downloadRuntimeApk();
+    final result = await DownloadRunTimeApk.downloadRuntimeApk(
+      force: widget.alreadyDownloaded,
+    );
     if (!mounted) return;
     if (result.isNotEmpty) {
-      await AnymeXRuntimeBridge.loadAnymeXRuntimeHost(result);
-      await sourceController.extensionManager.onRuntimeBridgeInitialization();
+      if (Platform.isAndroid && result != "desktop_runtime_ready") {
+        await AnymeXRuntimeBridge.loadAnymeXRuntimeHost(result);
+        await sourceController.extensionManager.onRuntimeBridgeInitialization();
+      }
       setState(() => _status = _DownloadStatus.done);
     } else {
       setState(() => _status = _DownloadStatus.error);
@@ -169,14 +194,13 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
 
   Future<void> _pickAndLoad() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
-      );
+      final result = await FilePicker.platform.pickFiles(type: FileType.any);
       if (result != null && result.files.single.path != null) {
         final path = result.files.single.path!;
         final success = await AnymeXRuntimeBridge.useLocalApk(path);
         if (success) {
-          await sourceController.extensionManager.onRuntimeBridgeInitialization();
+          await sourceController.extensionManager
+              .onRuntimeBridgeInitialization();
           if (!mounted) return;
           Navigator.pop(context, true);
           return;
@@ -190,7 +214,6 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
-
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 24),
@@ -237,7 +260,6 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
     final isDone = _status == _DownloadStatus.done;
     final isError = _status == _DownloadStatus.error;
     final isExists = _status == _DownloadStatus.alreadyExists;
-
     final iconColor = isDone
         ? const Color(0xFF4CAF50)
         : isError
@@ -245,7 +267,6 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
         : isExists
         ? const Color(0xFF4CAF50)
         : theme.primary;
-
     final icon = isExists
         ? Icons.folder_rounded
         : isDone
@@ -255,7 +276,6 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
         : _status == _DownloadStatus.confirm
         ? Icons.system_update_rounded
         : Icons.download_rounded;
-
     return Row(
       children: [
         AnimatedBuilder(
@@ -310,7 +330,9 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
               ),
               4.height,
               AzyXText(
-                text: 'anymex_runtime_host.apk',
+                text: Platform.isAndroid
+                    ? 'anymex_runtime_host.apk'
+                    : 'anymex_desktop_runtime.jar',
                 fontSize: 12,
                 color: theme.onSurface.withOpacity(0.4),
               ),
@@ -338,14 +360,16 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
                 theme: theme,
                 icon: Icons.folder_rounded,
                 label: 'Found at',
-                value: '/Download/',
+                value: Platform.isAndroid ? '/Download/' : 'App Data Directory',
               ),
               12.height,
               _InfoRow(
                 theme: theme,
                 icon: Icons.storage_rounded,
                 label: 'Package',
-                value: 'anymex_runtime_host.apk',
+                value: Platform.isAndroid
+                    ? 'anymex_runtime_host.apk'
+                    : 'anymex_desktop_runtime.jar',
               ),
             ],
           ),
@@ -378,7 +402,6 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
           ),
         ),
         24.height,
-
         Row(
           children: [
             Expanded(
@@ -433,7 +456,7 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
                 theme: theme,
                 icon: Icons.save_alt_rounded,
                 label: 'Save to',
-                value: '/Download/',
+                value: Platform.isAndroid ? '/Download/' : 'App Data Directory',
               ),
             ],
           ),
@@ -456,8 +479,9 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
               10.width,
               Expanded(
                 child: AzyXText(
-                  text:
-                      'The runtime host is required to run extensions on Android.',
+                  text: Platform.isAndroid
+                      ? 'The runtime host is required to run extensions on Android.'
+                      : 'The desktop runtime bridge is required to run extensions.',
                   fontSize: 11,
                   color: theme.onSurface.withOpacity(0.6),
                 ),
@@ -495,7 +519,6 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
     final isError = _status == _DownloadStatus.error;
     final isCancelled = _status == _DownloadStatus.cancelled;
     final isDownloading = _status == _DownloadStatus.downloading;
-
     final statusColor = isDone
         ? const Color(0xFF4CAF50)
         : isError
@@ -503,7 +526,6 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
         : isCancelled
         ? theme.onSurface.withOpacity(0.4)
         : theme.primary;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -518,8 +540,9 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
                       theme: theme,
                       icon: Broken.document_download,
                       label: 'Downloaded',
-                      value:
-                          '${DownloadRunTimeApk.downloadedBytes.value} / ${DownloadRunTimeApk.totalBytes.value}',
+                      value: isDone
+                          ? '100% / 100%'
+                          : '${DownloadRunTimeApk.downloadedBytes.value} / ${DownloadRunTimeApk.totalBytes.value}',
                     ),
                   ),
                   10.width,
@@ -610,7 +633,9 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
                 Expanded(
                   child: AzyXText(
                     text: isDone
-                        ? 'Runtime downloaded successfully to /Download/.'
+                        ? (Platform.isAndroid
+                              ? 'Runtime downloaded successfully to /Download/.'
+                              : 'Desktop runtime bridge installed successfully.')
                         : isError
                         ? 'Something went wrong. Please retry.'
                         : 'Download was cancelled.',
@@ -669,14 +694,12 @@ class _InfoRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-
   const _InfoRow({
     required this.theme,
     required this.icon,
     required this.label,
     required this.value,
   });
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -705,14 +728,12 @@ class _StatChip extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-
   const _StatChip({
     required this.theme,
     required this.icon,
     required this.label,
     required this.value,
   });
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -749,20 +770,17 @@ class _OutlineButton extends StatelessWidget {
   final ColorScheme theme;
   final bool isDestructive;
   final VoidCallback onTap;
-
   const _OutlineButton({
     required this.label,
     required this.theme,
     required this.onTap,
     this.isDestructive = false,
   });
-
   @override
   Widget build(BuildContext context) {
     final color = isDestructive
         ? theme.error
         : theme.onSurface.withOpacity(0.6);
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -793,14 +811,12 @@ class _FilledButton extends StatelessWidget {
   final IconData icon;
   final ColorScheme theme;
   final VoidCallback onTap;
-
   const _FilledButton({
     required this.label,
     required this.icon,
     required this.theme,
     required this.onTap,
   });
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
