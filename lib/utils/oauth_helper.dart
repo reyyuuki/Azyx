@@ -11,11 +11,8 @@ class OauthHelper {
     required String callbackUrlScheme,
     bool forceWebAuth = false,
   }) async {
-    final supportsWebView = !forceWebAuth &&
-        (Platform.isAndroid ||
-            Platform.isIOS ||
-            Platform.isWindows ||
-            Platform.isMacOS);
+    final supportsWebView =
+        !forceWebAuth && (Platform.isAndroid || Platform.isIOS);
 
     if (supportsWebView) {
       try {
@@ -76,6 +73,17 @@ class OauthWebViewPage extends StatefulWidget {
 class _OauthWebViewPageState extends State<OauthWebViewPage> {
   bool _finished = false;
 
+  void _checkUrl(WebUri? url) {
+    if (url == null || _finished) return;
+    final urlString = url.toString();
+    if (urlString.startsWith('${widget.callbackUrlScheme}://') ||
+        urlString.contains('code=') ||
+        urlString.contains('access_token=')) {
+      _finished = true;
+      Navigator.pop(context, urlString);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isWindows = Platform.isWindows;
@@ -100,16 +108,25 @@ class _OauthWebViewPageState extends State<OauthWebViewPage> {
           domStorageEnabled: true,
           databaseEnabled: true,
           useShouldOverrideUrlLoading: true,
+          transparentBackground: false,
+          supportZoom: false,
+          userAgent:
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         ),
-        onLoadStart: (controller, url) {
-          if (url != null) {
-            final urlString = url.toString();
-            if (urlString.startsWith('${widget.callbackUrlScheme}://') ||
-                urlString.contains('code=')) {
-              if (!_finished) {
-                _finished = true;
-                Navigator.pop(context, urlString);
-              }
+        onLoadStart: (controller, url) => _checkUrl(url),
+        onLoadStop: (controller, url) => _checkUrl(url),
+        onUpdateVisitedHistory: (controller, url, isReload) => _checkUrl(url),
+        onReceivedError: (controller, request, error) {
+          final url = request.url;
+          _checkUrl(url);
+          controller.getUrl().then((u) => _checkUrl(u));
+          final text = '${url.toString()} ${error.description}';
+          if (text.contains('code=') || text.contains('${widget.callbackUrlScheme}://')) {
+            final pattern = r'(' + widget.callbackUrlScheme + r'://[^\s"\x27<>]+|https?://[^\s"\x27<>]+[?&]code=[^\s"\x27<>]+)';
+            final match = RegExp(pattern).firstMatch(text);
+            if (match != null && !_finished) {
+              _finished = true;
+              Navigator.pop(context, match.group(0));
             }
           }
         },
@@ -118,7 +135,8 @@ class _OauthWebViewPageState extends State<OauthWebViewPage> {
           if (url != null) {
             final urlString = url.toString();
             if (urlString.startsWith('${widget.callbackUrlScheme}://') ||
-                urlString.contains('code=')) {
+                urlString.contains('code=') ||
+                urlString.contains('access_token=')) {
               if (!_finished) {
                 _finished = true;
                 Navigator.pop(context, urlString);
