@@ -59,8 +59,9 @@ class AnilistService extends GetxController
     final token = AuthKeys.anilistToken.get<String>('');
     if (token.isNotEmpty) {
       await fetchUserProfile();
+      return;
     }
-    return log('Auth token not available!');
+    log('Auth token not available!');
   }
 
   @override

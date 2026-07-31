@@ -4,6 +4,7 @@ import 'package:app_links/app_links.dart';
 import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
+import 'package:azyx/Controllers/backup_controller.dart';
 import 'package:azyx/Controllers/local_history_controller.dart';
 import 'package:azyx/Controllers/offline_controller.dart';
 import 'package:azyx/Controllers/services/mal_service.dart';
@@ -36,7 +37,9 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:isar_community/isar.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:provider/provider.dart';
+
 late Isar isar;
+
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   @override
   Set<PointerDeviceKind> get dragDevices => {
@@ -46,6 +49,7 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
     PointerDeviceKind.stylus,
   };
 }
+
 void main(List<String> args) async {
   runZonedGuarded(
     () async {
@@ -86,6 +90,7 @@ void main(List<String> args) async {
       Get.put(SettingsController());
       Get.put(SourceController());
       Get.put(LocalHistoryController());
+      Get.put(BackupController());
       runApp(
         MultiProvider(
           providers: [ChangeNotifierProvider(create: (_) => ThemeProvider())],
@@ -98,6 +103,7 @@ void main(List<String> args) async {
     },
   );
 }
+
 bool _isDeepLinkInitialized = false;
 void deepLink() async {
   if (_isDeepLinkInitialized) return;
@@ -114,7 +120,9 @@ void deepLink() async {
     onError: (err) => azyxSnackBar('Error Opening link: $err'),
   );
 }
+
 Rx<int> index = 2.obs;
+
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
   bool get isDesktop =>
@@ -130,11 +138,13 @@ class MainApp extends StatelessWidget {
     );
   }
 }
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
   @override
   State<HomePage> createState() => _HomePageState();
 }
+
 class _HomePageState extends State<HomePage> {
   @override
   void initState() {
@@ -143,6 +153,7 @@ class _HomePageState extends State<HomePage> {
       deepLink();
     });
   }
+
   final List<Widget> _screens = [
     const HomeScreen(),
     const LibraryScreen(),

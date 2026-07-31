@@ -10,7 +10,6 @@ import 'package:azyx/Database/isar_models/category.dart';
 import 'package:azyx/Database/isar_models/local_history_item.dart';
 import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:azyx/Models/anime_all_data.dart';
-import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
 import 'package:azyx/Screens/Anime/Watch/watch_screen.dart';
 import 'package:azyx/Screens/History/history_screen.dart' as azyx_history;
@@ -22,12 +21,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
+
 enum LibraryContentType { anime, manga }
+
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
   @override
   State<LibraryScreen> createState() => _LibraryScreenState();
 }
+
 class _LibraryScreenState extends State<LibraryScreen>
     with TickerProviderStateMixin {
   LibraryContentType _contentType = LibraryContentType.anime;
@@ -47,12 +49,14 @@ class _LibraryScreenState extends State<LibraryScreen>
     _heroFade = CurvedAnimation(parent: _heroController, curve: Curves.easeOut);
     _heroController.forward();
   }
+
   @override
   void dispose() {
     _heroController.dispose();
     _searchController.dispose();
     super.dispose();
   }
+
   void _switchContentType(LibraryContentType type) {
     if (_contentType == type) return;
     _heroController.reset();
@@ -62,6 +66,7 @@ class _LibraryScreenState extends State<LibraryScreen>
     });
     _heroController.forward();
   }
+
   List<OfflineItem> _filterItems(List<OfflineItem> all) {
     List<OfflineItem> result = all;
     if (_selectedCategory != null) {
@@ -88,6 +93,7 @@ class _LibraryScreenState extends State<LibraryScreen>
     }
     return result;
   }
+
   void _handleContinueTap(LocalHistoryItem item) {
     final isAnime = _contentType == LibraryContentType.anime;
     if (item.mediaId != null) {
@@ -137,6 +143,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -231,6 +238,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
+
   Widget _buildTopBar(ColorScheme cs) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -351,6 +359,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
+
   Widget _iconBtn(
     ColorScheme cs, {
     required IconData icon,
@@ -370,6 +379,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
+
   Widget _buildTypeChips(ColorScheme cs) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
@@ -394,6 +404,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
+
   Widget _typeChip(
     ColorScheme cs, {
     required String label,
@@ -438,6 +449,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
+
   Widget _buildHistorySection(
     ColorScheme cs,
     List<LocalHistoryItem> histList,
@@ -464,58 +476,18 @@ class _LibraryScreenState extends State<LibraryScreen>
             double prog = 0.0;
             if (histItem.totalDurationSeconds != null &&
                 histItem.totalDurationSeconds! > 0) {
-              prog = ((histItem.currentTimeSeconds ?? 0) /
-                      histItem.totalDurationSeconds!)
-                  .clamp(0.0, 1.0);
+              prog =
+                  ((histItem.currentTimeSeconds ?? 0) /
+                          histItem.totalDurationSeconds!)
+                      .clamp(0.0, 1.0);
             } else if (offlineMatch != null) {
               final int cur = int.tryParse(offlineMatch.number) ?? 0;
               final int total = offlineMatch.mediaData?.episodes ?? 0;
               prog = total > 0 ? (cur / total).clamp(0.0, 1.0) : 0.0;
             }
-            final tagg = '$mediaId&hero_$index';
             final isLast = index == histList.length - 1;
             return GestureDetector(
-              onTap: () {
-                if (offlineMatch != null) {
-                  _contentType == LibraryContentType.anime
-                      ? Get.to(
-                          () => AnimeDetailsScreen(
-                            tagg: tagg,
-                            allData: offlineMatch,
-                            isOffline: true,
-                          ),
-                        )
-                      : Get.to(
-                          () => MangaDetailsScreen(
-                            tagg: tagg,
-                            allData: offlineMatch,
-                            isOffline: true,
-                          ),
-                        );
-                } else {
-                  _contentType == LibraryContentType.anime
-                      ? Get.to(
-                          () => AnimeDetailsScreen(
-                            tagg: tagg,
-                            smallMedia: CarousaleData(
-                              id: mediaId.toString(),
-                              image: imageUrl ?? '',
-                              title: title,
-                            ),
-                          ),
-                        )
-                      : Get.to(
-                          () => MangaDetailsScreen(
-                            tagg: tagg,
-                            smallMedia: CarousaleData(
-                              id: mediaId.toString(),
-                              image: imageUrl ?? '',
-                              title: title,
-                            ),
-                          ),
-                        );
-                }
-              },
+              onTap: () => _handleContinueTap(histItem),
               child: Container(
                 width: Get.width * 0.85,
                 margin: EdgeInsets.only(
@@ -681,29 +653,26 @@ class _LibraryScreenState extends State<LibraryScreen>
                     Positioned(
                       right: 16,
                       bottom: 16,
-                      child: GestureDetector(
-                        onTap: () => _handleContinueTap(histItem),
-                        child: Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: cs.primary,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: cs.primary.withOpacity(0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            _contentType == LibraryContentType.anime
-                                ? Icons.play_arrow_rounded
-                                : Icons.menu_book_rounded,
-                            color: cs.onPrimary,
-                            size: 22,
-                          ),
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: cs.primary,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: cs.primary.withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          _contentType == LibraryContentType.anime
+                              ? Icons.play_arrow_rounded
+                              : Icons.menu_book_rounded,
+                          color: cs.onPrimary,
+                          size: 22,
                         ),
                       ),
                     ),
@@ -716,6 +685,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
+
   Widget _buildStatsRow(
     ColorScheme cs,
     List<OfflineItem> items,
@@ -754,6 +724,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
+
   Widget _statChip(
     ColorScheme cs, {
     required String value,
@@ -798,6 +769,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
+
   Widget _buildCategorySection(
     ColorScheme cs,
     List<Category> categories,
@@ -862,6 +834,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       ],
     );
   }
+
   Widget _categoryPill(ColorScheme cs, Category? cat, String label, int count) {
     final selected =
         _selectedCategory?.id == cat?.id &&
@@ -896,6 +869,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
+
   Widget _buildMediaCard(ColorScheme cs, OfflineItem item) {
     final media = item.mediaData;
     final tagg = '${media?.id}&library';
@@ -969,9 +943,7 @@ class _LibraryScreenState extends State<LibraryScreen>
                       placeholder: (_, __) => Shimmer.fromColors(
                         baseColor: cs.surfaceContainerHighest,
                         highlightColor: cs.surfaceContainerLow,
-                        child: Container(
-                          color: Colors.white,
-                        ),
+                        child: Container(color: Colors.white),
                       ),
                       errorWidget: (_, __, ___) => Container(
                         color: cs.surfaceContainerHighest,
@@ -1118,7 +1090,9 @@ class _LibraryScreenState extends State<LibraryScreen>
                                           gradient: LinearGradient(
                                             colors: [cs.primary, cs.secondary],
                                           ),
-                                          borderRadius: BorderRadius.circular(4),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -1141,6 +1115,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
+
   String? _formatRating(String? r) {
     if (r == null || r.isEmpty || r == 'null' || r == '??') return null;
     try {
@@ -1155,6 +1130,7 @@ class _LibraryScreenState extends State<LibraryScreen>
     } catch (_) {}
     return r;
   }
+
   Widget _statusBadge(ColorScheme cs, bool isReleasing, String? status) {
     if (status == 'FINISHED' || status == 'Completed') {
       return const SizedBox.shrink();
@@ -1188,6 +1164,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       ),
     );
   }
+
   Widget _buildEmptyState(ColorScheme cs) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 60),

@@ -12,6 +12,9 @@ class UiSettingController extends GetxController {
     super.onInit();
     _loadInitialSettings();
   }
+  void reloadSettings() {
+    _loadInitialSettings();
+  }
   void _loadInitialSettings() {
     _glowMultiplier.value = UiKeys.glowMultiplier.get<double>(0.6);
     _blurMultiplier.value = UiKeys.blurMultiplier.get<double>(1.0);

@@ -20,6 +20,10 @@ class ThemeProvider with ChangeNotifier {
   bool? get isDarkMode => _isDarkMode;
   bool? get isLightMode => _isLightMode;
   ThemeProvider() {
+    reloadSettings();
+  }
+
+  void reloadSettings() {
     _isMaterial = ThemeKeys.isMaterial.get<bool>(true);
     _isLightMode = ThemeKeys.isLightMode.get<bool>(false);
     _isDarkMode = ThemeKeys.isDarkMode.get<bool>(true);

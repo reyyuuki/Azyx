@@ -9,6 +9,7 @@ import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 class Header extends StatelessWidget {
   const Header({super.key});
   @override
@@ -65,6 +66,7 @@ class Header extends StatelessWidget {
       ),
     );
   }
+
   void showBottomSheet(context) {
     showModalBottomSheet(
       context: context,
@@ -204,6 +206,7 @@ class Header extends StatelessWidget {
       },
     );
   }
+
   Widget _buildTile(String name, IconData icon) {
     return AzyXContainer(
       padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),

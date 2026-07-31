@@ -124,4 +124,7 @@ class LocalHistoryController extends GetxController {
     });
     mangaReadingHistory.clear();
   }
+  void refreshHistory() {
+    _loadHistory();
+  }
 }
