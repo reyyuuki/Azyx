@@ -4,12 +4,14 @@ import 'package:azyx/Database/isar_models/category.dart';
 import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+
 class ManageLibraryScreen extends StatefulWidget {
   final bool isManga;
   const ManageLibraryScreen({super.key, required this.isManga});
   @override
   State<ManageLibraryScreen> createState() => _ManageLibraryScreenState();
 }
+
 class _ManageLibraryScreenState extends State<ManageLibraryScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
@@ -31,11 +33,13 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
         ? offlineController.getOfflineMangaStream()
         : offlineController.getOfflineAnimeStream();
   }
+
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
+
   void _showAddCategoryDialog(BuildContext context, ColorScheme cs) {
     final textCtrl = TextEditingController();
     showDialog(
@@ -115,6 +119,7 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
       ),
     );
   }
+
   void _showRenameCategoryDialog(
     BuildContext context,
     ColorScheme cs,
@@ -194,6 +199,7 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
       ),
     );
   }
+
   void _showDeleteCategoryDialog(
     BuildContext context,
     ColorScheme cs,
@@ -254,6 +260,7 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
       ),
     );
   }
+
   void _showRemoveItemDialog(
     BuildContext context,
     ColorScheme cs,
@@ -318,6 +325,7 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -346,10 +354,18 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
           indicatorSize: TabBarIndicatorSize.tab,
           labelColor: cs.primary,
           unselectedLabelColor: cs.onSurfaceVariant,
-          labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
-          unselectedLabelStyle:
-              const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-          tabs: const [Tab(text: 'Categories'), Tab(text: 'Items')],
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 15,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 15,
+          ),
+          tabs: const [
+            Tab(text: 'Categories'),
+            Tab(text: 'Items'),
+          ],
         ),
       ),
       body: TabBarView(
@@ -379,6 +395,7 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
       ),
     );
   }
+
   Widget _buildCategoriesTab(ColorScheme cs) {
     return StreamBuilder<List<Category>>(
       stream: _categoriesStream1,
@@ -401,20 +418,26 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.category_outlined, size: 64, color: cs.onSurfaceVariant.withOpacity(0.5)),
+                Icon(
+                  Icons.category_outlined,
+                  size: 64,
+                  color: cs.onSurfaceVariant.withOpacity(0.5),
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'No Categories',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: cs.onSurfaceVariant),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: cs.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
           );
         }
         return Theme(
-          data: Theme.of(context).copyWith(
-            canvasColor: Colors.transparent,
-          ),
+          data: Theme.of(context).copyWith(canvasColor: Colors.transparent),
           child: ReorderableListView.builder(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
             itemCount: list.length,
@@ -473,12 +496,22 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.edit_rounded, color: cs.primary, size: 20),
-                        onPressed: () => _showRenameCategoryDialog(context, cs, cat),
+                        icon: Icon(
+                          Icons.edit_rounded,
+                          color: cs.primary,
+                          size: 20,
+                        ),
+                        onPressed: () =>
+                            _showRenameCategoryDialog(context, cs, cat),
                       ),
                       IconButton(
-                        icon: Icon(Icons.delete_rounded, color: cs.error, size: 20),
-                        onPressed: () => _showDeleteCategoryDialog(context, cs, cat),
+                        icon: Icon(
+                          Icons.delete_rounded,
+                          color: cs.error,
+                          size: 20,
+                        ),
+                        onPressed: () =>
+                            _showDeleteCategoryDialog(context, cs, cat),
                       ),
                     ],
                   ),
@@ -490,6 +523,7 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
       },
     );
   }
+
   Widget _buildItemsTab(ColorScheme cs) {
     return StreamBuilder<List<Category>>(
       stream: _categoriesStream2,
@@ -511,7 +545,11 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
           return Center(
             child: Text(
               'No categories found',
-              style: TextStyle(color: cs.onSurfaceVariant, fontSize: 16, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: cs.onSurfaceVariant,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           );
         }
@@ -530,7 +568,7 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
             final allItems = itemSnapshot.data ?? [];
             final ids = currentCat.anilistIds ?? [];
             final itemsMap = {
-              for (var i in allItems) i.mediaData?.id?.toString(): i
+              for (var i in allItems) i.mediaData?.id?.toString(): i,
             };
             final list = ids
                 .map((id) => itemsMap[id])
@@ -549,16 +587,21 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
                       final cat = categories[index];
                       final isSelected = cat.id == currentCat.id;
                       return GestureDetector(
-                        onTap: () => setState(() => _selectedCategoryForItems = cat),
+                        onTap: () =>
+                            setState(() => _selectedCategoryForItems = cat),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 180),
                           margin: const EdgeInsets.only(right: 8),
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           decoration: BoxDecoration(
-                            color: isSelected ? cs.primary : cs.surfaceContainerHigh.withOpacity(0.4),
+                            color: isSelected
+                                ? cs.primary
+                                : cs.surfaceContainerHigh.withOpacity(0.4),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: isSelected ? cs.primary : cs.outlineVariant.withOpacity(0.2),
+                              color: isSelected
+                                  ? cs.primary
+                                  : cs.outlineVariant.withOpacity(0.2),
                               width: 1,
                             ),
                           ),
@@ -568,7 +611,9 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
-                                color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
+                                color: isSelected
+                                    ? cs.onPrimary
+                                    : cs.onSurfaceVariant,
                               ),
                             ),
                           ),
@@ -583,19 +628,27 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.folder_open_rounded, size: 64, color: cs.onSurfaceVariant.withOpacity(0.5)),
+                              Icon(
+                                Icons.folder_open_rounded,
+                                size: 64,
+                                color: cs.onSurfaceVariant.withOpacity(0.5),
+                              ),
                               const SizedBox(height: 16),
                               Text(
                                 'No Items inside this Category',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: cs.onSurfaceVariant),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: cs.onSurfaceVariant,
+                                ),
                               ),
                             ],
                           ),
                         )
                       : Theme(
-                          data: Theme.of(context).copyWith(
-                            canvasColor: Colors.transparent,
-                          ),
+                          data: Theme.of(
+                            context,
+                          ).copyWith(canvasColor: Colors.transparent),
                           child: ReorderableListView.builder(
                             padding: const EdgeInsets.fromLTRB(16, 10, 16, 80),
                             itemCount: list.length,
@@ -613,7 +666,9 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
                                 key: ValueKey(media?.id ?? index.toString()),
                                 margin: const EdgeInsets.only(bottom: 10),
                                 decoration: BoxDecoration(
-                                  color: cs.surfaceContainerHigh.withOpacity(0.4),
+                                  color: cs.surfaceContainerHigh.withOpacity(
+                                    0.4,
+                                  ),
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
                                     color: cs.outlineVariant.withOpacity(0.15),
@@ -632,7 +687,8 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
                                         index: index,
                                         child: Icon(
                                           Icons.drag_indicator_rounded,
-                                          color: cs.onSurfaceVariant.withOpacity(0.7),
+                                          color: cs.onSurfaceVariant
+                                              .withOpacity(0.7),
                                         ),
                                       ),
                                       const SizedBox(width: 12),
@@ -644,11 +700,18 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
                                           child: CachedNetworkImage(
                                             imageUrl: media?.image ?? '',
                                             fit: BoxFit.cover,
-                                            placeholder: (_, __) => Container(color: cs.surfaceContainerHighest),
-                                            errorWidget: (_, __, ___) => Container(
+                                            placeholder: (_, __) => Container(
                                               color: cs.surfaceContainerHighest,
-                                              child: const Icon(Icons.broken_image, size: 20),
                                             ),
+                                            errorWidget: (_, __, ___) =>
+                                                Container(
+                                                  color: cs
+                                                      .surfaceContainerHighest,
+                                                  child: const Icon(
+                                                    Icons.broken_image,
+                                                    size: 20,
+                                                  ),
+                                                ),
                                           ),
                                         ),
                                       ),
@@ -665,7 +728,8 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   subtitle: Text(
-                                    (media?.genres != null && media!.genres!.isNotEmpty)
+                                    (media?.genres != null &&
+                                            media!.genres!.isNotEmpty)
                                         ? media.genres!.first
                                         : 'Unknown',
                                     style: TextStyle(
@@ -675,7 +739,11 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
                                     ),
                                   ),
                                   trailing: IconButton(
-                                    icon: Icon(Icons.remove_circle_outline_rounded, color: cs.error, size: 22),
+                                    icon: Icon(
+                                      Icons.remove_circle_outline_rounded,
+                                      color: cs.error,
+                                      size: 22,
+                                    ),
                                     onPressed: () => _showRemoveItemDialog(
                                       context,
                                       cs,
@@ -697,12 +765,14 @@ class _ManageLibraryScreenState extends State<ManageLibraryScreen>
     );
   }
 }
+
 class _KeepAliveTab extends StatefulWidget {
   final Widget child;
   const _KeepAliveTab({super.key, required this.child});
   @override
   State<_KeepAliveTab> createState() => _KeepAliveTabState();
 }
+
 class _KeepAliveTabState extends State<_KeepAliveTab>
     with AutomaticKeepAliveClientMixin {
   @override

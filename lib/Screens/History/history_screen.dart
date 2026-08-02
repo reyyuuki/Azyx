@@ -15,11 +15,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
+
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
 }
+
 class _HistoryScreenState extends State<HistoryScreen>
     with SingleTickerProviderStateMixin {
   late final LocalHistoryController _controller;
@@ -78,6 +80,7 @@ class _HistoryScreenState extends State<HistoryScreen>
       log('no media id: ${item.mediaId}');
     }
   }
+
   @override
   void initState() {
     super.initState();
@@ -89,18 +92,21 @@ class _HistoryScreenState extends State<HistoryScreen>
       }
     });
   }
+
   @override
   void dispose() {
     _tabController.dispose();
     _searchController.dispose();
     super.dispose();
   }
+
   String _formatDuration(int seconds) {
     if (seconds <= 0) return '0:00';
     final minutes = seconds ~/ 60;
     final remainingSeconds = seconds % 60;
     return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }
+
   String _formatLastWatched(DateTime? dateTime) {
     if (dateTime == null) return '';
     final difference = DateTime.now().difference(dateTime);
@@ -109,7 +115,10 @@ class _HistoryScreenState extends State<HistoryScreen>
     if (difference.inMinutes > 0) return '${difference.inMinutes}m ago';
     return 'Just now';
   }
-  List<LocalHistoryItem> _getFilteredItems(List<LocalHistoryItem> originalItems) {
+
+  List<LocalHistoryItem> _getFilteredItems(
+    List<LocalHistoryItem> originalItems,
+  ) {
     var items = originalItems.toList();
     if (_selectedFilter.value != 'All') {
       final now = DateTime.now();
@@ -135,10 +144,13 @@ class _HistoryScreenState extends State<HistoryScreen>
     }
     if (_searchQuery.value.isNotEmpty) {
       final query = _searchQuery.value.toLowerCase();
-      items = items.where((e) => e.title?.toLowerCase().contains(query) ?? false).toList();
+      items = items
+          .where((e) => e.title?.toLowerCase().contains(query) ?? false)
+          .toList();
     }
     return items;
   }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -160,13 +172,17 @@ class _HistoryScreenState extends State<HistoryScreen>
                     Obx(() {
                       final originalItems = _controller.animeWatchingHistory;
                       final items = _getFilteredItems(originalItems);
-                      if (items.isEmpty) return _buildEmptyState(context, "Anime");
+                      if (items.isEmpty) {
+                        return _buildEmptyState(context, "Anime");
+                      }
                       return _buildHistoryList(context, items, true);
                     }),
                     Obx(() {
                       final originalItems = _controller.mangaReadingHistory;
                       final items = _getFilteredItems(originalItems);
-                      if (items.isEmpty) return _buildEmptyState(context, "Manga");
+                      if (items.isEmpty) {
+                        return _buildEmptyState(context, "Manga");
+                      }
                       return _buildHistoryList(context, items, false);
                     }),
                   ],
@@ -178,6 +194,7 @@ class _HistoryScreenState extends State<HistoryScreen>
       ),
     );
   }
+
   Widget _buildTopBar(ColorScheme cs) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
@@ -192,7 +209,9 @@ class _HistoryScreenState extends State<HistoryScreen>
                   decoration: BoxDecoration(
                     color: cs.surfaceContainerHigh.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: cs.outlineVariant.withOpacity(0.2)),
+                    border: Border.all(
+                      color: cs.outlineVariant.withOpacity(0.2),
+                    ),
                   ),
                   child: TextField(
                     controller: _searchController,
@@ -234,7 +253,11 @@ class _HistoryScreenState extends State<HistoryScreen>
                   key: const ValueKey('titleBar'),
                   children: [
                     IconButton(
-                      icon: Icon(Broken.arrow_left_2, color: cs.onSurface, size: 28),
+                      icon: Icon(
+                        Broken.arrow_left_2,
+                        color: cs.onSurface,
+                        size: 28,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                     const SizedBox(width: 4),
@@ -253,7 +276,9 @@ class _HistoryScreenState extends State<HistoryScreen>
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            _tabController.index == 0 ? 'Anime Watched' : 'Manga Read',
+                            _tabController.index == 0
+                                ? 'Anime Watched'
+                                : 'Manga Read',
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w900,
@@ -265,7 +290,11 @@ class _HistoryScreenState extends State<HistoryScreen>
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.search_rounded, color: cs.onSurface, size: 24),
+                      icon: Icon(
+                        Icons.search_rounded,
+                        color: cs.onSurface,
+                        size: 24,
+                      ),
                       onPressed: () => _isSearching.value = true,
                     ),
                     IconButton(
@@ -278,6 +307,7 @@ class _HistoryScreenState extends State<HistoryScreen>
       }),
     );
   }
+
   Widget _buildTabBar(ColorScheme cs) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -310,6 +340,7 @@ class _HistoryScreenState extends State<HistoryScreen>
       ),
     );
   }
+
   Widget _buildFilterChips(ColorScheme cs) {
     final filterOptions = ['All', 'Today', 'This Week', 'This Month'];
     return Container(
@@ -330,7 +361,10 @@ class _HistoryScreenState extends State<HistoryScreen>
                 borderRadius: BorderRadius.circular(20),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? cs.primary
@@ -347,7 +381,9 @@ class _HistoryScreenState extends State<HistoryScreen>
                     child: AzyXText(
                       text: option,
                       fontSize: 12,
-                      fontVariant: isSelected ? FontVariant.bold : FontVariant.regular,
+                      fontVariant: isSelected
+                          ? FontVariant.bold
+                          : FontVariant.regular,
                       color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
                     ),
                   ),
@@ -359,6 +395,7 @@ class _HistoryScreenState extends State<HistoryScreen>
       ),
     );
   }
+
   Widget _buildEmptyState(BuildContext context, String type) {
     final cs = Theme.of(context).colorScheme;
     return Center(
@@ -378,7 +415,10 @@ class _HistoryScreenState extends State<HistoryScreen>
                   ],
                 ),
                 borderRadius: BorderRadius.circular(50),
-                border: Border.all(color: cs.primary.withOpacity(0.1), width: 1.5),
+                border: Border.all(
+                  color: cs.primary.withOpacity(0.1),
+                  width: 1.5,
+                ),
               ),
               child: Icon(
                 type == "Anime" ? Broken.video_play : Broken.book,
@@ -394,18 +434,21 @@ class _HistoryScreenState extends State<HistoryScreen>
               color: cs.onSurface,
             ),
             const SizedBox(height: 8),
-            Obx(() => AzyXText(
-                  text: _searchQuery.value.isNotEmpty
-                      ? "Try searching for something else"
-                      : "Start exploring to build your history!",
-                  fontSize: 13,
-                  color: cs.onSurfaceVariant.withOpacity(0.7),
-                )),
+            Obx(
+              () => AzyXText(
+                text: _searchQuery.value.isNotEmpty
+                    ? "Try searching for something else"
+                    : "Start exploring to build your history!",
+                fontSize: 13,
+                color: cs.onSurfaceVariant.withOpacity(0.7),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
+
   Widget _buildHistoryList(
     BuildContext context,
     List<LocalHistoryItem> items,
@@ -419,16 +462,20 @@ class _HistoryScreenState extends State<HistoryScreen>
       },
     );
   }
+
   Widget _buildHistoryCard(
     BuildContext context,
     LocalHistoryItem item,
     bool isAnime,
   ) {
     final cs = Theme.of(context).colorScheme;
-    int currentSecs = item.currentTimeSeconds ?? 0;
-    int totalSecs = item.totalDurationSeconds ?? 1;
-    if (totalSecs == 0) totalSecs = 1;
-    final watchProgress = (currentSecs / totalSecs).clamp(0.0, 1.0);
+    int currentSecs =
+        item.currentTimeSeconds ??
+        (item.currentPage != null ? item.currentPage! + 1 : 0);
+    int totalSecs = item.totalDurationSeconds ?? 0;
+    final watchProgress = totalSecs > 0
+        ? (currentSecs / totalSecs).clamp(0.0, 1.0)
+        : 0.0;
     return GestureDetector(
       onTap: () => handleTap(item, isAnime),
       child: Container(
@@ -500,27 +547,20 @@ class _HistoryScreenState extends State<HistoryScreen>
                             width: 85,
                             height: 120,
                             color: cs.surfaceContainerHighest,
-                            child: Icon(
-                              Broken.image,
-                              color: cs.outline,
-                            ),
+                            child: Icon(Broken.image, color: cs.outline),
                           ),
                         ),
                       ),
                       Positioned(
                         bottom: 8,
                         right: 8,
-                        child: isAnime
-                            ? _PlayStoreProgressIndicator(
-                                progress: watchProgress,
-                                icon: Icons.play_arrow_rounded,
-                                size: 30,
-                              )
-                            : const _PlayStoreProgressIndicator(
-                                progress: 1.0,
-                                icon: Icons.menu_book_rounded,
-                                size: 30,
-                              ),
+                        child: _PlayStoreProgressIndicator(
+                          progress: watchProgress,
+                          icon: isAnime
+                              ? Icons.play_arrow_rounded
+                              : Icons.menu_book_rounded,
+                          size: 30,
+                        ),
                       ),
                     ],
                   ),
@@ -557,7 +597,8 @@ class _HistoryScreenState extends State<HistoryScreen>
                         if (item.totalDurationSeconds != null) ...[
                           const SizedBox(height: 2),
                           AzyXText(
-                            text: "${_formatDuration(currentSecs)} / ${_formatDuration(totalSecs)}",
+                            text:
+                                "${_formatDuration(currentSecs)} / ${_formatDuration(totalSecs)}",
                             fontSize: 11,
                             color: cs.onSurfaceVariant.withOpacity(0.8),
                           ),
@@ -570,17 +611,34 @@ class _HistoryScreenState extends State<HistoryScreen>
                             color: cs.primary,
                             fontVariant: FontVariant.bold,
                           )
-                        else if (item.currentPage != null)
+                        else if (item.currentPage != null ||
+                            item.currentTimeSeconds != null)
                           AzyXText(
                             text: "Reading",
                             fontSize: 12,
                             color: cs.primary,
                             fontVariant: FontVariant.bold,
                           ),
-                        if (item.currentPage != null) ...[
+                        if (item.currentTimeSeconds != null ||
+                            item.currentPage != null) ...[
                           const SizedBox(height: 2),
                           AzyXText(
-                            text: "Page ${item.currentPage}",
+                            text: () {
+                              final current =
+                                  item.currentTimeSeconds ??
+                                  (item.currentPage != null
+                                      ? item.currentPage! + 1
+                                      : null);
+                              final total = item.totalDurationSeconds;
+                              if (current != null &&
+                                  total != null &&
+                                  total > 0) {
+                                return "Page $current/$total";
+                              } else if (current != null) {
+                                return "Page $current";
+                              }
+                              return "";
+                            }(),
                             fontSize: 11,
                             color: cs.onSurfaceVariant.withOpacity(0.8),
                           ),
@@ -589,7 +647,8 @@ class _HistoryScreenState extends State<HistoryScreen>
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          if (item.sourceName != null && item.sourceName!.isNotEmpty) ...[
+                          if (item.sourceName != null &&
+                              item.sourceName!.isNotEmpty) ...[
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
@@ -598,7 +657,10 @@ class _HistoryScreenState extends State<HistoryScreen>
                               decoration: BoxDecoration(
                                 color: cs.primaryContainer.withOpacity(0.35),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: cs.primary.withOpacity(0.15), width: 0.5),
+                                border: Border.all(
+                                  color: cs.primary.withOpacity(0.15),
+                                  width: 0.5,
+                                ),
                               ),
                               child: AzyXText(
                                 text: item.sourceName!,
@@ -633,11 +695,7 @@ class _HistoryScreenState extends State<HistoryScreen>
                     highlightColor: cs.errorContainer.withOpacity(0.2),
                     padding: const EdgeInsets.all(10),
                   ),
-                  icon: Icon(
-                    Broken.trash,
-                    size: 18,
-                    color: cs.error,
-                  ),
+                  icon: Icon(Broken.trash, size: 18, color: cs.error),
                   onPressed: () {
                     if (item.mediaId != null) {
                       if (isAnime) {
@@ -655,6 +713,7 @@ class _HistoryScreenState extends State<HistoryScreen>
       ),
     );
   }
+
   void _showClearHistoryDialog(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isAnime = _tabController.index == 0;
@@ -665,11 +724,7 @@ class _HistoryScreenState extends State<HistoryScreen>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Row(
           children: [
-            Icon(
-              Broken.warning_2,
-              color: cs.error,
-              size: 24,
-            ),
+            Icon(Broken.warning_2, color: cs.error, size: 24),
             const SizedBox(width: 12),
             AzyXText(
               text: isAnime ? "Clear Anime History" : "Clear Manga History",
@@ -680,7 +735,8 @@ class _HistoryScreenState extends State<HistoryScreen>
           ],
         ),
         content: AzyXText(
-          text: "Are you sure you want to clear your entire ${isAnime ? 'anime' : 'manga'} history? This action cannot be undone.",
+          text:
+              "Are you sure you want to clear your entire ${isAnime ? 'anime' : 'manga'} history? This action cannot be undone.",
           fontSize: 14,
           color: cs.onSurfaceVariant,
           maxLines: 4,
@@ -704,10 +760,14 @@ class _HistoryScreenState extends State<HistoryScreen>
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text("${isAnime ? 'Anime' : 'Manga'} history cleared"),
+                  content: Text(
+                    "${isAnime ? 'Anime' : 'Manga'} history cleared",
+                  ),
                   backgroundColor: cs.primary,
                   behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               );
             },
@@ -722,6 +782,7 @@ class _HistoryScreenState extends State<HistoryScreen>
     );
   }
 }
+
 class _PlayStoreProgressIndicator extends StatelessWidget {
   final double progress;
   final IconData icon;
@@ -771,11 +832,7 @@ class _PlayStoreProgressIndicator extends StatelessWidget {
               valueColor: AlwaysStoppedAnimation<Color>(cs.primary),
             ),
           ),
-          Icon(
-            icon,
-            size: size * 0.45,
-            color: Colors.white,
-          ),
+          Icon(icon, size: size * 0.45, color: Colors.white),
         ],
       ),
     );

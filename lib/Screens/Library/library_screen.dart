@@ -474,16 +474,23 @@ class _LibraryScreenState extends State<LibraryScreen>
               (i) => i.mediaData?.id == mediaId.toString(),
             );
             double prog = 0.0;
-            if (histItem.totalDurationSeconds != null &&
-                histItem.totalDurationSeconds! > 0) {
-              prog =
-                  ((histItem.currentTimeSeconds ?? 0) /
-                          histItem.totalDurationSeconds!)
-                      .clamp(0.0, 1.0);
+            final int currentVal =
+                histItem.currentTimeSeconds ?? histItem.currentPage ?? 0;
+            final int totalVal = histItem.totalDurationSeconds ?? 0;
+            if (totalVal > 0) {
+              prog = (currentVal / totalVal).clamp(0.0, 1.0);
             } else if (offlineMatch != null) {
               final int cur = int.tryParse(offlineMatch.number) ?? 0;
               final int total = offlineMatch.mediaData?.episodes ?? 0;
               prog = total > 0 ? (cur / total).clamp(0.0, 1.0) : 0.0;
+            }
+            String displayProgress = progress;
+            if (_contentType == LibraryContentType.manga && currentVal > 0) {
+              if (totalVal > 0) {
+                displayProgress = "$progress • Page $currentVal/$totalVal";
+              } else {
+                displayProgress = "$progress • Page $currentVal";
+              }
             }
             final isLast = index == histList.length - 1;
             return GestureDetector(
@@ -527,7 +534,9 @@ class _LibraryScreenState extends State<LibraryScreen>
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    if (imageUrl != null)
+                    if (imageUrl != null &&
+                        imageUrl.trim().isNotEmpty &&
+                        imageUrl.startsWith('http'))
                       CachedNetworkImage(
                         imageUrl: imageUrl,
                         fit: BoxFit.cover,
@@ -608,8 +617,8 @@ class _LibraryScreenState extends State<LibraryScreen>
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                progress.isNotEmpty
-                                    ? progress
+                                displayProgress.isNotEmpty
+                                    ? displayProgress
                                     : 'Progress unknown',
                                 style: TextStyle(
                                   fontSize: 12,
@@ -938,7 +947,12 @@ class _LibraryScreenState extends State<LibraryScreen>
                       top: Radius.circular(24),
                     ),
                     child: CachedNetworkImage(
-                      imageUrl: media?.image ?? '',
+                      imageUrl:
+                          (media?.image != null &&
+                              media!.image!.trim().isNotEmpty &&
+                              media.image!.startsWith('http'))
+                          ? media.image!
+                          : 'https://raw.githubusercontent.com/RyanYuuki/AnymeX/main/assets/images/sticker.png',
                       fit: BoxFit.cover,
                       placeholder: (_, __) => Shimmer.fromColors(
                         baseColor: cs.surfaceContainerHighest,
