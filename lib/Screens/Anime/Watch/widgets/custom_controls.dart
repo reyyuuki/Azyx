@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
+
 class CustomControls extends StatelessWidget {
   final Player player;
   final Widget topBar;
@@ -37,7 +38,7 @@ class CustomControls extends StatelessWidget {
             () => controller.isControlsLocked.value
                 ? const SizedBox.shrink()
                 : AnimatedContainer(
-                    height: controller.isPotraitOrientaion.value ? 150 : 101,
+                    height: controller.isPotraitOrientaion.value ? 120 : 60,
                     alignment: Alignment.center,
                     transform: Matrix4.translationValues(
                       0,
@@ -61,7 +62,7 @@ class CustomControls extends StatelessWidget {
             ),
           ),
           AnimatedContainer(
-            height: controller.isPotraitOrientaion.value ? 150 : 101,
+            height: controller.isPotraitOrientaion.value ? 160 : 130,
             transform: Matrix4.translationValues(
               0,
               controller.showControls.value ? 0 : Get.height,
@@ -137,6 +138,7 @@ class CustomControls extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildIconButton({
     required VoidCallback ontap,
     required IconData icon,
@@ -155,6 +157,7 @@ class CustomControls extends StatelessWidget {
       ),
     );
   }
+
   Widget _centerControls(WatchController controller, BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -191,6 +194,7 @@ class CustomControls extends StatelessWidget {
       ],
     );
   }
+
   Widget _lockedCenterControls(WatchController controller) {
     return AzyXContainer(
       alignment: Alignment.center,

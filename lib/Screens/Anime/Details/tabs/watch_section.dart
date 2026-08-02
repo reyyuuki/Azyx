@@ -24,6 +24,7 @@ class WatchSection extends StatefulWidget {
   final Rx<String> totalEpisodes;
   final RxList<Episode> episodelist;
   final Rx<bool> hasError;
+  final Rx<bool>? isFetching;
   final Function(String link) onChanged;
   final Function(String) onTitleChanged;
   final Function(String) onSourceChanged;
@@ -35,6 +36,7 @@ class WatchSection extends StatefulWidget {
     required this.totalEpisodes,
     required this.episodelist,
     required this.hasError,
+    this.isFetching,
     required this.onChanged,
     required this.onTitleChanged,
     required this.onSourceChanged,
@@ -260,7 +262,7 @@ class _WatchSectionState extends State<WatchSection> {
         Obx(
           () => widget.hasError.value
               ? _buildErrorState(colorScheme)
-              : widget.episodelist.isEmpty
+              : (widget.isFetching?.value ?? widget.episodelist.isEmpty)
               ? _buildLoadingState(colorScheme)
               : filteredList.isEmpty
               ? _buildEmptyState(colorScheme)
@@ -381,7 +383,9 @@ class _WatchSectionState extends State<WatchSection> {
             ),
             const SizedBox(height: 10),
             Text(
-              "No episodes match your filters",
+              widget.episodelist.isEmpty
+                  ? "No episodes found for this source"
+                  : "No episodes match your filters",
               style: TextStyle(
                 color: colorScheme.onSurfaceVariant.withOpacity(0.5),
                 fontWeight: FontWeight.w600,
