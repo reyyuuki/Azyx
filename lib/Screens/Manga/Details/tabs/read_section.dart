@@ -1,16 +1,14 @@
 import 'dart:developer';
-import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Database/isar_models/episode_class.dart';
-import 'package:azyx/Models/user_media.dart';
 import 'package:azyx/Models/wrong_title_search.dart';
 import 'package:azyx/Screens/Manga/Details/tabs/widgets/chapter_item.dart';
 import 'package:azyx/Screens/Manga/Read/view/read.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_normal_card.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/anime/mapped_title.dart';
-import 'package:azyx/Widgets/AzyXWidgets/azyx_normal_card.dart';
 import 'package:azyx/Widgets/common/search_widget.dart';
 import 'package:azyx/Widgets/custom_drop_down.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
@@ -19,6 +17,7 @@ import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
+
 class ReadSection extends StatefulWidget {
   final String image;
   final String id;
@@ -28,11 +27,12 @@ class ReadSection extends StatefulWidget {
   final Rx<String> totalEpisodes;
   final RxList<Chapter> chaptersList;
   final Rx<bool> hasError;
+  final Rx<bool>? isFetching;
   final Rx<String> syncId;
-  Function(List<DEpisode>) onChanged;
-  Function(String) onTitleChanged;
-  Function() onSourceChanged;
-  ReadSection({
+  final Function(List<DEpisode>) onChanged;
+  final Function(String) onTitleChanged;
+  final Function() onSourceChanged;
+  const ReadSection({
     super.key,
     required this.id,
     required this.image,
@@ -41,6 +41,7 @@ class ReadSection extends StatefulWidget {
     required this.selectedSource,
     required this.chaptersList,
     required this.hasError,
+    this.isFetching,
     required this.onChanged,
     required this.onTitleChanged,
     required this.onSourceChanged,
@@ -207,8 +208,18 @@ class _WatchSectionState extends State<ReadSection> {
         Obx(
           () => widget.hasError.value
               ? Image.asset('assets/images/sticker.png', fit: BoxFit.contain)
-              : widget.chaptersList.isEmpty
+              : (widget.isFetching?.value ?? widget.chaptersList.isEmpty)
               ? const Center(child: LoadingIndicatorM3E())
+              : filteredList.isEmpty
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 40),
+                    child: Text(
+                      "No chapters found",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                )
               : Column(
                   children: filteredList.map((ch) {
                     return GestureDetector(

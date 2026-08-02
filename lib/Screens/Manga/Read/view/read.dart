@@ -17,6 +17,7 @@ import 'package:get/get.dart';
 import 'package:azyx/Widgets/subsampling_scale_image_view/subsampling_image_provider.dart';
 import 'package:azyx/Screens/Manga/Read/view/manga_page_view_custom.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
+
 class ReadPage extends StatefulWidget {
   final String mangaTitle;
   final String mangaImage;
@@ -40,6 +41,7 @@ class ReadPage extends StatefulWidget {
   @override
   State<ReadPage> createState() => _ReadPageState();
 }
+
 class _ReadPageState extends State<ReadPage> {
   bool _isFirstLoad = true;
   final RxList<PageUrl> pagesList = RxList();
@@ -74,8 +76,12 @@ class _ReadPageState extends State<ReadPage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     updateEntry();
   }
+
   void localHistoryEntry() {
     log("media id: ${widget.mediaId}");
+    final curPage = _getPageIndexInChapter(_currentPage.value);
+    final totPages = _getTotalPagesInChapter(_currentPage.value);
+    final finalTotal = totPages > 0 ? totPages : pagesList.length;
     final entry = LocalHistoryItem()
       ..mediaId = int.tryParse(widget.mediaId ?? '')
       ..title = widget.mangaTitle
@@ -84,11 +90,14 @@ class _ReadPageState extends State<ReadPage> {
       ..sourceName = widget.source.name
       ..progress = chapterTitle.value
       ..currentPage = _currentPage.value
+      ..currentTimeSeconds = curPage > 0 ? curPage : (_currentPage.value + 1)
+      ..totalDurationSeconds = finalTotal > 0 ? finalTotal : null
       ..mediaType = HistoryMediaType.manga
       ..chapterList = widget.chapterList
       ..mangaSourceJson = jsonEncode(widget.source.toJson());
     Future.microtask(() => localHistoryController.addToReadingHistory(entry));
   }
+
   void updateEntry() async {
     localHistoryEntry();
     if (serviceHandler.userData.value.name != null) {
@@ -99,6 +108,7 @@ class _ReadPageState extends State<ReadPage> {
       );
     }
   }
+
   Future<void> loadPages() async {
     final generation = ++_loadGeneration;
     final targetUrl = chapterUrl.value;
@@ -156,6 +166,7 @@ class _ReadPageState extends State<ReadPage> {
       relativeTotalPages.value = pages.length;
       hasPreviousChapter.value = index < widget.chapterList.length - 1;
       hasNextChapter.value = index > 0;
+      localHistoryEntry();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && generation == _loadGeneration) {
           if (_isFirstLoad) {
@@ -174,6 +185,7 @@ class _ReadPageState extends State<ReadPage> {
       azyxSnackBar(e.toString());
     }
   }
+
   void _checkPreloadNext(int index) {
     if (_isLoadingNext) return;
     final totalLoaded = pagesList.length;
@@ -182,6 +194,7 @@ class _ReadPageState extends State<ReadPage> {
       _loadNextChapter();
     }
   }
+
   Future<void> _loadNextChapter() async {
     final currentLink = pagesChapters.isEmpty
         ? chapterUrl.value
@@ -225,6 +238,7 @@ class _ReadPageState extends State<ReadPage> {
       _isLoadingNext = false;
     }
   }
+
   int _getPageIndexInChapter(int absoluteIndex) {
     if (absoluteIndex < 0 || absoluteIndex >= pagesChapters.length) return 0;
     final currentCh = pagesChapters[absoluteIndex];
@@ -237,6 +251,7 @@ class _ReadPageState extends State<ReadPage> {
     }
     return count;
   }
+
   int _getTotalPagesInChapter(int absoluteIndex) {
     if (absoluteIndex < 0 || absoluteIndex >= pagesChapters.length) return 0;
     final currentCh = pagesChapters[absoluteIndex];
@@ -249,6 +264,7 @@ class _ReadPageState extends State<ReadPage> {
     }
     return count;
   }
+
   void navigateChapter(bool isNext) {
     final index = widget.chapterList.indexWhere(
       (i) => i.link == chapterUrl.value,
@@ -269,6 +285,7 @@ class _ReadPageState extends State<ReadPage> {
       azyxSnackBar('No Chapter Avail');
     }
   }
+
   int getAbsoluteIndex(int relativeIndex) {
     final absIndex = _currentPage.value;
     if (absIndex < 0 || absIndex >= pagesChapters.length) return 0;
@@ -284,6 +301,7 @@ class _ReadPageState extends State<ReadPage> {
     if (firstPageAbsIndex == -1) return 0;
     return firstPageAbsIndex + relativeIndex;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -531,6 +549,7 @@ class _ReadPageState extends State<ReadPage> {
     );
   }
 }
+
 class ReaderTransitionWidget extends StatelessWidget {
   final String fromTitle;
   final String toTitle;

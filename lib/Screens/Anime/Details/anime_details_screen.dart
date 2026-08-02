@@ -24,6 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
+
 class AnimeDetailsScreen extends StatefulWidget {
   final String tagg;
   final CarousaleData? smallMedia;
@@ -39,6 +40,7 @@ class AnimeDetailsScreen extends StatefulWidget {
   @override
   State<AnimeDetailsScreen> createState() => _DetailsScreenState();
 }
+
 class _DetailsScreenState extends State<AnimeDetailsScreen>
     with SingleTickerProviderStateMixin {
   final RxString title = ''.obs;
@@ -55,6 +57,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
   late PageController _pageController;
   final Rx<String> _anilistError = ''.obs;
   final Rx<bool> _extenstionError = false.obs;
+  final Rx<bool> isFetchingEpisodes = true.obs;
   final Rx<String> syncId = ''.obs;
   final RxInt _currentIndex = 0.obs;
   @override
@@ -76,6 +79,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
     convertData();
     getMediaStatus();
   }
+
   @override
   void dispose() {
     _tabBarController.dispose();
@@ -85,6 +89,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
     SourceMapper.cancelMapping();
     super.dispose();
   }
+
   void getMediaStatus() {
     if (serviceHandler.isLoggedIn.value) {
       serviceHandler.currentMedia.value = serviceHandler.userAnimeList
@@ -94,6 +99,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
           );
     }
   }
+
   Future<void> loadData() async {
     try {
       final response = await serviceHandler.fetchAnimeDetails(
@@ -108,6 +114,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
     _syncMedia();
     loadDetails();
   }
+
   Future<void> _syncMedia() async {
     final response = await MediaSyncer.mapMediaId(
       id.value.toString(),
@@ -115,6 +122,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
     );
     syncId.value = response ?? '';
   }
+
   void convertData() {
     if (widget.isOffline) {
       anilistAddToListController.findAnime(widget.allData!.mediaData!);
@@ -141,16 +149,19 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
       loadData();
     }
   }
+
   Future<void> getEpisodes(String link) async {
     final token = "detail_${id.value}";
     sourceController.updateToken('detail', token);
+    isFetchingEpisodes.value = true;
+    _extenstionError.value = false;
     try {
       final episodeResult = await sourceController.activeSource.value!.methods
           .getDetail(
             DMedia.withUrl(link),
             parameters: SourceParams(cancelToken: token),
           );
-      final episodes = List<DEpisode>.from(episodeResult.episodes!);
+      final episodes = List<DEpisode>.from(episodeResult.episodes ?? []);
       episodes.sort((a, b) {
         final typeA = a.sortMap?['type']?.toLowerCase() ?? '';
         final typeB = b.sortMap?['type']?.toLowerCase() ?? '';
@@ -160,6 +171,7 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
           if (type.isNotEmpty) return 2;
           return 3;
         }
+
         final rankA = typeRank(typeA);
         final rankB = typeRank(typeB);
         if (rankA != rankB) {
@@ -185,7 +197,8 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
       episodesList.value = mappedList;
       totalEpisodes.value = episodesList.length.toString();
       if (serviceHandler.serviceType.value != ServicesType.simkl) {
-        if (mediaData.value.episodes == episodesList.length) {
+        if (mediaData.value.episodes == episodesList.length &&
+            episodesList.isNotEmpty) {
           await getAnifyEpisodes();
         }
         if (mounted) setState(() {});
@@ -193,8 +206,11 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
     } catch (e) {
       log("Error fetching episodes or cancelled: $e");
       _extenstionError.value = true;
+    } finally {
+      isFetchingEpisodes.value = false;
     }
   }
+
   bool matchesAnyTitle(String query) {
     final q = query.toLowerCase().trim();
     return [
@@ -207,48 +223,52 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
           q.contains(t.toLowerCase().trim()),
     );
   }
+
   Future<void> getAnifyEpisodes() async {
-    final resp = await get(
-      Uri.parse(
-        "https://api.ani.zip/mappings?${serviceHandler.serviceType.value == ServicesType.anilist ? 'anilist_id' : 'mal_id'}=${id.value}",
-      ),
-    );
-    final check = jsonDecode(resp.body);
-    final anifyEpisodes = check['episodes'] as Map<String, dynamic>;
-    log(
-      '[AnifyEpisodes] Enriching ${episodesList.length} episodes with Anify data',
-    );
-    final ep = episodesList
-        .map((entry) {
-          final epNum = entry.number;
-          log(
-            '[AnifyEpisodes] EP $epNum => sortKeys=${entry.sortKeys} sortVals=${entry.sortVals}',
-          );
-          final data = anifyEpisodes.values.firstWhere(
-            (e) => e['absoluteEpisodeNumber'].toString() == epNum,
-            orElse: () => null,
-          );
-          return Episode(
-            url: entry.url ?? '',
-            number: epNum,
-            desc: data['overview'] ?? '',
-            thumbnail: data['image'] ?? '',
-            title: (data['title']?['en']) ?? '',
-            sortKeys: entry.sortKeys,
-            sortVals: entry.sortVals,
-            season: entry.season,
-            type: entry.type,
-            filler: entry.filler,
-          );
-        })
-        .whereType<Episode>()
-        .toList();
-    log('[AnifyEpisodes] Done. First ep sortMap = ${ep.first.sortMap}');
-    if (ep.first.number.isNotEmpty) {
-      episodesList.value = ep;
+    try {
+      final resp = await get(
+        Uri.parse(
+          "https://api.ani.zip/mappings?${serviceHandler.serviceType.value == ServicesType.anilist ? 'anilist_id' : 'mal_id'}=${id.value}",
+        ),
+      );
+      final check = jsonDecode(resp.body);
+      final anifyEpisodes = check['episodes'] as Map<String, dynamic>;
+      log(
+        '[AnifyEpisodes] Enriching ${episodesList.length} episodes with Anify data',
+      );
+      final ep = episodesList
+          .map((entry) {
+            final epNum = entry.number;
+            final data = anifyEpisodes.values.firstWhere(
+              (e) => e['absoluteEpisodeNumber'].toString() == epNum,
+              orElse: () => null,
+            );
+            return Episode(
+              url: entry.url ?? '',
+              number: epNum,
+              desc: data != null ? (data['overview'] ?? '') : '',
+              thumbnail: data != null ? (data['image'] ?? '') : '',
+              title: data != null ? ((data['title']?['en']) ?? '') : '',
+              sortKeys: entry.sortKeys,
+              sortVals: entry.sortVals,
+              season: entry.season,
+              type: entry.type,
+              filler: entry.filler,
+            );
+          })
+          .whereType<Episode>()
+          .toList();
+      if (ep.isNotEmpty && ep.first.number.isNotEmpty) {
+        episodesList.value = ep;
+      }
+    } catch (e) {
+      log("Error fetching Anify episodes: $e");
     }
   }
+
   Future<void> loadDetails() async {
+    isFetchingEpisodes.value = true;
+    _extenstionError.value = false;
     try {
       final result = await SourceMapper.mapMedia(
         formatTitles(mediaData.value),
@@ -258,23 +278,28 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
         synonyms: mediaData.value.synonyms ?? [],
       );
       if (result != null) {
-        getEpisodes(result.url!);
+        await getEpisodes(result.url!);
         animeTitle.value = result.title ?? '';
       } else {
         _extenstionError.value = true;
+        isFetchingEpisodes.value = false;
       }
     } catch (e) {
       Utils.log("Error loading episodes");
       _extenstionError.value = true;
+      isFetchingEpisodes.value = false;
     }
   }
+
   List<String> formatTitles(AnilistMediaData media) {
     return [media.title ?? '', media.titleRomaji ?? ''];
   }
+
   void _onPageChanged(int index) {
     _currentIndex.value = index;
     _tabBarController.animateTo(index);
   }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -413,11 +438,11 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
                       },
                       mediaData: mediaData.value,
                       hasError: _extenstionError,
+                      isFetching: isFetchingEpisodes,
                       id: id.value,
                       image: coverImage.value,
                       animeTitle: animeTitle,
-                      installedExtensions:
-                          sourceController.installedExtensions,
+                      installedExtensions: sourceController.installedExtensions,
                       totalEpisodes: totalEpisodes,
                       episodelist: episodesList,
                     ),

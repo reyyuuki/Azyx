@@ -56,6 +56,7 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
   final PageController pageController = PageController();
   final Rx<String> _anilistError = ''.obs;
   final Rx<bool> _extenstionError = false.obs;
+  final Rx<bool> isFetchingChapters = true.obs;
   final Rx<String> syncId = ''.obs;
   final RxInt _currentIndex = 0.obs;
   Future<void> loadData() async {
@@ -122,6 +123,8 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
   Future<void> getChapters(String link) async {
     final token = "manga_detail_${id.value}";
     sourceController.updateToken('manga_detail', token);
+    isFetchingChapters.value = true;
+    _extenstionError.value = false;
     try {
       final episodeResult = await sourceController
           .activeMangaSource
@@ -131,17 +134,21 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
             DMedia.withUrl(link),
             parameters: SourceParams(cancelToken: token),
           );
-      totalChapters.value = chaptersList.length.toString();
       chaptersList.value = mChapterToChapter(
-        episodeResult.episodes!,
+        episodeResult.episodes ?? [],
         widget.smallMedia!.title,
       );
+      totalChapters.value = chaptersList.length.toString();
     } catch (e) {
       log("Error fetching chapters or cancelled: $e");
       _extenstionError.value = true;
+    } finally {
+      isFetchingChapters.value = false;
     }
   }
   Future<void> loadDetails() async {
+    isFetchingChapters.value = true;
+    _extenstionError.value = false;
     try {
       final result = await SourceMapper.mapMedia(
         formatTitles(mediaData.value),
@@ -151,15 +158,16 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
         synonyms: mediaData.value.synonyms ?? [],
       );
       if (result != null) {
-        getChapters(result.url!);
+        await getChapters(result.url!);
         mangaTitle.value = result.title ?? '';
       } else {
         _extenstionError.value = true;
-        log("error ${_extenstionError.value}");
+        isFetchingChapters.value = false;
       }
     } catch (e, stackTrace) {
       log("Error while loading episode data: $e / $stackTrace");
       _extenstionError.value = true;
+      isFetchingChapters.value = false;
     }
   }
   List<String> formatTitles(AnilistMediaData media) {
@@ -208,7 +216,7 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
             number: '1',
             animeTitle: title.value,
             mediaType: 0,
-            chaptersList: chaptersList.value,
+            chaptersList: chaptersList.toList(),
           ),
           mediaData: mediaData.value,
           isLoading: isLoading,
@@ -320,6 +328,7 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
                         loadDetails();
                       },
                       hasError: _extenstionError,
+                      isFetching: isFetchingChapters,
                       id: id.value,
                       image: mediaData.value.coverImage ?? image.value,
                       animeTitle: mangaTitle,
