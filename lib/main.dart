@@ -5,6 +5,7 @@ import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
 import 'package:azyx/Controllers/backup_controller.dart';
+import 'package:azyx/Controllers/sync/gist_sync_controller.dart';
 import 'package:azyx/Controllers/local_history_controller.dart';
 import 'package:azyx/Controllers/offline_controller.dart';
 import 'package:azyx/Controllers/services/mal_service.dart';
@@ -24,6 +25,7 @@ import 'package:azyx/Screens/Manga/manga_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/common/custom_nav_bar.dart';
 import 'package:azyx/utils/deeplink.dart';
+import 'package:azyx/utils/register_protocol/register_protocol.dart';
 import 'package:azyx/utils/update_notifier.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:flutter/gestures.dart';
@@ -91,6 +93,7 @@ void main(List<String> args) async {
       Get.put(SourceController());
       Get.put(LocalHistoryController());
       Get.put(BackupController());
+      Get.put(GistSyncController());
       runApp(
         MultiProvider(
           providers: [ChangeNotifierProvider(create: (_) => ThemeProvider())],
@@ -108,6 +111,22 @@ bool _isDeepLinkInitialized = false;
 void deepLink() async {
   if (_isDeepLinkInitialized) return;
   _isDeepLinkInitialized = true;
+  if (Platform.isWindows || Platform.isLinux) {
+    try {
+      [
+        'anymex',
+        'anymex-extension',
+        'cloudstreamrepo',
+        'mangayomi',
+        'aniyomi',
+        'tachiyomi',
+        'kotatsu',
+        'sora',
+        'sugoireads',
+        'dar',
+      ].forEach(registerProtocolHandler);
+    } catch (_) {}
+  }
   final appLink = AppLinks();
   try {
     final initLink = await appLink.getInitialLink();

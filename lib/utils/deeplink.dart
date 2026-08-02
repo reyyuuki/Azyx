@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:hive/hive.dart';
-import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart' hide isar;
+import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
+    hide isar;
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
@@ -11,8 +12,9 @@ import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:get/get.dart';
+
 class Deeplink {
-  static void handleDeepLink(Uri uri, {bool isInitial = false}) {
+  static Future<void> handleDeepLink(Uri uri, {bool isInitial = false}) async {
     if (isInitial) {
       if (Hive.isBoxOpen("offline-data")) {
         final box = Hive.box("offline-data");
@@ -23,38 +25,65 @@ class Deeplink {
       }
     }
     Utils.log("HANDLING DEEEPLIINK => ${uri.toString()}");
-    final illegalSchemes = Get.find<ExtensionManager>()
-        .managers
-        .expand((e) => e.schemes.toList())
-        .toList();
-    if (!illegalSchemes.contains(uri.scheme.toLowerCase()) && uri.host.toLowerCase() != 'add-repo') {
+
+    if (uri.host == 'callback' ||
+        uri.path.contains('callback') ||
+        uri.queryParameters.containsKey('code')) {
+      return;
+    }
+
+    if (Get.isRegistered<ExtensionManager>()) {
+      final extensionManager = Get.find<ExtensionManager>();
+      int attempts = 0;
+      while (extensionManager.managers.isEmpty && attempts < 25) {
+        await Future.delayed(const Duration(milliseconds: 200));
+        attempts++;
+      }
+
+      final illegalSchemes = extensionManager.managers
+          .expand((e) => e.schemes.toList())
+          .toList();
+
       final mediaTarget = _parseMediaTarget(uri);
       if (mediaTarget != null) {
-         _openMediaTarget(mediaTarget);
-         return;
+        _openMediaTarget(mediaTarget);
+        return;
+      }
+
+      if (uri.host.toLowerCase() == 'add-repo') {
+        _legacyUseDeepLink(uri);
+        return;
+      }
+
+      if (illegalSchemes.contains(uri.scheme.toLowerCase())) {
+        bool isRepoAdded = false;
+        azyxSnackBar("Adding repo... please wait.");
+        final manager = extensionManager.managers;
+        for (final handler in manager) {
+          Utils.log(
+            'Matching ${uri.scheme} with ${handler.schemes.toString()}',
+          );
+          if (handler.schemes.contains(uri.scheme.toLowerCase())) {
+            handler.handleSchemes(uri);
+            isRepoAdded = true;
+            break;
+          }
+        }
+        azyxSnackBar(
+          isRepoAdded
+              ? "Added Repo Links Successfully!"
+              : "Missing or invalid parameters in the link.",
+        );
+        return;
       }
     }
+
     if (uri.host.toLowerCase() == 'add-repo') {
       _legacyUseDeepLink(uri);
       return;
     }
-    bool isRepoAdded = false;
-    azyxSnackBar("Adding repo... please wait.");
-    final manager = Get.find<ExtensionManager>().managers;
-    for (final handler in manager) {
-      Utils.log('Matching ${uri.scheme} with ${handler.schemes.toString()}');
-      if (handler.schemes.contains(uri.scheme.toLowerCase())) {
-        handler.handleSchemes(uri);
-        isRepoAdded = true;
-        break;
-      }
-    }
-    azyxSnackBar(
-      isRepoAdded
-          ? "Added Repo Links Successfully!"
-          : "Missing or invalid parameters in the link.",
-    );
   }
+
   static void _legacyUseDeepLink(Uri uri) {
     if (uri.host != 'add-repo') return;
     String managerId;
@@ -85,16 +114,25 @@ class Deeplink {
               ?.trim();
       mangaUrl = uri.queryParameters['manga_url']?.trim();
     }
-    if (animeUrl != null) sourceController.addRepo(animeUrl, ItemType.anime, managerId);
-    if (mangaUrl != null) sourceController.addRepo(mangaUrl, ItemType.manga, managerId);
-    if (animeUrl != null || mangaUrl != null) azyxSnackBar('Repo added succesfully');
-    else azyxSnackBar('Unsupported link');
+    if (animeUrl != null) {
+      sourceController.addRepo(animeUrl, ItemType.anime, managerId);
+    }
+    if (mangaUrl != null) {
+      sourceController.addRepo(mangaUrl, ItemType.manga, managerId);
+    }
+    if (animeUrl != null || mangaUrl != null) {
+      azyxSnackBar('Repo added succesfully');
+    } else {
+      azyxSnackBar('Unsupported link');
+    }
   }
+
   static _MediaDeepLinkTarget? _parseMediaTarget(Uri uri) {
     final webTarget = _parseWebTarget(uri);
     if (webTarget != null) return webTarget;
     return _parseCustomTarget(uri);
   }
+
   static _MediaDeepLinkTarget? _parseWebTarget(Uri uri) {
     final scheme = uri.scheme.toLowerCase();
     if (scheme != 'https' && scheme != 'http') return null;
@@ -119,6 +157,7 @@ class Deeplink {
     }
     return null;
   }
+
   static _MediaDeepLinkTarget? _parseCustomTarget(Uri uri) {
     if (uri.host.toLowerCase() == 'callback' ||
         uri.host.toLowerCase() == 'add-repo') {
@@ -144,6 +183,7 @@ class Deeplink {
       serviceType: serviceType,
     );
   }
+
   static _MediaDeepLinkTarget? _parseAnimeMangaTarget({
     required Uri uri,
     required List<String> segments,
@@ -177,6 +217,7 @@ class Deeplink {
       initialTabIndex: _parseInitialTabIndex(uri.fragment),
     );
   }
+
   static _MediaDeepLinkTarget? _parseSimklTarget({
     required Uri uri,
     required List<String> segments,
@@ -195,6 +236,7 @@ class Deeplink {
       initialTabIndex: _parseInitialTabIndex(uri.fragment),
     );
   }
+
   static ServicesType? _serviceFromToken(String raw) {
     final token = raw.toLowerCase();
     if (token.contains('anilist')) return ServicesType.anilist;
@@ -215,6 +257,7 @@ class Deeplink {
         return null;
     }
   }
+
   static int _parseInitialTabIndex(String fragment) {
     var tab = fragment.trim().toLowerCase();
     tab = tab.replaceFirst(RegExp(r'^/+'), '');
@@ -230,6 +273,7 @@ class Deeplink {
         return 0;
     }
   }
+
   static void _openMediaTarget(
     _MediaDeepLinkTarget target, {
     int attempts = 0,
@@ -247,47 +291,43 @@ class Deeplink {
     }
     _openHydratedMediaTarget(target);
   }
+
   static Future<void> _openHydratedMediaTarget(
-      _MediaDeepLinkTarget target) async {
+    _MediaDeepLinkTarget target,
+  ) async {
     AnilistMediaData? mediaData;
     try {
       final fetchedMedia = await serviceHandler.fetchAnimeDetails(
-        FetchDetailsParams(
-          id: target.mediaId,
-          isManga: target.isManga,
-        ),
+        FetchDetailsParams(id: target.mediaId, isManga: target.isManga),
       );
       mediaData = fetchedMedia;
-    } catch (_) {
-    }
+    } catch (_) {}
     final tag = 'deep-link-${DateTime.now().millisecondsSinceEpoch}';
     CarousaleData smallMedia = CarousaleData(
-       id: target.mediaId, 
-       image: mediaData?.coverImage ?? '', 
-       title: mediaData?.title ?? ''
+      id: target.mediaId,
+      image: mediaData?.coverImage ?? '',
+      title: mediaData?.title ?? '',
     );
     if (target.isManga) {
-      Get.to(() => MangaDetailsScreen(
-            tagg: tag,
-            smallMedia: smallMedia,
-          ));
+      Get.to(() => MangaDetailsScreen(tagg: tag, smallMedia: smallMedia));
     } else {
-      Get.to(() => AnimeDetailsScreen(
-            tagg: tag,
-            smallMedia: smallMedia,
-          ));
+      Get.to(() => AnimeDetailsScreen(tagg: tag, smallMedia: smallMedia));
     }
   }
+
   static bool _isHost(String host, String domain) {
     return host == domain || host.endsWith('.$domain');
   }
+
   static List<String> _compactSegments(List<String> segments) {
     return segments.where((s) => s.trim().isNotEmpty).toList();
   }
+
   static String? _extractNumericId(String raw) {
     return RegExp(r'\d+').firstMatch(raw)?.group(0);
   }
 }
+
 class _MediaDeepLinkTarget {
   final ServicesType serviceType;
   final bool isManga;
