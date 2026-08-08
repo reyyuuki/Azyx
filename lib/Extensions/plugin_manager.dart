@@ -6,11 +6,12 @@ import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.
 import 'package:azyx/Controllers/source/download_run_time_apk.dart';
 import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 class PluginManager {
@@ -26,6 +27,7 @@ class PluginManager {
   Future<void> ensurePluginLoaded(BuildContext context) async {
     final isLoaded = await AnymeXRuntimeBridge.isLoaded();
     if (isLoaded) {
+      if (!context.mounted) return;
       await checkForUpdates(context, showIfUpToDate: false);
       return;
     }
@@ -91,192 +93,192 @@ class PluginManager {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (sheetCtx) => Container(
-        height: MediaQuery.of(context).size.height * 0.7,
+        height: MediaQuery.of(context).size.height * 0.72,
         decoration: BoxDecoration(
-          color: colors.surfaceContainer,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(28),
-            topRight: Radius.circular(28),
-          ),
+          color: colors.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          border: Border.all(color: colors.outline.withOpacity(0.08)),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: colors.outline.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: colors.primary.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(14),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          child: AzyXGradientContainer(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              child: SafeArea(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: colors.outline.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
                     ),
-                    child: Icon(
-                      Icons.system_update_rounded,
-                      color: colors.primary,
-                      size: 26,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(height: 16),
+                    Row(
                       children: [
-                        Text(
-                          'Extension Runtime Update',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: colors.onSurface,
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: colors.primary.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.system_update_rounded,
+                            color: colors.primary,
+                            size: 22,
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '$installedVersion  ➜  ${release.tagName}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: colors.primary,
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const AzyXText(
+                                text: 'Extension Runtime Update',
+                                fontVariant: FontVariant.bold,
+                                fontSize: 17,
+                              ),
+                              const SizedBox(height: 2),
+                              AzyXText(
+                                text:
+                                    '$installedVersion  ➜  ${release.tagName}',
+                                fontSize: 12,
+                                fontVariant: FontVariant.bold,
+                                color: colors.primary,
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: colors.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(14),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.surfaceContainerHighest.withOpacity(0.35),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: colors.outline.withOpacity(0.08),
+                        ),
+                      ),
+                      child: AzyXText(
+                        text: release.title,
+                        fontVariant: FontVariant.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: colors.surfaceContainerHighest.withOpacity(
+                            0.25,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: colors.outline.withOpacity(0.08),
+                          ),
+                        ),
+                        child: SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          child: MarkdownBody(
+                            data: release.body.isNotEmpty
+                                ? release.body
+                                : 'No release notes provided for this version.',
+                            styleSheet: MarkdownStyleSheet(
+                              p: TextStyle(
+                                fontSize: 13,
+                                color: colors.onSurfaceVariant,
+                              ),
+                              h1: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: colors.onSurface,
+                              ),
+                              h2: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: colors.onSurface,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 13),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            onPressed: () => Navigator.pop(sheetCtx),
+                            child: AzyXText(
+                              text: 'Later',
+                              color: colors.onSurfaceVariant,
+                              fontVariant: FontVariant.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: colors.primary,
+                              foregroundColor: colors.onPrimary,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 13),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            onPressed: () async {
+                              Navigator.pop(sheetCtx);
+                              final success =
+                                  await DownloadRunTimeApk.showDownloadDialog(
+                                    context,
+                                    force: true,
+                                  );
+                              if (success) {
+                                PluginKeys.runtimeHostInstalledVersion.set(
+                                  release.tagName,
+                                );
+                                PluginKeys.runtimeHostInstalledReleaseTitle.set(
+                                  release.title,
+                                );
+                                azyxSnackBar(
+                                  Platform.isAndroid
+                                      ? 'Plugin updated successfully. Please restart app.'
+                                      : 'Desktop runtime updated successfully.',
+                                );
+                              }
+                            },
+                            child: const AzyXText(
+                              text: 'Update Now',
+                              fontVariant: FontVariant.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                child: Text(
-                  release.title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: colors.onSurface,
-                  ),
-                ),
               ),
-              const SizedBox(height: 14),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: colors.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: colors.outline.withOpacity(0.15),
-                    ),
-                  ),
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: MarkdownBody(
-                      data: release.body.isNotEmpty
-                          ? release.body
-                          : 'No release notes provided for this version.',
-                      styleSheet: MarkdownStyleSheet(
-                        p: TextStyle(
-                          fontSize: 13,
-                          color: colors.onSurfaceVariant,
-                        ),
-                        h1: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: colors.onSurface,
-                        ),
-                        h2: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: colors.onSurface,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        side: BorderSide(
-                          color: colors.outline.withOpacity(0.3),
-                        ),
-                      ),
-                      onPressed: () => Navigator.pop(sheetCtx),
-                      child: Text(
-                        'Later',
-                        style: TextStyle(
-                          color: colors.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      onPressed: () async {
-                        Navigator.pop(sheetCtx);
-                        final success =
-                            await DownloadRunTimeApk.showDownloadDialog(
-                          context,
-                          force: true,
-                        );
-                        if (success) {
-                          PluginKeys.runtimeHostInstalledVersion.set(
-                            release.tagName,
-                          );
-                          PluginKeys.runtimeHostInstalledReleaseTitle.set(
-                            release.title,
-                          );
-                          azyxSnackBar(
-                            Platform.isAndroid
-                                ? 'Plugin updated successfully. Please restart app.'
-                                : 'Desktop runtime updated successfully.',
-                          );
-                        }
-                      },
-                      child: Text(
-                        'Update Now',
-                        style: TextStyle(
-                          color: colors.onPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -351,10 +353,12 @@ class PluginManager {
 
         final toolsDir = await paths.toolsDir;
         final metadataFile = File('${toolsDir.path}/metadata.json');
-        await metadataFile.writeAsString(jsonEncode({
-          'version': 'Local-${DateTime.now().millisecondsSinceEpoch}',
-          'title': 'Local Synced Jar',
-        }));
+        await metadataFile.writeAsString(
+          jsonEncode({
+            'version': 'Local-${DateTime.now().millisecondsSinceEpoch}',
+            'title': 'Local Synced Jar',
+          }),
+        );
         await AnymeXRuntimeBridge.loadMetadata();
         azyxSnackBar(
           'Local plugin JAR loaded successfully. Please restart app.',
@@ -376,88 +380,90 @@ class PluginManager {
       isScrollControlled: true,
       builder: (modalCtx) => Container(
         decoration: BoxDecoration(
-          color: colors.surfaceContainer,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(28),
-            topRight: Radius.circular(28),
-          ),
+          color: colors.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          border: Border.all(color: colors.outline.withOpacity(0.08)),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: colors.outline.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          child: AzyXGradientContainer(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              child: SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: colors.outline.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const AzyXText(
+                      text: 'Extension Runtime Options',
+                      fontVariant: FontVariant.bold,
+                      fontSize: 18,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 4),
+                    AzyXText(
+                      text: installedVersion.isNotEmpty
+                          ? 'Current Version: $installedVersion'
+                          : 'Runtime Not Installed',
+                      fontSize: 12,
+                      color: colors.onSurfaceVariant,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 20),
+                    _buildOptionTile(
+                      modalCtx,
+                      onPressed: () {
+                        Navigator.pop(modalCtx);
+                        checkForUpdates(context, showIfUpToDate: true);
+                      },
+                      icon: Icons.system_update_alt_rounded,
+                      title: 'Check Runtime Updates',
+                      subtitle: 'Check GitHub for newer runtime versions',
+                    ),
+                    const SizedBox(height: 10),
+                    _buildOptionTile(
+                      modalCtx,
+                      onPressed: () {
+                        Navigator.pop(modalCtx);
+                        forceReDownload(context);
+                      },
+                      icon: Icons.refresh_rounded,
+                      title: 'Force Re-Update / Re-Download',
+                      subtitle:
+                          'Re-download and reinstall runtime host from scratch',
+                    ),
+                    const SizedBox(height: 10),
+                    _buildOptionTile(
+                      modalCtx,
+                      onPressed: () {
+                        Navigator.pop(modalCtx);
+                        syncLocalPluginFile(context);
+                      },
+                      icon: Platform.isAndroid
+                          ? Icons.install_mobile_rounded
+                          : Icons.folder_zip_rounded,
+                      title: Platform.isAndroid
+                          ? 'Load Local Runtime APK'
+                          : 'Load Local Runtime JAR',
+                      subtitle:
+                          'Install runtime file directly from local storage',
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                 ),
               ),
-              const SizedBox(height: 20),
-              Text(
-                'Extension Runtime Options',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: colors.onSurface,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                installedVersion.isNotEmpty
-                    ? 'Current Version: $installedVersion'
-                    : 'Runtime Not Installed',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: colors.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              _buildOptionTile(
-                modalCtx,
-                onPressed: () {
-                  Navigator.pop(modalCtx);
-                  checkForUpdates(context, showIfUpToDate: true);
-                },
-                icon: Icons.system_update_alt_rounded,
-                title: 'Check Runtime Updates',
-                subtitle: 'Check GitHub for newer runtime versions',
-              ),
-              const SizedBox(height: 12),
-              _buildOptionTile(
-                modalCtx,
-                onPressed: () {
-                  Navigator.pop(modalCtx);
-                  forceReDownload(context);
-                },
-                icon: Icons.refresh_rounded,
-                title: 'Force Re-Update / Re-Download',
-                subtitle: 'Re-download and reinstall runtime host from scratch',
-              ),
-              const SizedBox(height: 12),
-              _buildOptionTile(
-                modalCtx,
-                onPressed: () {
-                  Navigator.pop(modalCtx);
-                  syncLocalPluginFile(context);
-                },
-                icon: Platform.isAndroid
-                    ? Icons.install_mobile_rounded
-                    : Icons.folder_zip_rounded,
-                title: Platform.isAndroid
-                    ? 'Load Local Runtime APK'
-                    : 'Load Local Runtime JAR',
-                subtitle: 'Install runtime file directly from local storage',
-              ),
-              const SizedBox(height: 16),
-            ],
+            ),
           ),
         ),
       ),
@@ -472,65 +478,56 @@ class PluginManager {
     required String subtitle,
   }) {
     final colors = Theme.of(context).colorScheme;
-    return Material(
-      color: colors.surfaceContainerLow,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onPressed,
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerHighest.withOpacity(0.35),
         borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: colors.primary.withOpacity(0.15),
-              width: 1,
-            ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: colors.primary.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: colors.outline.withOpacity(0.08)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(9),
+                  decoration: BoxDecoration(
+                    color: colors.primary.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, size: 20, color: colors.primary),
                 ),
-                child: Icon(
-                  icon,
-                  size: 22,
-                  color: colors.primary,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: colors.onSurface,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AzyXText(
+                        text: title,
+                        fontVariant: FontVariant.bold,
+                        fontSize: 14,
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
+                      const SizedBox(height: 2),
+                      AzyXText(
+                        text: subtitle,
                         fontSize: 11,
-                        color: colors.onSurfaceVariant.withOpacity(0.8),
+                        color: colors.onSurfaceVariant,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 16,
-                color: colors.onSurfaceVariant.withOpacity(0.5),
-              ),
-            ],
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: colors.onSurfaceVariant.withOpacity(0.5),
+                ),
+              ],
+            ),
           ),
         ),
       ),

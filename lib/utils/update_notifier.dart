@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:get/utils.dart';
@@ -96,199 +99,179 @@ class UpdateNotifier extends GetxController {
     }
   }
 
-  static Map<String, List<String>> _parseChangelog(String changelog) {
-    Map<String, List<String>> parsedChanges = {};
-    List<String> sections = changelog.split(
-      RegExp(r'(?<=\r\n)\*\*[^*]+(?=\*\*)'),
-    );
-    for (var section in sections) {
-      if (section.trim().isEmpty) continue;
-      List<String> lines = section
-          .split('\r\n')
-          .where((line) => line.isNotEmpty)
-          .toList();
-      String header = lines.first.trim();
-      List<String> body = lines
-          .sublist(1)
-          .map(
-            (line) => line
-                .replaceAll(RegExp(r'https?:\/\/\S+'), '')
-                .replaceAll(RegExp(r'[#*`\[\]]'), '')
-                .trim(),
-          )
-          .where((line) => line.isNotEmpty)
-          .toList();
-      parsedChanges[header] = body;
-    }
-    return parsedChanges;
-  }
-
   static void _showUpdateBottomSheet(
     BuildContext context,
     String changelog,
     String name,
   ) {
-    Map<String, List<String>> parsedChanges = _parseChangelog(changelog);
-    List<String> headers = parsedChanges.keys.toList();
+    final colors = Theme.of(context).colorScheme;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.5,
-          padding: const EdgeInsets.all(20),
+          height: MediaQuery.of(context).size.height * 0.68,
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(15),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 10,
-                spreadRadius: 1,
-              ),
-            ],
+            color: colors.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            border: Border.all(color: colors.outline.withOpacity(0.08)),
           ),
-          child: Column(
-            children: [
-              const Text(
-                'Update Available',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: "Poppins-Bold",
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                name,
-                style: const TextStyle(fontFamily: 'Poppins-SemiBold'),
-              ),
-              const SizedBox(height: 10),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: headers.map((header) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.circle,
-                                  size: 10,
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  header
-                                      .replaceAll('**', '')
-                                      .replaceAll('#', ''),
-                                  style: const TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                              ],
-                            ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            child: AzyXGradientContainer(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: colors.outline.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: colors.primary.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          SizedBox(
-                            height: 200,
-                            child: ListView.builder(
-                              physics: const BouncingScrollPhysics(),
-                              itemCount: parsedChanges[header]?.length ?? 0,
-                              itemBuilder: (context, index) {
-                                final change = parsedChanges[header]![index];
-                                return Padding(
-                                  padding: const EdgeInsets.only(
-                                    left: 20,
-                                    top: 5,
-                                  ),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Padding(
-                                        padding: EdgeInsets.only(
-                                          top: 5,
-                                          right: 8,
-                                        ),
-                                        child: Icon(
-                                          Icons.circle,
-                                          size: 6,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: Text(
-                                          change.split(':').last,
-                                          style: const TextStyle(fontSize: 14),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
+                          child: Icon(
+                            Icons.system_update_rounded,
+                            color: colors.primary,
+                            size: 22,
                           ),
-                        ],
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Divider(thickness: 1),
-              const SizedBox(height: 15),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        backgroundColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          side: BorderSide(
-                            color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const AzyXText(
+                                text: 'App Update Available',
+                                fontVariant: FontVariant.bold,
+                                fontSize: 18,
+                              ),
+                              const SizedBox(height: 2),
+                              AzyXText(
+                                text: name.isNotEmpty
+                                    ? name
+                                    : 'New Version Released',
+                                fontSize: 13,
+                                fontVariant: FontVariant.bold,
+                                color: colors.primary,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const AzyXText(
+                      text: "WHAT'S NEW",
+                      fontSize: 11,
+                      fontVariant: FontVariant.bold,
+                    ),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: colors.surfaceContainerHighest.withOpacity(
+                            0.35,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: colors.outline.withOpacity(0.08),
+                          ),
+                        ),
+                        child: SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          child: MarkdownBody(
+                            data: changelog.isNotEmpty
+                                ? changelog
+                                : 'A new update for AzyX is available with performance improvements and bug fixes.',
+                            styleSheet: MarkdownStyleSheet(
+                              p: TextStyle(
+                                fontSize: 13,
+                                color: colors.onSurfaceVariant,
+                              ),
+                              h1: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: colors.onSurface,
+                              ),
+                              h2: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: colors.onSurface,
+                              ),
+                              listBullet: TextStyle(color: colors.primary),
+                            ),
                           ),
                         ),
                       ),
-                      child: const Text('Cancel'),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        launchUrl(
-                          Uri.parse(
-                            'https://github.com/reyyuuki/AzyX/releases/latest',
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 13),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            onPressed: () => Navigator.pop(context),
+                            child: AzyXText(
+                              text: 'Later',
+                              color: colors.onSurfaceVariant,
+                              fontVariant: FontVariant.bold,
+                            ),
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
                         ),
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Colors.black,
-                      ),
-                      child: const Text('Update'),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: colors.primary,
+                              foregroundColor: colors.onPrimary,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 13),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            onPressed: () {
+                              launchUrl(
+                                Uri.parse(
+                                  'https://github.com/reyyuuki/AzyX/releases/latest',
+                                ),
+                              );
+                            },
+                            child: const AzyXText(
+                              text: 'Update Now',
+                              fontVariant: FontVariant.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
         );
       },

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
     hide isar;
 import 'package:azyx/Controllers/source/source_controller.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
@@ -116,6 +117,7 @@ class DownloadRunTimeApk {
       alreadyDownloaded =
           !force && AnymeXRuntimeBridge.controller.isReady.value;
     }
+    if (!context.mounted) return false;
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -219,7 +221,7 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
       insetPadding: const EdgeInsets.symmetric(horizontal: 24),
       child: Container(
         decoration: BoxDecoration(
-          color: theme.surface,
+          color: theme.surfaceContainerHighest.withOpacity(0.95),
           borderRadius: BorderRadius.circular(28),
           border: Border.all(color: theme.outline.withOpacity(0.12), width: 1),
           boxShadow: [
@@ -232,22 +234,24 @@ class _ApkDownloadDialogState extends State<_ApkDownloadDialog>
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(28),
-          child: Padding(
-            padding: const EdgeInsets.all(28),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildHeader(theme),
-                28.height,
-                if (_status == _DownloadStatus.alreadyExists)
-                  _buildAlreadyExists(theme),
-                if (_status == _DownloadStatus.confirm) _buildConfirm(theme),
-                if (_status == _DownloadStatus.downloading ||
-                    _status == _DownloadStatus.done ||
-                    _status == _DownloadStatus.error ||
-                    _status == _DownloadStatus.cancelled)
-                  _buildProgress(theme),
-              ],
+          child: AzyXGradientContainer(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildHeader(theme),
+                  24.height,
+                  if (_status == _DownloadStatus.alreadyExists)
+                    _buildAlreadyExists(theme),
+                  if (_status == _DownloadStatus.confirm) _buildConfirm(theme),
+                  if (_status == _DownloadStatus.downloading ||
+                      _status == _DownloadStatus.done ||
+                      _status == _DownloadStatus.error ||
+                      _status == _DownloadStatus.cancelled)
+                    _buildProgress(theme),
+                ],
+              ),
             ),
           ),
         ),
