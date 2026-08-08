@@ -5,6 +5,7 @@ import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:provider/provider.dart';
+
 class AzyXGradientContainer extends StatelessWidget {
   final Widget child;
   final double? height;
@@ -44,7 +45,7 @@ class AzyXGradientContainer extends StatelessWidget {
                     ]
                   : [
                       Theme.of(context).colorScheme.surface,
-                      Theme.of(context).colorScheme.surface,
+                      Theme.of(context).colorScheme.primary.withAlpha(45),
                     ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
