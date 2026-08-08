@@ -10,6 +10,7 @@ class ThemeSetting extends StatefulWidget {
   @override
   State<ThemeSetting> createState() => _ThemeSettingState();
 }
+
 class _ThemeSettingState extends State<ThemeSetting> {
   @override
   Widget build(BuildContext context) {
@@ -18,24 +19,24 @@ class _ThemeSettingState extends State<ThemeSetting> {
       body: AzyXGradientContainer(
         child: ListView(
           physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.only(bottom: 30),
           children: const [
-            CustomAppBar(title: "Theme Settings",icon: Broken.brush,),
+            CustomAppBar(
+              title: "Theme Settings",
+              icon: Broken.brush,
+            ),
             Padding(
-              padding: EdgeInsets.all(12),
+              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               child: ThemeModes(),
             ),
-            SizedBox(
-              height: 20,
-            ),
             Padding(
-              padding: EdgeInsets.all(12),
+              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               child: ThemeColor(),
             ),
-            SizedBox(height: 20,),
             Padding(
-              padding: EdgeInsets.all(12),
+              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               child: CustomColor(),
-            )
+            ),
           ],
         ),
       ),

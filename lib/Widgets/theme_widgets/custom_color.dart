@@ -1,5 +1,4 @@
 import 'package:azyx/Providers/theme_provider.dart';
-import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/theme_widgets/custom_color_template.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
@@ -33,51 +32,71 @@ class _ThemeModesState extends State<CustomColor> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ThemeProvider>(context);
-    return AzyXContainer(
-      width: MediaQuery.of(context).size.width,
-      decoration: BoxDecoration(boxShadow: [
-        BoxShadow(blurRadius: 10, color: Colors.black.withOpacity(0.6))
-      ], borderRadius: BorderRadius.circular(20)),
+    final theme = Theme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.35),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.08),
+        ),
+      ),
       child: Column(
         children: [
-          AzyXContainer(
-            decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(20))),
-            child: const ListTile(
-              leading: Icon(Broken.color_swatch),
-              title: AzyXText(
-                text: "Custom Color",
-               fontVariant: FontVariant.bold,
-              ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.tertiary.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  child: Icon(
+                    Broken.color_swatch,
+                    size: 18,
+                    color: theme.colorScheme.tertiary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const AzyXText(
+                  text: "Custom Seed Color",
+                  fontVariant: FontVariant.bold,
+                  fontSize: 14,
+                ),
+              ],
             ),
           ),
-          AzyXContainer(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-            decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerLowest,
-                borderRadius:
-                    const BorderRadius.vertical(bottom: Radius.circular(20))),
+          Divider(
+            height: 1,
+            indent: 48,
+            endIndent: 14,
+            color: theme.colorScheme.outline.withOpacity(0.1),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12),
             child: SizedBox(
-              height: 190,
+              height: 160,
               child: ListView.builder(
                 shrinkWrap: true,
                 physics: const BouncingScrollPhysics(),
                 scrollDirection: Axis.horizontal,
                 itemCount: colors.length,
                 itemBuilder: (context, index) {
+                  final isSelected = colors[index]['name'] == provider.colorName;
                   return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          provider.updateSeedColor(colors[index]['name']);
-                        });
-                      },
-                      child: CustomColorTemplate(
-                          color: colors[index]['color'],
-                          isBorder:
-                              colors[index]['color'] == provider.seedColor,
-                          name: colors[index]['name']));
+                    onTap: () {
+                      setState(() {
+                        provider.updateSeedColor(colors[index]['name']);
+                      });
+                    },
+                    child: CustomColorTemplate(
+                      color: colors[index]['color'],
+                      isBorder: isSelected,
+                      name: colors[index]['name'],
+                    ),
+                  );
                 },
               ),
             ),

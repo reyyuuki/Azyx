@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:ui';
 import 'package:azyx/Providers/theme_provider.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
@@ -12,6 +11,7 @@ class ThemeColor extends StatefulWidget {
   @override
   State<ThemeColor> createState() => _ThemeModesState();
 }
+
 class _ThemeModesState extends State<ThemeColor> {
   String? seedColor;
   List<String> paletteList = [
@@ -25,109 +25,163 @@ class _ThemeModesState extends State<ThemeColor> {
     "TonalSpot",
     "Vibrant",
   ];
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ThemeProvider>(context);
+    final theme = Theme.of(context);
     seedColor = provider.colorName;
-    return AzyXContainer(
-      width: MediaQuery.of(context).size.width,
+    return Container(
       decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(blurRadius: 10, color: Colors.black.withOpacity(0.6)),
-        ],
-        borderRadius: BorderRadius.circular(20),
-        color: Theme.of(context).colorScheme.surface,
+        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.35),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.08),
+        ),
       ),
       child: Column(
         children: [
-          AzyXContainer(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(20),
-              ),
-            ),
-            child: const ListTile(
-              leading: Icon(Broken.designtools),
-              title: AzyXText(
-                text: "Customization",
-                fontVariant: FontVariant.bold,
-              ),
-            ),
-          ),
-          AzyXContainer(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerLowest,
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(20),
-              ),
-            ),
-            child: Column(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            child: Row(
               children: [
-                ListTile(
-                  leading: const Icon(Broken.colorfilter, size: 28),
-                  title: const AzyXText(
-                    text: "Dynamic Coloring",
-                    fontVariant: FontVariant.bold,
-                    fontSize: 14,
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.secondary.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(9),
                   ),
-                  subtitle: const AzyXText(
-                    text: "Automatically pick colors from current wallpaper",
-                    fontSize: 12,
-                  ),
-                  trailing: Switch(
-                    value: Provider.of<ThemeProvider>(context).isMaterial!,
-                    onChanged: (bool isTrue) {
-                      isTrue
-                          ? provider.loadDynamicColors()
-                          : provider.updateSeedColor(seedColor!);
-                    },
+                  child: Icon(
+                    Broken.designtools,
+                    size: 18,
+                    color: theme.colorScheme.secondary,
                   ),
                 ),
-                ListTile(
-                  leading: const Icon(Broken.brush_1, size: 28),
-                  title: const AzyXText(
-                    text: "Custom Coloring",
-                    fontVariant: FontVariant.bold,
-                    fontSize: 14,
-                  ),
-                  subtitle: const AzyXText(
-                    text: "Use custom color to change your vibe",
-                    fontSize: 12,
-                  ),
-                  trailing: Switch(
-                    value: !Provider.of<ThemeProvider>(
-                      context,
-                      listen: false,
-                    ).isMaterial!,
-                    onChanged: (bool isTrue) {
-                      log(isTrue.toString());
-                      isTrue
-                          ? provider.updateSeedColor(seedColor!)
-                          : provider.loadDynamicColors();
-                    },
-                  ),
-                ),
-                ListTile(
-                  leading: const Icon(Broken.paintbucket, size: 28),
-                  title: const AzyXText(
-                    text: "Palette Color",
-                    fontVariant: FontVariant.bold,
-                    fontSize: 14,
-                  ),
-                  subtitle: const AzyXText(
-                    text: "Use custom color to change your vibe",
-                    fontSize: 12,
-                  ),
-                  onTap: () {
-                    paletteBox(context);
-                  },
+                const SizedBox(width: 12),
+                const AzyXText(
+                  text: "Color Customization",
+                  fontVariant: FontVariant.bold,
+                  fontSize: 14,
                 ),
               ],
             ),
           ),
+          Divider(
+            height: 1,
+            indent: 48,
+            endIndent: 14,
+            color: theme.colorScheme.outline.withOpacity(0.1),
+          ),
+          _buildColorTile(
+            context,
+            title: "Dynamic Coloring",
+            subtitle: "Automatically pick colors from current wallpaper",
+            icon: Broken.colorfilter,
+            iconColor: theme.colorScheme.primary,
+            trailing: Switch(
+              value: provider.isMaterial!,
+              onChanged: (bool isTrue) {
+                isTrue
+                    ? provider.loadDynamicColors()
+                    : provider.updateSeedColor(seedColor!);
+              },
+            ),
+          ),
+          Divider(
+            height: 1,
+            indent: 48,
+            endIndent: 14,
+            color: theme.colorScheme.outline.withOpacity(0.1),
+          ),
+          _buildColorTile(
+            context,
+            title: "Custom Seed Coloring",
+            subtitle: "Use custom seed color to change your vibe",
+            icon: Broken.brush_1,
+            iconColor: theme.colorScheme.secondary,
+            trailing: Switch(
+              value: !provider.isMaterial!,
+              onChanged: (bool isTrue) {
+                isTrue
+                    ? provider.updateSeedColor(seedColor!)
+                    : provider.loadDynamicColors();
+              },
+            ),
+          ),
+          Divider(
+            height: 1,
+            indent: 48,
+            endIndent: 14,
+            color: theme.colorScheme.outline.withOpacity(0.1),
+          ),
+          _buildColorTile(
+            context,
+            title: "Palette Mode",
+            subtitle: "Select custom color palette profile (${provider.variant ?? "Vibrant"})",
+            icon: Broken.paintbucket,
+            iconColor: theme.colorScheme.tertiary,
+            onTap: () {
+              paletteBox(context);
+            },
+            trailing: Icon(
+              Icons.chevron_right_rounded,
+              size: 18,
+              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildColorTile(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color iconColor,
+    Widget? trailing,
+    VoidCallback? onTap,
+  }) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(7),
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(9),
+              ),
+              child: Icon(icon, size: 18, color: iconColor),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AzyXText(
+                    text: title,
+                    fontVariant: FontVariant.bold,
+                    fontSize: 14,
+                  ),
+                  const SizedBox(height: 2),
+                  AzyXText(
+                    text: subtitle,
+                    fontSize: 11,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            if (trailing != null) trailing,
+          ],
+        ),
       ),
     );
   }
@@ -194,7 +248,11 @@ class _ThemeModesState extends State<ThemeColor> {
                                       ).setPaletteColor(selectedPalette);
                                       Future.delayed(
                                         const Duration(milliseconds: 600),
-                                        () => Navigator.pop(context),
+                                        () {
+                                          if (context.mounted) {
+                                            Navigator.pop(context);
+                                          }
+                                        },
                                       );
                                     },
                                     child: AzyXContainer(

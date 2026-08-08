@@ -15,38 +15,45 @@ class CustomAppBar extends StatelessWidget {
       this.ontap});
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        IconButton(
-            onPressed: () {
-              Get.back();
-            },
-            icon: const Icon(
-              Broken.arrow_left_2,
-              size: 40,
-            )),
-        Padding(
-          padding: const EdgeInsets.all(15),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              AzyXText(
-                text: title,
-                fontVariant: FontVariant.bold,
-                fontSize: size ?? 25,
+    return SafeArea(
+      bottom: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 4, top: 4),
+            child: IconButton(
+              onPressed: () {
+                Get.back();
+              },
+              icon: const Icon(
+                Broken.arrow_left_2,
+                size: 28,
               ),
-              GestureDetector(
-                onTap: ontap,
-                child: Icon(
-                  icon,
-                  size: 35,
-                ),
-              )
-            ],
+            ),
           ),
-        )
-      ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                AzyXText(
+                  text: title,
+                  fontVariant: FontVariant.bold,
+                  fontSize: size ?? 24,
+                ),
+                GestureDetector(
+                  onTap: ontap,
+                  child: Icon(
+                    icon,
+                    size: 28,
+                  ),
+                )
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 }
