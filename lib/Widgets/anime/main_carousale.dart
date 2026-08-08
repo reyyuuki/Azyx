@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:azyx/Controllers/ui_setting_controller.dart';
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Models/media.dart';
 import 'package:azyx/Screens/Anime/Details/anime_details_screen.dart';
@@ -9,6 +10,7 @@ import 'package:azyx/Widgets/common/shimmer_effect.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class MainCarousale extends StatefulWidget {
@@ -197,43 +199,47 @@ class _HeroCardContent extends StatelessWidget {
 
     final rating = _parseRating(anime.rating);
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: colorScheme.outline.withOpacity(0.12),
-            width: 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.28),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
+    return Obx(() {
+      final rMult = uiSettingController.radiusMultiplier;
+      final cardRadius = (18.0 * rMult).clamp(4.0, 36.0);
+
+      return GestureDetector(
+        onTap: onTap,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(cardRadius),
+            border: Border.all(
+              color: colorScheme.outline.withOpacity(0.12),
+              width: 1.0,
             ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(18),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              CachedNetworkImage(
-                imageUrl: bgUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                placeholder: (_, __) => Container(
-                  color: colorScheme.surfaceContainerHighest,
-                  child: const ShimmerEffect(
-                    height: 195,
-                    width: double.infinity,
-                  ),
-                ),
-                errorWidget: (_, __, ___) =>
-                    Container(color: colorScheme.surfaceContainerHighest),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.28),
+                blurRadius: 14,
+                offset: const Offset(0, 6),
               ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(cardRadius),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                CachedNetworkImage(
+                  imageUrl: bgUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  placeholder: (_, __) => Container(
+                    color: colorScheme.surfaceContainerHighest,
+                    child: const ShimmerEffect(
+                      height: 195,
+                      width: double.infinity,
+                    ),
+                  ),
+                  errorWidget: (_, __, ___) =>
+                      Container(color: colorScheme.surfaceContainerHighest),
+                ),
               DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -399,6 +405,7 @@ class _HeroCardContent extends StatelessWidget {
         ),
       ),
     );
+  });
   }
 
   Widget _buildDot() {

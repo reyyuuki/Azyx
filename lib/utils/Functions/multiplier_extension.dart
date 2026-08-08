@@ -10,6 +10,9 @@ extension Multiplier on num {
   double spreadMultiplier() {
     return uiSettingController.spreadMultiplier * this;
   }
+  double radiusMultiplier() {
+    return uiSettingController.radiusMultiplier * this;
+  }
 }
 extension SizeExtension on num {
   SizedBox get height => SizedBox(height: toDouble());
