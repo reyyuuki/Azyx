@@ -4,7 +4,6 @@ import 'dart:math' as show;
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/models/online_service.dart';
-import 'package:azyx/Controllers/source/source_mapper.dart';
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
@@ -18,7 +17,6 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/anime/anime_scrollable_list.dart';
 import 'package:azyx/Widgets/anime/main_carousale.dart';
 import 'package:azyx/Widgets/common_cards.dart';
-import 'package:azyx/Widgets/common/community_scrollable_list.dart';
 import 'package:azyx/Widgets/header.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:azyx/utils/functions.dart';
@@ -193,10 +191,26 @@ class MalService extends GetxController implements BaseService, OnlineService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (auth) {
-          final rep = await get(
-            Uri.parse('https://api.jikan.moe/v4/users/${data['name']}/full'),
-          );
-          return jsonDecode(rep.body)..['picture'] = data['picture'];
+          try {
+            final rep = await get(
+              Uri.parse('https://api.jikan.moe/v4/users/${data['name']}/full'),
+            );
+            if (rep.statusCode == 200) {
+              final decoded = jsonDecode(rep.body);
+              if (decoded is Map<String, dynamic>) {
+                return decoded..['picture'] = data['picture'];
+              }
+            }
+          } catch (e) {
+            log('Error fetching Jikan profile stats: $e');
+          }
+          return {
+            'data': {
+              'mal_id': data['id'],
+              'username': data['name'],
+            },
+            'picture': data['picture'],
+          };
         }
         return data;
       } else {
@@ -345,7 +359,7 @@ class MalService extends GetxController implements BaseService, OnlineService {
   }
   Future<AnilistMediaData> fetchWithToken(String url) async {
     const newField =
-        "fields=mean,status,media_type,synopsis,genres,type,num_episodes,num_chapters,start_date,end_date,source,rating,rank,popularity,favorites,statistics,recommendations,alternative_titles";
+        "fields=mean,status,media_type,synopsis,genres,type,num_episodes,num_chapters,start_date,end_date,source,rating,rank,popularity,favorites,statistics,recommendations,alternative_titles,studios,start_season,average_episode_duration,authors,pictures";
     final data = await fetchMAL('$url?$newField') as Map<String, dynamic>;
     return AnilistMediaData.fromMAL(data);
   }
@@ -386,14 +400,14 @@ class MalService extends GetxController implements BaseService, OnlineService {
                       title: "Currently Reading",
                     ),
                   ),
-                topUpcoming.value.isEmpty
+                topUpcoming.isEmpty
                     ? const Center(child: LoadingIndicatorM3E())
                     : AnimeScrollableList(
                         animeList: topUpcoming,
                         isManga: false,
                         title: "Upcoming Animes",
                       ),
-                trendingM.value.isEmpty
+                trendingM.isEmpty
                     ? const Center(child: LoadingIndicatorM3E())
                     : AnimeScrollableList(
                         animeList: trendingM,
@@ -414,8 +428,8 @@ class MalService extends GetxController implements BaseService, OnlineService {
     AuthKeys.malRefreshToken.set('');
     userData.value = User();
     isLoggedIn.value = false;
-    userAnimeList.value.clear();
-    userMangaList.value.clear();
+    userAnimeList.clear();
+    userMangaList.clear();
   }
   @override
   Rx<Widget> mangaWidgets(BuildContext context) => Obx(

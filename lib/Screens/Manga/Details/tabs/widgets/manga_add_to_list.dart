@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
+
 class MangaAddToList extends StatelessWidget {
   final int? index;
   final OfflineItem data;
@@ -23,49 +24,45 @@ class MangaAddToList extends StatelessWidget {
     required this.mediaData,
     required this.isLoading,
   });
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Obx(() {
       final isLoggedIn = serviceHandler.userData.value.name != null;
       return Container(
-        margin: const EdgeInsets.only(bottom: 28, left: 20, right: 20),
-        height: 70,
+        margin: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
+        height: 64,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: colorScheme.outlineVariant.withOpacity(0.15),
-            width: 0.5,
+            color: colorScheme.outline.withOpacity(0.12),
+            width: 0.8,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.35),
-              blurRadius: 24,
-              spreadRadius: -4,
-              offset: const Offset(0, 10),
-            ),
-            BoxShadow(
-              color: colorScheme.primary.withOpacity(0.06),
-              blurRadius: 40,
-              spreadRadius: -8,
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 20,
+              spreadRadius: -2,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHigh.withOpacity(0.88),
-                borderRadius: BorderRadius.circular(24),
+                color: colorScheme.surfaceContainerHighest.withOpacity(0.85),
+                borderRadius: BorderRadius.circular(20),
               ),
               child: isLoading.value
                   ? Center(
                       child: SizedBox(
-                        width: 24,
-                        height: 24,
+                        width: 22,
+                        height: 22,
                         child: LoadingIndicatorM3E(color: colorScheme.primary),
                       ),
                     )
@@ -100,6 +97,7 @@ class MangaAddToList extends StatelessWidget {
       );
     });
   }
+
   void _openLibrarySheet(BuildContext context) {
     HapticFeedback.mediumImpact();
     final theme = Theme.of(context);
@@ -115,38 +113,38 @@ class MangaAddToList extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 12),
               Container(
-                width: 40,
+                width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: colorScheme.onSurfaceVariant.withOpacity(0.25),
+                  color: colorScheme.onSurfaceVariant.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 18),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(14),
+                        color: colorScheme.primary.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         IonIcons.bookmarks,
                         color: colorScheme.primary,
-                        size: 20,
+                        size: 18,
                       ),
                     ),
-                    const SizedBox(width: 14),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,7 +152,7 @@ class MangaAddToList extends StatelessWidget {
                           Text(
                             "Manga Collections",
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.w800,
                               color: colorScheme.onSurface,
                             ),
@@ -174,9 +172,9 @@ class MangaAddToList extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               Divider(
-                color: colorScheme.outlineVariant.withOpacity(0.3),
+                color: colorScheme.outline.withOpacity(0.08),
                 height: 1,
               ),
               const SizedBox(height: 8),
@@ -238,6 +236,7 @@ class MangaAddToList extends StatelessWidget {
       },
     );
   }
+
   void _showCreateDialog(BuildContext context) {
     final controller = TextEditingController();
     final colorScheme = Theme.of(context).colorScheme;
@@ -245,17 +244,17 @@ class MangaAddToList extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: colorScheme.surfaceContainerHigh,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
-        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+        contentPadding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
         actionsPadding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
         title: Row(
           children: [
-            Icon(EvaIcons.plus_circle, color: colorScheme.primary, size: 24),
-            const SizedBox(width: 12),
+            Icon(EvaIcons.plus_circle, color: colorScheme.primary, size: 22),
+            const SizedBox(width: 10),
             const Text(
               "New Collection",
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
             ),
           ],
         ),
@@ -263,7 +262,7 @@ class MangaAddToList extends StatelessWidget {
           controller: controller,
           autofocus: true,
           textCapitalization: TextCapitalization.words,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
           decoration: InputDecoration(
             hintText: "e.g. Reading List",
             hintStyle: TextStyle(
@@ -271,14 +270,14 @@ class MangaAddToList extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
             filled: true,
-            fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.6),
+            fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.5),
             border: OutlineInputBorder(
               borderSide: BorderSide.none,
               borderRadius: BorderRadius.circular(14),
             ),
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
+              horizontal: 14,
+              vertical: 12,
             ),
           ),
         ),
@@ -286,7 +285,7 @@ class MangaAddToList extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -307,7 +306,7 @@ class MangaAddToList extends StatelessWidget {
               }
             },
             style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -322,6 +321,7 @@ class MangaAddToList extends StatelessWidget {
     );
   }
 }
+
 class _LibraryButton extends StatelessWidget {
   final bool isCompact;
   final VoidCallback onTap;
@@ -334,14 +334,14 @@ class _LibraryButton extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeOutCubic,
-        height: 54,
-        padding: EdgeInsets.symmetric(horizontal: isCompact ? 0 : 20),
+        height: 48,
+        padding: EdgeInsets.symmetric(horizontal: isCompact ? 0 : 16),
         decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest.withOpacity(0.7),
-          borderRadius: BorderRadius.circular(18),
+          color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: colorScheme.outlineVariant.withOpacity(0.12),
-            width: 0.5,
+            color: colorScheme.outline.withOpacity(0.08),
+            width: 0.8,
           ),
         ),
         child: Row(
@@ -350,41 +350,40 @@ class _LibraryButton extends StatelessWidget {
           children: [
             if (isCompact)
               SizedBox(
-                width: 54,
-                child: Icon(
-                  IonIcons.bookmarks,
-                  color: colorScheme.primary,
-                  size: 20,
-                ),
-              )
-            else ...[
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: colorScheme.primary.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                width: 48,
                 child: Icon(
                   IonIcons.bookmarks,
                   color: colorScheme.primary,
                   size: 18,
                 ),
-              ),
-              const SizedBox(width: 14),
-              const Text(
-                "Save to Library",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.3,
-                  fontSize: 15,
+              )
+            else ...[
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  IonIcons.bookmarks,
+                  color: colorScheme.primary,
+                  size: 16,
                 ),
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 12),
+              Text(
+                "Save to Library",
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(width: 4),
               Icon(
                 Icons.arrow_forward_ios_rounded,
                 color: colorScheme.onSurfaceVariant.withOpacity(0.5),
-                size: 14,
+                size: 12,
               ),
             ],
           ],
@@ -394,6 +393,7 @@ class _LibraryButton extends StatelessWidget {
     return isCompact ? child : Expanded(child: child);
   }
 }
+
 class _AddToListButton extends StatelessWidget {
   final AnilistMediaData mediaData;
   final VoidCallback onTap;
@@ -404,23 +404,15 @@ class _AddToListButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 54,
+        height: 48,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              colorScheme.primary,
-              colorScheme.primary.withOpacity(0.82),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(18),
+          color: colorScheme.primary,
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: colorScheme.primary.withOpacity(0.35),
-              blurRadius: 14,
-              spreadRadius: -3,
-              offset: const Offset(0, 6),
+              color: colorScheme.primary.withOpacity(0.25),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -437,17 +429,17 @@ class _AddToListButton extends StatelessWidget {
                   hasStatus ? Icons.check_circle_rounded : Icons.add_rounded,
                   key: ValueKey(hasStatus),
                   color: colorScheme.onPrimary,
-                  size: hasStatus ? 19 : 22,
+                  size: hasStatus ? 18 : 20,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Text(
                 (status ?? "Add to List").toUpperCase(),
                 style: TextStyle(
                   color: colorScheme.onPrimary,
                   fontWeight: FontWeight.w800,
-                  letterSpacing: 0.5,
-                  fontSize: 13,
+                  letterSpacing: 0.4,
+                  fontSize: 12,
                 ),
               ),
             ],
@@ -457,6 +449,7 @@ class _AddToListButton extends StatelessWidget {
     );
   }
 }
+
 class _CollectionTile extends StatelessWidget {
   final String name;
   final RxBool isSelected;
@@ -466,67 +459,68 @@ class _CollectionTile extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
   });
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Obx(
       () => AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        margin: const EdgeInsets.symmetric(vertical: 4),
+        margin: const EdgeInsets.symmetric(vertical: 3),
         decoration: BoxDecoration(
           color: isSelected.value
-              ? colorScheme.primaryContainer.withOpacity(0.35)
-              : colorScheme.surfaceContainer.withOpacity(0.6),
-          borderRadius: BorderRadius.circular(16),
+              ? colorScheme.primary.withOpacity(0.12)
+              : colorScheme.surfaceContainerHighest.withOpacity(0.35),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected.value
                 ? colorScheme.primary.withOpacity(0.3)
-                : Colors.transparent,
-            width: 1,
+                : colorScheme.outline.withOpacity(0.08),
+            width: 0.8,
           ),
         ),
         child: ListTile(
           onTap: onTap,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
           ),
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 2,
+            horizontal: 14,
+            vertical: 0,
           ),
           leading: Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
               color: isSelected.value
                   ? colorScheme.primary.withOpacity(0.15)
-                  : colorScheme.surfaceContainerHighest.withOpacity(0.6),
-              borderRadius: BorderRadius.circular(10),
+                  : colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               EvaIcons.folder,
               color: isSelected.value
                   ? colorScheme.primary
                   : colorScheme.onSurfaceVariant,
-              size: 20,
+              size: 18,
             ),
           ),
           title: Text(
             name,
             style: TextStyle(
               fontWeight: FontWeight.w700,
-              fontSize: 14,
+              fontSize: 13,
               color: isSelected.value
                   ? colorScheme.onSurface
                   : colorScheme.onSurfaceVariant,
             ),
           ),
           trailing: SizedBox(
-            width: 22,
-            height: 22,
+            width: 20,
+            height: 20,
             child: CheckMark(
               active: isSelected.value,
               activeColor: colorScheme.primary,
-              strokeWidth: 2.5,
+              strokeWidth: 2.2,
               curve: Curves.easeOutCubic,
               duration: const Duration(milliseconds: 300),
             ),
@@ -536,6 +530,7 @@ class _CollectionTile extends StatelessWidget {
     );
   }
 }
+
 class _CreateCollectionTile extends StatelessWidget {
   final VoidCallback onTap;
   const _CreateCollectionTile({required this.onTap});
@@ -543,41 +538,40 @@ class _CreateCollectionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
+      margin: const EdgeInsets.symmetric(vertical: 3),
       child: ListTile(
         onTap: onTap,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           side: BorderSide(
-            color: colorScheme.outline.withOpacity(0.2),
-            width: 1,
-            strokeAlign: BorderSide.strokeAlignInside,
+            color: colorScheme.outline.withOpacity(0.12),
+            width: 0.8,
           ),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
         leading: Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(7),
           decoration: BoxDecoration(
             color: colorScheme.primary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             EvaIcons.plus_circle,
             color: colorScheme.primary,
-            size: 20,
+            size: 18,
           ),
         ),
         title: Text(
           "Create New Collection",
           style: TextStyle(
             fontWeight: FontWeight.w700,
-            fontSize: 14,
+            fontSize: 13,
             color: colorScheme.primary,
           ),
         ),
         trailing: Icon(
           Icons.arrow_forward_ios_rounded,
-          size: 14,
+          size: 12,
           color: colorScheme.primary.withOpacity(0.6),
         ),
       ),

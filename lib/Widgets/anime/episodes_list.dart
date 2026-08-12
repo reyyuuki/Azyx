@@ -8,11 +8,8 @@ import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Models/anime_all_data.dart';
 import 'package:azyx/Screens/Anime/Watch/watch_screen.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
-import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
-import 'package:azyx/Widgets/anime/episode_bottom_sheet.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';
-import 'package:azyx/utils/Functions/multiplier_extension.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -170,20 +167,20 @@ class EpisodesList extends StatelessWidget {
           },
           child: Container(
             height: 105,
-            margin: const EdgeInsets.only(bottom: 10),
+            margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainer.withOpacity(0.6),
-              borderRadius: BorderRadius.circular(16),
+              color: colorScheme.surfaceContainerHighest.withOpacity(0.35),
+              borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: colorScheme.outlineVariant.withOpacity(0.1),
-                width: 0.5,
+                color: colorScheme.outline.withOpacity(0.12),
+                width: 0.8,
               ),
             ),
             child: Row(
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.horizontal(
-                    left: Radius.circular(16),
+                    left: Radius.circular(18),
                   ),
                   child: SizedBox(
                     width: 140,
@@ -197,18 +194,24 @@ class EpisodesList extends StatelessWidget {
                           placeholder: (context, url) =>
                               const ShimmerEffect(height: 105, width: 140),
                         ),
-                        Container(color: Colors.black.withOpacity(0.25)),
+                        Container(color: Colors.black.withOpacity(0.3)),
                         Center(
                           child: Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.45),
+                              color: colorScheme.primary.withOpacity(0.85),
                               shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colorScheme.primary.withOpacity(0.4),
+                                  blurRadius: 10,
+                                ),
+                              ],
                             ),
                             child: const Icon(
                               Icons.play_arrow_rounded,
                               color: Colors.white,
-                              size: 22,
+                              size: 20,
                             ),
                           ),
                         ),
@@ -232,10 +235,12 @@ class EpisodesList extends StatelessWidget {
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: colorScheme.primaryContainer.withOpacity(
-                              0.4,
+                            color: colorScheme.primary.withOpacity(0.18),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: colorScheme.primary.withOpacity(0.3),
+                              width: 0.8,
                             ),
-                            borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             'Episode ${episode.number}',
@@ -262,7 +267,7 @@ class EpisodesList extends StatelessWidget {
                   padding: const EdgeInsets.only(right: 12),
                   child: Icon(
                     Icons.chevron_right_rounded,
-                    color: colorScheme.onSurfaceVariant.withOpacity(0.35),
+                    color: colorScheme.onSurfaceVariant.withOpacity(0.5),
                     size: 22,
                   ),
                 ),
@@ -502,61 +507,7 @@ class _StreamEpisodeSheetState extends State<StreamEpisodeSheet> {
     );
   }
 }
-class _StreamSheetLoading extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final bool compact;
-  const _StreamSheetLoading({
-    required this.title,
-    required this.subtitle,
-    this.compact = false,
-  });
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      margin: EdgeInsets.only(bottom: compact ? 0 : 12),
-      padding: EdgeInsets.symmetric(
-        horizontal: compact ? 14 : 18,
-        vertical: compact ? 12 : 18,
-      ),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withOpacity(0.35),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.12)),
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 22,
-            height: 22,
-            child: LoadingIndicatorM3E(color: colorScheme.primary),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AzyXText(
-                  text: title,
-                  fontSize: 14,
-                  fontVariant: FontVariant.bold,
-                  color: colorScheme.onSurface,
-                ),
-                const SizedBox(height: 2),
-                AzyXText(
-                  text: subtitle,
-                  fontSize: 12,
-                  color: colorScheme.onSurfaceVariant.withOpacity(0.75),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+
 class _StreamSheetMessage extends StatelessWidget {
   final IconData icon;
   final String title;

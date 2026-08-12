@@ -2,6 +2,7 @@ import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_mapper.dart';
 import 'package:isar_community/isar.dart';
 part 'anime_details_data.g.dart';
+
 @embedded
 class AnilistMediaData {
   String? id;
@@ -19,6 +20,15 @@ class AnilistMediaData {
   int? timeUntilAiring;
   List<String>? genres;
   List<String>? synonyms;
+  List<String>? studios;
+  String? season;
+  int? duration;
+  String? source;
+  String? startDate;
+  String? endDate;
+  String? trailerUrl;
+  String? trailerThumbnail;
+  List<String>? pictures;
   List<Character>? characters;
   List<AnilistMediaData>? relations;
   List<AnilistMediaData>? recommendations;
@@ -42,6 +52,15 @@ class AnilistMediaData {
     this.timeUntilAiring,
     this.genres,
     this.synonyms,
+    this.studios,
+    this.season,
+    this.duration,
+    this.source,
+    this.startDate,
+    this.endDate,
+    this.trailerUrl,
+    this.trailerThumbnail,
+    this.pictures,
     this.characters,
     this.relations,
     this.recommendations,
@@ -53,10 +72,32 @@ class AnilistMediaData {
     bool isManga = false,
   }) {
     final altTitles = json['alternative_titles'] as Map<String, dynamic>?;
+    final seasonMap = json['start_season'] as Map<String, dynamic>?;
+    final studioList = (json['studios'] as List?)
+        ?.map((e) => e['name'].toString())
+        .toList();
+
+    String? seasonStr;
+    if (seasonMap != null && seasonMap['season'] != null) {
+      seasonStr =
+          "${seasonMap['season'].toString().toUpperCase()} ${seasonMap['year'] ?? ''}"
+              .trim();
+    }
+
+    int? durationMins;
+    if (json['average_episode_duration'] != null) {
+      durationMins = (json['average_episode_duration'] as int) ~/ 60;
+    }
+
+    final picsList = (json['pictures'] as List?)
+        ?.map((e) => (e['large'] ?? e['medium'])?.toString())
+        .whereType<String>()
+        .toList();
+
     return AnilistMediaData(
       id: json['id']?.toString() ?? '',
       title: json['title'] ?? '??',
-      titleRomaji: altTitles?['ja']?.toString(),
+      titleRomaji: altTitles?['ja']?.toString() ?? altTitles?['en']?.toString(),
       titleNative: altTitles?['ja']?.toString(),
       image: json['main_picture']?['large'] ?? json['main_picture']?['medium'],
       coverImage: json['main_picture']?['large'],
@@ -72,6 +113,13 @@ class AnilistMediaData {
       synonyms: (altTitles?['synonyms'] as List?)
           ?.map((e) => e.toString())
           .toList(),
+      studios: studioList,
+      season: seasonStr,
+      duration: durationMins,
+      source: json['source']?.toString().replaceAll('_', ' ').toUpperCase(),
+      startDate: json['start_date']?.toString(),
+      endDate: json['end_date']?.toString(),
+      pictures: picsList,
     );
   }
   factory AnilistMediaData.fromSimkl(
@@ -112,6 +160,7 @@ class AnilistMediaData {
       'mediaType': mediaType?.name,
     };
   }
+
   factory AnilistMediaData.fromJson(
     Map<String, dynamic> json, [
     bool isManga = false,
@@ -138,6 +187,56 @@ class AnilistMediaData {
     } else {
       image = json['image']?.toString() ?? coverImageJson?.toString();
     }
+    final studiosJson = json['studios'];
+    List<String>? studios;
+    if (studiosJson is Map && studiosJson['nodes'] is List) {
+      studios = (studiosJson['nodes'] as List)
+          .map((e) => e['name'].toString())
+          .toList();
+    } else if (studiosJson is List) {
+      studios = studiosJson.map((e) => e.toString()).toList();
+    }
+
+    final seasonVal = json['season']?.toString();
+    final seasonYr = json['seasonYear']?.toString();
+    String? seasonStr;
+    if (seasonVal != null) {
+      seasonStr = "$seasonVal ${seasonYr ?? ''}".trim().toUpperCase();
+    }
+
+    final trailerMap = json['trailer'] as Map<String, dynamic>?;
+    String? trailerUrl;
+    String? trailerThumbnail;
+    if (trailerMap != null &&
+        trailerMap['site'] == 'youtube' &&
+        trailerMap['id'] != null) {
+      final ytId = trailerMap['id'].toString().trim();
+      if (ytId.isNotEmpty) {
+        trailerUrl = "https://www.youtube.com/watch?v=$ytId";
+        final thumbFromApi = trailerMap['thumbnail']?.toString().trim();
+        trailerThumbnail = (thumbFromApi != null && thumbFromApi.isNotEmpty)
+            ? thumbFromApi
+            : "https://img.youtube.com/vi/$ytId/hqdefault.jpg";
+      }
+    }
+
+    final picsList = <String>[];
+    if (json['bannerImage'] != null &&
+        json['bannerImage'].toString().isNotEmpty) {
+      picsList.add(json['bannerImage'].toString());
+    }
+    if (image != null && image.isNotEmpty && !picsList.contains(image)) {
+      picsList.add(image);
+    }
+    if (json['pictures'] is List) {
+      for (final p in (json['pictures'] as List)) {
+        final url = (p is Map ? (p['large'] ?? p['medium']) : p)?.toString();
+        if (url != null && url.isNotEmpty && !picsList.contains(url)) {
+          picsList.add(url);
+        }
+      }
+    }
+
     return AnilistMediaData(
       id: json['id']?.toString(),
       episodes: json['episodes'],
@@ -154,6 +253,19 @@ class AnilistMediaData {
       timeUntilAiring: json['timeUntilAiring'],
       genres: (json['genres'] as List?)?.map((e) => e.toString()).toList(),
       synonyms: (json['synonyms'] as List?)?.map((e) => e.toString()).toList(),
+      studios: studios,
+      season: seasonStr,
+      duration: json['duration'],
+      source: json['source']?.toString().replaceAll('_', ' ').toUpperCase(),
+      startDate: json['startDate'] is Map
+          ? "${json['startDate']['year']}-${json['startDate']['month']}-${json['startDate']['day']}"
+          : json['startDate']?.toString(),
+      endDate: json['endDate'] is Map
+          ? "${json['endDate']['year']}-${json['endDate']['month']}-${json['endDate']['day']}"
+          : json['endDate']?.toString(),
+      trailerUrl: trailerUrl,
+      trailerThumbnail: trailerThumbnail,
+      pictures: picsList.isNotEmpty ? picsList : null,
       characters: (json['characters']?['edges'] as List?)
           ?.map((e) => Character.fromJson(e['node']))
           .toList(),
@@ -182,6 +294,7 @@ class AnilistMediaData {
     );
   }
 }
+
 @embedded
 class Character {
   String? image;

@@ -3,9 +3,12 @@ import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/anime/anime_scrollable_list.dart';
 import 'package:azyx/Widgets/anime/characters_list.dart';
+import 'package:azyx/Widgets/common/shimmer_effect.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:icons_plus/icons_plus.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+
 class DetailsSection extends StatelessWidget {
   final Rx<AnilistMediaData> mediaData;
   final int index;
@@ -22,71 +25,37 @@ class DetailsSection extends StatelessWidget {
     this.chapterList,
     this.episodesList,
   });
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 16),
-          Center(
-            child: AzyXText(
-              text: mediaData.value.title ?? 'N/A',
-              fontSize: 26,
-              fontVariant: FontVariant.bold,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 22),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _StatChip(
-                icon: EvaIcons.star,
-                value: mediaData.value.rating ?? 'N/A',
-                bgColor: colorScheme.tertiaryContainer,
-                fgColor: colorScheme.onTertiaryContainer,
-              ),
-              const SizedBox(width: 10),
-              _StatChip(
-                icon: EvaIcons.heart,
-                value: _formatPopularity(mediaData.value.popularity),
-                bgColor: colorScheme.errorContainer,
-                fgColor: colorScheme.onErrorContainer,
-              ),
-              const SizedBox(width: 10),
-              _StatChip(
-                icon: EvaIcons.activity,
-                value: mediaData.value.status ?? 'N/A',
-                bgColor: colorScheme.primaryContainer,
-                fgColor: colorScheme.onPrimaryContainer,
-              ),
-            ],
-          ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 12),
           if (mediaData.value.genres != null &&
               mediaData.value.genres!.isNotEmpty)
-            Center(
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                alignment: WrapAlignment.center,
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
                 children: mediaData.value.genres!.map((genre) {
                   return Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 7,
+                      horizontal: 12,
+                      vertical: 6,
                     ),
+                    margin: const EdgeInsets.only(right: 8),
                     decoration: BoxDecoration(
                       color: colorScheme.surfaceContainerHighest.withOpacity(
-                        0.45,
+                        0.35,
                       ),
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: colorScheme.outlineVariant.withOpacity(0.12),
-                        width: 0.5,
+                        color: colorScheme.outline.withOpacity(0.08),
+                        width: 1,
                       ),
                     ),
                     child: AzyXText(
@@ -99,21 +68,30 @@ class DetailsSection extends StatelessWidget {
                 }).toList(),
               ),
             ),
-          const SizedBox(height: 26),
+          const SizedBox(height: 22),
           if (mediaData.value.description != null)
             _ExpandableDescription(description: mediaData.value.description!),
-          const SizedBox(height: 30),
+          if (mediaData.value.trailerUrl != null &&
+              mediaData.value.trailerUrl!.isNotEmpty)
+            _TrailerCard(
+              trailerUrl: mediaData.value.trailerUrl!,
+              thumbnail: mediaData.value.trailerThumbnail,
+              fallbackImage:
+                  mediaData.value.coverImage ?? mediaData.value.image,
+            ),
+          _MediaInfoGrid(media: mediaData.value),
+          const SizedBox(height: 24),
           CharactersList(
             characterList: mediaData.value.characters ?? [],
             title: "Characters",
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           AnimeScrollableList(
             isManga: isManga,
             animeList: mediaData.value.relations ?? [],
             title: "Related",
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           AnimeScrollableList(
             isManga: isManga,
             animeList: mediaData.value.recommendations ?? [],
@@ -123,46 +101,123 @@ class DetailsSection extends StatelessWidget {
       ),
     );
   }
-  String _formatPopularity(int? number) {
-    if (number == null) return 'N/A';
-    if (number >= 1000000) {
-      return '${(number / 1000000).toStringAsFixed(1)}M';
-    }
-    if (number >= 1000) return '${(number / 1000).toStringAsFixed(1)}K';
-    return number.toString();
-  }
 }
-class _StatChip extends StatelessWidget {
-  final IconData icon;
-  final String value;
-  final Color bgColor;
-  final Color fgColor;
-  const _StatChip({
-    required this.icon,
-    required this.value,
-    required this.bgColor,
-    required this.fgColor,
-  });
+
+class _MediaInfoGrid extends StatelessWidget {
+  final AnilistMediaData media;
+  const _MediaInfoGrid({required this.media});
+
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final studiosText = media.studios != null && media.studios!.isNotEmpty
+        ? media.studios!.join(', ')
+        : null;
+    final seasonText = media.season;
+    final durationText = media.duration != null
+        ? '${media.duration} mins'
+        : null;
+    final sourceText = media.source;
+
+    if (studiosText == null &&
+        seasonText == null &&
+        durationText == null &&
+        sourceText == null) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(top: 20),
       decoration: BoxDecoration(
-        color: bgColor.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: bgColor.withOpacity(0.25), width: 0.5),
+        color: colorScheme.surfaceContainerHighest.withOpacity(0.35),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.1),
+          width: 1,
+        ),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: fgColor, size: 15),
-          const SizedBox(width: 6),
-          Text(
-            value,
-            style: TextStyle(
-              color: fgColor,
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
+          const AzyXText(
+            text: "Studio Details",
+            fontSize: 15,
+            fontVariant: FontVariant.bold,
+          ),
+          const SizedBox(height: 14),
+          if (studiosText != null)
+            _InfoTile(
+              label: "Studio",
+              value: studiosText,
+              icon: Icons.movie_creation_outlined,
+            ),
+          if (seasonText != null)
+            _InfoTile(
+              label: "Season",
+              value: seasonText,
+              icon: Icons.calendar_today_outlined,
+            ),
+          if (durationText != null)
+            _InfoTile(
+              label: "Duration",
+              value: durationText,
+              icon: Icons.timer_outlined,
+            ),
+          if (sourceText != null)
+            _InfoTile(
+              label: "Source",
+              value: sourceText,
+              icon: Icons.menu_book_outlined,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoTile extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  const _InfoTile({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(icon, size: 16, color: colorScheme.primary),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AzyXText(
+                  text: label,
+                  fontSize: 11,
+                  color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+                ),
+                const SizedBox(height: 2),
+                AzyXText(
+                  text: value,
+                  fontSize: 13,
+                  fontVariant: FontVariant.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ],
             ),
           ),
         ],
@@ -170,14 +225,125 @@ class _StatChip extends StatelessWidget {
     );
   }
 }
+
+class _TrailerCard extends StatelessWidget {
+  final String trailerUrl;
+  final String? thumbnail;
+  final String? fallbackImage;
+  const _TrailerCard({
+    required this.trailerUrl,
+    this.thumbnail,
+    this.fallbackImage,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final primaryThumb = (thumbnail != null && thumbnail!.isNotEmpty)
+        ? thumbnail!
+        : (fallbackImage != null && fallbackImage!.isNotEmpty)
+        ? fallbackImage!
+        : '';
+
+    return GestureDetector(
+      onTap: () =>
+          launchUrlString(trailerUrl, mode: LaunchMode.externalApplication),
+      child: Container(
+        margin: const EdgeInsets.only(top: 20),
+        height: 140,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: colorScheme.outline.withOpacity(0.12),
+            width: 1,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (primaryThumb.isNotEmpty)
+                CachedNetworkImage(
+                  imageUrl: primaryThumb,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) =>
+                      const ShimmerEffect(height: 140, width: double.infinity),
+                  errorWidget: (context, url, error) {
+                    if (fallbackImage != null &&
+                        fallbackImage!.isNotEmpty &&
+                        primaryThumb != fallbackImage) {
+                      return CachedNetworkImage(
+                        imageUrl: fallbackImage!,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => const ShimmerEffect(
+                          height: 140,
+                          width: double.infinity,
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: colorScheme.surfaceContainerHighest,
+                        ),
+                      );
+                    }
+                    return Container(
+                      color: colorScheme.surfaceContainerHighest,
+                    );
+                  },
+                )
+              else
+                Container(color: colorScheme.surfaceContainerHighest),
+              Container(color: Colors.black.withOpacity(0.45)),
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.primary.withOpacity(0.5),
+                            blurRadius: 12,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.play_arrow_rounded,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const AzyXText(
+                      text: "Watch Official Trailer",
+                      fontVariant: FontVariant.bold,
+                      fontSize: 14,
+                      color: Colors.white,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ExpandableDescription extends StatefulWidget {
   final String description;
   const _ExpandableDescription({required this.description});
   @override
   State<_ExpandableDescription> createState() => _ExpandableDescriptionState();
 }
+
 class _ExpandableDescriptionState extends State<_ExpandableDescription> {
   bool _expanded = false;
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -185,42 +351,31 @@ class _ExpandableDescriptionState extends State<_ExpandableDescription> {
       onTap: () => setState(() => _expanded = !_expanded),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.fromLTRB(18, 18, 18, 10),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerLow.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(16),
+          color: colorScheme.surfaceContainerHighest.withOpacity(0.35),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: colorScheme.outlineVariant.withOpacity(0.12),
-            width: 0.5,
+            color: colorScheme.outline.withOpacity(0.08),
+            width: 1,
           ),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AnimatedSize(
-              duration: const Duration(milliseconds: 350),
-              curve: Curves.easeInOut,
-              alignment: Alignment.topCenter,
-              child: AzyXText(
-                text: widget.description,
-                fontSize: 14,
-                fontVariant: FontVariant.regular,
-                maxLines: _expanded ? 100 : 4,
-                color: colorScheme.onSurfaceVariant,
-              ),
+            AzyXText(
+              text: widget.description,
+              maxLines: _expanded ? 100 : 3,
+              overflow: TextOverflow.ellipsis,
+              fontSize: 13,
+              color: colorScheme.onSurfaceVariant.withOpacity(0.9),
             ),
             const SizedBox(height: 6),
-            Center(
-              child: AnimatedRotation(
-                turns: _expanded ? 0.5 : 0.0,
-                duration: const Duration(milliseconds: 300),
-                child: Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: colorScheme.primary,
-                  size: 22,
-                ),
-              ),
+            Icon(
+              _expanded
+                  ? Icons.keyboard_arrow_up_rounded
+                  : Icons.keyboard_arrow_down_rounded,
+              color: colorScheme.primary,
+              size: 20,
             ),
           ],
         ),

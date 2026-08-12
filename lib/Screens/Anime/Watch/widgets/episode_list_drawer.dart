@@ -118,9 +118,10 @@ class EpisodeListDrawer extends StatelessWidget {
                     physics: const BouncingScrollPhysics(),
                     itemCount: filteredEpisodes.length,
                     itemBuilder: (context, index) {
-                      final image = filteredEpisodes[index].thumbnail == null
-                          ? animeData.value.image
-                          : filteredEpisodes[index].thumbnail!;
+                      final String rawImg = (filteredEpisodes[index].thumbnail != null && filteredEpisodes[index].thumbnail!.isNotEmpty)
+                          ? filteredEpisodes[index].thumbnail!
+                          : (animeData.value.image ?? '');
+                      final bool validUrl = rawImg.isNotEmpty && (rawImg.startsWith('http://') || rawImg.startsWith('https://'));
                       return GestureDetector(
                         onTap: () => ontap(filteredEpisodes[index]),
                         child: Container(
@@ -130,11 +131,13 @@ class EpisodeListDrawer extends StatelessWidget {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(10),
-                                child: CachedNetworkImage(
-                                  imageUrl: image!,
-                                  fit: BoxFit.cover,
-                                  height: 150,
-                                ),
+                                child: validUrl
+                                    ? CachedNetworkImage(
+                                        imageUrl: rawImg,
+                                        fit: BoxFit.cover,
+                                        height: 150,
+                                      )
+                                    : Container(color: Colors.black26),
                               ),
                               Positioned.fill(
                                 child: AzyXContainer(
@@ -166,12 +169,14 @@ class EpisodeListDrawer extends StatelessWidget {
                                             const BorderRadius.horizontal(
                                               left: Radius.circular(10),
                                             ),
-                                        child: CachedNetworkImage(
-                                          height: 150,
-                                          width: 180,
-                                          imageUrl: image,
-                                          fit: BoxFit.cover,
-                                        ),
+                                        child: validUrl
+                                            ? CachedNetworkImage(
+                                                height: 150,
+                                                width: 180,
+                                                imageUrl: rawImg,
+                                                fit: BoxFit.cover,
+                                              )
+                                            : Container(width: 180, height: 150, color: Colors.black26),
                                       ),
                                       const SizedBox(width: 10),
                                       Expanded(

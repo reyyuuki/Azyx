@@ -115,7 +115,14 @@ class _WatchSectionState extends State<ReadSection> {
           onChanged: (value) {
             if (value != null) {
               final matched = sourceController.installedMangaExtensions
-                  .firstWhere((i) => "${i.name}_${i.extensionType}" == value);
+                  .firstWhere(
+                    (i) =>
+                        i.id.toString() == value ||
+                        "${i.name}_${i.id}" == value ||
+                        i.name == value,
+                    orElse: () =>
+                        sourceController.installedMangaExtensions.first,
+                  );
               widget.onSourceChanged();
               sourceController.activeMangaSource.value = matched;
               sourceController.setActiveSource(matched);

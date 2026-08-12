@@ -1,5 +1,4 @@
 import 'package:anymex_extension_runtime_bridge/Models/Video.dart';
-import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -18,40 +17,59 @@ class EpisodeBottomSheet extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-    return AzyXGradientContainer(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-      height: 350,
-      child: ListView(
-        physics: const BouncingScrollPhysics(),
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLow,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      height: 360,
+      child: Column(
         children: [
+          Center(
+            child: Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colorScheme.onSurfaceVariant.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           AzyXText(
-            text: "Select Quality",
-            fontSize: 25,
+            text: "Select Server / Quality",
+            fontSize: 18,
             fontVariant: FontVariant.bold,
-            color: Theme.of(context).colorScheme.primary,
+            color: colorScheme.onSurface,
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 15),
-          Obx(
-            () => hasError.value
-                ? Image.asset('assets/images/sticker.png', fit: BoxFit.contain)
-                : episodeUrls.isEmpty
-                ? Container(
-                    alignment: Alignment.center,
-                    height: 250,
-                    child: const LoadingIndicatorM3E(),
-                  )
-                : Column(
-                    children: episodeUrls.map<Widget>((item) {
-                      return serverAzyXContainer(
-                        context,
-                        item.title ?? 'Unknown',
-                        item.url,
-                        number,
-                      );
-                    }).toList(),
-                  ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: Obx(
+              () => hasError.value
+                  ? Center(
+                      child: Image.asset(
+                        'assets/images/sticker.png',
+                        fit: BoxFit.contain,
+                      ),
+                    )
+                  : episodeUrls.isEmpty
+                  ? const Center(child: LoadingIndicatorM3E())
+                  : ListView(
+                      physics: const BouncingScrollPhysics(),
+                      children: episodeUrls.map<Widget>((item) {
+                        return serverAzyXContainer(
+                          context,
+                          item.title ?? 'Unknown',
+                          item.url,
+                          number,
+                        );
+                      }).toList(),
+                    ),
+            ),
           ),
         ],
       ),

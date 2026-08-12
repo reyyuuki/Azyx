@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
+
 class CommentsSection extends StatefulWidget {
   final String mediaId;
   final String mediaTitle;
@@ -21,8 +22,10 @@ class CommentsSection extends StatefulWidget {
   @override
   State<CommentsSection> createState() => _CommentsSectionState();
 }
+
 class _CommentsSectionState extends State<CommentsSection> {
-  final CommentsBackendService _commentsService = Get.find<CommentsBackendService>();
+  final CommentsBackendService _commentsService =
+      Get.find<CommentsBackendService>();
   final ServiceHandler serviceHandler = Get.find<ServiceHandler>();
   final TextEditingController _commentController = TextEditingController();
   final FocusNode _commentFocusNode = FocusNode();
@@ -34,12 +37,14 @@ class _CommentsSectionState extends State<CommentsSection> {
     super.initState();
     _loadComments();
   }
+
   @override
   void dispose() {
     _commentController.dispose();
     _commentFocusNode.dispose();
     super.dispose();
   }
+
   Future<void> _loadComments() async {
     _isLoading.value = true;
     try {
@@ -48,6 +53,7 @@ class _CommentsSectionState extends State<CommentsSection> {
     } catch (_) {}
     _isLoading.value = false;
   }
+
   Future<void> _handleSubmit() async {
     final text = _commentController.text.trim();
     if (text.isEmpty) return;
@@ -87,6 +93,7 @@ class _CommentsSectionState extends State<CommentsSection> {
       }
     }
   }
+
   Future<void> _toggleLike(Comment comment) async {
     final commentId = int.tryParse(comment.id) ?? 0;
     if (commentId == 0) return;
@@ -110,46 +117,63 @@ class _CommentsSectionState extends State<CommentsSection> {
       _comments.refresh();
     }
   }
+
   Widget _buildCommentCard(Comment comment, {bool isReply = false}) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final hasAvatar = comment.avatarUrl != null && comment.avatarUrl!.isNotEmpty;
+    final hasAvatar =
+        comment.avatarUrl != null && comment.avatarUrl!.isNotEmpty;
     return Container(
       margin: EdgeInsets.only(bottom: isReply ? 8 : 12),
       decoration: BoxDecoration(
-        color: isReply ? colors.surfaceContainerLowest.withOpacity(0.5) : colors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
+        color: isReply
+            ? colors.surfaceContainerHighest.withOpacity(0.2)
+            : colors.surfaceContainerHighest.withOpacity(0.35),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: colors.primary.withOpacity(isReply ? 0.04 : 0.08),
-          width: 1.0,
+          color: colors.outline.withOpacity(isReply ? 0.06 : 0.1),
+          width: 0.8,
         ),
       ),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: 14,
-                backgroundImage: hasAvatar ? CachedNetworkImageProvider(comment.avatarUrl!) : null,
-                backgroundColor: colors.primary.withOpacity(0.1),
-                child: !hasAvatar
-                    ? Text(
-                        comment.username.isNotEmpty ? comment.username[0].toUpperCase() : 'U',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: colors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
-                    : null,
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: colors.primary.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: CircleAvatar(
+                  radius: 14,
+                  backgroundImage: hasAvatar
+                      ? CachedNetworkImageProvider(comment.avatarUrl!)
+                      : null,
+                  backgroundColor: colors.primary.withOpacity(0.12),
+                  child: !hasAvatar
+                      ? Text(
+                          comment.username.isNotEmpty
+                              ? comment.username[0].toUpperCase()
+                              : 'U',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: colors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
+                ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Expanded(
                 child: AzyXText(
                   text: comment.username,
-                  fontSize: 12,
+                  fontSize: 13,
                   fontVariant: FontVariant.bold,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -158,7 +182,7 @@ class _CommentsSectionState extends State<CommentsSection> {
               Text(
                 _formatTime(comment.createdAt),
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 11,
                   color: colors.onSurfaceVariant.withOpacity(0.6),
                 ),
               ),
@@ -166,68 +190,112 @@ class _CommentsSectionState extends State<CommentsSection> {
           ),
           const SizedBox(height: 8),
           Padding(
-            padding: const EdgeInsets.only(left: 4),
+            padding: const EdgeInsets.only(left: 2),
             child: AzyXText(
               text: comment.commentText,
-              fontSize: 12.5,
+              fontSize: 13,
               color: colors.onSurface,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 10),
           Row(
             children: [
-              IconButton(
-                icon: Icon(
-                  comment.userVote == 1 ? Icons.thumb_up_rounded : Icons.thumb_up_outlined,
-                  size: 14,
-                  color: comment.userVote == 1 ? colors.primary : colors.onSurfaceVariant.withOpacity(0.6),
+              InkWell(
+                onTap: () => _toggleLike(comment),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: comment.userVote == 1
+                        ? colors.primary.withOpacity(0.18)
+                        : colors.surfaceContainerHighest.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: comment.userVote == 1
+                          ? colors.primary.withOpacity(0.3)
+                          : colors.outline.withOpacity(0.08),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        comment.userVote == 1
+                            ? Icons.thumb_up_rounded
+                            : Icons.thumb_up_outlined,
+                        size: 13,
+                        color: comment.userVote == 1
+                            ? colors.primary
+                            : colors.onSurfaceVariant.withOpacity(0.7),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        '${comment.likes}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: comment.userVote == 1
+                              ? colors.primary
+                              : colors.onSurfaceVariant.withOpacity(0.7),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: () => _toggleLike(comment),
               ),
-              const SizedBox(width: 4),
-              Text(
-                '${comment.likes}',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: colors.onSurfaceVariant.withOpacity(0.6),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(width: 16),
-              GestureDetector(
+              const SizedBox(width: 8),
+              InkWell(
                 onTap: () {
                   setState(() {
                     _replyingTo = comment;
                   });
                   _commentFocusNode.requestFocus();
                 },
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.reply_rounded,
-                      size: 14,
-                      color: colors.onSurfaceVariant.withOpacity(0.6),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerHighest.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: colors.outline.withOpacity(0.08),
+                      width: 0.8,
                     ),
-                    const SizedBox(width: 4),
-                    Text(
-                      "Reply",
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: colors.onSurfaceVariant.withOpacity(0.6),
-                        fontWeight: FontWeight.bold,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.reply_rounded,
+                        size: 13,
+                        color: colors.onSurfaceVariant.withOpacity(0.7),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 5),
+                      Text(
+                        "Reply",
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: colors.onSurfaceVariant.withOpacity(0.7),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
           if (comment.replies.isNotEmpty) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Padding(
-              padding: const EdgeInsets.only(left: 16),
+              padding: const EdgeInsets.only(left: 14),
               child: Column(
                 children: comment.replies
                     .map((reply) => _buildCommentCard(reply, isReply: true))
@@ -239,6 +307,7 @@ class _CommentsSectionState extends State<CommentsSection> {
       ),
     );
   }
+
   String _formatTime(String dateStr) {
     try {
       final dt = DateTime.parse(dateStr);
@@ -250,14 +319,16 @@ class _CommentsSectionState extends State<CommentsSection> {
     } catch (_) {}
     return 'Just now';
   }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final currentUser = serviceHandler.userData.value;
-    final hasUserAvatar = currentUser.avatar != null && currentUser.avatar!.isNotEmpty;
+    final hasUserAvatar =
+        currentUser.avatar != null && currentUser.avatar!.isNotEmpty;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -270,32 +341,51 @@ class _CommentsSectionState extends State<CommentsSection> {
                 fontSize: 18,
                 fontVariant: FontVariant.bold,
               ),
-              Obx(() => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: colors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
+              Obx(
+                () => Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.primary.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: colors.primary.withOpacity(0.3),
+                      width: 0.8,
                     ),
-                    child: AzyXText(
-                      text: "${_comments.length} Comments",
-                      fontSize: 11,
-                      fontVariant: FontVariant.bold,
-                      color: colors.primary,
-                    ),
-                  )),
+                  ),
+                  child: AzyXText(
+                    text: "${_comments.length} Comments",
+                    fontSize: 11,
+                    fontVariant: FontVariant.bold,
+                    color: colors.primary,
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
           if (_replyingTo != null) ...[
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
                 color: colors.secondaryContainer.withOpacity(0.4),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: colors.secondary.withOpacity(0.2),
+                  width: 0.8,
+                ),
               ),
               child: Row(
                 children: [
+                  Icon(
+                    Icons.reply_rounded,
+                    size: 16,
+                    color: colors.onSecondaryContainer,
+                  ),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Replying to @${_replyingTo!.username}',
@@ -314,7 +404,7 @@ class _CommentsSectionState extends State<CommentsSection> {
                     },
                     child: Icon(
                       Icons.close_rounded,
-                      size: 16,
+                      size: 18,
                       color: colors.onSecondaryContainer,
                     ),
                   ),
@@ -323,41 +413,46 @@ class _CommentsSectionState extends State<CommentsSection> {
             ),
           ],
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: colors.surfaceContainerLow,
+              color: colors.surfaceContainerHighest.withOpacity(0.35),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: colors.primary.withOpacity(0.12),
-                width: 1.2,
+                color: colors.outline.withOpacity(0.12),
+                width: 0.8,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: colors.shadow.withOpacity(0.02),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundImage: hasUserAvatar ? CachedNetworkImageProvider(currentUser.avatar!) : null,
-                  backgroundColor: colors.primary.withOpacity(0.1),
-                  child: !hasUserAvatar
-                      ? Text(
-                          currentUser.name != null && currentUser.name!.isNotEmpty
-                              ? currentUser.name![0].toUpperCase()
-                              : 'U',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: colors.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      : null,
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: colors.primary.withOpacity(0.2),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: CircleAvatar(
+                    radius: 17,
+                    backgroundImage: hasUserAvatar
+                        ? CachedNetworkImageProvider(currentUser.avatar!)
+                        : null,
+                    backgroundColor: colors.primary.withOpacity(0.15),
+                    child: !hasUserAvatar
+                        ? Text(
+                            currentUser.name != null &&
+                                    currentUser.name!.isNotEmpty
+                                ? currentUser.name![0].toUpperCase()
+                                : 'U',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: colors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        : null,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -369,10 +464,7 @@ class _CommentsSectionState extends State<CommentsSection> {
                         focusNode: _commentFocusNode,
                         maxLines: 3,
                         minLines: 1,
-                        style: TextStyle(
-                          color: colors.onSurface,
-                          fontSize: 13,
-                        ),
+                        style: TextStyle(color: colors.onSurface, fontSize: 13),
                         decoration: InputDecoration(
                           hintText: "Join the discussion...",
                           hintStyle: TextStyle(
@@ -380,10 +472,29 @@ class _CommentsSectionState extends State<CommentsSection> {
                             fontSize: 13,
                           ),
                           filled: true,
-                          fillColor: colors.surfaceContainerLowest,
+                          fillColor: colors.surfaceContainerLowest.withOpacity(
+                            0.6,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
+                            borderSide: BorderSide(
+                              color: colors.outline.withOpacity(0.08),
+                              width: 0.8,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(
+                              color: colors.outline.withOpacity(0.08),
+                              width: 0.8,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(
+                              color: colors.primary.withOpacity(0.4),
+                              width: 1,
+                            ),
                           ),
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 14,
@@ -391,18 +502,18 @@ class _CommentsSectionState extends State<CommentsSection> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: _handleSubmit,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colors.primary,
                           foregroundColor: colors.onPrimary,
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
+                            horizontal: 18,
                             vertical: 8,
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(18),
                           ),
                           elevation: 0,
                         ),
@@ -416,8 +527,8 @@ class _CommentsSectionState extends State<CommentsSection> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(width: 4),
-                            Icon(Icons.send_rounded, size: 12),
+                            SizedBox(width: 6),
+                            Icon(Icons.send_rounded, size: 13),
                           ],
                         ),
                       ),
@@ -448,7 +559,9 @@ class _CommentsSectionState extends State<CommentsSection> {
               );
             }
             return Column(
-              children: _comments.map((comment) => _buildCommentCard(comment)).toList(),
+              children: _comments
+                  .map((comment) => _buildCommentCard(comment))
+                  .toList(),
             );
           }),
         ],

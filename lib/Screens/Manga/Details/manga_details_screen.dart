@@ -24,6 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../utils/utils.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
+
 class MangaDetailsScreen extends StatefulWidget {
   final String tagg;
   final CarousaleData? smallMedia;
@@ -39,6 +40,7 @@ class MangaDetailsScreen extends StatefulWidget {
   @override
   State<MangaDetailsScreen> createState() => _DetailsScreenState();
 }
+
 class _DetailsScreenState extends State<MangaDetailsScreen>
     with SingleTickerProviderStateMixin {
   final RxString title = ''.obs;
@@ -74,6 +76,7 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
     }
     await loadDetails();
   }
+
   void getMediaStatus() {
     if (serviceHandler.isLoggedIn.value) {
       serviceHandler.currentMedia.value = serviceHandler.userMangaList
@@ -84,6 +87,7 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
     }
     Utils.log('st; ${serviceHandler.currentMedia.value.status} / $id');
   }
+
   Future<void> _syncMedia() async {
     final response = await MediaSyncer.mapMediaId(
       id.value.toString(),
@@ -92,6 +96,7 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
     syncId.value = response ?? '';
     Utils.log('MAL ${syncId.value} / ${id.value}');
   }
+
   void convertData() {
     if (widget.isOffline) {
       anilistAddToListController.findManga(widget.allData!.mediaData!);
@@ -120,6 +125,7 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
       loadData();
     }
   }
+
   Future<void> getChapters(String link) async {
     final token = "manga_detail_${id.value}";
     sourceController.updateToken('manga_detail', token);
@@ -146,6 +152,7 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
       isFetchingChapters.value = false;
     }
   }
+
   Future<void> loadDetails() async {
     isFetchingChapters.value = true;
     _extenstionError.value = false;
@@ -170,28 +177,34 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
       isFetchingChapters.value = false;
     }
   }
+
   List<String> formatTitles(AnilistMediaData media) {
     return [media.title ?? '', media.titleRomaji ?? ''];
   }
+
   @override
   void initState() {
     super.initState();
     final length = sourceController.installedMangaExtensions.isNotEmpty ? 3 : 2;
     _tabBarController = TabController(length: length, vsync: this);
     _tabBarController.addListener(() {
-      if (_tabBarController.indexIsChanging) {
+      if (_tabBarController.index != _currentIndex.value) {
         _currentIndex.value = _tabBarController.index;
-        pageController.animateToPage(
-          _tabBarController.index,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
+        if (pageController.hasClients &&
+            pageController.page?.round() != _tabBarController.index) {
+          pageController.animateToPage(
+            _tabBarController.index,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
       }
     });
     _syncMedia();
     convertData();
     getMediaStatus();
   }
+
   @override
   void dispose() {
     _tabBarController.dispose();
@@ -201,6 +214,7 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
     SourceMapper.cancelMapping();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -231,43 +245,50 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
               tagg: widget.tagg,
             ),
             Container(
-              margin: const EdgeInsets.fromLTRB(24, 32, 24, 16),
-              height: 52,
+              margin: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+              height: 46,
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withOpacity(0.6),
-                borderRadius: BorderRadius.circular(26),
+                color: colorScheme.surfaceContainerHighest.withOpacity(0.35),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: colorScheme.outlineVariant.withOpacity(0.3),
-                  width: 0.5,
+                  color: colorScheme.outline.withOpacity(0.08),
+                  width: 1,
                 ),
               ),
               child: TabBar(
                 controller: _tabBarController,
-                splashBorderRadius: BorderRadius.circular(26),
+                onTap: (index) {
+                  _currentIndex.value = index;
+                  if (pageController.hasClients) {
+                    pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                },
+                splashBorderRadius: BorderRadius.circular(14),
                 indicatorSize: TabBarIndicatorSize.tab,
                 dividerColor: Colors.transparent,
-                indicatorPadding: const EdgeInsets.all(4),
+                indicatorPadding: const EdgeInsets.all(3),
                 indicator: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  color: colorScheme.primary.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(13),
+                  border: Border.all(
+                    color: colorScheme.primary.withOpacity(0.3),
+                    width: 0.8,
+                  ),
                 ),
                 labelColor: colorScheme.primary,
                 unselectedLabelColor: colorScheme.onSurfaceVariant,
                 labelStyle: TextStyle(
                   fontWeight: FontWeight.w700,
-                  fontSize: 14,
+                  fontSize: 13,
                   fontFamily: theme.textTheme.titleMedium?.fontFamily,
                 ),
                 unselectedLabelStyle: TextStyle(
                   fontWeight: FontWeight.w500,
-                  fontSize: 14,
+                  fontSize: 13,
                   fontFamily: theme.textTheme.titleMedium?.fontFamily,
                 ),
                 tabs: [
@@ -290,7 +311,7 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
                                   text: _anilistError.value,
                                   textAlign: TextAlign.center,
                                   fontSize: 20,
-                                  )
+                                )
                               : const LoadingIndicatorM3E(),
                         )
                       : DetailsSection(
@@ -346,6 +367,7 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
                 ),
               ],
             ),
+            const SizedBox(height: 120),
           ],
         ),
       ),

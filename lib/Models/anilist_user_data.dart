@@ -7,15 +7,16 @@ class User {
   int? episodesWatched;
   int? minutesWatched;
   int? chaptersRead;
-  User(
-      {this.name,
-      this.id,
-      this.avatar,
-      this.animeCount,
-      this.mangaCount,
-      this.episodesWatched,
-      this.minutesWatched,
-      this.chaptersRead});
+  User({
+    this.name,
+    this.id,
+    this.avatar,
+    this.animeCount,
+    this.mangaCount,
+    this.episodesWatched,
+    this.minutesWatched,
+    this.chaptersRead,
+  });
   factory User.fromJson(dynamic data) {
     return User(
       name: data['name'],
@@ -29,19 +30,20 @@ class User {
     );
   }
   factory User.fromMAL(Map<String, dynamic> json) {
-    final animeStats = json['data']?['statistics']['anime'];
-    final mangaStats = json['data']?['statistics']['manga'];
+    final animeStats = json['data']?['statistics']?['anime'];
+    final mangaStats = json['data']?['statistics']?['manga'];
     return User(
       id: json['data']?['mal_id'],
       name: json['data']?['username'],
-      avatar: json['picture'] ??
+      avatar:
+          json['picture'] ??
           json['data']?['images']?['jpg']?['image_url'] ??
           json['data']?['images']?['webp']?['image_url'],
-      animeCount: animeStats['count'],
-      mangaCount: mangaStats['count'],
-      episodesWatched: animeStats['episodeWatched'],
-      minutesWatched: animeStats['minutesWatched'],
-      chaptersRead: mangaStats['chaptersRead'],
+      animeCount: animeStats?['count'],
+      mangaCount: mangaStats?['count'],
+      episodesWatched: animeStats?['episodeWatched'],
+      minutesWatched: animeStats?['minutesWatched'],
+      chaptersRead: mangaStats?['chaptersRead'],
     );
   }
 }

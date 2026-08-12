@@ -67,13 +67,16 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
     _tabBarController = TabController(length: length, vsync: this);
     _pageController = PageController();
     _tabBarController.addListener(() {
-      if (_tabBarController.indexIsChanging) {
+      if (_tabBarController.index != _currentIndex.value) {
         _currentIndex.value = _tabBarController.index;
-        _pageController.animateToPage(
-          _tabBarController.index,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOutCubicEmphasized,
-        );
+        if (_pageController.hasClients &&
+            _pageController.page?.round() != _tabBarController.index) {
+          _pageController.animateToPage(
+            _tabBarController.index,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOutCubicEmphasized,
+          );
+        }
       }
     });
     convertData();
@@ -331,43 +334,50 @@ class _DetailsScreenState extends State<AnimeDetailsScreen>
               tagg: widget.tagg,
             ),
             Container(
-              margin: const EdgeInsets.fromLTRB(24, 32, 24, 16),
-              height: 52,
+              margin: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+              height: 46,
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withOpacity(0.6),
-                borderRadius: BorderRadius.circular(26),
+                color: colorScheme.surfaceContainerHighest.withOpacity(0.35),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: colorScheme.outlineVariant.withOpacity(0.3),
-                  width: 0.5,
+                  color: colorScheme.outline.withOpacity(0.08),
+                  width: 1,
                 ),
               ),
               child: TabBar(
                 controller: _tabBarController,
-                splashBorderRadius: BorderRadius.circular(26),
+                onTap: (index) {
+                  _currentIndex.value = index;
+                  if (_pageController.hasClients) {
+                    _pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOutCubicEmphasized,
+                    );
+                  }
+                },
+                splashBorderRadius: BorderRadius.circular(14),
                 indicatorSize: TabBarIndicatorSize.tab,
                 dividerColor: Colors.transparent,
-                indicatorPadding: const EdgeInsets.all(4),
+                indicatorPadding: const EdgeInsets.all(3),
                 indicator: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  color: colorScheme.primary.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(13),
+                  border: Border.all(
+                    color: colorScheme.primary.withOpacity(0.3),
+                    width: 0.8,
+                  ),
                 ),
                 labelColor: colorScheme.primary,
                 unselectedLabelColor: colorScheme.onSurfaceVariant,
                 labelStyle: TextStyle(
                   fontWeight: FontWeight.w700,
-                  fontSize: 14,
+                  fontSize: 13,
                   fontFamily: theme.textTheme.titleMedium?.fontFamily,
                 ),
                 unselectedLabelStyle: TextStyle(
                   fontWeight: FontWeight.w500,
-                  fontSize: 14,
+                  fontSize: 13,
                   fontFamily: theme.textTheme.titleMedium?.fontFamily,
                 ),
                 tabs: [

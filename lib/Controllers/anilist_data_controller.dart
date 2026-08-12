@@ -40,6 +40,25 @@ class AnilistDataController extends GetxController {
         status
         popularity
         genres
+        season
+        seasonYear
+        duration
+        source
+        startDate {
+          year
+          month
+          day
+        }
+        endDate {
+          year
+          month
+          day
+        }
+        trailer {
+          id
+          site
+          thumbnail
+        }
         studios {
           nodes {
             name
