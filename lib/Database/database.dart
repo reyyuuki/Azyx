@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:ffi';
 import 'dart:io';
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
     hide isar;
@@ -11,6 +12,7 @@ import 'package:isar_community/isar.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:win32/win32.dart';
 
 class Database {
   Future<void> init() async {
@@ -28,6 +30,11 @@ class Database {
       name: "AzyX",
       inspector: true,
     );
+    if (Platform.isWindows) {
+      try {
+        CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+      } catch (_) {}
+    }
     try {
       await AnymeXExtensionBridge.init(
         isarInstance: isar,
@@ -45,7 +52,7 @@ class Database {
             },
       );
     } catch (e) {
-      log('AnymeXExtensionBridge.init non-fatal warning: $e');
+      log('AnymeXExtensionBridge.init error: $e');
     }
   }
 

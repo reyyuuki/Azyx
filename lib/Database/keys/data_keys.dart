@@ -1,4 +1,12 @@
-enum ThemeKeys { seedColor, varient, isMaterial, isDarkMode, isLightMode }
+enum ThemeKeys {
+  seedColor,
+  varient,
+  isMaterial,
+  isDarkMode,
+  isLightMode,
+  customHexColor,
+  darkSurfaceStyle,
+}
 enum AppKeys { gradient }
 enum AuthKeys {
   anilistToken,
@@ -30,3 +38,11 @@ enum PluginKeys {
   runtimeHostInstalledVersion,
   runtimeHostInstalledReleaseTitle,
 }
+enum SyncKeys {
+  gistGithubToken,
+  gistGithubUsername,
+  gistAutoSync,
+  gistAutoDeleteCompleted,
+}
+enum WatchiumKeys { serverUrl }
+
