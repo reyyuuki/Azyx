@@ -7,6 +7,12 @@ class GistProgressEntry {
   final String? malId;
   final String mediaType;
   final String? serviceType;
+  final String? title;
+  final String? image;
+  final String? link;
+  final String? sourceName;
+  final String? sourceId;
+  final Map<String, dynamic>? mediaData;
   final String? episodeNumber;
   final int? timestampMs;
   final int? durationMs;
@@ -20,6 +26,12 @@ class GistProgressEntry {
     this.malId,
     required this.mediaType,
     this.serviceType,
+    this.title,
+    this.image,
+    this.link,
+    this.sourceName,
+    this.sourceId,
+    this.mediaData,
     this.episodeNumber,
     this.timestampMs,
     this.durationMs,
@@ -35,6 +47,12 @@ class GistProgressEntry {
     final malIdVal = (j['malId'] ?? j['myanimelistId'])?.toString();
     final mediaTypeVal = (j['mediaType'] ?? j['type'] ?? 'ANIME').toString().toUpperCase();
     final serviceTypeVal = (j['serviceType'] ?? j['service'])?.toString();
+    final titleVal = (j['title'] ?? j['name'] ?? j['animeTitle'] ?? j['mangaTitle'])?.toString();
+    final imageVal = (j['image'] ?? j['coverImage'] ?? j['poster'] ?? j['thumbnail'] ?? j['bannerImage'])?.toString();
+    final linkVal = (j['link'] ?? j['url'])?.toString();
+    final sourceNameVal = j['sourceName']?.toString();
+    final sourceIdVal = j['sourceId']?.toString();
+    final mediaDataVal = j['mediaData'] is Map ? Map<String, dynamic>.from(j['mediaData']) : null;
     final epNumVal = (j['episodeNumber'] ?? j['episode'] ?? j['currentEpisode'] ?? j['progress'])?.toString();
 
     int? timeVal;
@@ -76,6 +94,12 @@ class GistProgressEntry {
       malId: malIdVal,
       mediaType: mediaTypeVal,
       serviceType: serviceTypeVal,
+      title: titleVal,
+      image: imageVal,
+      link: linkVal,
+      sourceName: sourceNameVal,
+      sourceId: sourceIdVal,
+      mediaData: mediaDataVal,
       episodeNumber: epNumVal,
       timestampMs: timeVal,
       durationMs: durVal,
@@ -92,6 +116,12 @@ class GistProgressEntry {
         if (malId != null) 'malId': malId,
         'mediaType': mediaType,
         if (serviceType != null) 'serviceType': serviceType,
+        if (title != null) 'title': title,
+        if (image != null) 'image': image,
+        if (link != null) 'link': link,
+        if (sourceName != null) 'sourceName': sourceName,
+        if (sourceId != null) 'sourceId': sourceId,
+        if (mediaData != null) 'mediaData': mediaData,
         if (episodeNumber != null) 'episodeNumber': episodeNumber,
         if (episodeNumber != null) 'progress': episodeNumber,
         if (timestampMs != null) 'timestampMs': timestampMs,
@@ -162,21 +192,33 @@ class GistSyncService {
     if (_gistId != null) return _gistId;
     try {
       final resp = await http.get(Uri.parse('$_apiBase/gists?per_page=100'), headers: _headers);
-      if (resp.statusCode != 200) return null;
+      if (resp.statusCode != 200) {
+        log('[GistSyncService] _findExistingGistId HTTP error ${resp.statusCode}: ${resp.body}');
+        return null;
+      }
 
       final list = jsonDecode(resp.body) as List<dynamic>;
+      log('[GistSyncService] Fetched ${list.length} total Gists for GitHub user');
       for (final g in list) {
         final files = g['files'] as Map<String, dynamic>? ?? {};
-        for (final fn in _possibleFileNames) {
+        for (final fn in [
+          'azyx_categories.json',
+          'azyx_progress.json',
+          'anymex_progress.json',
+          'anymex_sync.json',
+          'anymex_watch_history.json',
+        ]) {
           if (files.containsKey(fn)) {
             _gistId = g['id'] as String;
-            _activeFileName = fn;
+            _activeFileName = files.containsKey(_defaultFileName) ? _defaultFileName : fn;
+            log('[GistSyncService] Selected Gist ID: $_gistId matching "$fn" with files: ${files.keys.toList()}');
             return _gistId;
           }
         }
       }
+      log('[GistSyncService] No existing AzyX Gist found in ${list.length} Gists');
     } catch (e) {
-      log('[GistSyncService] _findExistingGistId error: $e');
+      log('[GistSyncService] _findExistingGistId exception: $e');
     }
     return null;
   }
@@ -185,6 +227,7 @@ class GistSyncService {
     final existing = await _findExistingGistId();
     if (existing != null) return existing;
     try {
+      log('[GistSyncService] Creating new Gist for user...');
       final resp = await http.post(
         Uri.parse('$_apiBase/gists'),
         headers: _headers,
@@ -200,54 +243,95 @@ class GistSyncService {
         final data = jsonDecode(resp.body) as Map<String, dynamic>;
         _gistId = data['id'] as String;
         _activeFileName = _defaultFileName;
+        log('[GistSyncService] Created new Gist ID: $_gistId');
         return _gistId;
+      } else {
+        log('[GistSyncService] Create Gist HTTP error ${resp.statusCode}: ${resp.body}');
       }
     } catch (e) {
-      log('[GistSyncService] _ensureGistId error: $e');
+      log('[GistSyncService] _ensureGistId exception: $e');
     }
     return null;
   }
 
   Future<Map<String, GistProgressEntry>> downloadCloudData() async {
-    if (!isReady) return {};
+    if (!isReady) {
+      log('[GistSyncService] downloadCloudData abort: token not ready');
+      return {};
+    }
     try {
       final gistId = await _ensureGistId();
-      if (gistId == null) return {};
-
-      final resp = await http.get(Uri.parse('$_apiBase/gists/$gistId'), headers: _headers);
-      if (resp.statusCode != 200) return {};
-
-      final data = jsonDecode(resp.body) as Map<String, dynamic>;
-      final filesMap = data['files'] as Map<String, dynamic>?;
-      if (filesMap == null) return {};
-
-      String? content;
-      if (filesMap.containsKey(_activeFileName)) {
-        content = (filesMap[_activeFileName] as Map<String, dynamic>?)?['content'] as String?;
-      } else {
-        for (final fn in _possibleFileNames) {
-          if (filesMap.containsKey(fn)) {
-            _activeFileName = fn;
-            content = (filesMap[fn] as Map<String, dynamic>?)?['content'] as String?;
-            break;
-          }
-        }
+      if (gistId == null) {
+        log('[GistSyncService] downloadCloudData abort: gistId is null');
+        return {};
       }
 
-      if (content == null || content.trim().isEmpty) return {};
+      final resp = await http.get(Uri.parse('$_apiBase/gists/$gistId'), headers: _headers);
+      if (resp.statusCode == 404) {
+        log('[GistSyncService] Gist ID $gistId returned 404. Resetting cached Gist ID.');
+        _gistId = null;
+        final retryId = await _ensureGistId();
+        if (retryId == null) return {};
+        final retryResp = await http.get(Uri.parse('$_apiBase/gists/$retryId'), headers: _headers);
+        if (retryResp.statusCode != 200) return {};
+        final data = jsonDecode(retryResp.body) as Map<String, dynamic>;
+        return _parseProgressFromFiles(data['files'] as Map<String, dynamic>?);
+      }
+      if (resp.statusCode != 200) {
+        log('[GistSyncService] downloadCloudData HTTP error ${resp.statusCode}: ${resp.body}');
+        return {};
+      }
 
-      final parsed = jsonDecode(content) as Map<String, dynamic>;
-      final Map<String, GistProgressEntry> result = {};
-      parsed.forEach((key, val) {
-        if (val is Map) {
-          result[key] = GistProgressEntry.fromJson(Map<String, dynamic>.from(val));
-        }
-      });
-      return result;
+      final data = jsonDecode(resp.body) as Map<String, dynamic>;
+      return _parseProgressFromFiles(data['files'] as Map<String, dynamic>?);
     } catch (e) {
       log('[GistSyncService] downloadCloudData error: $e');
       return {};
     }
+  }
+
+  Future<Map<String, GistProgressEntry>> _parseProgressFromFiles(Map<String, dynamic>? filesMap) async {
+    if (filesMap == null) return {};
+
+    String? content;
+    Map<String, dynamic>? targetFileData;
+    if (filesMap.containsKey(_activeFileName)) {
+      targetFileData = filesMap[_activeFileName] as Map<String, dynamic>?;
+    } else {
+      for (final fn in _possibleFileNames) {
+        if (filesMap.containsKey(fn)) {
+          _activeFileName = fn;
+          targetFileData = filesMap[fn] as Map<String, dynamic>?;
+          break;
+        }
+      }
+    }
+
+    if (targetFileData != null) {
+      content = targetFileData['content'] as String?;
+      if ((content == null || content.isEmpty || targetFileData['truncated'] == true) && targetFileData['raw_url'] != null) {
+        try {
+          log('[GistSyncService] Downloading raw_url for progress file $_activeFileName');
+          final rawResp = await http.get(Uri.parse(targetFileData['raw_url'] as String));
+          if (rawResp.statusCode == 200) {
+            content = rawResp.body;
+          }
+        } catch (e) {
+          log('[GistSyncService] Error fetching raw_url for progress: $e');
+        }
+      }
+    }
+
+    if (content == null || content.trim().isEmpty) return {};
+
+    final parsed = jsonDecode(content) as Map<String, dynamic>;
+    final Map<String, GistProgressEntry> result = {};
+    parsed.forEach((key, val) {
+      if (val is Map) {
+        result[key] = GistProgressEntry.fromJson(Map<String, dynamic>.from(val));
+      }
+    });
+    return result;
   }
 
   Future<bool> uploadCloudData(Map<String, GistProgressEntry> entries) async {
@@ -271,6 +355,92 @@ class GistSyncService {
       return resp.statusCode == 200;
     } catch (e) {
       log('[GistSyncService] uploadCloudData error: $e');
+      return false;
+    }
+  }
+
+  Future<Map<String, String>> downloadAllCloudFiles() async {
+    if (!isReady) {
+      log('[GistSyncService] downloadAllCloudFiles abort: token is missing or not ready');
+      return {};
+    }
+    try {
+      var gistId = await _ensureGistId();
+      if (gistId == null) {
+        log('[GistSyncService] downloadAllCloudFiles abort: gistId is null');
+        return {};
+      }
+
+      var resp = await http.get(Uri.parse('$_apiBase/gists/$gistId'), headers: _headers);
+      if (resp.statusCode == 404) {
+        log('[GistSyncService] Gist ID $gistId returned 404 Not Found. Resetting cached Gist ID and re-discovering Gist...');
+        _gistId = null;
+        gistId = await _ensureGistId();
+        if (gistId == null) return {};
+        resp = await http.get(Uri.parse('$_apiBase/gists/$gistId'), headers: _headers);
+      }
+
+      if (resp.statusCode != 200) {
+        log('[GistSyncService] downloadAllCloudFiles HTTP error ${resp.statusCode}: ${resp.body}');
+        return {};
+      }
+
+      final data = jsonDecode(resp.body) as Map<String, dynamic>;
+      final filesMap = data['files'] as Map<String, dynamic>?;
+      if (filesMap == null) {
+        log('[GistSyncService] downloadAllCloudFiles: "files" object is null in response');
+        return {};
+      }
+
+      final Map<String, String> results = {};
+      for (final entry in filesMap.entries) {
+        final fileName = entry.key;
+        final fileData = entry.value;
+        if (fileData is Map) {
+          String? content = fileData['content'] as String?;
+          if ((content == null || content.isEmpty || fileData['truncated'] == true) && fileData['raw_url'] != null) {
+            try {
+              log('[GistSyncService] Downloading raw_url for $fileName because content was truncated or null');
+              final rawResp = await http.get(Uri.parse(fileData['raw_url'] as String));
+              if (rawResp.statusCode == 200) {
+                content = rawResp.body;
+              }
+            } catch (e) {
+              log('[GistSyncService] Error downloading raw_url for $fileName: $e');
+            }
+          }
+          if (content != null) {
+            results[fileName] = content;
+          }
+        }
+      }
+      log('[GistSyncService] Downloaded ${results.length} cloud files from Gist $gistId: ${results.keys.toList()}');
+      return results;
+    } catch (e) {
+      log('[GistSyncService] downloadAllCloudFiles error: $e');
+      return {};
+    }
+  }
+
+  Future<bool> uploadCloudFiles(Map<String, String> filesPayload) async {
+    if (!isReady || filesPayload.isEmpty) return false;
+    try {
+      final gistId = await _ensureGistId();
+      if (gistId == null) return false;
+
+      final Map<String, dynamic> filesObj = {};
+      filesPayload.forEach((fileName, contentStr) {
+        filesObj[fileName] = {'content': contentStr};
+      });
+
+      final resp = await http.patch(
+        Uri.parse('$_apiBase/gists/$gistId'),
+        headers: _headers,
+        body: jsonEncode({'files': filesObj}),
+      );
+      return resp.statusCode == 200;
+    } catch (e) {
+      log('[GistSyncService] uploadCloudFiles error: $e');
       return false;
     }
   }

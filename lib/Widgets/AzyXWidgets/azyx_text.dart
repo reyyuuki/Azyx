@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-enum FontVariant {
-  regular,
-  semiBold,
-  bold,
-}
+
+enum FontVariant { regular, semiBold, bold }
+
 class AzyXText extends StatelessWidget {
   final String text;
   final FontVariant fontVariant;
@@ -13,43 +11,53 @@ class AzyXText extends StatelessWidget {
   final int? maxLines;
   final TextOverflow? overflow;
   final double? lineHeight;
+  final double? letterSpacing;
   final FontStyle? fontStyle;
-  const AzyXText(
-      {super.key,
-      required this.text,
-      this.fontVariant = FontVariant.regular,
-      this.textAlign,
-      this.overflow = TextOverflow.clip,
-      this.maxLines,
-      this.color,
-      this.fontSize,
-      this.fontStyle,
-      this.lineHeight});
+  const AzyXText({
+    super.key,
+    required this.text,
+    this.fontVariant = FontVariant.regular,
+    this.textAlign,
+    this.overflow = TextOverflow.clip,
+    this.maxLines,
+    this.color,
+    this.fontSize,
+    this.fontStyle,
+    this.lineHeight,
+    this.letterSpacing,
+  });
   TextStyle _getTextStyle() {
     switch (fontVariant) {
       case FontVariant.bold:
         return TextStyle(
-            fontFamily: "Poppins-Bold",
-            fontSize: fontSize,
-            color: color,
-            fontStyle: fontStyle,
-            height: lineHeight);
+          fontFamily: "Poppins-Bold",
+          fontSize: fontSize,
+          color: color,
+          fontStyle: fontStyle,
+          letterSpacing: letterSpacing,
+          height: lineHeight,
+        );
       case FontVariant.semiBold:
         return TextStyle(
-            fontFamily: "Poppins-Bold",
-            fontSize: fontSize,
-            color: color,
-            fontStyle: fontStyle,
-            height: lineHeight);
+          fontFamily: "Poppins-Bold",
+          fontSize: fontSize,
+          color: color,
+          fontStyle: fontStyle,
+          letterSpacing: letterSpacing,
+          height: lineHeight,
+        );
       case FontVariant.regular:
         return TextStyle(
-            fontFamily: "Poppins",
-            fontSize: fontSize,
-            color: color,
-            fontStyle: fontStyle,
-            height: lineHeight);
+          fontFamily: "Poppins",
+          fontSize: fontSize,
+          color: color,
+          fontStyle: fontStyle,
+          letterSpacing: letterSpacing,
+          height: lineHeight,
+        );
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Text(

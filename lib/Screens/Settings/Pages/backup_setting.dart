@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:isar_community/isar.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class BackupSetting extends StatefulWidget {
@@ -95,18 +96,36 @@ class _BackupSettingState extends State<BackupSetting> {
 
   Widget _buildOverviewHeader(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final historyCount = isar.localHistoryItems.countSync();
+    final historyItems = isar.localHistoryItems.where().findAllSync();
+    final animeHistoryCount = historyItems
+        .where((e) => e.mediaType == HistoryMediaType.anime)
+        .length;
+    final mangaHistoryCount = historyItems
+        .where((e) => e.mediaType == HistoryMediaType.manga)
+        .length;
+    final historyCount = historyItems.length;
     final categoryCount = isar.categorys.countSync();
     final offlineCount = isar.offlineItems.countSync();
     final settingsCount = isar.keyValues.countSync();
+    final totalCount =
+        historyCount + categoryCount + offlineCount + settingsCount;
+
+    final historyFactor = totalCount == 0 ? 0.25 : (historyCount / totalCount);
+    final categoryFactor = totalCount == 0
+        ? 0.25
+        : (categoryCount / totalCount);
+    final offlineFactor = totalCount == 0 ? 0.25 : (offlineCount / totalCount);
+    final settingsFactor = totalCount == 0
+        ? 0.25
+        : (settingsCount / totalCount);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(16),
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: colorScheme.primary.withValues(alpha: 0.2),
+          color: colorScheme.primary.withValues(alpha: 0.15),
           width: 1,
         ),
       ),
@@ -115,42 +134,141 @@ class _BackupSettingState extends State<BackupSetting> {
         children: [
           Row(
             children: [
-              Icon(Icons.storage_rounded, color: colorScheme.primary, size: 20),
-              const SizedBox(width: 8),
-              const AzyXText(
-                text: "Local Storage Overview",
-                fontSize: 16,
-                fontVariant: FontVariant.bold,
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: colorScheme.primary.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Icon(
+                  Broken.chart_2,
+                  color: colorScheme.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const AzyXText(
+                      text: "Local Storage Metrics",
+                      fontSize: 16,
+                      fontVariant: FontVariant.bold,
+                    ),
+                    AzyXText(
+                      text: "Live database footprint & entries count",
+                      fontSize: 12,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: AzyXText(
+                  text: "$totalCount Total",
+                  fontSize: 11,
+                  fontVariant: FontVariant.bold,
+                  color: colorScheme.primary,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: SizedBox(
+              height: 6,
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: (historyFactor * 100).toInt().clamp(1, 100),
+                    child: Container(color: colorScheme.primary),
+                  ),
+                  const SizedBox(width: 2),
+                  Expanded(
+                    flex: (categoryFactor * 100).toInt().clamp(1, 100),
+                    child: Container(color: colorScheme.secondary),
+                  ),
+                  const SizedBox(width: 2),
+                  Expanded(
+                    flex: (offlineFactor * 100).toInt().clamp(1, 100),
+                    child: Container(color: colorScheme.tertiary),
+                  ),
+                  const SizedBox(width: 2),
+                  Expanded(
+                    flex: (settingsFactor * 100).toInt().clamp(1, 100),
+                    child: Container(
+                      color: colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildStatChip(
-                context,
-                "$historyCount",
-                "History",
-                Icons.history_rounded,
+              Expanded(
+                child: _buildMetricTile(
+                  context,
+                  title: "History",
+                  count: "$historyCount",
+                  subtitle:
+                      "$animeHistoryCount Anime • $mangaHistoryCount Manga",
+                  icon: Broken.video_play,
+                  color: colorScheme.primary,
+                ),
               ),
-              _buildStatChip(
-                context,
-                "$categoryCount",
-                "Lists",
-                Icons.folder_copy_rounded,
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildMetricTile(
+                  context,
+                  title: "Lists",
+                  count: "$categoryCount",
+                  subtitle: "$categoryCount Custom Categories",
+                  icon: Broken.folder_favorite,
+                  color: colorScheme.secondary,
+                ),
               ),
-              _buildStatChip(
-                context,
-                "$offlineCount",
-                "Offline",
-                Icons.download_done_rounded,
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _buildMetricTile(
+                  context,
+                  title: "Downloads",
+                  count: "$offlineCount",
+                  subtitle: "$offlineCount Offline Saved",
+                  icon: Icons.file_download_outlined,
+                  color: colorScheme.tertiary,
+                ),
               ),
-              _buildStatChip(
-                context,
-                "$settingsCount",
-                "Keys",
-                Icons.tune_rounded,
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildMetricTile(
+                  context,
+                  title: "Preferences",
+                  count: "$settingsCount",
+                  subtitle: "$settingsCount Active Keys",
+                  icon: Broken.setting_4,
+                  color: colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -159,42 +277,55 @@ class _BackupSettingState extends State<BackupSetting> {
     );
   }
 
-  Widget _buildStatChip(
-    BuildContext context,
-    String value,
-    String label,
-    IconData icon,
-  ) {
+  Widget _buildMetricTile(
+    BuildContext context, {
+    required String title,
+    required String count,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colorScheme.surface.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withValues(alpha: 0.15)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Icon(icon, size: 14, color: colorScheme.primary),
+              Icon(icon, size: 16, color: color),
               const SizedBox(width: 6),
               AzyXText(
-                text: value,
-                fontSize: 14,
+                text: title,
+                fontSize: 11,
+                color: colorScheme.onSurfaceVariant,
                 fontVariant: FontVariant.bold,
-                color: colorScheme.onSurface,
               ),
             ],
           ),
-        ),
-        const SizedBox(height: 4),
-        AzyXText(
-          text: label,
-          fontSize: 11,
-          color: colorScheme.onSurfaceVariant,
-        ),
-      ],
+          const SizedBox(height: 6),
+          AzyXText(
+            text: count,
+            fontSize: 20,
+            fontVariant: FontVariant.bold,
+            color: colorScheme.onSurface,
+          ),
+          const SizedBox(height: 2),
+          AzyXText(
+            text: subtitle,
+            fontSize: 10,
+            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 
@@ -285,6 +416,52 @@ class _BackupSettingState extends State<BackupSetting> {
               fontSize: 13,
               color: colorScheme.onSurfaceVariant,
             ),
+            if (isConnected) ...[
+              const SizedBox(height: 14),
+              Divider(
+                height: 1,
+                color: colorScheme.outline.withValues(alpha: 0.1),
+              ),
+              const SizedBox(height: 10),
+              const AzyXText(
+                text: "SYNC CONTENT SELECTION",
+                fontSize: 11,
+                fontVariant: FontVariant.bold,
+              ),
+              const SizedBox(height: 6),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+                title: const AzyXText(
+                  text: "Watch & Read Progress",
+                  fontSize: 13,
+                  fontVariant: FontVariant.bold,
+                ),
+                subtitle: const AzyXText(
+                  text: "Sync timestamps, episodes & manga pages",
+                  fontSize: 11,
+                ),
+                value: gistController.syncHistory.value,
+                activeColor: colorScheme.primary,
+                onChanged: (val) => gistController.setSyncHistory(val),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+                title: const AzyXText(
+                  text: "Library Categories & Lists",
+                  fontSize: 13,
+                  fontVariant: FontVariant.bold,
+                ),
+                subtitle: const AzyXText(
+                  text: "Sync custom tags & user library categories",
+                  fontSize: 11,
+                ),
+                value: gistController.syncCategories.value,
+                activeColor: colorScheme.primary,
+                onChanged: (val) => gistController.setSyncCategories(val),
+              ),
+            ],
             const SizedBox(height: 16),
             Row(
               children: [
@@ -358,8 +535,8 @@ class _BackupSettingState extends State<BackupSetting> {
                   const SizedBox(width: 8),
                   IconButton(
                     style: IconButton.styleFrom(
-                      backgroundColor:
-                          colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                      backgroundColor: colorScheme.surfaceContainerHighest
+                          .withOpacity(0.5),
                     ),
                     tooltip: "Personal Access Token",
                     onPressed: () => _showTokenSetupDialog(context),
@@ -840,8 +1017,9 @@ class _BackupSettingState extends State<BackupSetting> {
                         color: colorScheme.primary,
                       ),
                       onPressed: () async {
-                        final data =
-                            await Clipboard.getData(Clipboard.kTextPlain);
+                        final data = await Clipboard.getData(
+                          Clipboard.kTextPlain,
+                        );
                         if (data?.text != null) {
                           tokenInputController.text = data!.text!.trim();
                         }

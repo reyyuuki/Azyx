@@ -114,6 +114,8 @@ void deepLink() async {
   if (Platform.isWindows || Platform.isLinux) {
     try {
       [
+        'azyx',
+        'watchium',
         'anymex',
         'anymex-extension',
         'cloudstreamrepo',

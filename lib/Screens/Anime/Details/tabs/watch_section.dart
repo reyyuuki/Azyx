@@ -178,7 +178,11 @@ class _WatchSectionState extends State<WatchSection> {
             onChanged: (value) {
               if (value != null) {
                 final matched = sourceController.installedExtensions.firstWhere(
-                  (i) => "${i.name}_${i.extensionType}" == value,
+                  (i) =>
+                      i.id.toString() == value ||
+                      "${i.name}_${i.id}" == value ||
+                      i.name == value,
+                  orElse: () => sourceController.installedExtensions.first,
                 );
                 widget.onSourceChanged(value);
                 sourceController.setActiveSource(matched);

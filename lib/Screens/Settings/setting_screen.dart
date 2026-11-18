@@ -21,172 +21,481 @@ import 'package:azyx/Database/isar_models/local_history_item.dart';
 import 'package:azyx/Database/isar_models/offline_item.dart';
 import '../../Widgets/common/custom_app_bar.dart';
 
-class SettingScreen extends StatelessWidget {
+class SettingItemData {
+  final String section;
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color Function(ThemeData theme) iconColor;
+  final Color Function(ThemeData theme)? textColor;
+  final void Function(BuildContext context) onTap;
+
+  SettingItemData({
+    required this.section,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.iconColor,
+    this.textColor,
+    required this.onTap,
+  });
+}
+
+class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
+
+  @override
+  State<SettingScreen> createState() => _SettingScreenState();
+}
+
+class _SettingScreenState extends State<SettingScreen> {
+  bool _isSearching = false;
+  String _searchQuery = "";
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+
+  List<SettingItemData> _getAllSettings(BuildContext context) {
+    return [
+      SettingItemData(
+        section: "APPEARANCE & UI",
+        title: "Theme",
+        subtitle: "Choose Vibe : Light, Dark, Dynamic",
+        icon: Broken.brush_2,
+        iconColor: (theme) => theme.colorScheme.primary,
+        onTap: (ctx) {
+          Navigator.push(
+            ctx,
+            PageRouteBuilder(
+              transitionDuration: const Duration(milliseconds: 300),
+              transitionsBuilder: (ctx, animation, _, child) {
+                return SlideTransition(
+                  position: animation.drive(
+                    Tween(
+                      begin: const Offset(1, 0),
+                      end: Offset.zero,
+                    ).chain(CurveTween(curve: Curves.easeOutCubic)),
+                  ),
+                  child: child,
+                );
+              },
+              pageBuilder: (_, __, ___) => const ThemeSetting(),
+            ),
+          );
+        },
+      ),
+      SettingItemData(
+        section: "APPEARANCE & UI",
+        title: "UI Customization",
+        subtitle: "Customize Your UI: Vibrant, Sleek",
+        icon: Broken.brush_1,
+        iconColor: (theme) => theme.colorScheme.secondary,
+        onTap: (ctx) {
+          Navigator.push(
+            ctx,
+            PageRouteBuilder(
+              transitionDuration: const Duration(milliseconds: 300),
+              transitionsBuilder: (ctx, animation, _, child) {
+                return SlideTransition(
+                  position: animation.drive(
+                    Tween(
+                      begin: const Offset(1, 0),
+                      end: Offset.zero,
+                    ).chain(CurveTween(curve: Curves.easeOutCubic)),
+                  ),
+                  child: child,
+                );
+              },
+              pageBuilder: (_, __, ___) => const UiSettings(),
+            ),
+          );
+        },
+      ),
+      SettingItemData(
+        section: "EXTENSIONS & WATCH TOGETHER",
+        title: "Extension Runtime Host",
+        subtitle: "Update, Force Re-download or Load Runtime APK",
+        icon: Broken.category,
+        iconColor: (theme) => theme.colorScheme.tertiary,
+        onTap: (ctx) {
+          PluginManager().showRuntimeSettingsSheet(ctx);
+        },
+      ),
+      SettingItemData(
+        section: "EXTENSIONS & WATCH TOGETHER",
+        title: "Watch Together",
+        subtitle: "Join or create a room to watch anime together",
+        icon: Broken.people,
+        iconColor: (theme) => theme.colorScheme.primary,
+        onTap: (ctx) {
+          if (!Get.isRegistered<WatchiumService>()) {
+            Get.put(WatchiumService());
+          }
+          showWatchiumSheet(ctx);
+        },
+      ),
+      SettingItemData(
+        section: "DATA & STORAGE",
+        title: "Backup & Restore",
+        subtitle: "Backup, restore, and transfer your library & login tokens",
+        icon: Icons.backup_outlined,
+        iconColor: (theme) => theme.colorScheme.secondary,
+        onTap: (ctx) {
+          Navigator.push(
+            ctx,
+            PageRouteBuilder(
+              transitionDuration: const Duration(milliseconds: 300),
+              transitionsBuilder: (ctx, animation, _, child) {
+                return SlideTransition(
+                  position: animation.drive(
+                    Tween(
+                      begin: const Offset(1, 0),
+                      end: Offset.zero,
+                    ).chain(CurveTween(curve: Curves.easeOutCubic)),
+                  ),
+                  child: child,
+                );
+              },
+              pageBuilder: (_, __, ___) => const BackupSetting(),
+            ),
+          );
+        },
+      ),
+      SettingItemData(
+        section: "DATA & STORAGE",
+        title: "Clear Cache",
+        subtitle: "Reset All Cached Settings",
+        icon: Broken.trash,
+        iconColor: (theme) => theme.colorScheme.error,
+        textColor: (theme) => theme.colorScheme.error,
+        onTap: (ctx) {
+          openDialogBox(ctx);
+        },
+      ),
+      SettingItemData(
+        section: "SYSTEM & UPDATES",
+        title: "Check for Update",
+        subtitle: "Check if a new version of AzyX is available",
+        icon: Icons.system_update_outlined,
+        iconColor: (theme) => theme.colorScheme.primary,
+        onTap: (ctx) {
+          UpdateNotifier.checkUpdate(showFeedback: true);
+        },
+      ),
+    ];
+  }
+
+  Widget _buildIOSHeader(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SizeTransition(
+                    sizeFactor: animation,
+                    axisAlignment: -1.0,
+                    child: child,
+                  ),
+                );
+              },
+              child: _isSearching
+                  ? Container(
+                      key: const ValueKey("SearchHeader"),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colors.surfaceContainerHighest.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: colors.primary.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Broken.search_normal,
+                            size: 20,
+                            color: colors.primary,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: TextField(
+                              controller: _searchController,
+                              focusNode: _searchFocusNode,
+                              style: TextStyle(
+                                color: colors.onSurface,
+                                fontSize: 14,
+                                fontFamily: "Poppins",
+                              ),
+                              decoration: InputDecoration(
+                                hintText: "Search settings...",
+                                hintStyle: TextStyle(
+                                  color: colors.onSurfaceVariant.withOpacity(
+                                    0.6,
+                                  ),
+                                  fontSize: 14,
+                                  fontFamily: "Poppins",
+                                ),
+                                border: InputBorder.none,
+                                isDense: true,
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  _searchQuery = value.trim().toLowerCase();
+                                });
+                              },
+                            ),
+                          ),
+                          if (_searchQuery.isNotEmpty)
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _searchController.clear();
+                                  _searchQuery = "";
+                                });
+                              },
+                              child: Icon(
+                                Icons.cancel_rounded,
+                                size: 18,
+                                color: colors.onSurfaceVariant,
+                              ),
+                            ),
+                          const SizedBox(width: 8),
+                          InkWell(
+                            onTap: () {
+                              setState(() {
+                                _isSearching = false;
+                                _searchController.clear();
+                                _searchQuery = "";
+                              });
+                            },
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: colors.surface.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                Icons.close_rounded,
+                                size: 20,
+                                color: colors.onSurface,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Row(
+                      key: const ValueKey("StandardHeader"),
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        InkWell(
+                          onTap: () => Get.back(),
+                          borderRadius: BorderRadius.circular(14),
+                          child: Container(
+                            padding: const EdgeInsets.all(9),
+                            decoration: BoxDecoration(
+                              color: colors.surfaceContainerHighest.withOpacity(
+                                0.35,
+                              ),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: colors.outline.withOpacity(0.08),
+                              ),
+                            ),
+                            child: Icon(
+                              Broken.arrow_left_2,
+                              size: 20,
+                              color: colors.onSurface,
+                            ),
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              _isSearching = true;
+                            });
+                            Future.delayed(
+                              const Duration(milliseconds: 100),
+                              () {
+                                _searchFocusNode.requestFocus();
+                              },
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(14),
+                          child: Container(
+                            padding: const EdgeInsets.all(9),
+                            decoration: BoxDecoration(
+                              color: colors.primary.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: colors.primary.withOpacity(0.2),
+                              ),
+                            ),
+                            child: Icon(
+                              Broken.search_normal,
+                              size: 20,
+                              color: colors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+            const SizedBox(height: 14),
+            AzyXText(
+              text: "Settings",
+              fontVariant: FontVariant.bold,
+              fontSize: 30,
+              color: colors.onSurface,
+              letterSpacing: -0.5,
+            ),
+            const SizedBox(height: 2),
+            AzyXText(
+              text: _isSearching && _searchQuery.isNotEmpty
+                  ? "Search results for \"$_searchQuery\""
+                  : "Customize your layout, runtime plugins & playback options",
+              fontSize: 12,
+              color: colors.onSurfaceVariant,
+            ),
+            const SizedBox(height: 12),
+            Container(
+              height: 1,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    colors.primary.withOpacity(0.35),
+                    colors.outline.withOpacity(0.08),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final allSettings = _getAllSettings(context);
+
+    final filteredSettings = _searchQuery.isEmpty
+        ? allSettings
+        : allSettings.where((item) {
+            final titleMatch = item.title.toLowerCase().contains(_searchQuery);
+            final subtitleMatch = item.subtitle.toLowerCase().contains(
+              _searchQuery,
+            );
+            final sectionMatch = item.section.toLowerCase().contains(
+              _searchQuery,
+            );
+            return titleMatch || subtitleMatch || sectionMatch;
+          }).toList();
+
+    final Map<String, List<SettingItemData>> groupedSettings = {};
+    for (var item in filteredSettings) {
+      groupedSettings.putIfAbsent(item.section, () => []).add(item);
+    }
+
     return Scaffold(
       body: AzyXGradientContainer(
         child: ListView(
           padding: const EdgeInsets.only(bottom: 30),
           physics: const BouncingScrollPhysics(),
           children: [
-            const CustomAppBar(title: "Settings", icon: Broken.setting_2),
-            _buildSectionHeader(context, "APPEARANCE & UI"),
-            _buildGroupedCard(
-              context,
-              children: [
-                _buildSettingTile(
-                  context,
-                  title: "Theme",
-                  subtitle: "Choose Vibe : Light, Dark, Dynamic",
-                  icon: Broken.brush_2,
-                  iconColor: theme.colorScheme.primary,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                        transitionDuration: const Duration(milliseconds: 300),
-                        transitionsBuilder: (context, animation, _, child) {
-                          return SlideTransition(
-                            position: animation.drive(
-                              Tween(
-                                begin: const Offset(1, 0),
-                                end: Offset.zero,
-                              ).chain(CurveTween(curve: Curves.easeOutCubic)),
-                            ),
-                            child: child,
-                          );
-                        },
-                        pageBuilder: (_, __, ___) => const ThemeSetting(),
+            _buildIOSHeader(context),
+            if (groupedSettings.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 40,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerHighest.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: colors.outline.withOpacity(0.08)),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Broken.search_status,
+                        size: 44,
+                        color: colors.primary.withOpacity(0.7),
                       ),
-                    );
-                  },
-                ),
-                _buildDivider(context),
-                _buildSettingTile(
-                  context,
-                  title: "UI Customization",
-                  subtitle: "Customize Your UI: Vibrant, Sleek",
-                  icon: Broken.brush_1,
-                  iconColor: theme.colorScheme.secondary,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                        transitionDuration: const Duration(milliseconds: 300),
-                        transitionsBuilder: (context, animation, _, child) {
-                          return SlideTransition(
-                            position: animation.drive(
-                              Tween(
-                                begin: const Offset(1, 0),
-                                end: Offset.zero,
-                              ).chain(CurveTween(curve: Curves.easeOutCubic)),
-                            ),
-                            child: child,
-                          );
-                        },
-                        pageBuilder: (_, __, ___) => const UiSettings(),
+                      const SizedBox(height: 12),
+                      AzyXText(
+                        text: "No Settings Found",
+                        fontSize: 16,
+                        fontVariant: FontVariant.bold,
+                        color: colors.onSurface,
                       ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            _buildSectionHeader(context, "EXTENSIONS & WATCH TOGETHER"),
-            _buildGroupedCard(
-              context,
-              children: [
-                _buildSettingTile(
-                  context,
-                  title: "Extension Runtime Host",
-                  subtitle: "Update, Force Re-download or Load Runtime APK",
-                  icon: Broken.category,
-                  iconColor: theme.colorScheme.tertiary,
-                  onTap: () {
-                    PluginManager().showRuntimeSettingsSheet(context);
-                  },
-                ),
-                _buildDivider(context),
-                _buildSettingTile(
-                  context,
-                  title: "Watch Together",
-                  subtitle: "Join or create a room to watch anime together",
-                  icon: Broken.people,
-                  iconColor: theme.colorScheme.primary,
-                  onTap: () {
-                    if (!Get.isRegistered<WatchiumService>()) {
-                      Get.put(WatchiumService());
-                    }
-                    showWatchiumSheet(context);
-                  },
-                ),
-              ],
-            ),
-            _buildSectionHeader(context, "DATA & STORAGE"),
-            _buildGroupedCard(
-              context,
-              children: [
-                _buildSettingTile(
-                  context,
-                  title: "Backup & Restore",
-                  subtitle:
-                      "Backup, restore, and transfer your library & login tokens",
-                  icon: Icons.backup_outlined,
-                  iconColor: theme.colorScheme.secondary,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      PageRouteBuilder(
-                        transitionDuration: const Duration(milliseconds: 300),
-                        transitionsBuilder: (context, animation, _, child) {
-                          return SlideTransition(
-                            position: animation.drive(
-                              Tween(
-                                begin: const Offset(1, 0),
-                                end: Offset.zero,
-                              ).chain(CurveTween(curve: Curves.easeOutCubic)),
-                            ),
-                            child: child,
-                          );
-                        },
-                        pageBuilder: (_, __, ___) => const BackupSetting(),
+                      const SizedBox(height: 4),
+                      AzyXText(
+                        text:
+                            "No setting matching \"$_searchQuery\" was found.",
+                        fontSize: 12,
+                        textAlign: TextAlign.center,
+                        color: colors.onSurfaceVariant,
                       ),
-                    );
-                  },
+                    ],
+                  ),
                 ),
-                _buildDivider(context),
-                _buildSettingTile(
-                  context,
-                  title: "Clear Cache",
-                  subtitle: "Reset All Cached Settings",
-                  icon: Broken.trash,
-                  iconColor: theme.colorScheme.error,
-                  textColor: theme.colorScheme.error,
-                  onTap: () {
-                    openDialogBox(context);
-                  },
-                ),
-              ],
-            ),
-            _buildSectionHeader(context, "SYSTEM & UPDATES"),
-            _buildGroupedCard(
-              context,
-              children: [
-                _buildSettingTile(
-                  context,
-                  title: "Check for Update",
-                  subtitle: "Check if a new version of AzyX is available",
-                  icon: Icons.system_update_outlined,
-                  iconColor: theme.colorScheme.primary,
-                  onTap: () {
-                    UpdateNotifier.checkUpdate(showFeedback: true);
-                  },
-                ),
-              ],
-            ),
+              )
+            else
+              ...groupedSettings.entries.expand((entry) {
+                final sectionTitle = entry.key;
+                final items = entry.value;
+
+                return [
+                  _buildSectionHeader(context, sectionTitle),
+                  _buildGroupedCard(
+                    context,
+                    children: List.generate(items.length, (index) {
+                      final item = items[index];
+                      final isLast = index == items.length - 1;
+
+                      return Column(
+                        children: [
+                          _buildSettingTile(
+                            context,
+                            title: item.title,
+                            subtitle: item.subtitle,
+                            icon: item.icon,
+                            iconColor: item.iconColor(theme),
+                            textColor: item.textColor?.call(theme),
+                            onTap: () => item.onTap(context),
+                          ),
+                          if (!isLast) _buildDivider(context),
+                        ],
+                      );
+                    }),
+                  ),
+                ];
+              }),
           ],
         ),
       ),

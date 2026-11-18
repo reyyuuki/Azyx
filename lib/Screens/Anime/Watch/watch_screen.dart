@@ -79,6 +79,7 @@ class _WatchScreenState extends State<WatchScreen> {
             watchController.volumeIndicator(),
             watchController.brightnessIndicator(),
             watchController.preesedBar(),
+            watchController.buildReactionsOverlay(),
           ],
         ),
       ),

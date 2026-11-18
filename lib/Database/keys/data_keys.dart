@@ -43,6 +43,10 @@ enum SyncKeys {
   gistGithubUsername,
   gistAutoSync,
   gistAutoDeleteCompleted,
+  gistSyncHistory,
+  gistSyncCategories,
+  gistSyncOffline,
+  gistSyncSettings,
 }
 enum WatchiumKeys { serverUrl }
 

@@ -16,6 +16,9 @@ import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Functions/string_extensions.dart';
 import 'package:azyx/Models/anime_all_data.dart';
 import 'package:azyx/Database/isar_models/local_history_item.dart';
+import 'package:azyx/Screens/Anime/Watch/Watchium/watchium_model.dart';
+import 'package:azyx/Screens/Anime/Watch/Watchium/watchium_service.dart';
+import 'package:azyx/Screens/Anime/Watch/Watchium/widgets/watchium_sheet.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/bottom_sheets.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/episode_list_drawer.dart';
 import 'package:azyx/Screens/Anime/Watch/widgets/indicator.dart';
@@ -42,6 +45,7 @@ enum ResizeModes { contain, cover, fill }
 class WatchController extends GetxController with WidgetsBindingObserver {
   late Player player;
   late VideoController controller;
+  late WatchiumService watchiumService;
   final Rx<bool> showControls = true.obs;
   final Rx<bool> isControlsLocked = false.obs;
   final Rx<bool> showEpisodesBox = false.obs;
@@ -75,7 +79,8 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   Timer? _volumeTimer;
   Timer? _brightnessTimer;
   Timer? _positionUpdateTimer;
-  Duration _lastPosition = Duration.zero;
+  Timer? _heartbeatTimer;
+  StreamSubscription? _roomStateSubscription;
   void initializePlayer(AnimeAllData playerData) {
     WidgetsBinding.instance.addObserver(this);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
@@ -84,6 +89,11 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       DeviceOrientation.landscapeLeft,
     ]);
     updateEntry();
+    if (!Get.isRegistered<WatchiumService>()) {
+      watchiumService = Get.put(WatchiumService());
+    } else {
+      watchiumService = Get.find<WatchiumService>();
+    }
     player = Player();
     controller = VideoController(
       player,
@@ -92,41 +102,77 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       ),
     );
     intializeData(playerData);
-    final initialStart =
-        (playerData.startFromSeconds != null && playerData.startFromSeconds! > 0)
-            ? Duration(seconds: playerData.startFromSeconds!)
-            : Duration.zero;
+    int? startSec = playerData.startFromSeconds;
+    if (startSec == null || startSec <= 0) {
+      final savedEntry = localHistoryController.animeWatchingHistory
+          .firstWhereOrNull(
+            (item) => item.mediaId == int.tryParse(playerData.id ?? ''),
+          );
+      if (savedEntry != null &&
+          savedEntry.progress == 'EP ${playerData.number}' &&
+          savedEntry.currentTimeSeconds != null &&
+          savedEntry.currentTimeSeconds! > 0) {
+        startSec = savedEntry.currentTimeSeconds;
+      }
+    }
+    final initialStart = (startSec != null && startSec > 0)
+        ? Duration(seconds: startSec)
+        : Duration.zero;
     position.value = initialStart;
-    final firstVideo = playerData.episodeUrls.isNotEmpty
-        ? playerData.episodeUrls.first
-        : null;
+    final selectedVideo =
+        playerData.episodeUrls.firstWhereOrNull(
+          (v) => v.url == playerData.url,
+        ) ??
+        (playerData.episodeUrls.isNotEmpty
+            ? playerData.episodeUrls.first
+            : null);
     final referer =
-        firstVideo?.headers?['referer'] ??
-        firstVideo?.headers?['Referer'] ??
-        (sourceController.activeSource.value?.baseUrl ?? '');
+        selectedVideo?.headers?['referer'] ??
+        selectedVideo?.headers?['Referer'] ??
+        '';
     final origin =
-        firstVideo?.headers?['origin'] ??
-        firstVideo?.headers?['Origin'] ??
-        (sourceController.activeSource.value?.baseUrl ?? '');
+        selectedVideo?.headers?['origin'] ??
+        selectedVideo?.headers?['Origin'] ??
+        '';
     final userAgent =
-        firstVideo?.headers?['user-agent'] ??
-        firstVideo?.headers?['User-Agent'] ??
+        selectedVideo?.headers?['user-agent'] ??
+        selectedVideo?.headers?['User-Agent'] ??
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+
+    final Map<String, String> headers = {'User-Agent': userAgent};
+    if (selectedVideo?.headers != null && selectedVideo!.headers!.isNotEmpty) {
+      selectedVideo.headers!.forEach((k, v) => headers[k] = v);
+    } else {
+      if (referer.isNotEmpty) headers['Referer'] = referer;
+      if (origin.isNotEmpty) headers['Origin'] = origin;
+    }
+
     if (playerData.url != null && playerData.url!.isNotEmpty) {
+      final bool shouldPlay =
+          (watchiumService.inRoom && !watchiumService.isHost.value)
+          ? (watchiumService.roomState.value?.playback?.isPlaying ?? false)
+          : true;
       player.open(
-        Media(
-          playerData.url!,
-          start: initialStart,
-          httpHeaders: {
-            'Referer': referer,
-            'Origin': origin,
-            'User-Agent': userAgent,
-          },
-        ),
+        Media(playerData.url!, start: initialStart, httpHeaders: headers),
+        play: shouldPlay,
       );
     }
     _handleVolumeAndBrightness();
     _setupPlayerListeners();
+    if (watchiumService.inRoom && !watchiumService.isHost.value) {
+      final pb = watchiumService.roomState.value?.playback;
+      if (pb != null) {
+        if (pb.positionSec > 0) {
+          player.seek(Duration(seconds: pb.positionSec.toInt()));
+        }
+        if (pb.isPlaying) {
+          player.play();
+        } else {
+          player.pause();
+        }
+      }
+    }
+    syncHostContentWithWatchium();
     updateTimer = Timer.periodic(
       const Duration(minutes: 1),
       (timer) => localHistoryEntry(),
@@ -134,12 +180,17 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     final currentEpisode = playerData.episodeList?.firstWhereOrNull(
       (e) => e.number == playerData.number,
     );
-    if (playerData.episodeUrls.isEmpty && currentEpisode != null && currentEpisode.url != null) {
+    if (playerData.episodeUrls.isEmpty &&
+        currentEpisode != null &&
+        currentEpisode.url != null) {
       _fetchFreshEpisodeUrls(currentEpisode, initialStart: initialStart);
     }
   }
 
-  Future<void> _fetchFreshEpisodeUrls(Episode episode, {Duration? initialStart}) async {
+  Future<void> _fetchFreshEpisodeUrls(
+    Episode episode, {
+    Duration? initialStart,
+  }) async {
     final url = episode.url!;
     log("fetching fresh links in background: $url");
     try {
@@ -191,27 +242,182 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   }
 
   void _setupPlayerListeners() {
+    player.stream.error.listen((err) {
+      log('[MediaKit Player Error] $err');
+    });
+    player.stream.log.listen((msg) {
+      log('[MediaKit Player Log] $msg');
+    });
     player.stream.playing.listen((p) {
       isPlaying.value = p;
+      if (watchiumService.inRoom) {
+        if (watchiumService.isHost.value) {
+          final pos = position.value.inSeconds.toDouble();
+          if (p) {
+            watchiumService.sendPlay(positionSec: pos);
+          } else {
+            watchiumService.sendPause(positionSec: pos);
+          }
+        } else {
+          final pb = watchiumService.roomState.value?.playback;
+          if (pb != null && !pb.isPlaying && p) {
+            player.pause();
+          }
+        }
+      }
     });
     player.stream.buffering.listen((b) {
       isBuffering.value = b;
+      if (!b && watchiumService.inRoom && !watchiumService.isHost.value) {
+        final pb = watchiumService.roomState.value?.playback;
+        if (pb != null && pb.isPlaying) {
+          final liveHostPos = pb.positionSec;
+          final currentSec = position.value.inSeconds;
+          if ((liveHostPos - currentSec).abs() > 1.5) {
+            player.seek(Duration(seconds: liveHostPos.toInt()));
+          }
+        }
+      }
     });
     player.stream.buffer.listen((d) {
       buffered.value = d;
     });
     player.stream.position.listen((p) {
-      if ((p - _lastPosition).abs().inSeconds >= 1) {
-        _lastPosition = p;
-        _positionUpdateTimer?.cancel();
-        _positionUpdateTimer = Timer(const Duration(milliseconds: 100), () {
-          position.value = p;
-        });
-      }
+      position.value = p;
     });
     player.stream.duration.listen((d) {
       totalDuration.value = d;
     });
+    ever(watchiumService.isHost, (isHost) {
+      _heartbeatTimer?.cancel();
+      if (isHost && watchiumService.inRoom) {
+        _heartbeatTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+          if (!watchiumService.inRoom || !watchiumService.isHost.value) {
+            timer.cancel();
+            return;
+          }
+          final pos = position.value.inSeconds.toDouble();
+          watchiumService.sendHeartbeat(pos, isPlaying.value);
+        });
+      }
+    });
+    _heartbeatTimer?.cancel();
+    if (watchiumService.inRoom && watchiumService.isHost.value) {
+      _heartbeatTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+        if (!watchiumService.inRoom || !watchiumService.isHost.value) {
+          timer.cancel();
+          return;
+        }
+        final pos = position.value.inSeconds.toDouble();
+        watchiumService.sendHeartbeat(pos, isPlaying.value);
+      });
+    }
+    _roomStateSubscription?.cancel();
+    _roomStateSubscription = watchiumService.roomState.listen((state) {
+      if (state == null || watchiumService.isHost.value) return;
+      final pb = state.playback;
+      if (pb != null) {
+        if (pb.isPlaying) {
+          if (!player.state.playing) {
+            player.play();
+          }
+          final currentSec = position.value.inSeconds;
+          final diff = (currentSec - pb.positionSec).abs();
+          if (diff > 3.0) {
+            player.seek(Duration(seconds: pb.positionSec.toInt()));
+          }
+        } else {
+          if (player.state.playing) {
+            player.pause();
+          }
+        }
+      }
+      final cnt = state.content;
+      if (cnt?.videoUrl != null &&
+          cnt!.videoUrl!.isNotEmpty &&
+          cnt.videoUrl != animeData.value.url) {
+        log('[Watchium] Joiner player opening host videoUrl: ${cnt.videoUrl}');
+        animeData.value.url = cnt.videoUrl;
+        player.open(
+          Media(
+            cnt.videoUrl!,
+            start: Duration(seconds: pb?.positionSec.toInt() ?? 0),
+            httpHeaders: {
+              'User-Agent':
+                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            },
+          ),
+        );
+        if (pb != null && pb.isPlaying) {
+          player.play();
+        }
+      }
+    });
+  }
+
+  void syncHostContentWithWatchium() {
+    if (!watchiumService.inRoom || !watchiumService.isHost.value) return;
+    final data = animeData.value;
+    final int epNum = int.tryParse(data.number ?? '') ?? 1;
+    log(
+      '[Watchium] Host syncing content -> title: ${data.title}, videoUrl: ${data.url}, episodeUrls len: ${data.episodeUrls.length}',
+    );
+
+    final servers = data.episodeUrls.asMap().entries.map((entry) {
+      final video = entry.value;
+      final String u = video.url;
+      final String streamType = () {
+        final lower = u.toLowerCase();
+        if (lower.contains('.m3u8') || lower.contains('m3u8')) return 'hls';
+        if (lower.contains('.mp4')) return 'mp4';
+        if (lower.contains('.mpd')) return 'dash';
+        return 'other';
+      }();
+      return WatchiumAnimeServer(
+        serverId: u,
+        serverName: video.quality,
+        quality: video.quality,
+        type: streamType,
+        url: video.url,
+        originalUrl: video.url,
+        headers: video.headers,
+      );
+    }).toList();
+
+    if (servers.isEmpty && data.url != null && data.url!.isNotEmpty) {
+      final String u = data.url!;
+      final String streamType = () {
+        final lower = u.toLowerCase();
+        if (lower.contains('.m3u8') || lower.contains('m3u8')) return 'hls';
+        if (lower.contains('.mp4')) return 'mp4';
+        if (lower.contains('.mpd')) return 'dash';
+        return 'other';
+      }();
+      servers.add(
+        WatchiumAnimeServer(
+          serverId: u,
+          serverName: data.source ?? 'Default',
+          type: streamType,
+          url: u,
+          originalUrl: u,
+        ),
+      );
+    }
+
+    final content = WatchiumAnimeContent(
+      animeId: data.id ?? '1',
+      animeTitle: data.title ?? 'Anime',
+      animeCoverImage: data.image,
+      episodeNumber: epNum,
+      availableServers: servers,
+      videoUrl: data.url,
+      sourceName: data.source,
+    );
+    watchiumService.setContent(content);
+    final pos = position.value.inSeconds.toDouble();
+    if (pos > 0) {
+      watchiumService.sendSeek(pos);
+    }
   }
 
   void localHistoryEntry() {
@@ -238,6 +444,15 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   }
 
   void updateEntry() async {
+    if (animeData.value.id != null) {
+      if (serviceHandler.currentMedia.value.id == null ||
+          serviceHandler.currentMedia.value.id != animeData.value.id) {
+        serviceHandler.currentMedia.value.id = animeData.value.id;
+        serviceHandler.currentMedia.value.title ??= animeData.value.title;
+        serviceHandler.currentMedia.value.image ??= animeData.value.image;
+      }
+    }
+    if (serviceHandler.currentMedia.value.id == null) return;
     Utils.log(
       'aando: ${animeData.value.id}  ${serviceHandler.currentMedia.value.id ?? ''}',
     );
@@ -266,10 +481,18 @@ class WatchController extends GetxController with WidgetsBindingObserver {
 
   void intializeData(AnimeAllData playerData) {
     animeData.value = playerData;
-    episodeNumber.value = playerData.number!;
-    episodeTitle.value = playerData.episodeTitle!;
-    filteredEpisodes.value = playerData.episodeList!;
-    localHistoryEntry();
+    episodeNumber.value = playerData.number ?? '1';
+    episodeTitle.value =
+        playerData.episodeTitle ?? 'Episode ${playerData.number ?? '1'}';
+    filteredEpisodes.value = playerData.episodeList ?? [];
+    if (playerData.id != null) {
+      if (serviceHandler.currentMedia.value.id == null ||
+          serviceHandler.currentMedia.value.id != playerData.id) {
+        serviceHandler.currentMedia.value.id = playerData.id;
+        serviceHandler.currentMedia.value.title ??= playerData.title;
+        serviceHandler.currentMedia.value.image ??= playerData.image;
+      }
+    }
   }
 
   void changeResizeMode() {
@@ -384,6 +607,13 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     seek10Seconds(isLeft);
   }
 
+  void seekTo(Duration pos) {
+    player.seek(pos);
+    if (watchiumService.inRoom && watchiumService.isHost.value) {
+      watchiumService.sendSeek(pos.inSeconds.toDouble());
+    }
+  }
+
   void seek10Seconds(bool isLeft) {
     player.pause();
     isSeeking.value = true;
@@ -399,7 +629,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
               )
               .seconds;
     position.value = newPosition;
-    player.seek(Duration(seconds: newPosition.inSeconds));
+    seekTo(Duration(seconds: newPosition.inSeconds));
     player.play();
     doubleTapTimer?.cancel();
     Future.delayed(
@@ -583,6 +813,12 @@ class WatchController extends GetxController with WidgetsBindingObserver {
           ),
           IconButton(
             onPressed: () {
+              showWatchiumSheet(context, animeData: animeData.value);
+            },
+            icon: const Icon(Broken.people, color: Colors.white),
+          ),
+          IconButton(
+            onPressed: () {
               showQualitySheet(
                 context,
                 animeData,
@@ -602,28 +838,69 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          AzyXContainer(
-            alignment: Alignment.topLeft,
-            child: Obx(
-              () => AzyXText(
-                text: "Episode ${episodeNumber.value}: ${episodeTitle.value}",
-                fontVariant: FontVariant.bold,
-                color: Theme.of(context).colorScheme.primary,
-                fontSize: 16,
-                maxLines: 2,
-              ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Obx(
+                  () => AzyXText(
+                    text:
+                        "Episode ${episodeNumber.value}: ${episodeTitle.value}",
+                    fontVariant: FontVariant.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                    fontSize: 16,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Obx(() {
+                  final state = watchiumService.roomState.value;
+                  final code = watchiumService.roomCode.value;
+                  if (state == null || code.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  return Container(
+                    margin: const EdgeInsets.only(left: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.fiber_manual_record,
+                          color: Colors.white,
+                          size: 8,
+                        ),
+                        const SizedBox(width: 4),
+                        AzyXText(
+                          text: 'LIVE • $code',
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontVariant: FontVariant.bold,
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ],
             ),
           ),
-          AzyXContainer(
-            alignment: Alignment.topLeft,
-            child: AzyXText(
-              text: animeData.value.title!,
-              color: const Color.fromARGB(255, 190, 190, 190),
-              fontSize: 13,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
+          AzyXText(
+            text: animeData.value.title ?? '',
+            color: const Color.fromARGB(255, 190, 190, 190),
+            fontSize: 13,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         ],
       ),
@@ -769,7 +1046,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
           position.value = isLeft
               ? max.max(0, position.value.inSeconds - 85).seconds
               : max.max(0, position.value.inSeconds + 85).seconds;
-          player.seek(Duration(seconds: position.value.inSeconds));
+          seekTo(Duration(seconds: position.value.inSeconds));
           player.play();
         },
         icon: isLeft
@@ -826,20 +1103,24 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   Widget bottomControls(BuildContext context) {
     return isPotraitOrientaion.value
         ? bottomPotraitControls(context)
-        : Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              bottomLeftControls(context),
-              Row(
-                children: [
-                  isControlsLocked.value
-                      ? const SizedBox.shrink()
-                      : seek85(false),
-                  bottomRightControls(),
-                ],
-              ),
-            ],
+        : SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                bottomLeftControls(context),
+                Row(
+                  children: [
+                    isControlsLocked.value
+                        ? const SizedBox.shrink()
+                        : seek85(false),
+                    bottomRightControls(),
+                  ],
+                ),
+              ],
+            ),
           );
   }
 
@@ -991,7 +1272,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
                             )
                           : 0.0,
                       onDragEnd: (value) {
-                        player.seek(Duration(seconds: value.toInt()));
+                        seekTo(Duration(seconds: value.toInt()));
                         player.play();
                       },
                       isLocked: isControlsLocked.value,
@@ -1129,6 +1410,44 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     );
   }
 
+  Widget buildReactionsOverlay() {
+    return Obx(() {
+      final state = watchiumService.roomState.value;
+      final rxList = watchiumService.reactions;
+      if (state == null || rxList.isEmpty) {
+        return const SizedBox.shrink();
+      }
+      return Positioned(
+        bottom: 110,
+        right: 30,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: rxList.map((r) {
+            return Container(
+              margin: const EdgeInsets.only(top: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AzyXText(
+                    text: '${r.username}: ',
+                    fontSize: 12,
+                    color: Colors.white70,
+                  ),
+                  Text(r.emoji, style: const TextStyle(fontSize: 18)),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      );
+    });
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
@@ -1145,6 +1464,10 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       DeviceOrientation.portraitDown,
       DeviceOrientation.portraitUp,
     ]);
+    _roomStateSubscription?.cancel();
+    _roomStateSubscription = null;
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
     player.dispose();
     localHistoryEntry();
     updateTimer?.cancel();

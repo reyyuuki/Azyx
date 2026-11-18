@@ -66,6 +66,7 @@ dependencies:
   fuzzywuzzy: ^1.2.0
   loading_indicator_m3e: ^0.1.1
   flutter_markdown: ^0.7.7+1
+  socket_io_client: ^3.0.2
   ffi: any
   win32: any
 

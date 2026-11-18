@@ -73,6 +73,20 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="sora" />
             </intent-filter> 
+
+            <intent-filter android:label="Watch Together">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="azyx" />
+            </intent-filter>
+            <intent-filter android:label="Watch Together">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" android:host="anymex.duckdns.org" />
+                <data android:scheme="https" android:host="anymex.duckdns.org" />
+            </intent-filter>
         </activity>
         <!-- Web Auth Callback Activity -->
         <activity android:name="com.linusu.flutter_web_auth_2.CallbackActivity" android:exported="true">
