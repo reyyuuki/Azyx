@@ -43,11 +43,17 @@ class SearchList extends StatelessWidget {
                       smallMedia: CarousaleData(
                           id: item.id!, image: item.image!, title: item.title!),
                     ))
-                : Get.to(() => AnimeDetailsScreen(
+                : Navigator.push(
+                    context,
+                    AnimeDetailsScreen.route(
                       tagg: 'anime_${item.id}',
                       smallMedia: CarousaleData(
-                          id: item.id!, image: item.image!, title: item.title!),
-                    ));
+                        id: item.id!,
+                        image: item.image!,
+                        title: item.title!,
+                      ),
+                    ),
+                  );
           },
           borderRadius: BorderRadius.circular(24),
           child: Container(

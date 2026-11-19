@@ -893,8 +893,9 @@ class _LibraryScreenState extends State<LibraryScreen>
     final formattedRating = _formatRating(media?.rating);
     return GestureDetector(
       onTap: () => _contentType == LibraryContentType.anime
-          ? Get.to(
-              () => AnimeDetailsScreen(
+          ? Navigator.push(
+              context,
+              AnimeDetailsScreen.route(
                 tagg: tagg,
                 allData: item,
                 isOffline: true,

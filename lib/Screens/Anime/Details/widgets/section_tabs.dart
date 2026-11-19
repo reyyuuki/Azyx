@@ -25,9 +25,9 @@ class SectionTabs extends StatelessWidget {
 
       final tabs = <MapEntry<String, String>>[
         const MapEntry('ov', 'Overview'),
-        const MapEntry('ch', 'Characters'),
-        if (hasRelations) const MapEntry('rl', 'Related'),
         const MapEntry('ep', 'Episodes'),
+        if (hasRelations) const MapEntry('rl', 'Related'),
+        const MapEntry('ch', 'Characters'),
         const MapEntry('cm', 'Community'),
       ];
 
@@ -35,8 +35,10 @@ class SectionTabs extends StatelessWidget {
 
       return Container(
         height: 46,
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        constraints: const BoxConstraints(maxWidth: 1132),
+        margin: const EdgeInsets.symmetric(
+          horizontal: AzTokens.horizontalPadding,
+        ),
+        constraints: const BoxConstraints(maxWidth: AzTokens.contentMaxWidth),
         child: GlassSurface(
           borderRadius: AzTokens.radiusTabContainer,
           padding: const EdgeInsets.all(4),
@@ -68,7 +70,8 @@ class SectionTabs extends StatelessWidget {
                           color: isSelected
                               ? tones.accent
                               : theme.colorScheme.onSurfaceVariant,
-                          weight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                          weight:
+                              isSelected ? FontWeight.w600 : FontWeight.w500,
                           size: 14,
                         ),
                       ),

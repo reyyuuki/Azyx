@@ -43,8 +43,9 @@ class GridviewList extends StatelessWidget {
                       ),
                     ),
                   )
-                : Get.to(
-                    () => AnimeDetailsScreen(
+                : Navigator.push(
+                    context,
+                    AnimeDetailsScreen.route(
                       tagg: tagg,
                       smallMedia: CarousaleData(
                         id: item.id ?? '1',

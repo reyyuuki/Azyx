@@ -40,6 +40,32 @@ class AnimeDetailsScreen extends StatefulWidget {
     this.id,
   });
 
+  static Route<void> route({
+    String? tagg,
+    CarousaleData? smallMedia,
+    OfflineItem? allData,
+    bool isOffline = false,
+    int? id,
+  }) {
+    return PageRouteBuilder<void>(
+      settings: RouteSettings(
+        name: '/anime_details_' + (id != null ? id.toString() : (smallMedia != null ? smallMedia.id : (tagg ?? ''))),
+      ),
+      transitionDuration: const Duration(milliseconds: 320),
+      reverseTransitionDuration: const Duration(milliseconds: 280),
+      pageBuilder: (context, animation, secondaryAnimation) => AnimeDetailsScreen(
+        tagg: tagg,
+        smallMedia: smallMedia,
+        allData: allData,
+        isOffline: isOffline,
+        id: id,
+      ),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return child;
+      },
+    );
+  }
+
   @override
   State<AnimeDetailsScreen> createState() => _AnimeDetailsScreenState();
 }
@@ -127,11 +153,9 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
 
   void _navigateToMedia(int targetId) {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => AnimeDetailsScreen(
-          id: targetId,
-          tagg: 'anime_$targetId',
-        ),
+      AnimeDetailsScreen.route(
+        id: targetId,
+        tagg: 'anime_$targetId',
       ),
     );
   }
@@ -144,8 +168,7 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
 
     return Obx(() {
       final media = _controller.mediaData.value;
-      final tones = AzTones.fromHex(
-        media.color,
+      final tones = AzTones.fromScheme(
         theme.colorScheme,
       );
 
@@ -174,6 +197,10 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
       final hasRelationsOrRecs =
           relations.isNotEmpty || recommendations.isNotEmpty;
 
+      final hasInitialData = (media.title != null && media.title!.isNotEmpty) ||
+          widget.smallMedia != null ||
+          widget.allData != null;
+
       return AzTonesProvider(
         tones: tones,
         child: CallbackShortcuts(
@@ -198,9 +225,9 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
                     height: 540,
                   ),
                 ),
-                if (isLoading)
+                if (isLoading && !hasInitialData)
                   const DetailsSkeleton()
-                else if (hasError)
+                else if (hasError && !hasInitialData)
                   DetailsError(
                     errorMessage: _controller.error.value,
                     onRetry: () => _controller.loadData(),
@@ -227,6 +254,8 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
                                 _controller.onPrimaryAction(context),
                             onListTap: () => _openListSheet(context),
                             onFavTap: () => _controller.toggleFavourite(),
+                            heroTag: widget.tagg,
+                            isLoading: isLoading,
                           ),
                         ),
                         SliverToBoxAdapter(
@@ -263,14 +292,14 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
                                             Container(
                                               key: _controller.sectionKeys['ov'],
                                               child:
-                                                  SynopsisBlock(media: media),
+                                                  SynopsisBlock(media: media, isLoading: isLoading),
                                             ),
                                             const SizedBox(
                                                 height: AzTokens.sectionGap),
                                             Container(
-                                              key: _controller.sectionKeys['ch'],
-                                              child: CharacterGrid(
-                                                characters: media.characters,
+                                              key: _controller.sectionKeys['ep'],
+                                              child: EpisodeGrid(
+                                                controller: _controller,
                                               ),
                                             ),
                                             if (hasRelationsOrRecs) ...[
@@ -307,9 +336,9 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
                                             const SizedBox(
                                                 height: AzTokens.sectionGap),
                                             Container(
-                                              key: _controller.sectionKeys['ep'],
-                                              child: EpisodeGrid(
-                                                controller: _controller,
+                                              key: _controller.sectionKeys['ch'],
+                                              child: CharacterGrid(
+                                                characters: media.characters,
                                               ),
                                             ),
                                             const SizedBox(
@@ -336,14 +365,14 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
                                     children: [
                                       Container(
                                         key: _controller.sectionKeys['ov'],
-                                        child: SynopsisBlock(media: media),
+                                        child: SynopsisBlock(media: media, isLoading: isLoading),
                                       ),
                                       const SizedBox(
                                           height: AzTokens.sectionGap),
                                       Container(
-                                        key: _controller.sectionKeys['ch'],
-                                        child: CharacterGrid(
-                                          characters: media.characters,
+                                        key: _controller.sectionKeys['ep'],
+                                        child: EpisodeGrid(
+                                          controller: _controller,
                                         ),
                                       ),
                                       if (hasRelationsOrRecs) ...[
@@ -377,9 +406,9 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
                                       const SizedBox(
                                           height: AzTokens.sectionGap),
                                       Container(
-                                        key: _controller.sectionKeys['ep'],
-                                        child: EpisodeGrid(
-                                          controller: _controller,
+                                        key: _controller.sectionKeys['ch'],
+                                        child: CharacterGrid(
+                                          characters: media.characters,
                                         ),
                                       ),
                                       const SizedBox(

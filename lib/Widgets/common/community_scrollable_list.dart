@@ -140,30 +140,35 @@ class _CommunityScrollItem extends StatelessWidget {
     required this.serviceType,
   });
   void _navigateToDetails(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => mediaType == MediaType.manga
-            ? MangaDetailsScreen(
-                smallMedia: CarousaleData(
-                  id: item.media.id ?? '',
-                  image: item.media.image ?? '',
-                  title: item.media.title ?? '',
-                ),
-                tagg: 'community-scroll-${item.media.id}',
-                isOffline: false,
-              )
-            : AnimeDetailsScreen(
-                smallMedia: CarousaleData(
-                  id: item.media.id ?? '',
-                  image: item.media.image ?? '',
-                  title: item.media.title ?? '',
-                ),
-                tagg: 'community-scroll-${item.media.id}',
-                isOffline: false,
-              ),
-      ),
-    );
+    if (mediaType == MediaType.manga) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MangaDetailsScreen(
+            smallMedia: CarousaleData(
+              id: item.media.id ?? '',
+              image: item.media.image ?? '',
+              title: item.media.title ?? '',
+            ),
+            tagg: 'community-scroll-${item.media.id}',
+            isOffline: false,
+          ),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        AnimeDetailsScreen.route(
+          smallMedia: CarousaleData(
+            id: item.media.id ?? '',
+            image: item.media.image ?? '',
+            title: item.media.title ?? '',
+          ),
+          tagg: 'community-scroll-${item.media.id}',
+          isOffline: false,
+        ),
+      );
+    }
   }
   @override
   Widget build(BuildContext context) {

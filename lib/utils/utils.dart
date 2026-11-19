@@ -13,7 +13,15 @@ class Utils {
 extension NavigatorExts on Widget {
   void navigate(BuildContext context) => Navigator.push(
     context,
-    MaterialPageRoute(builder: (c) => BouncePageAnimation(child: this)),
+    PageRouteBuilder(
+      pageBuilder: (c, _, __) => this,
+      transitionDuration: const Duration(milliseconds: 320),
+      reverseTransitionDuration: const Duration(milliseconds: 280),
+      transitionsBuilder: (_, __, ___, child) => child,
+    ),
   );
-  void getNavigate(BuildContext context) => Get.to(() => this);
+  void getNavigate(BuildContext context) => Get.to(
+    () => this,
+    transition: Transition.noTransition,
+  );
 }

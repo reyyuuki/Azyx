@@ -269,23 +269,27 @@ class _AiRecommendationsPageState extends State<AiRecommendationsPage> {
                           image: item.image ?? '',
                           title: item.title ?? 'Unknown',
                         );
+                        final cardTag = item.id ?? index.toString();
                         return GestureDetector(
                           onTap: () {
                             widget.isManga
                                 ? MangaDetailsScreen(
                                     smallMedia: data,
-                                    tagg: (item.title ?? '') + (item.id ?? ''),
+                                    tagg: cardTag,
                                     isOffline: false,
                                   ).navigate(context)
-                                : AnimeDetailsScreen(
-                                    smallMedia: data,
-                                    tagg: (item.title ?? '') + (item.id ?? ''),
-                                    isOffline: false,
-                                  ).navigate(context);
+                                : Navigator.push(
+                                    context,
+                                    AnimeDetailsScreen.route(
+                                      smallMedia: data,
+                                      tagg: cardTag,
+                                      isOffline: false,
+                                    ),
+                                  );
                           },
                           child: ItemCard(
                             item: data,
-                            tagg: item.id ?? index.toString(),
+                            tagg: cardTag,
                           ),
                         );
                       },
@@ -327,11 +331,14 @@ class _AiRecommendationsPageState extends State<AiRecommendationsPage> {
                     tagg: (item.title ?? '') + (item.id ?? ''),
                     isOffline: false,
                   ).navigate(context)
-                : AnimeDetailsScreen(
-                    smallMedia: data,
-                    tagg: (item.title ?? '') + (item.id ?? ''),
-                    isOffline: false,
-                  ).navigate(context);
+                : Navigator.push(
+                    context,
+                    AnimeDetailsScreen.route(
+                      smallMedia: data,
+                      tagg: (item.title ?? '') + (item.id ?? ''),
+                      isOffline: false,
+                    ),
+                  );
           },
           child: Padding(
             padding: const EdgeInsets.all(10),

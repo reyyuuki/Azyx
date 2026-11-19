@@ -433,30 +433,35 @@ class _CommunityCard extends StatelessWidget {
     required this.mediaId,
   });
   void _navigateToDetails(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => type == MediaType.manga
-            ? MangaDetailsScreen(
-                smallMedia: CarousaleData(
-                  id: item.media.id ?? '',
-                  image: item.media.image ?? '',
-                  title: item.media.title ?? '',
-                ),
-                tagg: 'community-all-${item.media.id}',
-                isOffline: false,
-              )
-            : AnimeDetailsScreen(
-                smallMedia: CarousaleData(
-                  id: item.media.id ?? '',
-                  image: item.media.image ?? '',
-                  title: item.media.title ?? '',
-                ),
-                tagg: 'community-all-${item.media.id}',
-                isOffline: false,
-              ),
-      ),
-    );
+    if (type == MediaType.manga) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MangaDetailsScreen(
+            smallMedia: CarousaleData(
+              id: item.media.id ?? '',
+              image: item.media.image ?? '',
+              title: item.media.title ?? '',
+            ),
+            tagg: 'community-all-${item.media.id}',
+            isOffline: false,
+          ),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        AnimeDetailsScreen.route(
+          smallMedia: CarousaleData(
+            id: item.media.id ?? '',
+            image: item.media.image ?? '',
+            title: item.media.title ?? '',
+          ),
+          tagg: 'community-all-${item.media.id}',
+          isOffline: false,
+        ),
+      );
+    }
   }
 
   @override
@@ -700,30 +705,35 @@ class _CommunityListTile extends StatelessWidget {
     required this.mediaId,
   });
   void _navigateToDetails(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => type == MediaType.manga
-            ? MangaDetailsScreen(
-                smallMedia: CarousaleData(
-                  id: item.media.id ?? '',
-                  image: item.media.image ?? '',
-                  title: item.media.title ?? '',
-                ),
-                tagg: 'community-all-${item.media.id}',
-                isOffline: false,
-              )
-            : AnimeDetailsScreen(
-                smallMedia: CarousaleData(
-                  id: item.media.id ?? '',
-                  image: item.media.image ?? '',
-                  title: item.media.title ?? '',
-                ),
-                tagg: 'community-all-${item.media.id}',
-                isOffline: false,
-              ),
-      ),
-    );
+    if (type == MediaType.manga) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MangaDetailsScreen(
+            smallMedia: CarousaleData(
+              id: item.media.id ?? '',
+              image: item.media.image ?? '',
+              title: item.media.title ?? '',
+            ),
+            tagg: 'community-all-${item.media.id}',
+            isOffline: false,
+          ),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        AnimeDetailsScreen.route(
+          smallMedia: CarousaleData(
+            id: item.media.id ?? '',
+            image: item.media.image ?? '',
+            title: item.media.title ?? '',
+          ),
+          tagg: 'community-all-${item.media.id}',
+          isOffline: false,
+        ),
+      );
+    }
   }
 
   @override

@@ -39,7 +39,7 @@ class AnimeScrollableList extends StatelessWidget {
                   itemCount: data.length,
                   itemBuilder: (context, index) {
                     final item = data[index];
-                    final tagg = UniqueKey().toString();
+                    final heroTag = '$title-${item.id}';
                     return SlideAndScaleAnimation(
                       child: GestureDetector(
                         onTap: () {
@@ -49,27 +49,25 @@ class AnimeScrollableList extends StatelessWidget {
                                   MaterialPageRoute(
                                     builder: (context) => MangaDetailsScreen(
                                       smallMedia: item,
-                                      tagg: tagg + data[index].id.toString(),
+                                      tagg: heroTag,
                                       isOffline: false,
                                     ),
                                   ),
                                 )
                               : Navigator.push(
                                   context,
-                                  MaterialPageRoute(
-                                    builder: (context) => AnimeDetailsScreen(
-                                      smallMedia: item,
-                                      tagg: title + data[index].id.toString(),
-                                      isOffline: false,
-                                    ),
+                                  AnimeDetailsScreen.route(
+                                    smallMedia: item,
+                                    tagg: heroTag,
+                                    isOffline: false,
                                   ),
                                 );
                         },
                         child: StaggeredAnimatedItemWrapper(
-                          baseDuration: Duration(milliseconds: 1000),
+                          baseDuration: const Duration(milliseconds: 1000),
                           child: ItemCard(
                             item: data[index],
-                            tagg: tagg + data[index].id.toString(),
+                            tagg: heroTag,
                           ),
                         ),
                       ),

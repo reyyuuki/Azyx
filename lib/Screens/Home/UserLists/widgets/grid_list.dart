@@ -53,23 +53,21 @@ class UserGridList extends StatelessWidget {
                               image: item.image!,
                               title: item.title!,
                             ),
-                            tagg: item.title! + item.id.toString(),
+                            tagg: tagg.toString(),
                             isOffline: false,
                           ),
                         ),
                       )
                     : Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => AnimeDetailsScreen(
-                            smallMedia: CarousaleData(
-                              id: tagg!,
-                              image: item.image!,
-                              title: item.title!,
-                            ),
-                            tagg: item.title! + item.id.toString(),
-                            isOffline: false,
+                        AnimeDetailsScreen.route(
+                          smallMedia: CarousaleData(
+                            id: tagg!,
+                            image: item.image!,
+                            title: item.title!,
                           ),
+                          tagg: tagg.toString(),
+                          isOffline: false,
                         ),
                       );
               },

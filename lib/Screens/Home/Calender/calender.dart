@@ -129,15 +129,18 @@ class _CalenderPageState extends State<CalenderPage>
                           final item = i.animeList[index];
                           final taggname = "${item.id}";
                           return GestureDetector(
-                            onTap: () => AnimeDetailsScreen(
-                              smallMedia: CarousaleData(
-                                id: item.id!,
-                                image: item.image!,
-                                title: item.title!,
+                            onTap: () => Navigator.push(
+                              context,
+                              AnimeDetailsScreen.route(
+                                smallMedia: CarousaleData(
+                                  id: item.id!,
+                                  image: item.image!,
+                                  title: item.title!,
+                                ),
+                                tagg: taggname,
+                                isOffline: false,
                               ),
-                              tagg: item.title! + item.id.toString(),
-                              isOffline: false,
-                            ).navigate(context),
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [

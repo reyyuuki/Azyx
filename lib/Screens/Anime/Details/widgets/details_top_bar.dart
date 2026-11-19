@@ -22,7 +22,12 @@ class DetailsTopBar extends StatelessWidget {
 
     return RepaintBoundary(
       child: Container(
-        padding: EdgeInsets.fromLTRB(18.0, topPadding + 12.0, 18.0, 12.0),
+        padding: EdgeInsets.fromLTRB(
+          AzTokens.horizontalPadding,
+          topPadding + 12.0,
+          AzTokens.horizontalPadding,
+          12.0,
+        ),
         child: Row(
           children: [
             if (showBackButton)

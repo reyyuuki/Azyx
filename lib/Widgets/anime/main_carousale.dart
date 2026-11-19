@@ -152,28 +152,33 @@ class _MainCarousaleState extends State<MainCarousale> {
   void _navigateToDetails(Media anime) {
     HapticFeedback.lightImpact();
     _stopAutoPlay();
-    final screen = widget.isManga
-        ? MangaDetailsScreen(
+    if (widget.isManga) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MangaDetailsScreen(
             smallMedia: CarousaleData(
               id: anime.id!,
               image: anime.image!,
               title: anime.title!,
             ),
             tagg: "${anime.id}MainCarousale",
-          )
-        : AnimeDetailsScreen(
-            smallMedia: CarousaleData(
-              id: anime.id!,
-              image: anime.image!,
-              title: anime.title!,
-            ),
-            tagg: "${anime.id}MainCarousale",
-          );
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => screen),
-    ).then((_) => _startAutoPlay());
+          ),
+        ),
+      ).then((_) => _startAutoPlay());
+    } else {
+      Navigator.push(
+        context,
+        AnimeDetailsScreen.route(
+          smallMedia: CarousaleData(
+            id: anime.id!,
+            image: anime.image!,
+            title: anime.title!,
+          ),
+          tagg: "${anime.id}MainCarousale",
+        ),
+      ).then((_) => _startAutoPlay());
+    }
   }
 }
 

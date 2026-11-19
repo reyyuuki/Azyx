@@ -311,7 +311,10 @@ class Deeplink {
     if (target.isManga) {
       Get.to(() => MangaDetailsScreen(tagg: tag, smallMedia: smallMedia));
     } else {
-      Get.to(() => AnimeDetailsScreen(tagg: tag, smallMedia: smallMedia));
+      Get.to(
+        () => AnimeDetailsScreen(tagg: tag, smallMedia: smallMedia),
+        transition: Transition.noTransition,
+      );
     }
   }
 

@@ -7,10 +7,12 @@ import 'package:flutter/material.dart';
 
 class SynopsisBlock extends StatefulWidget {
   final AnilistMediaData media;
+  final bool isLoading;
 
   const SynopsisBlock({
     super.key,
     required this.media,
+    this.isLoading = false,
   });
 
   @override
@@ -78,39 +80,82 @@ class _SynopsisBlockState extends State<SynopsisBlock> {
           style: AzTokens.h2(context),
         ),
         const SizedBox(height: 14),
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
-          child: Text(
-            cleanDesc,
-            maxLines: _isExpanded ? null : 5,
-            overflow: _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-            style: AzTokens.body(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
-              size: 16,
-              height: 1.75,
+        if (widget.isLoading &&
+            (widget.media.description == null ||
+                widget.media.description!.isEmpty))
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(7),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  width: double.infinity,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(7),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  width: 200,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(7),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: () {
-            setState(() {
-              _isExpanded = !_isExpanded;
-            });
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+          )
+        else ...[
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
             child: Text(
-              _isExpanded ? 'Show less' : 'Read more',
+              cleanDesc,
+              maxLines: _isExpanded ? null : 5,
+              overflow:
+                  _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
               style: AzTokens.body(
-                color: tones.accent,
-                weight: FontWeight.w600,
-                size: 14,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
+                size: 16,
+                height: 1.75,
               ),
             ),
           ),
-        ),
+          const SizedBox(height: 8),
+          InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+              child: Text(
+                _isExpanded ? 'Show less' : 'Read more',
+                style: AzTokens.body(
+                  color: tones.accent,
+                  weight: FontWeight.w600,
+                  size: 14,
+                ),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
