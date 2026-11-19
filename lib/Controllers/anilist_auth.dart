@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/models/online_service.dart';
-import 'package:azyx/Controllers/source/source_mapper.dart';
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
@@ -828,6 +827,78 @@ class AnilistService extends GetxController
     }
     await fetchUserAnimeList();
     await fetchUserMangaList();
+  }
+
+  Future<bool> toggleFavourite(int animeId) async {
+    const String url = 'https://graphql.anilist.co';
+    final accessToken = AuthKeys.anilistToken.get<String>('');
+    if (accessToken.isEmpty) return false;
+    final Map<String, String> headers = {
+      'Authorization': 'Bearer $accessToken',
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    const String mutation = '''
+    mutation (\$animeId: Int) {
+      ToggleFavourite(animeId: \$animeId) {
+        anime {
+          pageInfo {
+            total
+          }
+        }
+      }
+    }
+    ''';
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode({
+          'query': mutation,
+          'variables': {'animeId': animeId},
+        }),
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      log('toggleFavourite error: $e');
+      return false;
+    }
+  }
+
+  Future<bool> deleteMediaListEntry(int entryId) async {
+    const String url = 'https://graphql.anilist.co';
+    final accessToken = AuthKeys.anilistToken.get<String>('');
+    if (accessToken.isEmpty) return false;
+    final Map<String, String> headers = {
+      'Authorization': 'Bearer $accessToken',
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    const String mutation = '''
+    mutation (\$id: Int) {
+      DeleteMediaListEntry(id: \$id) {
+        deleted
+      }
+    }
+    ''';
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: headers,
+        body: jsonEncode({
+          'query': mutation,
+          'variables': {'id': entryId},
+        }),
+      );
+      if (response.statusCode == 200) {
+        await fetchUserAnimeList();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      log('deleteMediaListEntry error: $e');
+      return false;
+    }
   }
 
   @override

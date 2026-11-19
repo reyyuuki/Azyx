@@ -1,3 +1,5 @@
+import 'package:azyx/Database/keys/data_keys.dart';
+import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Models/anilist_schedules.dart';
 import 'package:azyx/Models/media.dart';
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
@@ -10,40 +12,112 @@ final AnilistDataController anilistDataController = Get.find();
 class AnilistDataController extends GetxController {
   final String graphqlEndpoint = 'https://graphql.anilist.co';
   final RxList<AnilistSchedules> anilistSchedules = RxList();
+  final Map<int, (DateTime, AnilistMediaData)> _detailsCache = {};
+  final Map<int, Future<AnilistMediaData>> _inFlightDetails = {};
+
   @override
   void onInit() async {
     super.onInit();
     await fetchCalendarData(anilistSchedules);
   }
+
   Future<AnilistMediaData> fetchAnilistAnimeDetails(
     int animeId, {
     dynamic offlineData,
   }) async {
+    final cached = _detailsCache[animeId];
+    if (cached != null) {
+      if (DateTime.now().difference(cached.$1).inMinutes < 20) {
+        return cached.$2;
+      }
+    }
+
+    if (_inFlightDetails.containsKey(animeId)) {
+      return _inFlightDetails[animeId]!;
+    }
+
+    final future = _fetchWithRetry(animeId);
+    _inFlightDetails[animeId] = future;
+
+    try {
+      final result = await future;
+      _detailsCache[animeId] = (DateTime.now(), result);
+      return result;
+    } finally {
+      _inFlightDetails.remove(animeId);
+    }
+  }
+
+  Future<AnilistMediaData> _fetchWithRetry(int animeId) async {
+    try {
+      return await _fetchMediaDetailsFromApi(animeId);
+    } catch (_) {
+      await Future.delayed(const Duration(milliseconds: 1000));
+      return await _fetchMediaDetailsFromApi(animeId);
+    }
+  }
+
+  Future<AnilistMediaData> _fetchMediaDetailsFromApi(int animeId) async {
     const String query = '''
     query (\$id: Int) {
-      Media(id: \$id) {
+      Media(id: \$id, type: ANIME) {
         id
         title {
           romaji
           english
           native
         }
-        synonyms
-        description
         coverImage {
-          large   
+          extraLarge
+          color
         }
         bannerImage
-        averageScore
-        episodes
-        type
+        description
         status
-        popularity
-        genres
+        format
+        episodes
+        duration
         season
         seasonYear
-        duration
         source
+        countryOfOrigin
+        averageScore
+        meanScore
+        popularity
+        favourites
+        genres
+        tags {
+          name
+          rank
+          isMediaSpoiler
+        }
+        rankings {
+          rank
+          type
+          allTime
+          season
+          year
+          format
+          context
+        }
+        studios {
+          edges {
+            isMain
+            node {
+              name
+              isAnimationStudio
+            }
+          }
+        }
+        nextAiringEpisode {
+          episode
+          timeUntilAiring
+          airingAt
+        }
+        trailer {
+          id
+          site
+        }
         startDate {
           year
           month
@@ -54,97 +128,158 @@ class AnilistDataController extends GetxController {
           month
           day
         }
-        trailer {
-          id
-          site
+        siteUrl
+        streamingEpisodes {
+          title
           thumbnail
+          url
         }
-        studios {
-          nodes {
-            name
+        stats {
+          scoreDistribution {
+            score
+            amount
+          }
+          statusDistribution {
+            status
+            amount
           }
         }
-        characters {
+        characters(sort: [ROLE, FAVOURITES_DESC], perPage: 10) {
           edges {
+            role
             node {
               name {
                 full
               }
-              favourites
               image {
                 large
+              }
+            }
+            voiceActors(language: JAPANESE) {
+              name {
+                full
               }
             }
           }
         }
         relations {
           edges {
+            relationType(version: 2)
             node {
               id
+              type
               title {
                 romaji
-                english
               }
               coverImage {
                 large
               }
-              type
+              format
+            }
+          }
+        }
+        recommendations(sort: RATING_DESC, perPage: 10) {
+          nodes {
+            mediaRecommendation {
+              id
+              title {
+                romaji
+              }
+              coverImage {
+                large
+              }
               averageScore
             }
           }
         }
-        recommendations {
-          edges {
-            node {
-              mediaRecommendation {
-                id
-                title {
-                  romaji
-                  english
-                }
-                coverImage {
-                  large
-                }
-                averageScore
-              }
-            }
-          }
-        }
-        nextAiringEpisode {
-          airingAt
-          timeUntilAiring
-        }
-        rankings {
-          rank
-          type
-          year
+        isFavourite
+        mediaListEntry {
+          id
+          status
+          progress
+          score
+          repeat
         }
       }
     }
-  ''';
+    ''';
+
+    final token = AuthKeys.anilistToken.get<String>('');
+    final headers = {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      if (token.isNotEmpty) "Authorization": "Bearer $token",
+    };
+
+    final response = await http.post(
+      Uri.parse(graphqlEndpoint),
+      headers: headers,
+      body: json.encode({
+        "query": query,
+        "variables": {"id": animeId},
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final media = data['data']?['Media'];
+      if (media == null) {
+        throw Exception('Media not found');
+      }
+      return AnilistMediaData.fromJson(media, false);
+    } else {
+      throw Exception('Failed to load anime details: ${response.statusCode}');
+    }
+  }
+
+  Future<List<AnilistMediaData>> searchAnilistQuick(String query) async {
+    final q = query.trim();
+    if (q.isEmpty) return [];
+    const String searchGql = '''
+    query(\$s: String) {
+      Page(perPage: 7) {
+        media(search: \$s, type: ANIME, sort: SEARCH_MATCH) {
+          id
+          title {
+            romaji
+            english
+          }
+          coverImage {
+            medium
+          }
+          format
+          seasonYear
+          averageScore
+        }
+      }
+    }
+    ''';
     try {
       final response = await http.post(
         Uri.parse(graphqlEndpoint),
-        headers: {"Content-Type": "application/json"},
-        body: json.encode({
-          "query": query,
-          "variables": {"id": animeId},
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'query': searchGql,
+          'variables': {'s': q},
         }),
       );
-      log('Request to AniList: id=$animeId, statusCode=${response.statusCode}');
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final media = data['data']['Media'];
-        offlineData = data;
-        return AnilistMediaData.fromJson(media, false);
-      } else {
-        log('Error response: ${response.body}');
-        throw Exception('Failed to load anime details: ${response.body}');
+        final data = jsonDecode(response.body);
+        final list = data['data']?['Page']?['media'] as List?;
+        if (list != null) {
+          return list
+              .whereType<Map>()
+              .map((e) => AnilistMediaData.fromJson(Map<String, dynamic>.from(e)))
+              .toList();
+        }
       }
-    } catch (error) {
-      log('Exception: $error');
-      throw Exception('Failed to load anime details: $error');
+    } catch (e) {
+      log('searchAnilistQuick error: $e');
     }
+    return [];
   }
   Future<AnilistMediaData> fetchAnilistMangaDetails(int mangaId) async {
     const String graphqlEndpoint = 'https://graphql.anilist.co';

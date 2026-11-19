@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/services/mal_service.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
@@ -60,6 +59,10 @@ class ServiceHandler extends GetxController {
     required bool isAnime,
     String? syncId,
   }) async => await onlineService.updateEntry(params, isAnime: isAnime);
+  Future<bool> toggleFavourite(int animeId) =>
+      anilistService.toggleFavourite(animeId);
+  Future<bool> deleteMediaListEntry(int entryId) =>
+      anilistService.deleteMediaListEntry(entryId);
   Rx<Widget> animeWidgets(BuildContext context) =>
       service.animeWidgets(context);
   Rx<Widget> mangaWidgets(BuildContext context) =>

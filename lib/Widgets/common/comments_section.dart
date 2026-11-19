@@ -31,6 +31,7 @@ class _CommentsSectionState extends State<CommentsSection> {
   final FocusNode _commentFocusNode = FocusNode();
   final RxList<Comment> _comments = <Comment>[].obs;
   final RxBool _isLoading = false.obs;
+  final RxBool _showAllComments = false.obs;
   Comment? _replyingTo;
   @override
   void initState() {
@@ -558,10 +559,44 @@ class _CommentsSectionState extends State<CommentsSection> {
                 ),
               );
             }
+            final displayedComments = _showAllComments.value
+                ? _comments
+                : _comments.take(5).toList();
+
             return Column(
-              children: _comments
-                  .map((comment) => _buildCommentCard(comment))
-                  .toList(),
+              children: [
+                ...displayedComments
+                    .map((comment) => _buildCommentCard(comment)),
+                if (!_showAllComments.value && _comments.length > 5) ...[
+                  const SizedBox(height: 14),
+                  Center(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _showAllComments.value = true,
+                      icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
+                      label: Text(
+                        "Load all ${_comments.length} comments",
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: colors.primary,
+                        side: BorderSide(
+                          color: colors.primary.withOpacity(0.3),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 10,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             );
           }),
         ],

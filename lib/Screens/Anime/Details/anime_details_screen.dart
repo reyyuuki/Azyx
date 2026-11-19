@@ -1,474 +1,460 @@
-import 'dart:convert';
-import 'dart:developer';
-import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
-import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
-import 'package:azyx/Controllers/services/models/base_service.dart';
-import 'package:azyx/Controllers/services/service_handler.dart';
-import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Database/isar_models/anime_details_data.dart';
-import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Database/isar_models/offline_item.dart';
 import 'package:azyx/Models/carousale_data.dart';
-import 'package:azyx/Models/user_media.dart';
-import 'package:azyx/Screens/Anime/Details/tabs/add_to_list_floater.dart';
-import 'package:azyx/Screens/Anime/Details/tabs/details_section.dart';
-import 'package:azyx/Screens/Anime/Details/tabs/watch_section.dart';
-import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
-import 'package:azyx/Widgets/common/comments_section.dart';
-import 'package:azyx/Widgets/common/scrollable_app_bar.dart';
-import 'package:azyx/utils/mapper.dart';
-import 'package:azyx/utils/source_mapper.dart';
-import 'package:azyx/utils/utils.dart';
-import 'package:expandable_page_view/expandable_page_view.dart';
+import 'package:azyx/Screens/Anime/Details/controller/anime_details_controller.dart';
+import 'package:azyx/Screens/Anime/Details/tokens/az_tokens.dart';
+import 'package:azyx/Screens/Anime/Details/tokens/az_tones.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/az_toast.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/character_grid.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/community_charts.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/details_error.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/details_skeleton.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/details_top_bar.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/episode_grid.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/hero_backdrop.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/hero_section.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/list_sheet.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/mobile_dock.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/poster_row.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/search_overlay.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/section_tabs.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/side_column.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/synopsis_block.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart';
-import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class AnimeDetailsScreen extends StatefulWidget {
-  final String tagg;
+  final String? tagg;
   final CarousaleData? smallMedia;
   final OfflineItem? allData;
   final bool isOffline;
+  final int? id;
+
   const AnimeDetailsScreen({
     super.key,
-    required this.tagg,
+    this.tagg,
     this.isOffline = false,
     this.smallMedia,
     this.allData,
+    this.id,
   });
+
   @override
-  State<AnimeDetailsScreen> createState() => _DetailsScreenState();
+  State<AnimeDetailsScreen> createState() => _AnimeDetailsScreenState();
 }
 
-class _DetailsScreenState extends State<AnimeDetailsScreen>
-    with SingleTickerProviderStateMixin {
-  final RxString title = ''.obs;
-  final Rx<String> image = ''.obs;
-  final Rx<String> coverImage = ''.obs;
-  final Rx<String> id = ''.obs;
-  final Rx<AnilistMediaData> mediaData = AnilistMediaData().obs;
-  final RxBool isLoading = true.obs;
-  final Rx<Source> selectedSource = Source().obs;
-  final Rx<String> animeTitle = "??".obs;
-  final Rx<String> totalEpisodes = "??".obs;
-  final RxList<Episode> episodesList = RxList();
-  late TabController _tabBarController;
-  late PageController _pageController;
-  final Rx<String> _anilistError = ''.obs;
-  final Rx<bool> _extenstionError = false.obs;
-  final Rx<bool> isFetchingEpisodes = true.obs;
-  final Rx<String> syncId = ''.obs;
-  final RxInt _currentIndex = 0.obs;
+class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
+  late final String _controllerTag;
+  late final AnimeDetailsController _controller;
+  final GlobalKey _tabsKey = GlobalKey();
+  final ValueNotifier<bool> _showStickyTabs = ValueNotifier<bool>(false);
+
   @override
   void initState() {
     super.initState();
-    final length = sourceController.installedExtensions.isNotEmpty ? 3 : 2;
-    _tabBarController = TabController(length: length, vsync: this);
-    _pageController = PageController();
-    _tabBarController.addListener(() {
-      if (_tabBarController.index != _currentIndex.value) {
-        _currentIndex.value = _tabBarController.index;
-        if (_pageController.hasClients &&
-            _pageController.page?.round() != _tabBarController.index) {
-          _pageController.animateToPage(
-            _tabBarController.index,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOutCubicEmphasized,
-          );
-        }
-      }
+    final animeId = _resolveAnimeId();
+    _controllerTag = widget.tagg ??
+        'anime_${animeId ?? DateTime.now().millisecondsSinceEpoch}';
+
+    _controller = Get.put(
+      AnimeDetailsController(),
+      tag: _controllerTag,
+    );
+
+    if (widget.smallMedia != null) {
+      _controller.mediaData.value = AnilistMediaData(
+        id: widget.smallMedia!.id,
+        title: widget.smallMedia!.title,
+        image: widget.smallMedia!.image,
+        coverImage: widget.smallMedia!.image,
+      );
+    }
+
+    _controller.initialize(
+      animeId: animeId ?? 0,
+      offlineData: widget.allData,
+      isOffline: widget.isOffline,
+    );
+
+    _controller.scrollController.addListener(_handleScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _handleScroll();
     });
-    convertData();
-    getMediaStatus();
+  }
+
+  void _handleScroll() {
+    final renderBox =
+        _tabsKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null && renderBox.hasSize && mounted) {
+      final position = renderBox.localToGlobal(Offset.zero);
+      final topPadding = MediaQuery.of(context).padding.top;
+      final threshold = topPadding + 56.0;
+      final shouldShow = position.dy <= threshold;
+      if (_showStickyTabs.value != shouldShow) {
+        _showStickyTabs.value = shouldShow;
+      }
+    }
   }
 
   @override
   void dispose() {
-    _tabBarController.dispose();
-    _pageController.dispose();
-    sourceController.cancelInProgress('search');
-    sourceController.cancelInProgress('detail');
-    SourceMapper.cancelMapping();
+    _controller.scrollController.removeListener(_handleScroll);
+    _showStickyTabs.dispose();
+    Get.delete<AnimeDetailsController>(tag: _controllerTag);
     super.dispose();
   }
 
-  void getMediaStatus() {
-    if (serviceHandler.isLoggedIn.value) {
-      serviceHandler.currentMedia.value = serviceHandler.userAnimeList
-          .firstWhere(
-            (e) => e.id == id.value,
-            orElse: () => UserMedia(id: id.value),
-          );
+  int? _resolveAnimeId() {
+    if (widget.id != null) return widget.id;
+    if (widget.allData?.mediaData?.id != null) {
+      return int.tryParse(widget.allData!.mediaData!.id!);
     }
-  }
-
-  Future<void> loadData() async {
-    try {
-      final response = await serviceHandler.fetchAnimeDetails(
-        FetchDetailsParams(id: id.value),
-      );
-      mediaData.value = response;
-      isLoading.value = false;
-      coverImage.value = mediaData.value.coverImage ?? image.value;
-    } catch (e) {
-      _anilistError.value = e.toString();
+    if (widget.smallMedia?.id != null) {
+      return int.tryParse(widget.smallMedia!.id);
     }
-    _syncMedia();
-    loadDetails();
+    return null;
   }
 
-  Future<void> _syncMedia() async {
-    final response = await MediaSyncer.mapMediaId(
-      id.value.toString(),
-      isManga: false,
-    );
-    syncId.value = response ?? '';
-  }
-
-  void convertData() {
-    if (widget.isOffline) {
-      anilistAddToListController.findAnime(widget.allData!.mediaData!);
-      image.value = widget.allData!.mediaData!.image!;
-      title.value = widget.allData!.mediaData!.title!;
-      id.value = widget.allData!.mediaData!.id!;
-      episodesList.value = widget.allData!.episodesList!;
-      animeTitle.value = widget.allData!.animeTitle ?? '';
-      mediaData.value = widget.allData!.mediaData!;
-      coverImage.value = widget.allData?.mediaData?.coverImage ?? image.value;
-      totalEpisodes.value = episodesList.length.toString();
-      isLoading.value = false;
-    } else {
-      anilistAddToListController.findAnime(
-        AnilistMediaData(
-          id: widget.smallMedia?.id,
-          title: widget.smallMedia?.title,
-          episodes: widget.allData?.episodesList?.length ?? 0,
-        ),
-      );
-      image.value = widget.smallMedia!.image;
-      title.value = widget.smallMedia!.title;
-      id.value = widget.smallMedia!.id;
-      loadData();
-    }
-  }
-
-  Future<void> getEpisodes(String link) async {
-    final token = "detail_${id.value}";
-    sourceController.updateToken('detail', token);
-    isFetchingEpisodes.value = true;
-    _extenstionError.value = false;
-    try {
-      final episodeResult = await sourceController.activeSource.value!.methods
-          .getDetail(
-            DMedia.withUrl(link),
-            parameters: SourceParams(cancelToken: token),
-          );
-      final episodes = List<DEpisode>.from(episodeResult.episodes ?? []);
-      episodes.sort((a, b) {
-        final typeA = a.sortMap?['type']?.toLowerCase() ?? '';
-        final typeB = b.sortMap?['type']?.toLowerCase() ?? '';
-        int typeRank(String type) {
-          if (type == 'subbed') return 0;
-          if (type == 'dubbed') return 1;
-          if (type.isNotEmpty) return 2;
-          return 3;
-        }
-
-        final rankA = typeRank(typeA);
-        final rankB = typeRank(typeB);
-        if (rankA != rankB) {
-          return rankA.compareTo(rankB);
-        }
-        final seasonA = int.tryParse(a.sortMap?['season'] ?? '') ?? 1;
-        final seasonB = int.tryParse(b.sortMap?['season'] ?? '') ?? 1;
-        if (seasonA != seasonB) {
-          return seasonA.compareTo(seasonB);
-        }
-        final numA = double.tryParse(a.episodeNumber);
-        final numB = double.tryParse(b.episodeNumber);
-        if (numA != null && numB != null) {
-          return numA.compareTo(numB);
-        }
-        if (numA != null) return -1;
-        if (numB != null) return 1;
-        return (a.name ?? '').compareTo(b.name ?? '');
-      });
-      final mappedList = episodes.map((item) {
-        return mChapterToEpisode(item, episodeResult);
-      }).toList();
-      episodesList.value = mappedList;
-      totalEpisodes.value = episodesList.length.toString();
-      if (serviceHandler.serviceType.value != ServicesType.simkl) {
-        if (mediaData.value.episodes == episodesList.length &&
-            episodesList.isNotEmpty) {
-          await getAnifyEpisodes();
-        }
-        if (mounted) setState(() {});
-      }
-    } catch (e) {
-      log("Error fetching episodes or cancelled: $e");
-      _extenstionError.value = true;
-    } finally {
-      isFetchingEpisodes.value = false;
-    }
-  }
-
-  bool matchesAnyTitle(String query) {
-    final q = query.toLowerCase().trim();
-    return [
-      mediaData.value.title,
-      mediaData.value.titleRomaji,
-      mediaData.value.titleNative,
-    ].whereType<String>().any(
-      (t) =>
-          t.toLowerCase().trim().contains(q) ||
-          q.contains(t.toLowerCase().trim()),
+  void _openListSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => ListSheet(controller: _controller),
     );
   }
 
-  Future<void> getAnifyEpisodes() async {
-    try {
-      final resp = await get(
-        Uri.parse(
-          "https://api.ani.zip/mappings?${serviceHandler.serviceType.value == ServicesType.anilist ? 'anilist_id' : 'mal_id'}=${id.value}",
+  void _navigateToMedia(int targetId) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => AnimeDetailsScreen(
+          id: targetId,
+          tagg: 'anime_$targetId',
         ),
-      );
-      final check = jsonDecode(resp.body);
-      final anifyEpisodes = check['episodes'] as Map<String, dynamic>;
-      log(
-        '[AnifyEpisodes] Enriching ${episodesList.length} episodes with Anify data',
-      );
-      final ep = episodesList
-          .map((entry) {
-            final epNum = entry.number;
-            final data = anifyEpisodes.values.firstWhere(
-              (e) => e['absoluteEpisodeNumber'].toString() == epNum,
-              orElse: () => null,
-            );
-            return Episode(
-              url: entry.url ?? '',
-              number: epNum,
-              desc: data != null ? (data['overview'] ?? '') : '',
-              thumbnail: data != null ? (data['image'] ?? '') : '',
-              title: data != null ? ((data['title']?['en']) ?? '') : '',
-              sortKeys: entry.sortKeys,
-              sortVals: entry.sortVals,
-              season: entry.season,
-              type: entry.type,
-              filler: entry.filler,
-            );
-          })
-          .whereType<Episode>()
-          .toList();
-      if (ep.isNotEmpty && ep.first.number.isNotEmpty) {
-        episodesList.value = ep;
-      }
-    } catch (e) {
-      log("Error fetching Anify episodes: $e");
-    }
-  }
-
-  Future<void> loadDetails() async {
-    isFetchingEpisodes.value = true;
-    _extenstionError.value = false;
-    try {
-      final result = await SourceMapper.mapMedia(
-        formatTitles(mediaData.value),
-        title,
-        mediaId: id.value,
-        type: ItemType.anime,
-        synonyms: mediaData.value.synonyms ?? [],
-      );
-      if (result != null) {
-        await getEpisodes(result.url!);
-        animeTitle.value = result.title ?? '';
-      } else {
-        _extenstionError.value = true;
-        isFetchingEpisodes.value = false;
-      }
-    } catch (e) {
-      Utils.log("Error loading episodes");
-      _extenstionError.value = true;
-      isFetchingEpisodes.value = false;
-    }
-  }
-
-  List<String> formatTitles(AnilistMediaData media) {
-    return [media.title ?? '', media.titleRomaji ?? ''];
-  }
-
-  void _onPageChanged(int index) {
-    _currentIndex.value = index;
-    _tabBarController.animateTo(index);
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      extendBody: true,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: Obx(
-        () => AddToListFloater(
-          data: OfflineItem(
-            mediaData: mediaData.value,
-            number: '1',
-            animeTitle: title.value,
-            mediaType: 1,
-            episodesList: episodesList.toList(),
-          ),
-          mediaData: mediaData.value,
-          isLoading: isLoading,
-        ),
-      ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          children: [
-            ScrollableAppBar(
-              mediaData: mediaData,
-              image: image.value,
-              tagg: widget.tagg,
-            ),
-            Container(
-              margin: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-              height: 46,
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withOpacity(0.35),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: colorScheme.outline.withOpacity(0.08),
-                  width: 1,
-                ),
-              ),
-              child: TabBar(
-                controller: _tabBarController,
-                onTap: (index) {
-                  _currentIndex.value = index;
-                  if (_pageController.hasClients) {
-                    _pageController.animateToPage(
-                      index,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOutCubicEmphasized,
-                    );
-                  }
-                },
-                splashBorderRadius: BorderRadius.circular(14),
-                indicatorSize: TabBarIndicatorSize.tab,
-                dividerColor: Colors.transparent,
-                indicatorPadding: const EdgeInsets.all(3),
-                indicator: BoxDecoration(
-                  color: colorScheme.primary.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(13),
-                  border: Border.all(
-                    color: colorScheme.primary.withOpacity(0.3),
-                    width: 0.8,
+    final topPadding = MediaQuery.of(context).padding.top;
+    final isDesktop = AzTokens.isExpanded(context);
+
+    return Obx(() {
+      final media = _controller.mediaData.value;
+      final tones = AzTones.fromHex(
+        media.color,
+        theme.colorScheme,
+      );
+
+      final isLoading = _controller.isLoading.value;
+      final hasError = _controller.error.value.isNotEmpty;
+
+      final isNotYetReleased =
+          media.status?.toUpperCase() == 'NOT_YET_RELEASED';
+      final isCurrentlyWatching =
+          _controller.listStatus.value == 'Currently watching';
+
+      final primaryLabel = isNotYetReleased
+          ? 'Not released yet'
+          : (isCurrentlyWatching ? 'Continue watching' : 'Start watching');
+
+      final listButtonLabel = _controller.listStatus.value.isNotEmpty
+          ? _controller.listStatus.value
+          : 'Add to list';
+
+      final isListOn = _controller.listStatus.value.isNotEmpty;
+      final isFav = _controller.isFavourite.value;
+
+      final relations = PosterRow.fromRelations(media.relations);
+      final recommendations =
+          PosterRow.fromRecommendations(media.recommendations);
+      final hasRelationsOrRecs =
+          relations.isNotEmpty || recommendations.isNotEmpty;
+
+      return AzTonesProvider(
+        tones: tones,
+        child: CallbackShortcuts(
+          bindings: {
+            const SingleActivator(LogicalKeyboardKey.slash): () {
+              if (!_controller.isSearchOpen.value) {
+                _controller.openSearch();
+              }
+            },
+          },
+          child: Scaffold(
+            backgroundColor: theme.colorScheme.surface,
+            body: Stack(
+              children: [
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: HeroBackdrop(
+                    bannerUrl: media.bannerImage,
+                    coverUrl: media.coverImage ?? media.image,
+                    height: 540,
                   ),
                 ),
-                labelColor: colorScheme.primary,
-                unselectedLabelColor: colorScheme.onSurfaceVariant,
-                labelStyle: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                  fontFamily: theme.textTheme.titleMedium?.fontFamily,
-                ),
-                unselectedLabelStyle: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 13,
-                  fontFamily: theme.textTheme.titleMedium?.fontFamily,
-                ),
-                tabs: [
-                  const Tab(text: "Overview"),
-                  if (sourceController.installedExtensions.isNotEmpty)
-                    const Tab(text: "Episodes"),
-                  const Tab(text: "Comments"),
-                ],
-              ),
-            ),
-            ExpandablePageView(
-              controller: _pageController,
-              onPageChanged: _onPageChanged,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                Obx(
-                  () => isLoading.value || _anilistError.value.isNotEmpty
-                      ? Container(
-                          height: 300,
-                          alignment: Alignment.center,
-                          child: _anilistError.value.isNotEmpty
-                              ? Container(
-                                  margin: const EdgeInsets.all(24),
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.errorContainer
-                                        .withOpacity(0.3),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: colorScheme.error.withOpacity(0.2),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: AzyXText(
-                                    text: _anilistError.value,
-                                    color: colorScheme.onErrorContainer,
-                                    fontSize: 14,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                )
-                              : LoadingIndicatorM3E(color: colorScheme.primary),
-                        )
-                      : DetailsSection(
-                          animeTitle: animeTitle.value,
-                          episodesList: episodesList,
-                          mediaData: mediaData,
-                          index: 0,
-                          isManga: false,
+                if (isLoading)
+                  const DetailsSkeleton()
+                else if (hasError)
+                  DetailsError(
+                    errorMessage: _controller.error.value,
+                    onRetry: () => _controller.loadData(),
+                    onSearch: () => _controller.openSearch(),
+                  )
+                else
+                  NotificationListener<ScrollNotification>(
+                    onNotification: (_) {
+                      _handleScroll();
+                      return false;
+                    },
+                    child: CustomScrollView(
+                      controller: _controller.scrollController,
+                      physics: const BouncingScrollPhysics(),
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: HeroSection(
+                            media: media,
+                            primaryLabel: primaryLabel,
+                            listButtonLabel: listButtonLabel,
+                            isListOn: isListOn,
+                            isFavourite: isFav,
+                            onWatchTap: () =>
+                                _controller.onPrimaryAction(context),
+                            onListTap: () => _openListSheet(context),
+                            onFavTap: () => _controller.toggleFavourite(),
+                          ),
                         ),
+                        SliverToBoxAdapter(
+                          child: Center(
+                            child: Container(
+                              key: _tabsKey,
+                              constraints: const BoxConstraints(
+                                maxWidth: AzTokens.contentMaxWidth,
+                              ),
+                              child: SectionTabs(controller: _controller),
+                            ),
+                          ),
+                        ),
+                      SliverToBoxAdapter(
+                        child: Center(
+                          child: Container(
+                            constraints: const BoxConstraints(
+                              maxWidth: AzTokens.contentMaxWidth,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AzTokens.horizontalPadding,
+                              vertical: 36,
+                            ),
+                            child: isDesktop
+                                ? Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              key: _controller.sectionKeys['ov'],
+                                              child:
+                                                  SynopsisBlock(media: media),
+                                            ),
+                                            const SizedBox(
+                                                height: AzTokens.sectionGap),
+                                            Container(
+                                              key: _controller.sectionKeys['ch'],
+                                              child: CharacterGrid(
+                                                characters: media.characters,
+                                              ),
+                                            ),
+                                            if (hasRelationsOrRecs) ...[
+                                              const SizedBox(
+                                                  height: AzTokens.sectionGap),
+                                              Container(
+                                                key: _controller
+                                                    .sectionKeys['rl'],
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    if (relations.isNotEmpty)
+                                                      PosterRow(
+                                                        title: 'Related',
+                                                        items: relations,
+                                                        onItemTapped:
+                                                            _navigateToMedia,
+                                                      ),
+                                                    if (recommendations
+                                                        .isNotEmpty)
+                                                      PosterRow(
+                                                        title:
+                                                            'Fans also liked',
+                                                        isSubheading: true,
+                                                        items: recommendations,
+                                                        onItemTapped:
+                                                            _navigateToMedia,
+                                                      ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                            const SizedBox(
+                                                height: AzTokens.sectionGap),
+                                            Container(
+                                              key: _controller.sectionKeys['ep'],
+                                              child: EpisodeGrid(
+                                                controller: _controller,
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                                height: AzTokens.sectionGap),
+                                            Container(
+                                              key: _controller.sectionKeys['cm'],
+                                              child: CommunityCharts(
+                                                media: media,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 56),
+                                      SizedBox(
+                                        width: 320,
+                                        child: SideColumn(media: media),
+                                      ),
+                                    ],
+                                  )
+                                : Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        key: _controller.sectionKeys['ov'],
+                                        child: SynopsisBlock(media: media),
+                                      ),
+                                      const SizedBox(
+                                          height: AzTokens.sectionGap),
+                                      Container(
+                                        key: _controller.sectionKeys['ch'],
+                                        child: CharacterGrid(
+                                          characters: media.characters,
+                                        ),
+                                      ),
+                                      if (hasRelationsOrRecs) ...[
+                                        const SizedBox(
+                                            height: AzTokens.sectionGap),
+                                        Container(
+                                          key: _controller.sectionKeys['rl'],
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              if (relations.isNotEmpty)
+                                                PosterRow(
+                                                  title: 'Related',
+                                                  items: relations,
+                                                  onItemTapped:
+                                                      _navigateToMedia,
+                                                ),
+                                              if (recommendations.isNotEmpty)
+                                                PosterRow(
+                                                  title: 'Fans also liked',
+                                                  isSubheading: true,
+                                                  items: recommendations,
+                                                  onItemTapped:
+                                                      _navigateToMedia,
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                      const SizedBox(
+                                          height: AzTokens.sectionGap),
+                                      Container(
+                                        key: _controller.sectionKeys['ep'],
+                                        child: EpisodeGrid(
+                                          controller: _controller,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                          height: AzTokens.sectionGap),
+                                      Container(
+                                        key: _controller.sectionKeys['cm'],
+                                        child: CommunityCharts(
+                                          media: media,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                          height: AzTokens.sectionGap),
+                                      SideColumn(media: media),
+                                      const SizedBox(height: 96),
+                                    ],
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                if (sourceController.installedExtensions.isNotEmpty)
-                  Obx(
-                    () => WatchSection(
-                      onChanged: (value) {
-                        totalEpisodes.value = '??';
-                        getEpisodes(value);
-                        _extenstionError.value = false;
-                      },
-                      onTitleChanged: (value) {
-                        animeTitle.value = value;
-                      },
-                      onSourceChanged: (value) {
-                        animeTitle.value = '??';
-                        totalEpisodes.value = '??';
-                        episodesList.value = [];
-                        _extenstionError.value = false;
-                        loadDetails();
-                      },
-                      mediaData: mediaData.value,
-                      hasError: _extenstionError,
-                      isFetching: isFetchingEpisodes,
-                      id: id.value,
-                      image: coverImage.value,
-                      animeTitle: animeTitle,
-                      installedExtensions: sourceController.installedExtensions,
-                      totalEpisodes: totalEpisodes,
-                      episodelist: episodesList,
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: DetailsTopBar(
+                    onSearchTap: () => _controller.openSearch(),
+                    showBackButton: Navigator.of(context).canPop(),
+                  ),
+                ),
+                ValueListenableBuilder<bool>(
+                  valueListenable: _showStickyTabs,
+                  builder: (context, show, _) {
+                    if (!show) return const SizedBox.shrink();
+                    return Positioned(
+                      top: topPadding + 56.0,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: Container(
+                          constraints: const BoxConstraints(
+                            maxWidth: AzTokens.contentMaxWidth,
+                          ),
+                          child: SectionTabs(controller: _controller),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                if (!isDesktop && !isLoading && !hasError)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: MobileDock(
+                      primaryLabel: primaryLabel,
+                      onWatchTap: () =>
+                          _controller.onPrimaryAction(context),
+                      onListTap: () => _openListSheet(context),
+                      onFavTap: () => _controller.toggleFavourite(),
+                      isFavourite: isFav,
+                      isListOn: isListOn,
                     ),
                   ),
-                CommentsSection(
-                  mediaId: id.value,
-                  mediaTitle: title.value,
-                  mediaPoster: image.value,
-                  isManga: false,
+                AzToast(controller: _controller),
+                SearchOverlay(
+                  controller: _controller,
+                  onSelectMedia: _navigateToMedia,
                 ),
               ],
             ),
-            const SizedBox(height: 120),
-          ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
