@@ -44,7 +44,7 @@ class ScoreRing extends StatelessWidget {
               score.toString(),
               style: TextStyle(
                 fontFamily: 'Poppins-Bold',
-                fontSize: 16.5,
+                fontSize: (size * 0.35).clamp(11.0, 16.0),
                 fontWeight: FontWeight.w700,
                 color: colorScheme.onSurface,
               ),

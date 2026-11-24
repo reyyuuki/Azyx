@@ -130,8 +130,8 @@ class _SynopsisBlockState extends State<SynopsisBlock> {
                   _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
               style: AzTokens.body(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
-                size: 16,
-                height: 1.75,
+                size: 14.5,
+                height: 1.55,
               ),
             ),
           ),

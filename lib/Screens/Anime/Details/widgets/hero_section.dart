@@ -35,6 +35,15 @@ class HeroSection extends StatelessWidget {
     this.isLoading = false,
   });
 
+  Widget _buildDivider(ColorScheme colorScheme, {double height = 24.0}) {
+    return Container(
+      width: 1.0,
+      height: height,
+      margin: const EdgeInsets.symmetric(horizontal: 4.0),
+      color: colorScheme.outlineVariant.withValues(alpha: 0.22),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -76,108 +85,159 @@ class HeroSection extends StatelessWidget {
     final hasEpisodes = media.episodes != null && media.episodes! > 0;
     final hasAnyMeta = hasStatus || hasType || hasSeason || hasEpisodes;
 
+    final hPad = isNarrow ? 16.0 : AzTokens.horizontalPadding;
+    final topPad = isNarrow
+        ? (MediaQuery.of(context).padding.top + 52.0)
+        : AzTokens.heroTopPadding;
+
     final infoColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         if (hasAnyMeta)
-          Wrap(
-            spacing: 8.0,
-            runSpacing: 8.0,
-            children: [
-              if (hasStatus)
-                AzChip(
-                  label: AzFormatters.formatStatus(media.status),
-                  isOn: true,
-                ),
-              if (hasType)
-                AzChip(
-                  label: AzFormatters.formatFormat(media.type),
-                ),
-              if (hasSeason) AzChip(label: media.season!),
-              if (hasEpisodes) AzChip(label: '${media.episodes} episodes'),
-            ],
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: [
+                if (hasStatus)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6.0),
+                    child: AzChip(
+                      label: AzFormatters.formatStatus(media.status),
+                      isOn: true,
+                    ),
+                  ),
+                if (hasType)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6.0),
+                    child: AzChip(
+                      label: AzFormatters.formatFormat(media.type),
+                    ),
+                  ),
+                if (hasSeason)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6.0),
+                    child: AzChip(label: media.season!),
+                  ),
+                if (hasEpisodes)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6.0),
+                    child: AzChip(label: '${media.episodes} episodes'),
+                  ),
+              ],
+            ),
           )
         else if (isLoading)
-          const Wrap(
-            spacing: 8.0,
-            runSpacing: 8.0,
+          const Row(
             children: [
               _PlaceholderChip(width: 72.0, height: 26.0),
+              SizedBox(width: 6.0),
               _PlaceholderChip(width: 52.0, height: 26.0),
             ],
           ),
-        const SizedBox(height: 16.0),
+        const SizedBox(height: 12.0),
         Text(
           title,
           style: AzTokens.titleStyle(context),
         ),
         if (nativeTitle.isNotEmpty) ...[
-          const SizedBox(height: 8.0),
+          const SizedBox(height: 4.0),
           Text(
             nativeTitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: AzTokens.body(
-              color: colorScheme.onSurfaceVariant,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.75),
+              size: 13.0,
             ),
           ),
         ] else if (isLoading) ...[
-          const SizedBox(height: 8.0),
-          const _PlaceholderLine(width: 100.0, height: 14.0),
+          const SizedBox(height: 4.0),
+          const _PlaceholderLine(width: 100.0, height: 13.0),
         ],
         if (media.genres != null && media.genres!.isNotEmpty) ...[
-          const SizedBox(height: 16.0),
-          Wrap(
-            spacing: 8.0,
-            runSpacing: 8.0,
-            children: media.genres!
-                .take(6)
-                .map((g) => AzChip(label: g))
-                .toList(),
+          const SizedBox(height: 12.0),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: media.genres!
+                  .take(6)
+                  .map((g) => Padding(
+                        padding: const EdgeInsets.only(right: 6.0),
+                        child: AzChip(label: g),
+                      ))
+                  .toList(),
+            ),
           ),
         ] else if (isLoading) ...[
-          const SizedBox(height: 16.0),
-          const Wrap(
-            spacing: 8.0,
-            runSpacing: 8.0,
+          const SizedBox(height: 12.0),
+          const Row(
             children: [
               _PlaceholderChip(width: 64.0, height: 26.0),
+              SizedBox(width: 6.0),
               _PlaceholderChip(width: 78.0, height: 26.0),
+              SizedBox(width: 6.0),
               _PlaceholderChip(width: 70.0, height: 26.0),
             ],
           ),
         ],
-        const SizedBox(height: 22.0),
+        const SizedBox(height: 16.0),
         if ((resolvedScore != null && resolvedScore > 0) ||
             allTimeRankings.isNotEmpty ||
             favCount.isNotEmpty)
-          Wrap(
-            spacing: 24.0,
-            runSpacing: 14.0,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              if (resolvedScore != null && resolvedScore > 0)
-                ScoreRing(score: resolvedScore),
-              ...allTimeRankings.map((r) => _RankingStat(ranking: r)),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    favCount.isNotEmpty ? favCount : '0',
-                    style: AzTokens.statNumber(context),
-                  ),
-                  Text(
-                    'Favourites',
-                    style: AzTokens.statCaption(context),
-                  ),
-                ],
+          Container(
+            width: double.infinity,
+            padding:
+                const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerLow.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(16.0),
+              border: Border.all(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.12),
+                width: 0.8,
               ),
-            ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                if (resolvedScore != null && resolvedScore > 0) ...[
+                  ScoreRing(
+                    score: resolvedScore,
+                    size: 44.0,
+                    strokeWidth: 3.0,
+                  ),
+                  _buildDivider(colorScheme),
+                ],
+                ...allTimeRankings.map((r) => Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _RankingStat(ranking: r, isCompact: false),
+                        _buildDivider(colorScheme),
+                      ],
+                    )),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      favCount.isNotEmpty ? favCount : '0',
+                      style: AzTokens.statNumber(context),
+                    ),
+                    Text(
+                      'Favourites',
+                      style: AzTokens.statCaption(context),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           )
         else if (isLoading)
           const _PlaceholderStatsRow(),
         if (isDesktop) ...[
-          const SizedBox(height: 26.0),
+          const SizedBox(height: 24.0),
           Wrap(
             spacing: 10.0,
             runSpacing: 10.0,
@@ -226,11 +286,11 @@ class HeroSection extends StatelessWidget {
 
     return Container(
       constraints: const BoxConstraints(maxWidth: AzTokens.contentMaxWidth),
-      padding: const EdgeInsets.fromLTRB(
-        AzTokens.horizontalPadding,
-        AzTokens.heroTopPadding,
-        AzTokens.horizontalPadding,
-        AzTokens.heroBottomPadding,
+      padding: EdgeInsets.fromLTRB(
+        hPad,
+        topPad,
+        hPad,
+        isNarrow ? 12.0 : 18.0,
       ),
       child: Center(
         child: ConstrainedBox(
@@ -241,14 +301,201 @@ class HeroSection extends StatelessWidget {
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _CoverArt(
-                        imageUrl: media.image ?? media.coverImage ?? '',
-                        width: coverW,
-                        altTitle: title,
-                        heroTag: heroTag,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          _CoverArt(
+                            imageUrl: media.image ?? media.coverImage ?? '',
+                            width: 115.0,
+                            altTitle: title,
+                            heroTag: heroTag,
+                          ),
+                          const SizedBox(width: 14.0),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  title,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontFamily: 'Poppins-Bold',
+                                    fontSize: 19.5,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.2,
+                                    letterSpacing: -0.3,
+                                  ),
+                                ),
+                                if (nativeTitle.isNotEmpty) ...[
+                                  const SizedBox(height: 3.0),
+                                  Text(
+                                    nativeTitle,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AzTokens.body(
+                                      color: colorScheme.onSurfaceVariant
+                                          .withValues(alpha: 0.75),
+                                      size: 12.0,
+                                    ),
+                                  ),
+                                ],
+                                if (hasAnyMeta) ...[
+                                  const SizedBox(height: 10.0),
+                                  SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    physics: const BouncingScrollPhysics(),
+                                    child: Row(
+                                      children: [
+                                        if (hasStatus)
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 6.0),
+                                            child: AzChip(
+                                              label: AzFormatters.formatStatus(
+                                                  media.status),
+                                              isOn: true,
+                                            ),
+                                          ),
+                                        if (hasType)
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 6.0),
+                                            child: AzChip(
+                                              label: AzFormatters.formatFormat(
+                                                  media.type),
+                                            ),
+                                          ),
+                                        if (hasSeason)
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 6.0),
+                                            child: AzChip(label: media.season!),
+                                          ),
+                                        if (hasEpisodes)
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 6.0),
+                                            child: AzChip(
+                                                label:
+                                                    '${media.episodes} episodes'),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                ] else if (isLoading) ...[
+                                  const SizedBox(height: 10.0),
+                                  const Row(
+                                    children: [
+                                      _PlaceholderChip(
+                                          width: 68.0, height: 24.0),
+                                      SizedBox(width: 6.0),
+                                      _PlaceholderChip(
+                                          width: 48.0, height: 24.0),
+                                    ],
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 20.0),
-                      infoColumn,
+                      if (media.genres != null &&
+                          media.genres!.isNotEmpty) ...[
+                        const SizedBox(height: 14.0),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          child: Row(
+                            children: media.genres!
+                                .take(6)
+                                .map((g) => Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 6.0),
+                                      child: AzChip(label: g),
+                                    ))
+                                .toList(),
+                          ),
+                        ),
+                      ] else if (isLoading) ...[
+                        const SizedBox(height: 14.0),
+                        const Row(
+                          children: [
+                            _PlaceholderChip(width: 60.0, height: 24.0),
+                            SizedBox(width: 6.0),
+                            _PlaceholderChip(width: 72.0, height: 24.0),
+                            SizedBox(width: 6.0),
+                            _PlaceholderChip(width: 64.0, height: 24.0),
+                          ],
+                        ),
+                      ],
+                      const SizedBox(height: 14.0),
+                      if ((resolvedScore != null && resolvedScore > 0) ||
+                          allTimeRankings.isNotEmpty ||
+                          favCount.isNotEmpty)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12.0, vertical: 10.0),
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerLow
+                                .withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(16.0),
+                            border: Border.all(
+                              color: colorScheme.outlineVariant
+                                  .withValues(alpha: 0.12),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              if (resolvedScore != null &&
+                                  resolvedScore > 0) ...[
+                                ScoreRing(
+                                  score: resolvedScore,
+                                  size: 40.0,
+                                  strokeWidth: 2.8,
+                                ),
+                                _buildDivider(colorScheme, height: 22.0),
+                              ],
+                              ...allTimeRankings.map((r) => Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      _RankingStat(ranking: r, isCompact: true),
+                                      _buildDivider(colorScheme, height: 22.0),
+                                    ],
+                                  )),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    favCount.isNotEmpty ? favCount : '0',
+                                    style: const TextStyle(
+                                      fontFamily: 'Poppins-Bold',
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.1,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Favourites',
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 11.0,
+                                      fontWeight: FontWeight.w400,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        )
+                      else if (isLoading)
+                        const _PlaceholderStatsRow(),
                     ],
                   )
                 : Row(
@@ -336,15 +583,10 @@ class _CoverArt extends StatelessWidget {
           color: theme.colorScheme.surfaceContainerHighest,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.55),
+              color: Colors.black.withValues(alpha: 0.6),
               blurRadius: 36.0,
-              spreadRadius: -8.0,
+              spreadRadius: -10.0,
               offset: const Offset(0, 16),
-            ),
-            BoxShadow(
-              color: Colors.white.withValues(alpha: 0.15),
-              blurRadius: 0.5,
-              spreadRadius: 0.5,
             ),
           ],
         ),
@@ -376,11 +618,25 @@ class _RankingStat extends StatelessWidget {
       children: [
         Text(
           '#${ranking.rank}',
-          style: AzTokens.statNumber(context),
+          style: isCompact
+              ? const TextStyle(
+                  fontFamily: 'Poppins-Bold',
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w700,
+                  height: 1.1,
+                )
+              : AzTokens.statNumber(context),
         ),
         Text(
           label,
-          style: AzTokens.statCaption(context),
+          style: isCompact
+              ? TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 11.0,
+                  fontWeight: FontWeight.w400,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                )
+              : AzTokens.statCaption(context),
         ),
       ],
     );
@@ -439,73 +695,108 @@ class _PlaceholderStatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Wrap(
-      spacing: 24.0,
-      runSpacing: 14.0,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Container(
-          width: 46.0,
-          height: 46.0,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.2),
-              width: 3.0,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLow.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.12),
+          width: 0.8,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Container(
+            width: 44.0,
+            height: 44.0,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.2),
+                width: 3.0,
+              ),
             ),
           ),
-        ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 48.0,
-              height: 18.0,
-              decoration: BoxDecoration(
-                color:
-                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(4.0),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 42.0,
+                height: 16.0,
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.35),
+                  borderRadius: BorderRadius.circular(4.0),
+                ),
               ),
-            ),
-            const SizedBox(height: 4.0),
-            Container(
-              width: 80.0,
-              height: 12.0,
-              decoration: BoxDecoration(
-                color:
-                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(4.0),
+              const SizedBox(height: 4.0),
+              Container(
+                width: 58.0,
+                height: 11.0,
+                decoration: BoxDecoration(
+                  color:
+                      colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(4.0),
+                ),
               ),
-            ),
-          ],
-        ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 48.0,
-              height: 18.0,
-              decoration: BoxDecoration(
-                color:
-                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(4.0),
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 42.0,
+                height: 16.0,
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.35),
+                  borderRadius: BorderRadius.circular(4.0),
+                ),
               ),
-            ),
-            const SizedBox(height: 4.0),
-            Container(
-              width: 70.0,
-              height: 12.0,
-              decoration: BoxDecoration(
-                color:
-                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(4.0),
+              const SizedBox(height: 4.0),
+              Container(
+                width: 58.0,
+                height: 11.0,
+                decoration: BoxDecoration(
+                  color:
+                      colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(4.0),
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 42.0,
+                height: 16.0,
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.35),
+                  borderRadius: BorderRadius.circular(4.0),
+                ),
+              ),
+              const SizedBox(height: 4.0),
+              Container(
+                width: 58.0,
+                height: 11.0,
+                decoration: BoxDecoration(
+                  color:
+                      colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(4.0),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

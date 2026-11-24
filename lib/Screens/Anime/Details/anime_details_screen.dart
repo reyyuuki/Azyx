@@ -275,9 +275,11 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
                             constraints: const BoxConstraints(
                               maxWidth: AzTokens.contentMaxWidth,
                             ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AzTokens.horizontalPadding,
-                              vertical: 36,
+                            padding: EdgeInsets.fromLTRB(
+                              isDesktop ? AzTokens.horizontalPadding : 16.0,
+                              isDesktop ? 28.0 : 16.0,
+                              isDesktop ? AzTokens.horizontalPadding : 16.0,
+                              24.0,
                             ),
                             child: isDesktop
                                 ? Row(
@@ -367,8 +369,7 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
                                         key: _controller.sectionKeys['ov'],
                                         child: SynopsisBlock(media: media, isLoading: isLoading),
                                       ),
-                                      const SizedBox(
-                                          height: AzTokens.sectionGap),
+                                      const SizedBox(height: 28.0),
                                       Container(
                                         key: _controller.sectionKeys['ep'],
                                         child: EpisodeGrid(
@@ -376,8 +377,7 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
                                         ),
                                       ),
                                       if (hasRelationsOrRecs) ...[
-                                        const SizedBox(
-                                            height: AzTokens.sectionGap),
+                                        const SizedBox(height: 28.0),
                                         Container(
                                           key: _controller.sectionKeys['rl'],
                                           child: Column(
@@ -403,24 +403,21 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
                                           ),
                                         ),
                                       ],
-                                      const SizedBox(
-                                          height: AzTokens.sectionGap),
+                                      const SizedBox(height: 28.0),
                                       Container(
                                         key: _controller.sectionKeys['ch'],
                                         child: CharacterGrid(
                                           characters: media.characters,
                                         ),
                                       ),
-                                      const SizedBox(
-                                          height: AzTokens.sectionGap),
+                                      const SizedBox(height: 28.0),
                                       Container(
                                         key: _controller.sectionKeys['cm'],
                                         child: CommunityCharts(
                                           media: media,
                                         ),
                                       ),
-                                      const SizedBox(
-                                          height: AzTokens.sectionGap),
+                                      const SizedBox(height: 28.0),
                                       SideColumn(media: media),
                                       const SizedBox(height: 96),
                                     ],

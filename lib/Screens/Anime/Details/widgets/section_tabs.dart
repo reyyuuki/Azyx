@@ -33,10 +33,14 @@ class SectionTabs extends StatelessWidget {
 
       final currentTab = controller.activeTab.value;
 
+      final hPad = MediaQuery.of(context).size.width < 600
+          ? 16.0
+          : AzTokens.horizontalPadding;
+
       return Container(
         height: 46,
-        margin: const EdgeInsets.symmetric(
-          horizontal: AzTokens.horizontalPadding,
+        margin: EdgeInsets.symmetric(
+          horizontal: hPad,
         ),
         constraints: const BoxConstraints(maxWidth: AzTokens.contentMaxWidth),
         child: GlassSurface(
@@ -57,7 +61,7 @@ class SectionTabs extends StatelessWidget {
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       height: 38,
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
                       decoration: BoxDecoration(
                         color: isSelected ? tones.soft : Colors.transparent,
                         borderRadius:
