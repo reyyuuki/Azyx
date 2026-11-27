@@ -1,9 +1,13 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:math' as math;
+import 'package:azyx/Database/keys/data_keys.dart';
+import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 class ColorProfileManager {
   static const Map<String, Map<String, int>> profiles = {
     "cinema": {
@@ -137,13 +141,60 @@ class ColorProfileManager {
     "cool": Icons.ac_unit,
     "grayscale": Icons.gradient,
   };
+  static String loadSavedProfile() {
+    final saved = PlayerKeys.visualProfile.get<String>('natural');
+    if (saved.isEmpty) return 'natural';
+    return saved;
+  }
+
+  static void saveProfile(String profile) {
+    PlayerKeys.visualProfile.set(profile);
+  }
+
+  static Map<String, int> loadCustomSettings() {
+    final raw = PlayerKeys.customColorSettings.get<String>('');
+    if (raw.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(raw) as Map<String, dynamic>;
+        return {
+          "brightness": (decoded["brightness"] as num?)?.toInt() ?? 0,
+          "contrast": (decoded["contrast"] as num?)?.toInt() ?? 0,
+          "saturation": (decoded["saturation"] as num?)?.toInt() ?? 0,
+          "gamma": (decoded["gamma"] as num?)?.toInt() ?? 0,
+          "hue": (decoded["hue"] as num?)?.toInt() ?? 0,
+        };
+      } catch (_) {}
+    }
+    return Map<String, int>.from(profiles['natural']!);
+  }
+
+  static void saveCustomSettings(Map<String, int> settings) {
+    PlayerKeys.customColorSettings.set(jsonEncode(settings));
+  }
+
+  Future<void> applySavedProfile(dynamic player) async {
+    final profile = loadSavedProfile();
+    if (profile.toLowerCase() == 'custom') {
+      await applyCustomSettings(loadCustomSettings(), player);
+    } else {
+      await applyColorProfile(profile, player);
+    }
+  }
+
   Future<void> applyColorProfile(String profile, dynamic player) async {
+    saveProfile(profile);
+    if (profile.toLowerCase() == 'custom') {
+      await applyCustomSettings(loadCustomSettings(), player);
+      return;
+    }
     final settings = profiles[profile.toLowerCase()];
-    if (settings != null && player.platform != null) {
+    if (settings != null && player?.platform != null) {
       try {
         for (final entry in settings.entries) {
-          await (player.platform as dynamic)
-              .setProperty(entry.key, entry.value.toString());
+          await (player.platform as dynamic).setProperty(
+            entry.key,
+            entry.value.toString(),
+          );
           Utils.log('Applied ${entry.key}: ${entry.value}');
         }
       } catch (e) {
@@ -151,13 +202,20 @@ class ColorProfileManager {
       }
     }
   }
+
   Future<void> applyCustomSettings(
-      Map<String, int> customSettings, dynamic player) async {
-    if (player.platform != null) {
+    Map<String, int> customSettings,
+    dynamic player,
+  ) async {
+    saveProfile('custom');
+    saveCustomSettings(customSettings);
+    if (player?.platform != null) {
       try {
         for (final entry in customSettings.entries) {
-          await (player.platform as dynamic)
-              .setProperty(entry.key, entry.value.toString());
+          await (player.platform as dynamic).setProperty(
+            entry.key,
+            entry.value.toString(),
+          );
         }
       } catch (e) {
         Utils.log('Error applying custom settings: $e');
@@ -165,6 +223,7 @@ class ColorProfileManager {
     }
   }
 }
+
 class ColorProfileBottomSheet extends StatefulWidget {
   final String currentProfile;
   final Function(String) onProfileSelected;
@@ -181,15 +240,13 @@ class ColorProfileBottomSheet extends StatefulWidget {
   State<ColorProfileBottomSheet> createState() =>
       _ColorProfileBottomSheetState();
 }
-class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
-    with TickerProviderStateMixin {
-  late AnimationController _backgroundController;
-  late AnimationController _slideController;
-  late Animation<double> _backgroundAnimation;
-  late Animation<Offset> _slideAnimation;
-  int _currentPage = 0;
-  PageController _pageController = PageController();
-  String _selectedProfile = '';
+
+class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet> {
+  int _currentTab = 0;
+  String _selectedProfile = 'natural';
+  double _splitPosition = 0.45;
+  Uint8List? _frameBytes;
+  bool _isCapturingFrame = true;
   Map<String, int> _customSettings = {
     "brightness": 0,
     "contrast": 0,
@@ -197,723 +254,846 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
     "gamma": 0,
     "hue": 0,
   };
+
   @override
   void initState() {
     super.initState();
-    _backgroundController = AnimationController(
-      duration: const Duration(seconds: 3),
-      vsync: this,
-    );
-    _slideController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-    _backgroundAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _backgroundController,
-      curve: Curves.easeInOut,
-    ));
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.elasticOut,
-    ));
     _selectedProfile = widget.currentProfile;
-    _customSettings = Map.from(ColorProfileManager.profiles['natural']!);
-    _backgroundController.repeat();
-    _slideController.forward();
+    _customSettings = _selectedProfile.toLowerCase() == 'custom'
+        ? ColorProfileManager.loadCustomSettings()
+        : Map.from(
+            ColorProfileManager.profiles[_selectedProfile.toLowerCase()] ??
+                ColorProfileManager.profiles['natural']!,
+          );
+    _captureCurrentFrame();
   }
-  @override
-  void dispose() {
-    _backgroundController.dispose();
-    _slideController.dispose();
-    _pageController.dispose();
-    super.dispose();
-  }
-  void _showProfileAppliedFeedback(String profileName) {
-    HapticFeedback.lightImpact();
-    log('Applied ${profileName.toUpperCase()} profile');
-  }
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
-    return SlideTransition(
-      position: _slideAnimation,
-      child: Container(
-        height: size.height * 0.95,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              theme.colorScheme.surface,
-              theme.colorScheme.surface.withOpacity(0.95),
-              theme.colorScheme.surfaceVariant.withOpacity(0.8),
-            ],
-          ),
-        ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
-          child: Stack(
-            children: [
-              AnimatedBuilder(
-                animation: _backgroundAnimation,
-                builder: (context, child) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          theme.colorScheme.primary.withOpacity(0.05),
-                          theme.colorScheme.secondary.withOpacity(0.03),
-                          theme.colorScheme.tertiary.withOpacity(0.02),
-                        ],
-                        stops: [
-                          0.0,
-                          0.5 +
-                              0.3 *
-                                  math.sin(
-                                      _backgroundAnimation.value * 2 * math.pi),
-                          1.0,
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-              Column(
-                children: [
-                  _buildFloatingHeader(theme),
-                  _buildPageIndicators(theme),
-                  Expanded(
-                    child: PageView(
-                      controller: _pageController,
-                      onPageChanged: (index) {
-                        setState(() {
-                          _currentPage = index;
-                        });
-                      },
-                      children: [
-                        _buildPresetsPage(theme),
-                        _buildCustomPage(theme),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-  Widget _buildFloatingHeader(ThemeData theme) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.shadow.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          AnimatedBuilder(
-            animation: _backgroundAnimation,
-            builder: (context, child) {
-              return Transform.rotate(
-                angle: _backgroundAnimation.value * 2 * math.pi,
-                child: Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        theme.colorScheme.primary,
-                        theme.colorScheme.secondary,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Icon(
-                    Icons.palette_outlined,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ShaderMask(
-                  shaderCallback: (bounds) => LinearGradient(
-                    colors: [
-                      theme.colorScheme.primary,
-                      theme.colorScheme.secondary,
-                    ],
-                  ).createShader(bounds),
-                  child: Text(
-                    'Color Studio',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Text(
-                  'Craft your perfect viewing experience',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.errorContainer.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Icon(
-                Icons.close_rounded,
-                color: theme.colorScheme.error,
-                size: 20,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  Widget _buildPageIndicators(ThemeData theme) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 30),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildIndicatorDot(0, 'Presets', Icons.collections_rounded, theme),
-          const SizedBox(width: 40),
-          _buildIndicatorDot(1, 'Custom', Icons.tune_rounded, theme),
-        ],
-      ),
-    );
-  }
-  Widget _buildIndicatorDot(
-      int index, String label, IconData icon, ThemeData theme) {
-    final isActive = _currentPage == index;
-    return GestureDetector(
-      onTap: () {
-        _pageController.animateToPage(
-          index,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
+
+  Future<void> _captureCurrentFrame() async {
+    if (mounted) {
+      setState(() => _isCapturingFrame = true);
+    }
+    Uint8List? bytes;
+    try {
+      if (widget.player != null) {
+        bytes = await (widget.player as dynamic).safeScreenshot(
+          format: 'image/jpeg',
         );
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        padding: EdgeInsets.symmetric(
-          horizontal: isActive ? 20 : 15,
-          vertical: 12,
-        ),
-        decoration: BoxDecoration(
-          gradient: isActive
-              ? LinearGradient(
-                  colors: [
-                    theme.colorScheme.primary,
-                    theme.colorScheme.secondary,
-                  ],
-                )
-              : null,
-          color: isActive
-              ? null
-              : theme.colorScheme.surfaceVariant.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(25),
-          boxShadow: isActive
-              ? [
-                  BoxShadow(
-                    color: theme.colorScheme.primary.withOpacity(0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 5),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color:
-                  isActive ? Colors.white : theme.colorScheme.onSurfaceVariant,
-            ),
-            if (isActive) ...[
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
-                ),
-              ),
-            ],
+        bytes ??= await (widget.player as dynamic).screenshot(
+          format: 'image/jpeg',
+        );
+      }
+    } catch (e) {
+      Utils.log('Preview screenshot error: $e');
+    }
+    if (!mounted) return;
+    setState(() {
+      _frameBytes = bytes;
+      _isCapturingFrame = false;
+    });
+  }
+
+  List<double> _buildColorMatrix() {
+    final active = _currentTab == 0
+        ? (ColorProfileManager.profiles[_selectedProfile.toLowerCase()] ??
+              _customSettings)
+        : _customSettings;
+    final b = ((active['brightness'] ?? 0) / 100.0) * 128.0;
+    final c = 1.0 + ((active['contrast'] ?? 0) / 100.0);
+    final s = (1.0 + ((active['saturation'] ?? 0) / 100.0)).clamp(0.0, 2.5);
+    final t = (1.0 - c) * 128.0 + b;
+    const lumR = 0.2126;
+    const lumG = 0.7152;
+    const lumB = 0.0722;
+    final sr = (1 - s) * lumR;
+    final sg = (1 - s) * lumG;
+    final sb = (1 - s) * lumB;
+    return [
+      c * (sr + s),
+      c * sg,
+      c * sb,
+      0,
+      t,
+      c * sr,
+      c * (sg + s),
+      c * sb,
+      0,
+      t,
+      c * sr,
+      c * sg,
+      c * (sb + s),
+      0,
+      t,
+      0,
+      0,
+      0,
+      1,
+      0,
+    ];
+  }
+
+  Widget _buildPreviewContent() {
+    if (_frameBytes != null && _frameBytes!.isNotEmpty) {
+      return Image.memory(
+        _frameBytes!,
+        fit: BoxFit.cover,
+        gaplessPlayback: true,
+      );
+    }
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF283E51),
+            Color(0xFF4B79A1),
+            Color(0xFFE06D53),
+            Color(0xFF1F1C2C),
           ],
         ),
       ),
+      child: _isCapturingFrame
+          ? const Center(
+              child: SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.2,
+                  color: Colors.white,
+                ),
+              ),
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: const [
+                CircleAvatar(radius: 22, backgroundColor: Color(0xFFFFB703)),
+                CircleAvatar(radius: 22, backgroundColor: Color(0xFFFB8500)),
+                CircleAvatar(radius: 22, backgroundColor: Color(0xFF8ECAE6)),
+                CircleAvatar(radius: 22, backgroundColor: Color(0xFFFF006E)),
+              ],
+            ),
     );
   }
-  Widget _buildPresetsPage(ThemeData theme) {
-    Map<String, List<String>> groupedProfiles = {
-      'Cinema': ['cinema', 'cinema_dark', 'cinema_hdr'],
-      'Anime': ['anime', 'anime_vibrant', 'anime_soft'],
-      'Vivid': ['vivid', 'vivid_pop', 'vivid_warm'],
-      'Essential': ['natural', 'dark', 'warm', 'cool', 'grayscale'],
-    };
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      children: [
-        ...groupedProfiles.entries.map((category) {
-          return Container(
-            margin: const EdgeInsets.only(bottom: 25),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+
+  Widget _buildSplitPreview(ColorScheme cs) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final dividerX = (width * _splitPosition).clamp(12.0, width - 12.0);
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: (details) {
+            setState(() {
+              _splitPosition = (details.localPosition.dx / width).clamp(
+                0.05,
+                0.95,
+              );
+            });
+          },
+          onHorizontalDragUpdate: (details) {
+            setState(() {
+              _splitPosition = (details.localPosition.dx / width).clamp(
+                0.05,
+                0.95,
+              );
+            });
+          },
+          child: Container(
+            height: 158,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: cs.outlineVariant.withValues(alpha: 0.24),
+                width: 0.8,
+              ),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Stack(
+              fit: StackFit.expand,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 10, bottom: 15),
-                  child: Text(
-                    category.key,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                    maxLines: 2,
+                ColorFiltered(
+                  colorFilter: ColorFilter.matrix(_buildColorMatrix()),
+                  child: _buildPreviewContent(),
+                ),
+                ClipRect(
+                  clipper: _LeftSplitClipper(_splitPosition),
+                  child: _buildPreviewContent(),
+                ),
+                Positioned(
+                  left: dividerX - 1,
+                  top: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 2,
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
-                SizedBox(
-                  height: 180,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: category.value.length,
-                    itemBuilder: (context, index) {
-                      final profileKey = category.value[index];
-                      final isSelected = _selectedProfile == profileKey;
-                      return _buildProfileCard(profileKey, isSelected, theme);
-                    },
+                Positioned(
+                  left: dividerX - 13,
+                  top: 66,
+                  child: Container(
+                    width: 26,
+                    height: 26,
+                    decoration: BoxDecoration(
+                      color: cs.surface.withValues(alpha: 0.92),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: cs.primary, width: 1.5),
+                    ),
+                    child: Icon(
+                      Icons.compare_arrows_rounded,
+                      size: 15,
+                      color: cs.primary,
+                    ),
+                  ),
+                ),
+                Positioned(left: 10, top: 10, child: _buildBadge('BEFORE')),
+                Positioned(
+                  right: 10,
+                  top: 10,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildBadge('AFTER'),
+                      const SizedBox(width: 6),
+                      InkWell(
+                        onTap: _captureCurrentFrame,
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.58),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.refresh_rounded,
+                            size: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      InkWell(
+                        onTap: () => _openFullScreenPreview(context),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.58),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.fullscreen_rounded,
+                            size: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Positioned(
+                  left: 10,
+                  bottom: 8,
+                  child: _buildBadge(
+                    _frameBytes != null
+                        ? 'Live Stream Frame • Drag to compare'
+                        : 'Drag slider to compare Before & After',
                   ),
                 ),
               ],
             ),
-          );
-        }),
-        const SizedBox(height: 20),
-      ],
+          ),
+        );
+      },
     );
   }
-  Widget _buildProfileCard(
-      String profileKey, bool isSelected, ThemeData theme) {
-    final profileColors = {
-      'cinema': Colors.amber,
-      'cinema_dark': Colors.deepPurple,
-      'cinema_hdr': Colors.blue,
-      'anime': Colors.pink,
-      'anime_vibrant': Colors.red,
-      'anime_soft': Colors.purple,
-      'vivid': Colors.orange,
-      'vivid_pop': Colors.cyan,
-      'vivid_warm': Colors.deepOrange,
-      'natural': Colors.green,
-      'dark': Colors.grey,
-      'warm': Colors.yellow,
-      'cool': Colors.lightBlue,
-      'grayscale': Colors.blueGrey,
-    };
+
+  void _openFullScreenPreview(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final presetKeys = ColorProfileManager.profiles.keys.toList();
+    double fullSplit = _splitPosition;
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Full Screen Preview',
+      barrierColor: Colors.black,
+      transitionDuration: const Duration(milliseconds: 200),
+      pageBuilder: (dialogContext, _, __) {
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            final matrix = _buildColorMatrix();
+            return Scaffold(
+              backgroundColor: Colors.black,
+              body: SafeArea(
+                child: LayoutBuilder(
+                  builder: (_, constraints) {
+                    final w = constraints.maxWidth;
+                    final h = constraints.maxHeight;
+                    final dx = (w * fullSplit).clamp(16.0, w - 16.0);
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTapDown: (d) {
+                        final next = (d.localPosition.dx / w).clamp(0.03, 0.97);
+                        setDialogState(() => fullSplit = next);
+                        if (mounted) setState(() => _splitPosition = next);
+                      },
+                      onHorizontalDragUpdate: (d) {
+                        final next = (d.localPosition.dx / w).clamp(0.03, 0.97);
+                        setDialogState(() => fullSplit = next);
+                        if (mounted) setState(() => _splitPosition = next);
+                      },
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          ColorFiltered(
+                            colorFilter: ColorFilter.matrix(matrix),
+                            child: _buildPreviewContent(),
+                          ),
+                          ClipRect(
+                            clipper: _LeftSplitClipper(fullSplit),
+                            child: _buildPreviewContent(),
+                          ),
+                          Positioned(
+                            left: dx - 1,
+                            top: 0,
+                            bottom: 0,
+                            child: Container(
+                              width: 2,
+                              color: Colors.white.withValues(alpha: 0.92),
+                            ),
+                          ),
+                          Positioned(
+                            left: dx - 16,
+                            top: (h / 2) - 16,
+                            child: Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: cs.surface.withValues(alpha: 0.92),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: cs.primary,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.compare_arrows_rounded,
+                                size: 18,
+                                color: cs.primary,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            left: 16,
+                            top: 16,
+                            child: _buildBadge('BEFORE'),
+                          ),
+                          Positioned(
+                            right: 16,
+                            top: 16,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _buildBadge('AFTER'),
+                                const SizedBox(width: 8),
+                                InkWell(
+                                  onTap: () async {
+                                    await _captureCurrentFrame();
+                                    setDialogState(() {});
+                                  },
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.62,
+                                      ),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.refresh_rounded,
+                                      size: 18,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                InkWell(
+                                  onTap: () =>
+                                      Navigator.of(dialogContext).pop(),
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.62,
+                                      ),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.close_rounded,
+                                      size: 18,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Positioned(
+                            left: 16,
+                            right: 16,
+                            bottom: 16,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _buildBadge(
+                                  'Profile: ${_selectedProfile.replaceAll('_', ' ').toUpperCase()} • Drag to compare',
+                                ),
+                                const SizedBox(height: 8),
+                                SizedBox(
+                                  height: 40,
+                                  child: ListView.separated(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: presetKeys.length,
+                                    separatorBuilder: (_, __) =>
+                                        const SizedBox(width: 8),
+                                    itemBuilder: (_, idx) {
+                                      final key = presetKeys[idx];
+                                      final isSel =
+                                          _selectedProfile.toLowerCase() == key;
+                                      final icon =
+                                          ColorProfileManager
+                                              .profileIcons[key] ??
+                                          Icons.palette_rounded;
+                                      return Material(
+                                        color: isSel
+                                            ? cs.primary
+                                            : Colors.black.withValues(
+                                                alpha: 0.68,
+                                              ),
+                                        borderRadius: BorderRadius.circular(20),
+                                        child: InkWell(
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                          onTap: () async {
+                                            if (mounted) {
+                                              setState(() {
+                                                _selectedProfile = key;
+                                                _customSettings = Map.from(
+                                                  ColorProfileManager
+                                                      .profiles[key]!,
+                                                );
+                                              });
+                                            } else {
+                                              _selectedProfile = key;
+                                              _customSettings = Map.from(
+                                                ColorProfileManager
+                                                    .profiles[key]!,
+                                              );
+                                            }
+                                            setDialogState(() {});
+                                            await ColorProfileManager()
+                                                .applyColorProfile(
+                                                  key,
+                                                  widget.player,
+                                                );
+                                            widget.onProfileSelected(key);
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              border: Border.all(
+                                                color: isSel
+                                                    ? cs.primary
+                                                    : Colors.white.withValues(
+                                                        alpha: 0.22,
+                                                      ),
+                                                width: 0.8,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  icon,
+                                                  size: 15,
+                                                  color: isSel
+                                                      ? cs.onPrimary
+                                                      : Colors.white,
+                                                ),
+                                                const SizedBox(width: 6),
+                                                Text(
+                                                  key
+                                                      .replaceAll('_', ' ')
+                                                      .toUpperCase(),
+                                                  style: TextStyle(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: isSel
+                                                        ? cs.onPrimary
+                                                        : Colors.white,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildBadge(String label) {
     return Container(
-      width: 140,
-      margin: const EdgeInsets.only(right: 15),
-      child: GestureDetector(
-        onTap: () async {
-          setState(() => _selectedProfile = profileKey);
-          await ColorProfileManager()
-              .applyColorProfile(profileKey, widget.player);
-          widget.onProfileSelected(profileKey);
-          _showProfileAppliedFeedback(profileKey);
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          decoration: BoxDecoration(
-            gradient: isSelected
-                ? LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      profileColors[profileKey]!,
-                      profileColors[profileKey]!.withOpacity(0.7),
-                    ],
-                  )
-                : null,
-            color: isSelected ? null : theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(25),
-            boxShadow: [
-              BoxShadow(
-                color: isSelected
-                    ? profileColors[profileKey]!.withOpacity(0.3)
-                    : theme.colorScheme.shadow.withOpacity(0.1),
-                blurRadius: isSelected ? 20 : 10,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              if (isSelected)
-                Positioned.fill(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(25),
-                    child: CustomPaint(
-                      painter: PatternPainter(
-                        color: Colors.white.withOpacity(0.1),
-                      ),
-                    ),
-                  ),
-                ),
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? Colors.white.withOpacity(0.2)
-                            : theme.colorScheme.surfaceVariant,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Icon(
-                        ColorProfileManager.profileIcons[profileKey],
-                        size: 30,
-                        color: isSelected
-                            ? Colors.white
-                            : theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    Text(
-                      profileKey.replaceAll('_', ' ').toUpperCase(),
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: isSelected
-                            ? Colors.white
-                            : theme.colorScheme.onSurface,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      ColorProfileManager.profileDescriptions[profileKey] ?? '',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: isSelected
-                            ? Colors.white.withOpacity(0.8)
-                            : theme.colorScheme.onSurfaceVariant,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              if (isSelected)
-                Positioned(
-                  top: 15,
-                  right: 15,
-                  child: Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Icon(
-                      Icons.check_rounded,
-                      size: 16,
-                      color: profileColors[profileKey],
-                    ),
-                  ),
-                ),
-            ],
-          ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.58),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 10,
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.3,
         ),
       ),
     );
   }
-  Widget _buildCustomPage(ThemeData theme) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Fine-tune Your Experience',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Adjust each parameter to create your perfect viewing setup',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 30),
-          ..._customSettings.keys.map((setting) {
-            return _buildModernSlider(setting, theme);
-          }),
-          const SizedBox(height: 40),
-          _buildActionButtons(theme),
-          const SizedBox(height: 30),
-        ],
-      ),
-    );
-  }
-  Widget _buildModernSlider(String setting, ThemeData theme) {
-    final value = _customSettings[setting]!;
-    final displayName = setting[0].toUpperCase() + setting.substring(1);
-    final sliderColors = {
-      'brightness': Colors.yellow,
-      'contrast': Colors.blue,
-      'saturation': Colors.purple,
-      'gamma': Colors.green,
-      'hue': Colors.orange,
-    };
-    final sliderIcons = {
-      'brightness': Icons.brightness_6_rounded,
-      'contrast': Icons.contrast_rounded,
-      'saturation': Icons.colorize_rounded,
-      'gamma': Icons.gamepad,
-      'hue': Icons.color_lens_rounded,
-    };
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final size = MediaQuery.of(context).size;
     return Container(
-      margin: const EdgeInsets.only(bottom: 30),
+      height: size.height * 0.85,
+      constraints: const BoxConstraints(maxWidth: 560),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        12,
+        16,
+        16 + MediaQuery.of(context).padding.bottom,
+      ),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border(
+          top: BorderSide(
+            color: cs.outlineVariant.withValues(alpha: 0.2),
+            width: 0.8,
+          ),
+        ),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            width: 34,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 14),
+            decoration: BoxDecoration(
+              color: cs.onSurfaceVariant.withValues(alpha: 0.35),
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      sliderColors[setting]!,
-                      sliderColors[setting]!.withOpacity(0.7),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(15),
+                  color: cs.primary.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  sliderIcons[setting],
-                  color: Colors.white,
-                  size: 20,
-                ),
+                child: Icon(Icons.tune_rounded, color: cs.primary, size: 20),
               ),
-              const SizedBox(width: 15),
+              const SizedBox(width: 12),
               Expanded(
-                child: Text(
-                  displayName,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AzyXText(
+                      text: 'Color & Shaders',
+                      fontVariant: FontVariant.bold,
+                      fontSize: 17,
+                      color: cs.onSurface,
+                    ),
+                    Text(
+                      'Active: ${_selectedProfile.replaceAll('_', ' ').toUpperCase()}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                decoration: BoxDecoration(
-                  color: sliderColors[setting]!.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: sliderColors[setting]!.withOpacity(0.3),
-                  ),
-                ),
-                child: Text(
-                  value.toString(),
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: sliderColors[setting],
-                  ),
-                ),
+              IconButton.filledTonal(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.close_rounded, size: 20),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
+          _buildSplitPreview(cs),
+          const SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.all(20),
+            height: 40,
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(25),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.colorScheme.shadow.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
+              color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
+              borderRadius: BorderRadius.circular(20),
             ),
-            child: Column(
+            child: Row(
               children: [
-                SliderTheme(
-                  data: SliderTheme.of(context).copyWith(
-                    trackHeight: 8,
-                    thumbShape: CustomSliderThumb(
-                      color: sliderColors[setting]!,
-                    ),
-                    overlayShape:
-                        const RoundSliderOverlayShape(overlayRadius: 30),
-                    activeTrackColor: sliderColors[setting]!,
-                    inactiveTrackColor: theme.colorScheme.surfaceVariant,
-                    overlayColor: sliderColors[setting]!.withOpacity(0.1),
-                  ),
-                  child: Slider(
-                    value: value.toDouble(),
-                    min: -100,
-                    max: 100,
-                    divisions: 200,
-                    onChanged: (newValue) {
-                      setState(() {
-                        _customSettings[setting] = newValue.round();
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('-100', style: theme.textTheme.bodySmall),
-                    Text('0', style: theme.textTheme.bodySmall),
-                    Text('100', style: theme.textTheme.bodySmall),
-                  ],
-                ),
+                _buildTabItem(cs, 0, 'Presets'),
+                _buildTabItem(cs, 1, 'Custom'),
               ],
             ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: _currentTab == 0
+                ? _buildPresetsList(cs)
+                : _buildCustomList(cs),
           ),
         ],
       ),
     );
   }
-  Widget _buildActionButtons(ThemeData theme) {
-    return Row(
-      children: [
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
+
+  Widget _buildTabItem(ColorScheme cs, int index, String label) {
+    final isSelected = _currentTab == index;
+    return Expanded(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => setState(() => _currentTab = index),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isSelected ? cs.primaryContainer : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              color: isSelected ? cs.onPrimaryContainer : cs.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPresetsList(ColorScheme cs) {
+    final entries = ColorProfileManager.profiles.entries.toList();
+    return ListView.separated(
+      physics: const BouncingScrollPhysics(),
+      itemCount: entries.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      itemBuilder: (context, index) {
+        final key = entries[index].key;
+        final isSelected = _selectedProfile.toLowerCase() == key;
+        final desc = ColorProfileManager.profileDescriptions[key] ?? '';
+        final icon =
+            ColorProfileManager.profileIcons[key] ?? Icons.palette_rounded;
+        return Material(
+          color: isSelected
+              ? cs.primary.withValues(alpha: 0.14)
+              : cs.surfaceContainerHighest.withValues(alpha: 0.35),
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () async {
+              HapticFeedback.lightImpact();
               setState(() {
-                _customSettings =
-                    Map.from(ColorProfileManager.profiles['natural']!);
+                _selectedProfile = key;
+                _customSettings = Map.from(entries[index].value);
               });
-              ColorProfileManager()
-                  .applyCustomSettings(_customSettings, widget.player);
-              widget.onCustomSettingsChanged(_customSettings);
+              await ColorProfileManager().applyColorProfile(key, widget.player);
+              widget.onProfileSelected(key);
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 18),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceVariant,
-                borderRadius: BorderRadius.circular(25),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: theme.colorScheme.outline.withOpacity(0.2),
+                  color: isSelected
+                      ? cs.primary.withValues(alpha: 0.5)
+                      : cs.outlineVariant.withValues(alpha: 0.18),
+                  width: isSelected ? 1.2 : 0.6,
                 ),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.refresh_rounded,
-                    color: theme.colorScheme.onSurfaceVariant,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Reset',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurfaceVariant,
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? cs.primary
+                          : cs.surfaceContainerHighest.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(11),
+                    ),
+                    child: Icon(
+                      icon,
+                      color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
+                      size: 19,
                     ),
                   ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          key.replaceAll('_', ' ').toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w700,
+                            color: isSelected ? cs.primary : cs.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          desc,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (isSelected)
+                    Icon(
+                      Icons.check_circle_rounded,
+                      color: cs.primary,
+                      size: 20,
+                    ),
                 ],
               ),
             ),
           ),
-        ),
-        const SizedBox(width: 15),
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
-              ColorProfileManager()
-                  .applyCustomSettings(_customSettings, widget.player);
-              widget.onCustomSettingsChanged(_customSettings);
-              _showProfileAppliedFeedback('Custom');
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    theme.colorScheme.primary,
-                    theme.colorScheme.secondary,
+        );
+      },
+    );
+  }
+
+  Widget _buildCustomList(ColorScheme cs) {
+    final keys = ['brightness', 'contrast', 'saturation', 'gamma', 'hue'];
+    return ListView(
+      physics: const BouncingScrollPhysics(),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: cs.outlineVariant.withValues(alpha: 0.18),
+              width: 0.6,
+            ),
+          ),
+          child: Column(
+            children: keys.map((k) {
+              final val = (_customSettings[k] ?? 0).toDouble();
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          k[0].toUpperCase() + k.substring(1),
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w600,
+                            color: cs.onSurface,
+                          ),
+                        ),
+                        Text(
+                          '${val.round()}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: cs.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Slider(
+                      min: -100,
+                      max: 100,
+                      value: val.clamp(-100, 100),
+                      onChanged: (next) async {
+                        setState(() {
+                          _customSettings[k] = next.round();
+                          _selectedProfile = 'custom';
+                        });
+                        await ColorProfileManager().applyCustomSettings(
+                          _customSettings,
+                          widget.player,
+                        );
+                        widget.onCustomSettingsChanged(_customSettings);
+                      },
+                    ),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(25),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.colorScheme.primary.withOpacity(0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.check_rounded,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Apply',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
+              );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: () async {
+            setState(() {
+              _selectedProfile = 'natural';
+              _customSettings = Map.from(
+                ColorProfileManager.profiles['natural']!,
+              );
+            });
+            await ColorProfileManager().applyColorProfile(
+              'natural',
+              widget.player,
+            );
+            widget.onProfileSelected('natural');
+          },
+          icon: const Icon(Icons.refresh_rounded, size: 18),
+          label: const Text('Reset to Natural'),
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 13),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
           ),
         ),
@@ -921,59 +1101,18 @@ class _ColorProfileBottomSheetState extends State<ColorProfileBottomSheet>
     );
   }
 }
-class CustomSliderThumb extends SliderComponentShape {
-  final Color color;
-  CustomSliderThumb({required this.color});
+
+class _LeftSplitClipper extends CustomClipper<Rect> {
+  final double splitFraction;
+  const _LeftSplitClipper(this.splitFraction);
+
   @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return const Size(24, 24);
+  Rect getClip(Size size) {
+    return Rect.fromLTRB(0, 0, size.width * splitFraction, size.height);
   }
+
   @override
-  void paint(
-    PaintingContext context,
-    Offset center, {
-    required Animation<double> activationAnimation,
-    required Animation<double> enableAnimation,
-    required bool isDiscrete,
-    required TextPainter labelPainter,
-    required RenderBox parentBox,
-    required SliderThemeData sliderTheme,
-    required TextDirection textDirection,
-    required double value,
-    required double textScaleFactor,
-    required Size sizeWithOverflow,
-  }) {
-    final Canvas canvas = context.canvas;
-    final Paint outerPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3;
-    canvas.drawCircle(center, 12, outerPaint);
-    final Paint innerPaint = Paint()
-      ..color = color.withOpacity(0.3)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, 8, innerPaint);
-    final Paint centerPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, 4, centerPaint);
+  bool shouldReclip(covariant _LeftSplitClipper oldClipper) {
+    return oldClipper.splitFraction != splitFraction;
   }
-}
-class PatternPainter extends CustomPainter {
-  final Color color;
-  PatternPainter({required this.color});
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-    const double spacing = 20;
-    for (double x = 0; x < size.width; x += spacing) {
-      for (double y = 0; y < size.height; y += spacing) {
-        canvas.drawCircle(Offset(x, y), 2, paint);
-      }
-    }
-  }
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

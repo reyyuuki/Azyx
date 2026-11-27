@@ -23,7 +23,8 @@ class MainCarousale extends StatefulWidget {
 }
 
 class _MainCarousaleState extends State<MainCarousale> {
-  late PageController _pageController;
+  late PageController _mobileController;
+  late PageController _desktopController;
   Timer? _autoPlayTimer;
   int _currentIndex = 0;
   double _pageDelta = 0;
@@ -34,17 +35,21 @@ class _MainCarousaleState extends State<MainCarousale> {
     final initialPage = widget.data.isNotEmpty ? widget.data.length ~/ 2 : 0;
     _currentIndex = initialPage;
     _pageDelta = initialPage.toDouble();
-    _pageController = PageController(
+    _mobileController = PageController(
       viewportFraction: 0.9,
       initialPage: initialPage,
     );
-    _pageController.addListener(_onScroll);
+    _desktopController = PageController(
+      viewportFraction: 1.0,
+      initialPage: initialPage,
+    );
+    _mobileController.addListener(_onMobileScroll);
     _startAutoPlay();
   }
 
-  void _onScroll() {
-    if (!_pageController.hasClients) return;
-    final page = _pageController.page ?? 0;
+  void _onMobileScroll() {
+    if (!_mobileController.hasClients) return;
+    final page = _mobileController.page ?? 0;
     setState(() {
       _pageDelta = page;
     });
@@ -53,14 +58,23 @@ class _MainCarousaleState extends State<MainCarousale> {
   void _startAutoPlay() {
     _autoPlayTimer?.cancel();
     if (widget.data.length <= 1) return;
-    _autoPlayTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      if (!mounted || !_pageController.hasClients) return;
+    _autoPlayTimer = Timer.periodic(const Duration(seconds: 6), (_) {
+      if (!mounted) return;
       final next = (_currentIndex + 1) % widget.data.length;
-      _pageController.animateToPage(
-        next,
-        duration: const Duration(milliseconds: 600),
-        curve: Curves.easeInOutCubic,
-      );
+      if (_desktopController.hasClients) {
+        _desktopController.animateToPage(
+          next,
+          duration: const Duration(milliseconds: 650),
+          curve: Curves.easeInOutCubic,
+        );
+      }
+      if (_mobileController.hasClients) {
+        _mobileController.animateToPage(
+          next,
+          duration: const Duration(milliseconds: 650),
+          curve: Curves.easeInOutCubic,
+        );
+      }
     });
   }
 
@@ -69,18 +83,21 @@ class _MainCarousaleState extends State<MainCarousale> {
   @override
   void dispose() {
     _autoPlayTimer?.cancel();
-    _pageController.removeListener(_onScroll);
-    _pageController.dispose();
+    _mobileController.removeListener(_onMobileScroll);
+    _mobileController.dispose();
+    _desktopController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final width = MediaQuery.of(context).size.width;
+    final isDesktop = width >= 950;
 
     if (widget.data.isEmpty) {
       return SizedBox(
-        height: 200,
+        height: isDesktop ? 380 : 200,
         child: Center(
           child: SizedBox(
             width: 24,
@@ -91,13 +108,21 @@ class _MainCarousaleState extends State<MainCarousale> {
       );
     }
 
+    if (isDesktop) {
+      return _buildDesktopCarousel(context, colorScheme);
+    }
+
+    return _buildMobileCarousel(context, colorScheme);
+  }
+
+  Widget _buildMobileCarousel(BuildContext context, ColorScheme colorScheme) {
     return Column(
       children: [
         const SizedBox(height: 6),
         SizedBox(
           height: 195,
           child: PageView.builder(
-            controller: _pageController,
+            controller: _mobileController,
             clipBehavior: Clip.none,
             itemCount: widget.data.length,
             onPageChanged: (i) {
@@ -115,7 +140,7 @@ class _MainCarousaleState extends State<MainCarousale> {
             count: widget.data.length,
             current: _currentIndex,
             onTap: (i) {
-              _pageController.animateToPage(
+              _mobileController.animateToPage(
                 i,
                 duration: const Duration(milliseconds: 350),
                 curve: Curves.easeOutCubic,
@@ -125,6 +150,437 @@ class _MainCarousaleState extends State<MainCarousale> {
         ],
       ],
     );
+  }
+
+  Widget _buildDesktopCarousel(BuildContext context, ColorScheme colorScheme) {
+    return Container(
+      height: 380,
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainer.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.12),
+          width: 0.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
+          children: [
+            PageView.builder(
+              controller: _desktopController,
+              itemCount: widget.data.length,
+              onPageChanged: (i) {
+                _currentIndex = i;
+                setState(() {});
+              },
+              itemBuilder: (context, index) {
+                return _buildDesktopSlideContent(context, index, colorScheme);
+              },
+            ),
+            Positioned(
+              left: 16,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: IconButton.filledTonal(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+                  onPressed: () {
+                    final prev = (_currentIndex - 1 + widget.data.length) % widget.data.length;
+                    _desktopController.animateToPage(
+                      prev,
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeOutCubic,
+                    );
+                  },
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.black.withValues(alpha: 0.45),
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              right: 16,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: IconButton.filledTonal(
+                  icon: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
+                  onPressed: () {
+                    final next = (_currentIndex + 1) % widget.data.length;
+                    _desktopController.animateToPage(
+                      next,
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeOutCubic,
+                    );
+                  },
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.black.withValues(alpha: 0.45),
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDesktopSlideContent(BuildContext context, int index, ColorScheme colorScheme) {
+    final anime = widget.data[index];
+    final rating = _parseRating(anime.rating);
+    final eps = anime.episodes?.toString();
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Positioned.fill(
+          child: CachedNetworkImage(
+            imageUrl: (anime.bannerImage != null && anime.bannerImage!.isNotEmpty)
+                ? anime.bannerImage!
+                : (anime.image ?? ''),
+            fit: BoxFit.cover,
+            errorWidget: (_, __, ___) => Container(
+              color: colorScheme.surfaceContainerHighest,
+            ),
+          ),
+        ),
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                colors: [
+                  Colors.black.withValues(alpha: 0.94),
+                  Colors.black.withValues(alpha: 0.45),
+                  Colors.black.withValues(alpha: 0.15),
+                ],
+                stops: const [0.0, 0.5, 0.9],
+              ),
+            ),
+          ),
+        ),
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Colors.black.withValues(alpha: 0.88),
+                  Colors.transparent,
+                ],
+                stops: const [0.0, 0.65],
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 28),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: colorScheme.primary.withValues(alpha: 0.4),
+                        width: 0.8,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.local_fire_department_rounded,
+                          size: 14,
+                          color: colorScheme.primary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '#${(index % widget.data.length) + 1} Spotlight',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (anime.type != null && anime.type!.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Text(
+                        anime.type!.toUpperCase(),
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  if (rating > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: Colors.amber.withValues(alpha: 0.4),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.star_rounded,
+                            size: 14,
+                            color: Colors.amber,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            rating.toStringAsFixed(1),
+                            style: const TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.amber,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+              const Spacer(),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 680),
+                child: Text(
+                  anime.title ?? 'Unknown',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins-Bold',
+                    fontSize: 34,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    height: 1.15,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ),
+              if (anime.description != null && anime.description!.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 640),
+                  child: Text(
+                    _cleanDescription(anime.description!),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14.5,
+                      color: Colors.white.withValues(alpha: 0.72),
+                      height: 1.45,
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  if (eps != null && eps.isNotEmpty) ...[
+                    Text(
+                      '$eps Episodes',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        '·',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.4),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (anime.status != null && anime.status!.isNotEmpty) ...[
+                    Text(
+                      anime.status!.toUpperCase(),
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  InkWell(
+                    borderRadius: BorderRadius.circular(24),
+                    onTap: () => _navigateToDetails(anime),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.primary.withValues(alpha: 0.4),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            widget.isManga
+                                ? Icons.auto_stories_rounded
+                                : Icons.play_arrow_rounded,
+                            color: colorScheme.onPrimary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            widget.isManga ? 'Read Now' : 'Watch Now',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              color: colorScheme.onPrimary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(24),
+                    onTap: () => _navigateToDetails(anime),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.16),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.info_outline_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Details',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  _SlideIndicator(
+                    count: widget.data.length,
+                    current: _currentIndex,
+                    onTap: (i) {
+                      _desktopController.animateToPage(
+                        i,
+                        duration: const Duration(milliseconds: 350),
+                        curve: Curves.easeOutCubic,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _cleanDescription(String htmlText) {
+    return htmlText
+        .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), ' ')
+        .replaceAll(RegExp(r'~!.*?!~', dotAll: true), '')
+        .replaceAll(RegExp(r'<[^>]+>'), '')
+        .trim();
+  }
+
+  double _parseRating(String? r) {
+    if (r == null || r.isEmpty || r == "N/A") return 0;
+    try {
+      if (r.contains('%')) {
+        return double.parse(r.replaceAll('%', '').trim()) / 20;
+      }
+      return (double.parse(r) / 2).clamp(0.0, 5.0);
+    } catch (_) {
+      return 0;
+    }
   }
 
   Widget _buildHeroCard(int index) {

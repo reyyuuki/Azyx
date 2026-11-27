@@ -19,6 +19,7 @@
 #include <screen_brightness_windows/screen_brightness_windows_plugin.h>
 #include <url_launcher_windows/url_launcher_windows.h>
 #include <volume_controller/volume_controller_plugin_c_api.h>
+#include <webview_all_windows/webview_all_windows_plugin.h>
 #include <window_to_front/window_to_front_plugin.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
@@ -48,6 +49,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("UrlLauncherWindows"));
   VolumeControllerPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("VolumeControllerPluginCApi"));
+  WebviewAllWindowsPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("WebviewAllWindowsPlugin"));
   WindowToFrontPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("WindowToFrontPlugin"));
 }

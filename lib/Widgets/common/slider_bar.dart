@@ -13,6 +13,7 @@ class CustomSlider extends StatelessWidget {
   final Color? inactveColor;
   final String? indiactorTime;
   final bool? isLocked;
+  final M3SliderTheme? theme;
   const CustomSlider({
     super.key,
     required this.onChanged,
@@ -27,6 +28,7 @@ class CustomSlider extends StatelessWidget {
     this.inactveColor,
     this.indiactorTime,
     this.isLocked,
+    this.theme,
   });
   @override
   Widget build(BuildContext context) {
@@ -42,6 +44,7 @@ class CustomSlider extends StatelessWidget {
       indiactorTime: indiactorTime,
       isLocked: isLocked,
       inactiveColor: inactveColor,
+      theme: theme ?? const M3SliderTheme(),
     );
   }
 }

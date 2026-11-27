@@ -2,6 +2,8 @@ import 'package:azyx/Database/isar_models/key_value.dart';
 import 'package:azyx/Screens/Anime/Watch/Watchium/watchium_service.dart';
 import 'package:azyx/Screens/Anime/Watch/Watchium/widgets/watchium_sheet.dart';
 import 'package:azyx/Screens/Settings/Pages/backup_setting.dart';
+import 'package:azyx/Screens/Settings/Pages/episode_metadata_settings.dart';
+import 'package:azyx/Screens/Settings/Pages/subtitle_settings.dart';
 import 'package:azyx/Screens/Settings/Pages/theme_setting.dart';
 import 'package:azyx/Screens/Settings/Pages/ui_settings.dart';
 import 'package:azyx/Extensions/plugin_manager.dart';
@@ -118,7 +120,61 @@ class _SettingScreenState extends State<SettingScreen> {
         },
       ),
       SettingItemData(
-        section: "EXTENSIONS & WATCH TOGETHER",
+        section: "APPEARANCE & UI",
+        title: "Subtitle Styling",
+        subtitle: "Customize font size, background, outline, and live preview",
+        icon: Icons.subtitles_rounded,
+        iconColor: (theme) => theme.colorScheme.tertiary,
+        onTap: (ctx) {
+          Navigator.push(
+            ctx,
+            PageRouteBuilder(
+              transitionDuration: const Duration(milliseconds: 300),
+              transitionsBuilder: (ctx, animation, _, child) {
+                return SlideTransition(
+                  position: animation.drive(
+                    Tween(
+                      begin: const Offset(1, 0),
+                      end: Offset.zero,
+                    ).chain(CurveTween(curve: Curves.easeOutCubic)),
+                  ),
+                  child: child,
+                );
+              },
+              pageBuilder: (_, __, ___) => const SubtitleSettingsPage(),
+            ),
+          );
+        },
+      ),
+      SettingItemData(
+        section: "EXTENSIONS",
+        title: "Episode Metadata",
+        subtitle: "Toggle episode metadata & choose provider (AniZip, Kitsu, Jikan)",
+        icon: Icons.movie_filter_rounded,
+        iconColor: (theme) => theme.colorScheme.primary,
+        onTap: (ctx) {
+          Navigator.push(
+            ctx,
+            PageRouteBuilder(
+              transitionDuration: const Duration(milliseconds: 300),
+              transitionsBuilder: (ctx, animation, _, child) {
+                return SlideTransition(
+                  position: animation.drive(
+                    Tween(
+                      begin: const Offset(1, 0),
+                      end: Offset.zero,
+                    ).chain(CurveTween(curve: Curves.easeOutCubic)),
+                  ),
+                  child: child,
+                );
+              },
+              pageBuilder: (_, __, ___) => const EpisodeMetadataSettings(),
+            ),
+          );
+        },
+      ),
+      SettingItemData(
+        section: "EXTENSIONS",
         title: "Extension Runtime Host",
         subtitle: "Update, Force Re-download or Load Runtime APK",
         icon: Broken.category,
@@ -127,19 +183,19 @@ class _SettingScreenState extends State<SettingScreen> {
           PluginManager().showRuntimeSettingsSheet(ctx);
         },
       ),
-      SettingItemData(
-        section: "EXTENSIONS & WATCH TOGETHER",
-        title: "Watch Together",
-        subtitle: "Join or create a room to watch anime together",
-        icon: Broken.people,
-        iconColor: (theme) => theme.colorScheme.primary,
-        onTap: (ctx) {
-          if (!Get.isRegistered<WatchiumService>()) {
-            Get.put(WatchiumService());
-          }
-          showWatchiumSheet(ctx);
-        },
-      ),
+      // SettingItemData(
+      //   section: "EXTENSIONS & WATCH TOGETHER",
+      //   title: "Watch Together",
+      //   subtitle: "Join or create a room to watch anime together",
+      //   icon: Broken.people,
+      //   iconColor: (theme) => theme.colorScheme.primary,
+      //   onTap: (ctx) {
+      //     if (!Get.isRegistered<WatchiumService>()) {
+      //       Get.put(WatchiumService());
+      //     }
+      //     showWatchiumSheet(ctx);
+      //   },
+      // ),
       SettingItemData(
         section: "DATA & STORAGE",
         title: "Backup & Restore",

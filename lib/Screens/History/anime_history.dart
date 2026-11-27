@@ -6,51 +6,67 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
+
 class AnimeHistoryScreen extends StatefulWidget {
   const AnimeHistoryScreen({super.key});
   @override
   State<AnimeHistoryScreen> createState() => _AnimeHistoryScreenState();
 }
+
 class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
   late final LocalHistoryController _controller;
   final RxString selectedFilter = RxString('All');
-  final List<String> filterOptions = ['All', 'Today', 'This Week', 'This Month'];
+  final List<String> filterOptions = [
+    'All',
+    'Today',
+    'This Week',
+    'This Month',
+  ];
   @override
   void initState() {
     super.initState();
     _controller = localHistoryController;
   }
+
   List<LocalHistoryItem> _getFilteredItems() {
     final items = _controller.animeWatchingHistory;
     final now = DateTime.now();
     switch (selectedFilter.value) {
       case 'Today':
         return items
-            .where((e) =>
-                e.lastWatched != null &&
-                now.difference(e.lastWatched!).inDays == 0)
+            .where(
+              (e) =>
+                  e.lastWatched != null &&
+                  now.difference(e.lastWatched!).inDays == 0,
+            )
             .toList();
       case 'This Week':
         return items
-            .where((e) =>
-                e.lastWatched != null &&
-                now.difference(e.lastWatched!).inDays <= 7)
+            .where(
+              (e) =>
+                  e.lastWatched != null &&
+                  now.difference(e.lastWatched!).inDays <= 7,
+            )
             .toList();
       case 'This Month':
         return items
-            .where((e) =>
-                e.lastWatched != null &&
-                now.difference(e.lastWatched!).inDays <= 30)
+            .where(
+              (e) =>
+                  e.lastWatched != null &&
+                  now.difference(e.lastWatched!).inDays <= 30,
+            )
             .toList();
       default:
         return items.toList();
     }
   }
+
   String _formatDuration(int seconds) {
     final minutes = seconds ~/ 60;
     final remainingSeconds = seconds % 60;
     return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }
+
   String _formatLastWatched(DateTime? dateTime) {
     if (dateTime == null) return '';
     final difference = DateTime.now().difference(dateTime);
@@ -59,6 +75,7 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
     if (difference.inMinutes > 0) return '${difference.inMinutes}m ago';
     return 'Just now';
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,14 +102,12 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Theme.of(context)
-                            .colorScheme
-                            .primaryContainer
-                            .withOpacity(0.3),
-                        Theme.of(context)
-                            .colorScheme
-                            .secondaryContainer
-                            .withOpacity(0.2),
+                        Theme.of(
+                          context,
+                        ).colorScheme.primaryContainer.withOpacity(0.3),
+                        Theme.of(
+                          context,
+                        ).colorScheme.secondaryContainer.withOpacity(0.2),
                       ],
                     ),
                   ),
@@ -106,9 +121,9 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                     icon: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
@@ -139,6 +154,7 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
       ),
     );
   }
+
   Widget _buildFilterChips(BuildContext context) {
     return Container(
       height: 60,
@@ -160,24 +176,25 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                       label: AzyXText(
                         text: option,
                         fontSize: 12,
-                        fontVariant:
-                            isSelected ? FontVariant.bold : FontVariant.regular,
+                        fontVariant: isSelected
+                            ? FontVariant.bold
+                            : FontVariant.regular,
                         color: isSelected
                             ? Theme.of(context).colorScheme.onPrimary
                             : Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       onSelected: (_) => selectedFilter.value = option,
-                      backgroundColor:
-                          Theme.of(context).colorScheme.surfaceContainerLow,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerLow,
                       selectedColor: Theme.of(context).colorScheme.primary,
                       checkmarkColor: Theme.of(context).colorScheme.onPrimary,
                       side: BorderSide(
                         color: isSelected
                             ? Theme.of(context).colorScheme.primary
-                            : Theme.of(context)
-                                .colorScheme
-                                .outline
-                                .withOpacity(0.3),
+                            : Theme.of(
+                                context,
+                              ).colorScheme.outline.withOpacity(0.3),
                         width: 1,
                       ),
                       shape: RoundedRectangleBorder(
@@ -193,6 +210,7 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
       ),
     );
   }
+
   Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Padding(
@@ -246,8 +264,9 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withOpacity(0.3),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -258,8 +277,10 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   shadowColor: Colors.transparent,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -278,6 +299,7 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
       ),
     );
   }
+
   Widget _buildHistoryList(BuildContext context, List<LocalHistoryItem> items) {
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -291,6 +313,7 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
       },
     );
   }
+
   Widget _buildHistoryCard(BuildContext context, LocalHistoryItem item) {
     final currentSecs = item.currentTimeSeconds ?? 0;
     final totalSecs = item.totalDurationSeconds ?? 1;
@@ -333,10 +356,9 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withOpacity(0.2),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.2),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -352,22 +374,15 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                                   width: 100,
                                   height: 140,
                                   fit: BoxFit.cover,
-                                  placeholder: (context, url) =>
-                                      Shimmer.fromColors(
-                                    baseColor: Theme.of(context)
-                                        .colorScheme
-                                        .surfaceContainerLowest,
-                                    highlightColor: Theme.of(context)
-                                        .colorScheme
-                                        .surfaceContainerLow,
-                                    child: Container(
-                                      width: 100,
-                                      height: 140,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius:
-                                            BorderRadius.circular(16),
-                                      ),
+                                  placeholder: (context, url) => Container(
+                                    width: 100,
+                                    height: 140,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerHighest
+                                          .withValues(alpha: 0.35),
+                                      borderRadius: BorderRadius.circular(16),
                                     ),
                                   ),
                                   errorWidget: (context, url, error) =>
@@ -381,7 +396,9 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                             left: 8,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: Theme.of(context).colorScheme.primary,
                                 borderRadius: BorderRadius.circular(12),
@@ -428,8 +445,7 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                                   text: "Progress: $percentWatched%",
                                   fontSize: 12,
                                   fontVariant: FontVariant.bold,
-                                  color:
-                                      Theme.of(context).colorScheme.primary,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ],
                             ),
@@ -437,9 +453,9 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                             Container(
                               height: 6,
                               decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerLow,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerLow,
                                 borderRadius: BorderRadius.circular(3),
                               ),
                               child: FractionallySizedBox(
@@ -479,13 +495,11 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
               ),
             ),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerLow
-                    .withOpacity(0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerLow.withOpacity(0.5),
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(20),
                   bottomRight: Radius.circular(20),
@@ -505,8 +519,7 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                       AzyXText(
                         text: "$formattedCurrentTime / $formattedTotalTime",
                         fontSize: 12,
-                        color:
-                            Theme.of(context).colorScheme.onSurfaceVariant,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ],
                   ),
@@ -515,20 +528,22 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                       if (item.sourceName != null)
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .secondaryContainer,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.secondaryContainer,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: AzyXText(
                             text: item.sourceName!,
                             fontSize: 10,
                             fontVariant: FontVariant.bold,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSecondaryContainer,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSecondaryContainer,
                           ),
                         ),
                       const SizedBox(width: 12),
@@ -547,6 +562,7 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
       ),
     );
   }
+
   Widget _imagePlaceholder(BuildContext context) {
     return Container(
       width: 100,
@@ -562,6 +578,7 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
       ),
     );
   }
+
   void _showOptionsBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -608,6 +625,7 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
       ),
     );
   }
+
   Widget _buildOptionTile(
     BuildContext context,
     IconData icon,
@@ -650,6 +668,7 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
+
   void _showClearHistoryDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -689,14 +708,12 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .errorContainer
-                      .withOpacity(0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.errorContainer.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color:
-                        Theme.of(context).colorScheme.error.withOpacity(0.3),
+                    color: Theme.of(context).colorScheme.error.withOpacity(0.3),
                   ),
                 ),
                 child: Row(
@@ -727,10 +744,10 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             style: TextButton.styleFrom(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             child: AzyXText(
               text: "Cancel",
@@ -759,16 +776,20 @@ class _AnimeHistoryScreenState extends State<AnimeHistoryScreen> {
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 );
               },
               style: TextButton.styleFrom(
                 backgroundColor: Colors.transparent,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: const AzyXText(
                 text: "Clear All",

@@ -69,6 +69,7 @@ dependencies:
   socket_io_client: ^3.0.2
   ffi: any
   win32: any
+  sensors_plus: ^7.1.1
 
 dev_dependencies:
   flutter_test:

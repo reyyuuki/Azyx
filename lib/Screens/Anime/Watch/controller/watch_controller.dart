@@ -10,6 +10,7 @@ import 'package:azyx/Controllers/anilist_add_to_list_controller.dart';
 import 'package:azyx/Controllers/anilist_auth.dart';
 import 'package:azyx/Controllers/online_subtitles_controller.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
+import 'package:azyx/Controllers/settings_controller.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Controllers/local_history_controller.dart';
 import 'package:azyx/Database/isar_models/episode_class.dart';
@@ -25,6 +26,7 @@ import 'package:azyx/Screens/Anime/Watch/widgets/indicator.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
+import 'package:azyx/Widgets/common/m3_slider.dart';
 import 'package:azyx/Widgets/common/slider_bar.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/utils/Functions/multiplier_extension.dart';
@@ -37,6 +39,7 @@ import 'package:icons_plus/icons_plus.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:screen_brightness/screen_brightness.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import 'package:volume_controller/volume_controller.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
@@ -72,7 +75,11 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   final Rx<bool> _volumeIndicator = false.obs;
   final Rx<bool> _brightnessIndicator = false.obs;
   final Rx<bool> isPressed = false.obs;
-  final currentVisualProfile = 'natural'.obs;
+  final Rx<bool> isPlayerReady = false.obs;
+  final RxList<String> subtitleText = <String>[].obs;
+  final Set<String> _failedUrls = {};
+  bool _isSwitchingFallback = false;
+  final currentVisualProfile = ColorProfileManager.loadSavedProfile().obs;
   Timer? updateTimer;
   Timer? doubleTapTimer;
   Timer? hideControlsTimer;
@@ -81,6 +88,10 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   Timer? _positionUpdateTimer;
   Timer? _heartbeatTimer;
   StreamSubscription? _roomStateSubscription;
+  StreamSubscription<AccelerometerEvent>? _accelerometerSub;
+  DeviceOrientation _currentLandscapeOrientation =
+      DeviceOrientation.landscapeLeft;
+  DateTime _lastOrientationCheck = DateTime.fromMillisecondsSinceEpoch(0);
   void initializePlayer(AnimeAllData playerData) {
     WidgetsBinding.instance.addObserver(this);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
@@ -88,19 +99,12 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       DeviceOrientation.landscapeRight,
       DeviceOrientation.landscapeLeft,
     ]);
-    updateEntry();
+    _initHorizontalAutoRotation();
     if (!Get.isRegistered<WatchiumService>()) {
       watchiumService = Get.put(WatchiumService());
     } else {
       watchiumService = Get.find<WatchiumService>();
     }
-    player = Player();
-    controller = VideoController(
-      player,
-      configuration: const VideoControllerConfiguration(
-        androidAttachSurfaceAfterVideoParameters: true,
-      ),
-    );
     intializeData(playerData);
     int? startSec = playerData.startFromSeconds;
     if (startSec == null || startSec <= 0) {
@@ -119,6 +123,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
         ? Duration(seconds: startSec)
         : Duration.zero;
     position.value = initialStart;
+
     final selectedVideo =
         playerData.episodeUrls.firstWhereOrNull(
           (v) => v.url == playerData.url,
@@ -147,44 +152,60 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       if (origin.isNotEmpty) headers['Origin'] = origin;
     }
 
-    if (playerData.url != null && playerData.url!.isNotEmpty) {
-      final bool shouldPlay =
-          (watchiumService.inRoom && !watchiumService.isHost.value)
-          ? (watchiumService.roomState.value?.playback?.isPlaying ?? false)
-          : true;
-      player.open(
-        Media(playerData.url!, start: initialStart, httpHeaders: headers),
-        play: shouldPlay,
-      );
-    }
-    _handleVolumeAndBrightness();
-    _setupPlayerListeners();
-    if (watchiumService.inRoom && !watchiumService.isHost.value) {
-      final pb = watchiumService.roomState.value?.playback;
-      if (pb != null) {
-        if (pb.positionSec > 0) {
-          player.seek(Duration(seconds: pb.positionSec.toInt()));
-        }
-        if (pb.isPlaying) {
-          player.play();
-        } else {
-          player.pause();
-        }
-      }
-    }
-    syncHostContentWithWatchium();
     updateTimer = Timer.periodic(
       const Duration(minutes: 1),
       (timer) => localHistoryEntry(),
     );
-    final currentEpisode = playerData.episodeList?.firstWhereOrNull(
-      (e) => e.number == playerData.number,
-    );
-    if (playerData.episodeUrls.isEmpty &&
-        currentEpisode != null &&
-        currentEpisode.url != null) {
-      _fetchFreshEpisodeUrls(currentEpisode, initialStart: initialStart);
-    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.microtask(() {
+        if (isClosed) return;
+        player = Player();
+        controller = VideoController(
+          player,
+          configuration: const VideoControllerConfiguration(
+            androidAttachSurfaceAfterVideoParameters: true,
+          ),
+        );
+        isPlayerReady.value = true;
+        _setupPlayerListeners();
+        applySavedProfile();
+        if (playerData.url != null && playerData.url!.isNotEmpty) {
+          final bool shouldPlay =
+              (watchiumService.inRoom && !watchiumService.isHost.value)
+              ? (watchiumService.roomState.value?.playback?.isPlaying ?? false)
+              : true;
+          player.open(
+            Media(playerData.url!, start: initialStart, httpHeaders: headers),
+            play: shouldPlay,
+          );
+        }
+        updateEntry();
+        _handleVolumeAndBrightness();
+        if (watchiumService.inRoom && !watchiumService.isHost.value) {
+          final pb = watchiumService.roomState.value?.playback;
+          if (pb != null) {
+            if (pb.positionSec > 0) {
+              player.seek(Duration(seconds: pb.positionSec.toInt()));
+            }
+            if (pb.isPlaying) {
+              player.play();
+            } else {
+              player.pause();
+            }
+          }
+        }
+        syncHostContentWithWatchium();
+        final currentEpisode = playerData.episodeList?.firstWhereOrNull(
+          (e) => e.number == playerData.number,
+        );
+        if (playerData.episodeUrls.isEmpty &&
+            currentEpisode != null &&
+            currentEpisode.url != null) {
+          _fetchFreshEpisodeUrls(currentEpisode, initialStart: initialStart);
+        }
+      });
+    });
   }
 
   Future<void> _fetchFreshEpisodeUrls(
@@ -241,15 +262,71 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     }
   }
 
+  void _tryNextFallbackLink(String errorMessage) {
+    if (_isSwitchingFallback) return;
+    final currentUrl = animeData.value.url;
+    if (currentUrl != null && currentUrl.isNotEmpty) {
+      _failedUrls.add(currentUrl);
+    }
+    final nextVideo = animeData.value.episodeUrls.firstWhereOrNull(
+      (v) => v.url.isNotEmpty && !_failedUrls.contains(v.url),
+    );
+    if (nextVideo == null) {
+      azyxSnackBar('All stream links failed to play for this episode');
+      return;
+    }
+    _isSwitchingFallback = true;
+    final label =
+        (nextVideo.title != null &&
+            nextVideo.title!.isNotEmpty &&
+            nextVideo.title!.toLowerCase() != 'null')
+        ? nextVideo.title!
+        : nextVideo.quality;
+    azyxSnackBar('Stream error — switching to $label');
+    animeData.value.url = nextVideo.url;
+    final baseUrl = sourceController.activeSource.value?.baseUrl ?? '';
+    final headers = <String, String>{
+      'Referer':
+          nextVideo.headers?['referer'] ??
+          nextVideo.headers?['Referer'] ??
+          baseUrl,
+      'Origin':
+          nextVideo.headers?['origin'] ??
+          nextVideo.headers?['Origin'] ??
+          baseUrl,
+      'User-Agent':
+          nextVideo.headers?['user-agent'] ??
+          nextVideo.headers?['User-Agent'] ??
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    };
+    player
+        .open(
+          Media(nextVideo.url, start: position.value, httpHeaders: headers),
+          play: true,
+        )
+        .whenComplete(() {
+          _isSwitchingFallback = false;
+        });
+  }
+
   void _setupPlayerListeners() {
     player.stream.error.listen((err) {
       log('[MediaKit Player Error] $err');
+      _tryNextFallbackLink(err);
+    });
+    player.stream.subtitle.listen((lines) {
+      subtitleText.assignAll(lines);
     });
     player.stream.log.listen((msg) {
       log('[MediaKit Player Log] $msg');
     });
+    bool appliedOnPlay = false;
     player.stream.playing.listen((p) {
       isPlaying.value = p;
+      if (p && !appliedOnPlay) {
+        appliedOnPlay = true;
+        applySavedProfile();
+      }
       if (watchiumService.inRoom) {
         if (watchiumService.isHost.value) {
           final pos = position.value.inSeconds.toDouble();
@@ -422,16 +499,22 @@ class WatchController extends GetxController with WidgetsBindingObserver {
 
   void localHistoryEntry() {
     final data = animeData.value;
-    if (data.id == null) return;
+    final resolvedId = data.id ?? serviceHandler.currentMedia.value.id;
+    if (resolvedId == null) return;
+    final resolvedTitle = data.title ?? serviceHandler.currentMedia.value.title;
+    final resolvedImage = data.image ?? serviceHandler.currentMedia.value.image;
+
     final String episodeUrlsJson = jsonEncode(
       data.episodeUrls.map((e) => e.toJson()).toList(),
     );
+    final activeSource = sourceController.activeSource.value;
     final entry = LocalHistoryItem()
-      ..mediaId = int.tryParse(data.id ?? '')
-      ..title = data.title
-      ..image = data.image
+      ..mediaId = int.tryParse(resolvedId)
+      ..title = resolvedTitle
+      ..image = resolvedImage
       ..link = data.url
-      ..sourceName = data.source
+      ..sourceName = data.source ?? activeSource?.name
+      ..sourceId = activeSource?.id?.toString()
       ..progress = 'EP ${data.number ?? episodeNumber.value}'
       ..currentTimeSeconds = position.value.inSeconds
       ..totalDurationSeconds = totalDuration.value.inSeconds > 0
@@ -460,6 +543,33 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       serviceHandler.currentMedia.value,
       isAnime: true,
     );
+  }
+
+  void _initHorizontalAutoRotation() {
+    if (!Platform.isAndroid && !Platform.isIOS) return;
+    try {
+      _accelerometerSub = accelerometerEventStream().listen((event) {
+        final now = DateTime.now();
+        if (now.difference(_lastOrientationCheck).inMilliseconds < 250) {
+          return;
+        }
+        _lastOrientationCheck = now;
+        if (isControlsLocked.value || isPotraitOrientaion.value) return;
+
+        DeviceOrientation? target;
+        if (event.x > 2.5) {
+          target = DeviceOrientation.landscapeLeft;
+        } else if (event.x < -2.5) {
+          target = DeviceOrientation.landscapeRight;
+        }
+
+        if (target != null && target != _currentLandscapeOrientation) {
+          _currentLandscapeOrientation = target;
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+          SystemChrome.setPreferredOrientations([target]);
+        }
+      });
+    } catch (_) {}
   }
 
   Future<void> _handleVolumeAndBrightness() async {
@@ -577,10 +687,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  void applySavedProfile() => ColorProfileManager().applyColorProfile(
-    currentVisualProfile.value,
-    player,
-  );
+  void applySavedProfile() => ColorProfileManager().applySavedProfile(player);
   void showColorProfileSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -595,6 +702,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
         },
         onCustomSettingsChanged: (settings) {
           Utils.log('Custom settings applied: $settings');
+          currentVisualProfile.value = 'custom';
         },
       ),
     );
@@ -615,28 +723,19 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   }
 
   void seek10Seconds(bool isLeft) {
-    player.pause();
     isSeeking.value = true;
     isLeftSide.value = isLeft;
     doubleTapLable.value += 10;
     skipDuration.value += 10;
     final newPosition = isLeft
-        ? max.max(0, position.value.inSeconds - skipDuration.value).seconds
+        ? max.max(0, position.value.inSeconds - 10).seconds
         : max
-              .min(
-                totalDuration.value.inSeconds,
-                position.value.inSeconds + skipDuration.value,
-              )
+              .min(totalDuration.value.inSeconds, position.value.inSeconds + 10)
               .seconds;
     position.value = newPosition;
     seekTo(Duration(seconds: newPosition.inSeconds));
-    player.play();
     doubleTapTimer?.cancel();
-    Future.delayed(
-      const Duration(milliseconds: 700),
-      () => isSeeking.value = false,
-    );
-    doubleTapTimer = Timer(const Duration(milliseconds: 1000), () {
+    doubleTapTimer = Timer(const Duration(milliseconds: 750), () {
       isSeeking.value = false;
       doubleTapLable.value = 0;
       skipDuration.value = 0;
@@ -700,6 +799,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   }
 
   void changeEpisode(bool isNext) {
+    _failedUrls.clear();
     if (anilistAuthController.userData.value.name != null) {
       anilistAddToListController.updateAnimeProgress(
         animeData.value,
@@ -732,6 +832,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   }
 
   void onEpisodeSelected(Episode item) {
+    _failedUrls.clear();
     if (anilistAuthController.userData.value.name != null) {
       anilistAddToListController.updateAnimeProgress(
         animeData.value,
@@ -762,45 +863,88 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     return "${formattedHours.isNotEmpty ? "$formattedHours:" : ''}$formattedMins:$formattedSeconds";
   }
 
+  BoxDecoration _playerPillDecoration(
+    BuildContext context, {
+    double radius = 24,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return BoxDecoration(
+      color: colorScheme.surface.withOpacity(0.76),
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(
+        width: 0.8,
+        color: colorScheme.outlineVariant.withOpacity(0.28),
+      ),
+    );
+  }
+
+  Widget _playerIconButton({
+    required BuildContext context,
+    required VoidCallback onPressed,
+    required IconData icon,
+    double size = 20,
+    Color? color,
+  }) {
+    final resolvedColor = color ?? Theme.of(context).colorScheme.onSurface;
+    return IconButton(
+      onPressed: onPressed,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+      splashRadius: 18,
+      icon: Icon(icon, color: resolvedColor, size: size),
+    );
+  }
+
   Widget backButton(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pop(context);
-      },
-      child: AzyXContainer(
-        padding: const EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.6),
-          border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
-          borderRadius: BorderRadius.circular(40),
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          Navigator.pop(context);
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: _playerPillDecoration(context, radius: 20),
+          alignment: Alignment.center,
+          child: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: colorScheme.onSurface,
+            size: 18,
+          ),
         ),
-        child: const Icon(Broken.arrow_left_2, color: Colors.white, size: 35),
       ),
     );
   }
 
   Widget topRightControls(BuildContext context) {
-    return AzyXContainer(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(40),
-        border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
-        color: Colors.black.withOpacity(0.6),
-      ),
+    return Container(
+      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      decoration: _playerPillDecoration(context, radius: 20),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
+          _playerIconButton(
+            context: context,
             onPressed: () {
               showEpisodesBox.value = true;
             },
-            icon: const Icon(Broken.video, color: Colors.white),
+            icon: Icons.playlist_play_rounded,
+            size: 22,
           ),
-          IconButton(
+          _playerIconButton(
+            context: context,
             onPressed: () {
               showColorProfileSheet(context);
             },
-            icon: const Icon(Broken.blur, color: Colors.white),
+            icon: Icons.tune_rounded,
+            size: 19,
           ),
-          IconButton(
+          _playerIconButton(
+            context: context,
             onPressed: () {
               showEnhancedSubtitleSheet(
                 animeData,
@@ -809,15 +953,19 @@ class WatchController extends GetxController with WidgetsBindingObserver {
                 player: player,
               );
             },
-            icon: const Icon(Iconsax.subtitle_bold, color: Colors.white),
+            icon: Icons.subtitles_rounded,
+            size: 19,
           ),
-          IconButton(
-            onPressed: () {
-              showWatchiumSheet(context, animeData: animeData.value);
-            },
-            icon: const Icon(Broken.people, color: Colors.white),
-          ),
-          IconButton(
+          // _playerIconButton(
+          //   context: context,
+          //   onPressed: () {
+          //     showWatchiumSheet(context, animeData: animeData.value);
+          //   },
+          //   icon: Icons.group_rounded,
+          //   size: 19,
+          // ),
+          _playerIconButton(
+            context: context,
             onPressed: () {
               showQualitySheet(
                 context,
@@ -825,9 +973,11 @@ class WatchController extends GetxController with WidgetsBindingObserver {
                 player,
                 position,
                 isPotraitOrientaion,
+                onLinkSelected: () => _failedUrls.clear(),
               );
             },
-            icon: const Icon(Icons.high_quality, color: Colors.white),
+            icon: Icons.hd_rounded,
+            size: 20,
           ),
         ],
       ),
@@ -838,7 +988,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -909,99 +1059,94 @@ class WatchController extends GetxController with WidgetsBindingObserver {
 
   Widget topControls(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         backButton(context),
-        const SizedBox(width: 10),
+        const SizedBox(width: 12),
         episodeTitleWidget(context),
+        const SizedBox(width: 12),
         topRightControls(context),
       ],
     );
   }
 
-  Widget bottomRightControls() {
-    return AzyXContainer(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(40),
-        border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
-        color: Colors.black.withOpacity(0.6),
-      ),
+  Widget bottomRightControls(BuildContext context) {
+    return Container(
+      height: 36,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: _playerPillDecoration(context, radius: 18),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
+          _playerIconButton(
+            context: context,
             onPressed: () {
               isControlsLocked.value = !isControlsLocked.value;
             },
-            icon: Icon(
-              isControlsLocked.value
-                  ? Icons.lock_rounded
-                  : Icons.lock_open_rounded,
-              color: Colors.white,
-            ),
+            icon: isControlsLocked.value
+                ? Icons.lock_rounded
+                : Icons.lock_open_rounded,
+            size: 18,
           ),
-          if (Platform.isAndroid || Platform.isIOS)
-            isControlsLocked.value
-                ? const SizedBox.shrink()
-                : IconButton(
-                    onPressed: () {
-                      isPotraitOrientaion.value = false;
-                      SystemChrome.setPreferredOrientations([
-                        DeviceOrientation.landscapeLeft,
-                      ]);
-                    },
-                    icon: const Icon(
-                      Icons.screen_rotation,
-                      color: Colors.white,
-                    ),
-                  ),
-          if (Platform.isAndroid || Platform.isIOS)
-            isControlsLocked.value
-                ? const SizedBox.shrink()
-                : IconButton(
-                    onPressed: () {
-                      isPotraitOrientaion.value = true;
-                      SystemChrome.setPreferredOrientations([
-                        DeviceOrientation.portraitUp,
-                      ]);
-                    },
-                    icon: const Icon(Icons.phone_android, color: Colors.white),
-                  ),
-          isControlsLocked.value
-              ? const SizedBox.shrink()
-              : IconButton(
-                  onPressed: () {
-                    changeResizeMode();
-                    azyxSnackBar(currentMode.value.name);
-                  },
-                  icon: Obx(
-                    () => Icon(getModeIcon(currentMode), color: Colors.white),
-                  ),
-                ),
+          if ((Platform.isAndroid || Platform.isIOS) && !isControlsLocked.value)
+            _playerIconButton(
+              context: context,
+              onPressed: () {
+                isPotraitOrientaion.value = !isPotraitOrientaion.value;
+                SystemChrome.setPreferredOrientations(
+                  isPotraitOrientaion.value
+                      ? [DeviceOrientation.portraitUp]
+                      : [
+                          DeviceOrientation.landscapeLeft,
+                          DeviceOrientation.landscapeRight,
+                        ],
+                );
+              },
+              icon: isPotraitOrientaion.value
+                  ? Icons.screen_rotation_rounded
+                  : Icons.stay_current_portrait_rounded,
+              size: 18,
+            ),
+          if (!isControlsLocked.value)
+            Obx(
+              () => _playerIconButton(
+                context: context,
+                onPressed: () {
+                  changeResizeMode();
+                  azyxSnackBar(currentMode.value.name);
+                },
+                icon: getModeIcon(currentMode),
+                size: 19,
+              ),
+            ),
         ],
       ),
     );
   }
 
-  Widget seek10Widget() {
-    return AzyXContainer(
-      margin: const EdgeInsets.only(right: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(40),
-        color: Colors.black.withOpacity(0.6),
-      ),
+  Widget seek10Widget(BuildContext context) {
+    return Container(
+      height: 36,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: _playerPillDecoration(context, radius: 18),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
+          _playerIconButton(
+            context: context,
             onPressed: () {
               seek10Seconds(true);
             },
-            icon: const Icon(Broken.backward_10_seconds, color: Colors.white),
+            icon: Icons.replay_10_rounded,
+            size: 20,
           ),
-          IconButton(
+          _playerIconButton(
+            context: context,
             onPressed: () {
               seek10Seconds(false);
             },
-            icon: const Icon(Broken.forward_10_seconds, color: Colors.white),
+            icon: Icons.forward_10_rounded,
+            size: 20,
           ),
         ],
       ),
@@ -1009,15 +1154,11 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   }
 
   Widget speedButton(BuildContext context) {
-    return AzyXContainer(
-      margin: const EdgeInsets.only(right: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(40),
-        border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
-        color: Colors.black.withOpacity(0.6),
-      ),
-      child: IconButton(
-        onPressed: () {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
           showSpeedBottomList(
             context,
             speedList,
@@ -1026,68 +1167,114 @@ class WatchController extends GetxController with WidgetsBindingObserver {
             isPotraitOrientaion,
           );
         },
-        icon: const Icon(Iconsax.speedometer_bold, color: Colors.white),
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 11),
+          decoration: _playerPillDecoration(context, radius: 18),
+          child: Obx(
+            () => Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.speed_rounded,
+                  color: colorScheme.onSurface,
+                  size: 17,
+                ),
+                const SizedBox(width: 5),
+                AzyXText(
+                  text: '${selectedSpeed.value}x',
+                  fontSize: 12,
+                  fontVariant: FontVariant.bold,
+                  color: colorScheme.onSurface,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 
-  Widget seek85(bool isLeft) {
-    return AzyXContainer(
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(40),
-        border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
-        color: Colors.black.withOpacity(0.6),
-      ),
-      child: IconButton(
-        onPressed: () {
-          player.pause();
-          position.value = isLeft
-              ? max.max(0, position.value.inSeconds - 85).seconds
-              : max.max(0, position.value.inSeconds + 85).seconds;
-          seekTo(Duration(seconds: position.value.inSeconds));
-          player.play();
+  Widget seek85(BuildContext context, bool isLeft) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          final target = isLeft
+              ? max.max(0, position.value.inSeconds - 85)
+              : max.min(
+                  totalDuration.value.inSeconds,
+                  position.value.inSeconds + 85,
+                );
+          position.value = Duration(seconds: target);
+          seekTo(Duration(seconds: target));
         },
-        icon: isLeft
-            ? const Row(
-                children: [
-                  Icon(Broken.backward, color: Colors.white),
-                  AzyXText(
-                    text: " -85",
-                    color: Colors.white,
-                    fontVariant: FontVariant.bold,
-                  ),
-                ],
-              )
-            : const Row(
-                children: [
-                  AzyXText(
-                    text: "+85 ",
-                    fontVariant: FontVariant.bold,
-                    color: Colors.white,
-                  ),
-                  Icon(Broken.forward, color: Colors.white),
-                ],
-              ),
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 11),
+          decoration: _playerPillDecoration(context, radius: 18),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: isLeft
+                ? [
+                    Icon(
+                      Icons.fast_rewind_rounded,
+                      color: colorScheme.onSurface,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 4),
+                    AzyXText(
+                      text: '-85s',
+                      color: colorScheme.onSurface,
+                      fontSize: 12,
+                      fontVariant: FontVariant.bold,
+                    ),
+                  ]
+                : [
+                    AzyXText(
+                      text: '+85s',
+                      color: colorScheme.onSurface,
+                      fontSize: 12,
+                      fontVariant: FontVariant.bold,
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.fast_forward_rounded,
+                      color: colorScheme.onSurface,
+                      size: 16,
+                    ),
+                  ],
+          ),
+        ),
       ),
     );
   }
 
   Widget bottomPotraitControls(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        isControlsLocked.value
-            ? const SizedBox.shrink()
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [seek85(true), speedButton(context), seek85(false)],
-              ),
+        if (!isControlsLocked.value) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              seek85(context, true),
+              speedButton(context),
+              seek85(context, false),
+            ],
+          ),
+          const SizedBox(height: 8),
+        ],
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            isControlsLocked.value ? const SizedBox.shrink() : seek10Widget(),
-            bottomRightControls(),
+            isControlsLocked.value
+                ? const SizedBox.shrink()
+                : seek10Widget(context),
+            bottomRightControls(context),
           ],
         ),
       ],
@@ -1097,92 +1284,127 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   Widget bottomLeftControls(BuildContext context) {
     return isControlsLocked.value
         ? const SizedBox.shrink()
-        : Row(children: [seek85(true), speedButton(context)]);
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              seek85(context, true),
+              const SizedBox(width: 8),
+              speedButton(context),
+            ],
+          );
   }
 
   Widget bottomControls(BuildContext context) {
     return isPotraitOrientaion.value
         ? bottomPotraitControls(context)
-        : SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                bottomLeftControls(context),
-                Row(
-                  children: [
-                    isControlsLocked.value
-                        ? const SizedBox.shrink()
-                        : seek85(false),
-                    bottomRightControls(),
+        : Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              bottomLeftControls(context),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (!isControlsLocked.value) ...[
+                    seek85(context, false),
+                    const SizedBox(width: 8),
                   ],
-                ),
-              ],
-            ),
+                  bottomRightControls(context),
+                ],
+              ),
+            ],
           );
   }
 
   Widget buildIconButton({
+    required BuildContext context,
     required VoidCallback ontap,
     required IconData icon,
   }) {
-    return InkWell(
-      onTap: ontap,
-      child: AzyXContainer(
-        padding: const EdgeInsets.all(10),
-        margin: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.6),
-          border: Border.all(width: 0.5, color: Colors.grey.withOpacity(0.6)),
-          borderRadius: BorderRadius.circular(50),
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: ontap,
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          width: 46,
+          height: 46,
+          decoration: _playerPillDecoration(context, radius: 23),
+          alignment: Alignment.center,
+          child: Icon(icon, color: colorScheme.onSurface, size: 26),
         ),
-        child: Icon(icon, color: Colors.white, size: 35),
       ),
     );
   }
 
   Widget centerControls(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         buildIconButton(
+          context: context,
           ontap: () {
             changeEpisode(false);
           },
-          icon: Broken.previous,
+          icon: Icons.skip_previous_rounded,
         ),
-        20.width,
+        const SizedBox(width: 28),
         Obx(
           () => isBuffering.value
-              ? const LoadingIndicatorM3E()
-              : GestureDetector(
-                  onTap: () => player.playOrPause(),
-                  child: Icon(
-                    isPlaying.value
-                        ? Icons.pause_rounded
-                        : Icons.play_arrow_rounded,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 60,
+              ? const SizedBox(
+                  width: 64,
+                  height: 64,
+                  child: Center(child: LoadingIndicatorM3E()),
+                )
+              : Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => player.playOrPause(),
+                    borderRadius: BorderRadius.circular(32),
+                    child: Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.primary.withOpacity(0.35),
+                            blurRadius: 16,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                      alignment: Alignment.center,
+                      child: Icon(
+                        isPlaying.value
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded,
+                        color: colorScheme.onPrimary,
+                        size: 36,
+                      ),
+                    ),
                   ),
                 ),
         ),
-        20.width,
+        const SizedBox(width: 28),
         buildIconButton(
+          context: context,
           ontap: () {
             changeEpisode(true);
           },
-          icon: Broken.next,
+          icon: Icons.skip_next_rounded,
         ),
       ],
     );
   }
 
   Widget lockedCenterControls() {
-    return AzyXContainer(
-      alignment: Alignment.center,
+    return Center(
       child: isBuffering.value
           ? const LoadingIndicatorM3E()
           : const SizedBox.shrink(),
@@ -1190,152 +1412,285 @@ class WatchController extends GetxController with WidgetsBindingObserver {
   }
 
   Widget customControls(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        vertical: isPotraitOrientaion.value ? 20 : 12,
-        horizontal: isPotraitOrientaion.value ? 20 : 35,
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Obx(
-            () => isControlsLocked.value
-                ? const SizedBox.shrink()
-                : AnimatedContainer(
-                    height: isPotraitOrientaion.value ? 120 : 60,
-                    alignment: Alignment.center,
-                    transform: Matrix4.translationValues(
-                      0,
-                      showControls.value ? 0 : -Get.height,
-                      0,
+    return Stack(
+      children: [
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 110,
+          child: IgnorePointer(
+            child: Obx(
+              () => AnimatedOpacity(
+                opacity: showControls.value ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 220),
+                child: const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.black54, Colors.transparent],
                     ),
-                    duration: const Duration(milliseconds: 1000),
-                    curve: Curves.easeInOutCubicEmphasized,
-                    child: topControls(context),
                   ),
-          ),
-          Obx(
-            () => Expanded(
-              child: AnimatedOpacity(
-                opacity: showControls.value ? 1 : 0,
-                duration: const Duration(milliseconds: 500),
-                child: isControlsLocked.value
-                    ? lockedCenterControls()
-                    : centerControls(context),
+                ),
               ),
             ),
           ),
-          AnimatedContainer(
-            height: isPotraitOrientaion.value ? 160 : 130,
-            transform: Matrix4.translationValues(
-              0,
-              showControls.value ? 0 : Get.height,
-              0,
-            ),
-            duration: const Duration(milliseconds: 1000),
-            curve: Curves.easeInOutCubicEmphasized,
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Obx(
-                      () => AzyXText(
-                        text: getFormattedTime(position.value.inSeconds),
-                        fontVariant: FontVariant.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                    const AzyXText(text: ' / ', fontVariant: FontVariant.bold),
-                    Obx(
-                      () => AzyXText(
-                        text: getFormattedTime(totalDuration.value.inSeconds),
-                        fontVariant: FontVariant.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                Obx(
-                  () => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: CustomSlider(
-                      min: 0.0,
-                      max: totalDuration.value.inSeconds > 0
-                          ? totalDuration.value.inSeconds.toDouble()
-                          : 0.0,
-                      secondaryTrackValue: totalDuration.value.inSeconds > 0
-                          ? buffered.value.inSeconds.toDouble()
-                          : 0.0,
-                      indiactorTime: getFormattedTime(position.value.inSeconds),
-                      value: totalDuration.value.inSeconds > 0.0
-                          ? double.parse(
-                              position.value.inSeconds.toStringAsFixed(2),
-                            )
-                          : 0.0,
-                      onDragEnd: (value) {
-                        seekTo(Duration(seconds: value.toInt()));
-                        player.play();
-                      },
-                      isLocked: isControlsLocked.value,
-                      onChanged: (value) {
-                        position.value = Duration(seconds: value.toInt());
-                      },
+        ),
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 150,
+          child: IgnorePointer(
+            child: Obx(
+              () => AnimatedOpacity(
+                opacity: showControls.value ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 220),
+                child: const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [Colors.black87, Colors.transparent],
                     ),
                   ),
                 ),
-                bottomControls(context),
-              ],
+              ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildRippleEffect(BuildContext context) {
-    return Obx(
-      () => AnimatedPositioned(
-        left: isLeftSide.value ? 0 : MediaQuery.of(context).size.width / 2,
-        height: isPotraitOrientaion.value ? Get.height / 2 : Get.height,
-        width: MediaQuery.of(context).size.width / 2,
-        top: isPotraitOrientaion.value ? (Get.height - Get.width) / 2 : 0,
-        duration: const Duration(milliseconds: 100),
-        child: AnimatedOpacity(
-          duration: const Duration(milliseconds: 300),
-          opacity: isSeeking.value ? 1.0 : 0.0,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 400),
-            alignment: Alignment.center,
-            curve: Curves.bounceOut,
-            decoration: BoxDecoration(
-              borderRadius: isLeftSide.value
-                  ? const BorderRadius.horizontal(right: Radius.circular(200))
-                  : const BorderRadius.horizontal(left: Radius.circular(200)),
-              color: Colors.white.withOpacity(0.5),
-            ),
-            child: Obx(
-              () => Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+        ),
+        Positioned.fill(
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: isPotraitOrientaion.value ? 14 : 12,
+                horizontal: isPotraitOrientaion.value ? 16 : 24,
+              ),
+              child: Stack(
                 children: [
-                  Icon(
-                    isLeftSide.value ? Broken.backward : Broken.forward,
-                    size: 50,
-                    color: Colors.white,
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: Obx(
+                      () => isControlsLocked.value
+                          ? const SizedBox.shrink()
+                          : AnimatedOpacity(
+                              opacity: showControls.value ? 1.0 : 0.0,
+                              duration: const Duration(milliseconds: 220),
+                              curve: Curves.easeOutCubic,
+                              child: AnimatedSlide(
+                                offset: showControls.value
+                                    ? Offset.zero
+                                    : const Offset(0, -0.15),
+                                duration: const Duration(milliseconds: 220),
+                                curve: Curves.easeOutCubic,
+                                child: topControls(context),
+                              ),
+                            ),
+                    ),
                   ),
-                  const SizedBox(width: 10),
-                  AzyXText(
-                    text: isLeftSide.value
-                        ? "-${skipDuration.value}s"
-                        : "+${skipDuration.value}s",
-                    fontVariant: FontVariant.bold,
-                    fontSize: 25,
-                    color: Colors.white,
+                  Positioned.fill(
+                    child: Center(
+                      child: Obx(
+                        () => AnimatedOpacity(
+                          opacity: showControls.value ? 1.0 : 0.0,
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOutCubic,
+                          child: isControlsLocked.value
+                              ? lockedCenterControls()
+                              : centerControls(context),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Obx(
+                      () => AnimatedOpacity(
+                        opacity: showControls.value ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeOutCubic,
+                        child: AnimatedSlide(
+                          offset: showControls.value
+                              ? Offset.zero
+                              : const Offset(0, 0.15),
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOutCubic,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                children: [
+                                  AzyXText(
+                                    text: getFormattedTime(
+                                      position.value.inSeconds,
+                                    ),
+                                    fontVariant: FontVariant.bold,
+                                    fontSize: 13,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                                  const AzyXText(
+                                    text: ' / ',
+                                    fontVariant: FontVariant.bold,
+                                    fontSize: 13,
+                                    color: Colors.white70,
+                                  ),
+                                  AzyXText(
+                                    text: getFormattedTime(
+                                      totalDuration.value.inSeconds,
+                                    ),
+                                    fontVariant: FontVariant.bold,
+                                    fontSize: 13,
+                                    color: Colors.white,
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              CustomSlider(
+                                min: 0.0,
+                                max: totalDuration.value.inSeconds > 0
+                                    ? totalDuration.value.inSeconds.toDouble()
+                                    : 0.0,
+                                secondaryTrackValue:
+                                    totalDuration.value.inSeconds > 0
+                                    ? buffered.value.inSeconds.toDouble()
+                                    : 0.0,
+                                indiactorTime: getFormattedTime(
+                                  position.value.inSeconds,
+                                ),
+                                value: totalDuration.value.inSeconds > 0.0
+                                    ? double.parse(
+                                        position.value.inSeconds
+                                            .toStringAsFixed(2),
+                                      )
+                                    : 0.0,
+                                theme: const M3SliderTheme(
+                                  height: 18,
+                                  trackHeight: 6,
+                                  outerRadius: 6,
+                                  innerRadius: 2,
+                                  thumbGap: 6,
+                                  edgeInset: 2,
+                                  thumbWidth: 4,
+                                  thumbHeight: 20,
+                                  thumbCornerRadius: 2,
+                                ),
+                                onDragEnd: (value) {
+                                  seekTo(Duration(seconds: value.toInt()));
+                                  player.play();
+                                },
+                                isLocked: isControlsLocked.value,
+                                onChanged: (value) {
+                                  position.value = Duration(
+                                    seconds: value.toInt(),
+                                  );
+                                },
+                              ),
+                              const SizedBox(height: 6),
+                              bottomControls(context),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget buildRippleEffect(BuildContext context) {
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: Obx(() {
+          final isLeft = isLeftSide.value;
+          final seeking = isSeeking.value;
+          final skip = skipDuration.value;
+          return Align(
+            alignment: isLeft ? Alignment.centerLeft : Alignment.centerRight,
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.45,
+              height: double.infinity,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                opacity: seeking ? 1.0 : 0.0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: isLeft
+                          ? Alignment.centerLeft
+                          : Alignment.centerRight,
+                      end: isLeft
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
+                      colors: [
+                        Colors.white.withOpacity(0.12),
+                        Colors.transparent,
+                      ],
+                    ),
+                    borderRadius: isLeft
+                        ? const BorderRadius.horizontal(
+                            right: Radius.circular(180),
+                          )
+                        : const BorderRadius.horizontal(
+                            left: Radius.circular(180),
+                          ),
+                  ),
+                  alignment: Alignment.center,
+                  child: AnimatedScale(
+                    scale: seeking ? 1.0 : 0.9,
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOutCubic,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.58),
+                        borderRadius: BorderRadius.circular(28),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.16),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isLeft
+                                ? Icons.fast_rewind_rounded
+                                : Icons.fast_forward_rounded,
+                            size: 24,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 8),
+                          AzyXText(
+                            text: isLeft ? '-${skip}s' : '+${skip}s',
+                            fontVariant: FontVariant.bold,
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }
@@ -1410,6 +1765,88 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     );
   }
 
+  Widget buildSubtitleOverlay(BuildContext context) {
+    return Obx(() {
+      final rawLines = subtitleText.toList();
+      if (rawLines.isEmpty) return const SizedBox.shrink();
+      final htmlRx = RegExp(r'<[^>]*>');
+      final assRx = RegExp(r'\{[^}]*\}');
+      final newlineRx = RegExp(r'\\[nN]');
+      final cleaned = rawLines
+          .where((l) => l.trim().isNotEmpty)
+          .join('\n')
+          .replaceAll(htmlRx, '')
+          .replaceAll(assRx, '')
+          .replaceAll(newlineRx, '\n')
+          .trim();
+      if (cleaned.isEmpty) return const SizedBox.shrink();
+      final fontSize = settingsController.subtitleFontSize.value;
+      final textColor = settingsController.resolveSubtitleTextColor();
+      final bgColor = settingsController.resolveSubtitleBgColor();
+      final outlineColor = settingsController.resolveSubtitleOutlineColor();
+      final outlineWidth = settingsController.subtitleOutlineWidth.value;
+      final baseOffset = showControls.value ? 72.0 : 0.0;
+      final bottomPos =
+          baseOffset + settingsController.subtitleBottomMargin.value;
+      final opacity = settingsController.subtitleOpacity.value.clamp(0.1, 1.0);
+      return AnimatedPositioned(
+        left: 24,
+        right: 24,
+        bottom: bottomPos,
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+        child: IgnorePointer(
+          child: Center(
+            child: Opacity(
+              opacity: opacity,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    if (outlineWidth > 0)
+                      Text(
+                        cleaned,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: fontSize,
+                          fontWeight: FontWeight.w600,
+                          height: 1.3,
+                          foreground: Paint()
+                            ..style = PaintingStyle.stroke
+                            ..strokeWidth = outlineWidth * 2
+                            ..color = outlineColor,
+                        ),
+                      ),
+                    Text(
+                      cleaned,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.w600,
+                        height: 1.3,
+                        color: textColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
   Widget buildReactionsOverlay() {
     return Obx(() {
       final state = watchiumService.roomState.value;
@@ -1466,9 +1903,13 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     ]);
     _roomStateSubscription?.cancel();
     _roomStateSubscription = null;
+    _accelerometerSub?.cancel();
+    _accelerometerSub = null;
     _heartbeatTimer?.cancel();
     _heartbeatTimer = null;
-    player.dispose();
+    if (isPlayerReady.value) {
+      player.dispose();
+    }
     localHistoryEntry();
     updateTimer?.cancel();
     doubleTapTimer?.cancel();

@@ -3,6 +3,7 @@ import 'package:azyx/Screens/Anime/Watch/controller/watch_controller.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_container.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 class WatchScreen extends StatefulWidget {
   final AnimeAllData playerData;
@@ -32,10 +33,12 @@ class _WatchScreenState extends State<WatchScreen> {
               : watchController.doubleTap(t, context);
         },
         onLongPressStart: (d) async {
+          if (!watchController.isPlayerReady.value) return;
           watchController.isPressed.value = true;
           watchController.player.setRate(2.0);
         },
         onLongPressEnd: (d) {
+          if (!watchController.isPlayerReady.value) return;
           watchController.player.setRate(watchController.selectedSpeed.value);
           watchController.isPressed.value = false;
         },
@@ -50,18 +53,31 @@ class _WatchScreenState extends State<WatchScreen> {
           alignment: Alignment.center,
           children: [
             Obx(
-              () => Video(
-                fit: watchController.getMode(watchController.currentMode),
-                controller: watchController.controller,
-                filterQuality: FilterQuality.low,
-                controls: null,
-              ),
+              () => watchController.isPlayerReady.value
+                  ? Video(
+                      fit: watchController.getMode(watchController.currentMode),
+                      controller: watchController.controller,
+                      filterQuality: FilterQuality.low,
+                      subtitleViewConfiguration:
+                          const SubtitleViewConfiguration(visible: false),
+                      controls: null,
+                    )
+                  : const ColoredBox(
+                      color: Colors.black,
+                      child: Center(
+                        child: SizedBox(
+                          width: 36,
+                          height: 36,
+                          child: LoadingIndicatorM3E(),
+                        ),
+                      ),
+                    ),
             ),
             Positioned.fill(
               child: Obx(
                 () => AnimatedOpacity(
-                  opacity: watchController.showControls.value ? 0.2 : 0.0,
-                  duration: const Duration(milliseconds: 300),
+                  opacity: watchController.showControls.value ? 0.38 : 0.0,
+                  duration: const Duration(milliseconds: 220),
                   child: const AzyXContainer(color: Colors.black),
                 ),
               ),
@@ -75,11 +91,12 @@ class _WatchScreenState extends State<WatchScreen> {
                 ),
               ),
             ),
+            watchController.buildSubtitleOverlay(context),
             watchController.episodeListDrawer(),
             watchController.volumeIndicator(),
             watchController.brightnessIndicator(),
             watchController.preesedBar(),
-            watchController.buildReactionsOverlay(),
+            // watchController.buildReactionsOverlay(),
           ],
         ),
       ),

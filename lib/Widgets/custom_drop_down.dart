@@ -41,29 +41,50 @@ class CustomSourceDropdown extends StatelessWidget {
     return items.isNotEmpty ? items.first : null;
   }
 
-  void _showSourceBottomSheet(BuildContext context) {
+  static void showSourceSheet({
+    required BuildContext context,
+    required List<Source> items,
+    required Source? currentSource,
+    required String labelText,
+    required Function(String?) onChanged,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withOpacity(0.6),
+      barrierColor: Colors.black.withValues(alpha: 0.6),
+      constraints: const BoxConstraints(maxWidth: 560),
       builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.55,
-          minChildSize: 0.35,
-          maxChildSize: 0.9,
-          expand: false,
-          builder: (context, scrollController) {
-            return _SourceBottomSheetContent(
-              items: items.toList(),
-              currentSource: _resolveActiveSource(),
-              labelText: labelText,
-              onChanged: onChanged,
-              scrollController: scrollController,
-            );
-          },
+        final viewInsets = MediaQuery.of(context).viewInsets.bottom;
+        return Padding(
+          padding: EdgeInsets.only(bottom: viewInsets),
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.6,
+            minChildSize: 0.35,
+            maxChildSize: 0.88,
+            expand: false,
+            builder: (context, scrollController) {
+              return _SourceBottomSheetContent(
+                items: items,
+                currentSource: currentSource,
+                labelText: labelText,
+                onChanged: onChanged,
+                scrollController: scrollController,
+              );
+            },
+          ),
         );
       },
+    );
+  }
+
+  void _showSourceBottomSheet(BuildContext context) {
+    showSourceSheet(
+      context: context,
+      items: items.toList(),
+      currentSource: _resolveActiveSource(),
+      labelText: labelText,
+      onChanged: onChanged,
     );
   }
 
@@ -71,113 +92,113 @@ class CustomSourceDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
-    return GestureDetector(
-      onTap: () => _showSourceBottomSheet(context),
-      child: Container(
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest.withOpacity(0.35),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: colorScheme.outline.withOpacity(0.12),
-            width: 0.8,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () => _showSourceBottomSheet(context),
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainer.withValues(alpha: 0.72),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.18),
+              width: 0.8,
+            ),
           ),
-        ),
-        padding: const EdgeInsets.all(16),
-        child: Obx(() {
-          final current = _resolveActiveSource();
-          return Row(
-            children: [
-              if (current != null) ...[
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Obx(() {
+            final current = _resolveActiveSource();
+            return Row(
+              children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(11),
+                    color: colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.5),
                     border: Border.all(
-                      color: colorScheme.outlineVariant.withOpacity(0.3),
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.25),
                       width: 0.5,
                     ),
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: CachedNetworkImage(
-                      imageUrl: current.iconUrl ?? '',
-                      width: 40,
-                      height: 40,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: colorScheme.surfaceContainerHighest.withOpacity(
-                          0.3,
-                        ),
-                        child: Icon(
-                          Icons.extension_rounded,
-                          color: colorScheme.onSurfaceVariant.withOpacity(0.5),
-                          size: 20,
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: colorScheme.surfaceContainerHighest.withOpacity(
-                          0.3,
-                        ),
-                        child: Icon(
-                          Icons.extension_rounded,
-                          color: colorScheme.onSurfaceVariant.withOpacity(0.5),
-                          size: 20,
-                        ),
-                      ),
-                    ),
+                    borderRadius: BorderRadius.circular(11),
+                    child: (current?.iconUrl != null &&
+                            current!.iconUrl!.isNotEmpty)
+                        ? CachedNetworkImage(
+                            imageUrl: current.iconUrl!,
+                            width: 38,
+                            height: 38,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Icon(
+                              Icons.extension_rounded,
+                              color: colorScheme.onSurfaceVariant
+                                  .withValues(alpha: 0.5),
+                              size: 20,
+                            ),
+                            errorWidget: (context, url, error) => Icon(
+                              Icons.extension_rounded,
+                              color: colorScheme.onSurfaceVariant
+                                  .withValues(alpha: 0.5),
+                              size: 20,
+                            ),
+                          )
+                        : Icon(
+                            Icons.extension_rounded,
+                            color: colorScheme.onSurfaceVariant
+                                .withValues(alpha: 0.5),
+                            size: 20,
+                          ),
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        labelText,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w500,
+                          color: colorScheme.onSurfaceVariant,
+                          fontFamily: theme.textTheme.labelSmall?.fontFamily,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      AzyXText(
+                        text: current?.name ?? 'Select source...',
+                        fontSize: 14.5,
+                        fontVariant: current != null
+                            ? FontVariant.bold
+                            : FontVariant.regular,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.45),
+                  ),
+                  child: Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: colorScheme.onSurfaceVariant,
+                    size: 20,
+                  ),
+                ),
               ],
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      labelText,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: colorScheme.onSurfaceVariant,
-                        fontFamily: theme.textTheme.labelSmall?.fontFamily,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    AzyXText(
-                      text: current?.name ?? 'Select source...',
-                      fontSize: 15,
-                      fontVariant: current != null
-                          ? FontVariant.bold
-                          : FontVariant.regular,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 10),
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: colorScheme.surfaceContainerHighest.withOpacity(0.4),
-                  border: Border.all(
-                    color: colorScheme.outlineVariant.withOpacity(0.2),
-                    width: 0.5,
-                  ),
-                ),
-                child: Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: colorScheme.onSurfaceVariant,
-                  size: 20,
-                ),
-              ),
-            ],
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }
@@ -231,41 +252,78 @@ class _SourceBottomSheetContentState extends State<_SourceBottomSheetContent> {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
+        border: Border(
+          top: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.18),
+            width: 0.8,
           ),
-        ],
+        ),
       ),
-      padding: const EdgeInsets.only(top: 12, left: 16, right: 16, bottom: 16),
+      padding: EdgeInsets.fromLTRB(
+        18,
+        12,
+        18,
+        16 + MediaQuery.of(context).padding.bottom,
+      ),
       child: Column(
         children: [
           Container(
-            width: 36,
+            width: 32,
             height: 4,
             margin: const EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
-              color: colorScheme.onSurfaceVariant.withOpacity(0.3),
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          AzyXText(
-            text: widget.labelText,
-            fontSize: 18,
-            fontVariant: FontVariant.bold,
-            color: colorScheme.onSurface,
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.extension_rounded,
+                  color: colorScheme.onPrimaryContainer,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Select ${widget.labelText}',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    Text(
+                      '${widget.items.length} installed sources',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton.filledTonal(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.close_rounded, size: 20),
+              ),
+            ],
           ),
           const SizedBox(height: 14),
           Container(
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withOpacity(0.45),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: colorScheme.outlineVariant.withOpacity(0.15),
-                width: 0.5,
-              ),
+              color: colorScheme.surfaceContainerHighest
+                  .withValues(alpha: 0.42),
+              borderRadius: BorderRadius.circular(28),
             ),
             child: TextField(
               controller: _searchController,
@@ -274,21 +332,37 @@ class _SourceBottomSheetContentState extends State<_SourceBottomSheetContent> {
                   _searchQuery = val.toLowerCase().trim();
                 });
               },
-              style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface,
+              ),
               decoration: InputDecoration(
-                hintText: "Search sources...",
-                hintStyle: TextStyle(
-                  fontSize: 14,
-                  color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+                hintText: 'Search sources...',
+                hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                 ),
                 prefixIcon: Icon(
                   Icons.search_rounded,
-                  size: 18,
-                  color: colorScheme.onSurfaceVariant.withOpacity(0.6),
+                  size: 20,
+                  color: colorScheme.onSurfaceVariant,
                 ),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(
+                          Icons.clear_rounded,
+                          size: 18,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() {
+                            _searchQuery = '';
+                          });
+                        },
+                      )
+                    : null,
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 14,
+                  horizontal: 16,
                   vertical: 12,
                 ),
                 isDense: true,
@@ -299,110 +373,136 @@ class _SourceBottomSheetContentState extends State<_SourceBottomSheetContent> {
           Expanded(
             child: filteredList.isEmpty
                 ? Center(
-                    child: Text(
-                      "No sources found",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: colorScheme.onSurfaceVariant.withOpacity(0.6),
-                      ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.search_off_rounded,
+                          size: 36,
+                          color: colorScheme.onSurfaceVariant
+                              .withValues(alpha: 0.5),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'No sources found',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                     ),
                   )
-                : ListView.builder(
+                : ListView.separated(
                     controller: widget.scrollController,
                     physics: const BouncingScrollPhysics(),
                     itemCount: filteredList.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
                     itemBuilder: (context, index) {
                       final item = filteredList[index];
                       final itemValue = item.id.toString();
                       final isSelected = widget.currentSource?.id == item.id;
-                      return GestureDetector(
-                        onTap: () {
-                          widget.onChanged(itemValue);
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? colorScheme.primary.withOpacity(0.15)
-                                : colorScheme.surfaceContainerHighest
-                                      .withOpacity(0.35),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: isSelected
-                                  ? colorScheme.primary.withOpacity(0.4)
-                                  : colorScheme.outline.withOpacity(0.1),
-                              width: isSelected ? 1.2 : 0.8,
+                      return Material(
+                        color: isSelected
+                            ? colorScheme.primary.withValues(alpha: 0.14)
+                            : colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.32),
+                        borderRadius: BorderRadius.circular(16),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () {
+                            widget.onChanged(itemValue);
+                            Navigator.pop(context);
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
                             ),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  color: colorScheme.surfaceContainerHighest
-                                      .withOpacity(0.4),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: CachedNetworkImage(
-                                    imageUrl: item.iconUrl ?? '',
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) => Icon(
-                                      Icons.extension_rounded,
-                                      color: colorScheme.onSurfaceVariant
-                                          .withOpacity(0.5),
-                                      size: 20,
-                                    ),
-                                    errorWidget: (context, url, error) => Icon(
-                                      Icons.extension_rounded,
-                                      color: colorScheme.onSurfaceVariant
-                                          .withOpacity(0.5),
-                                      size: 20,
-                                    ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 42,
+                                  height: 42,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    color: isSelected
+                                        ? colorScheme.surface
+                                            .withValues(alpha: 0.65)
+                                        : colorScheme.surfaceContainerHigh,
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: (item.iconUrl != null &&
+                                            item.iconUrl!.isNotEmpty)
+                                        ? CachedNetworkImage(
+                                            imageUrl: item.iconUrl!,
+                                            fit: BoxFit.cover,
+                                            placeholder: (context, url) => Icon(
+                                              Icons.extension_rounded,
+                                              color: colorScheme
+                                                  .onSurfaceVariant,
+                                              size: 20,
+                                            ),
+                                            errorWidget:
+                                                (context, url, error) => Icon(
+                                              Icons.extension_rounded,
+                                              color: colorScheme
+                                                  .onSurfaceVariant,
+                                              size: 20,
+                                            ),
+                                          )
+                                        : Icon(
+                                            Icons.extension_rounded,
+                                            color: colorScheme.onSurfaceVariant,
+                                            size: 20,
+                                          ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    AzyXText(
-                                      text: item.name ?? '',
-                                      fontSize: 15,
-                                      fontVariant: FontVariant.bold,
-                                      color: isSelected
-                                          ? colorScheme.primary
-                                          : colorScheme.onSurface,
-                                    ),
-                                    if (item.lang != null &&
-                                        item.lang!.isNotEmpty)
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
                                       Text(
-                                        item.lang!.toUpperCase(),
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: colorScheme.onSurfaceVariant
-                                              .withOpacity(0.6),
+                                        item.name ?? '',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.titleSmall
+                                            ?.copyWith(
                                           fontWeight: FontWeight.w600,
+                                          color: isSelected
+                                              ? colorScheme.onSecondaryContainer
+                                              : colorScheme.onSurface,
                                         ),
                                       ),
-                                  ],
+                                      if (item.lang != null &&
+                                          item.lang!.isNotEmpty) ...[
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          item.lang!.toUpperCase(),
+                                          style: theme.textTheme.labelSmall
+                                              ?.copyWith(
+                                            color: isSelected
+                                                ? colorScheme
+                                                    .onSecondaryContainer
+                                                    .withValues(alpha: 0.78)
+                                                : colorScheme.onSurfaceVariant,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              if (isSelected)
-                                Icon(
-                                  Icons.check_circle_rounded,
-                                  color: colorScheme.primary,
-                                  size: 22,
-                                ),
-                            ],
+                                if (isSelected)
+                                  Icon(
+                                    Icons.check_circle_rounded,
+                                    color: colorScheme.primary,
+                                    size: 22,
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
                       );

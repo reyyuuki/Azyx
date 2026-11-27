@@ -96,50 +96,62 @@ class _LibraryScreenState extends State<LibraryScreen>
 
   void _handleContinueTap(LocalHistoryItem item) {
     final isAnime = _contentType == LibraryContentType.anime;
-    if (item.mediaId != null) {
-      if (isAnime) {
-        final decodedList = item.episodeUrlsJson != null
-            ? jsonDecode(item.episodeUrlsJson!) as List
-            : [];
-        final List<Video> episodeUrls = decodedList
-            .map((e) => Video.fromJson(e as Map<String, dynamic>))
-            .toList();
+    if (item.mediaId == null) return;
+    if (isAnime) {
+      List<Video> episodeUrls = [];
+      if (item.episodeUrlsJson != null && item.episodeUrlsJson!.isNotEmpty) {
+        try {
+          final decodedList = jsonDecode(item.episodeUrlsJson!) as List;
+          episodeUrls = decodedList
+              .map((e) => Video.fromJson(Map<String, dynamic>.from(e as Map)))
+              .toList();
+        } catch (_) {}
+      }
+      final epNumber = item.progress?.replaceAll(RegExp(r'[^0-9]'), '') ?? '1';
+      final resolvedUrl = (item.link != null && item.link!.isNotEmpty)
+          ? item.link!
+          : (episodeUrls.isNotEmpty ? episodeUrls.first.url : '');
+      final epTitle =
+          item.episodeList
+              ?.firstWhereOrNull((e) => e.number == epNumber)
+              ?.title ??
+          item.title;
+      Get.to(
+        () => WatchScreen(
+          playerData: AnimeAllData(
+            id: item.mediaId.toString(),
+            image: item.image ?? '',
+            title: item.title ?? 'Unknown',
+            url: resolvedUrl,
+            number: epNumber,
+            episodeTitle: epTitle,
+            source: item.sourceName,
+            episodeList: item.episodeList,
+            episodeUrls: episodeUrls,
+            startFromSeconds: item.currentTimeSeconds,
+          ),
+        ),
+      );
+    } else {
+      final sourceIndex = sourceController.installedMangaExtensions.indexWhere(
+        (e) => e.name == item.sourceName,
+      );
+      if (sourceIndex != -1 || item.mangaSourceJson != null) {
+        final Source source = sourceIndex != -1
+            ? sourceController.installedMangaExtensions[sourceIndex]
+            : Source.fromJson(jsonDecode(item.mangaSourceJson!));
         Get.to(
-          () => WatchScreen(
-            playerData: AnimeAllData(
-              id: item.mediaId.toString(),
-              image: item.image ?? '',
-              title: item.title ?? 'Unknown',
-              url: item.link ?? '',
-              number: item.progress?.replaceAll(RegExp(r'[^0-9]'), '') ?? '1',
-              episodeTitle: item.title,
-              source: item.sourceName,
-              episodeList: item.episodeList,
-              episodeUrls: episodeUrls,
-              startFromSeconds: item.currentTimeSeconds,
-            ),
+          () => ReadPage(
+            source: source,
+            link: item.link ?? '',
+            chapterList: item.chapterList ?? [],
+            mangaTitle: item.title ?? 'Unknown',
+            mangaImage: item.image ?? '',
+            mediaId: item.mediaId?.toString(),
+            syncId: item.mediaId?.toString(),
+            initialPage: item.currentPage,
           ),
         );
-      } else {
-        final sourceIndex = sourceController.installedMangaExtensions
-            .indexWhere((e) => e.name == item.sourceName);
-        if (sourceIndex != -1 || item.mangaSourceJson != null) {
-          final Source source = sourceIndex != -1
-              ? sourceController.installedMangaExtensions[sourceIndex]
-              : Source.fromJson(jsonDecode(item.mangaSourceJson!));
-          Get.to(
-            () => ReadPage(
-              source: source,
-              link: item.link ?? '',
-              chapterList: item.chapterList ?? [],
-              mangaTitle: item.title ?? 'Unknown',
-              mangaImage: item.image ?? '',
-              mediaId: item.mediaId?.toString(),
-              syncId: item.mediaId?.toString(),
-              initialPage: item.currentPage,
-            ),
-          );
-        }
       }
     }
   }
@@ -206,9 +218,9 @@ class _LibraryScreenState extends State<LibraryScreen>
                             ? SliverToBoxAdapter(child: _buildEmptyState(cs))
                             : SliverPadding(
                                 padding: const EdgeInsets.fromLTRB(
-                                  16,
+                                  20,
                                   14,
-                                  16,
+                                  20,
                                   24,
                                 ),
                                 sliver: SliverGrid(
@@ -456,240 +468,301 @@ class _LibraryScreenState extends State<LibraryScreen>
     List<OfflineItem> allItems,
   ) {
     if (histList.isEmpty) return const SizedBox(height: 14);
-    return SizedBox(
-      height: 210,
-      child: FadeTransition(
-        opacity: _heroFade,
-        child: ListView.builder(
-          physics: const BouncingScrollPhysics(),
-          scrollDirection: Axis.horizontal,
-          itemCount: histList.length,
-          itemBuilder: (context, index) {
-            final histItem = histList[index];
-            final String? imageUrl = histItem.image;
-            final String title = histItem.title ?? '';
-            final String progress = histItem.progress ?? '';
-            final int mediaId = histItem.mediaId ?? 0;
-            final OfflineItem? offlineMatch = allItems.firstWhereOrNull(
-              (i) => i.mediaData?.id == mediaId.toString(),
-            );
-            double prog = 0.0;
-            final int currentVal =
-                histItem.currentTimeSeconds ?? histItem.currentPage ?? 0;
-            final int totalVal = histItem.totalDurationSeconds ?? 0;
-            if (totalVal > 0) {
-              prog = (currentVal / totalVal).clamp(0.0, 1.0);
-            } else if (offlineMatch != null) {
-              final int cur = int.tryParse(offlineMatch.number) ?? 0;
-              final int total = offlineMatch.mediaData?.episodes ?? 0;
-              prog = total > 0 ? (cur / total).clamp(0.0, 1.0) : 0.0;
-            }
-            String displayProgress = progress;
-            if (_contentType == LibraryContentType.manga && currentVal > 0) {
-              if (totalVal > 0) {
-                displayProgress = "$progress • Page $currentVal/$totalVal";
-              } else {
-                displayProgress = "$progress • Page $currentVal";
-              }
-            }
-            final isLast = index == histList.length - 1;
-            return GestureDetector(
-              onTap: () => _handleContinueTap(histItem),
-              child: Container(
-                width: Get.width * 0.85,
-                margin: EdgeInsets.only(
-                  left: 20,
-                  right: isLast ? 20 : 0,
-                  top: 14,
-                  bottom: 6,
-                ),
-                decoration: BoxDecoration(
-                  gradient: settingsController.isGradient.value
-                      ? LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            cs.surfaceContainerHigh.withOpacity(0.7),
-                            cs.surfaceContainerLow.withOpacity(0.5),
-                          ],
-                        )
-                      : null,
-                  color: settingsController.isGradient.value
-                      ? null
-                      : cs.surfaceContainerHigh.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(
-                    color: cs.outlineVariant.withOpacity(0.2),
-                    width: 1,
+    final isAnime = _contentType == LibraryContentType.anime;
+    return FadeTransition(
+      opacity: _heroFade,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Icon(Icons.history_rounded, size: 18, color: cs.primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    'History',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: cs.onSurface,
+                    ),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
                     ),
-                  ],
-                ),
-                clipBehavior: Clip.hardEdge,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    if (imageUrl != null &&
-                        imageUrl.trim().isNotEmpty &&
-                        imageUrl.startsWith('http'))
-                      CachedNetworkImage(
-                        imageUrl: imageUrl,
-                        fit: BoxFit.cover,
-                        placeholder: (_, __) =>
-                            Container(color: cs.surfaceContainerHighest),
-                        errorWidget: (_, __, ___) =>
-                            Container(color: cs.surfaceContainerHighest),
-                      ),
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [
-                            cs.surfaceContainerHigh,
-                            cs.surfaceContainerHigh.withOpacity(0.85),
-                            cs.surfaceContainerHigh.withOpacity(0.2),
-                          ],
-                          stops: const [0.0, 0.4, 1.0],
-                        ),
+                    decoration: BoxDecoration(
+                      color: cs.primary.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${histList.length}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: cs.primary,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: cs.primaryContainer,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 5,
-                                  height: 5,
-                                  decoration: BoxDecoration(
-                                    color: cs.primary,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 5),
-                                Text(
-                                  _contentType == LibraryContentType.anime
-                                      ? 'CONTINUE WATCHING'
-                                      : 'CONTINUE READING',
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: 1.0,
-                                    color: cs.onPrimaryContainer,
-                                  ),
-                                ),
-                              ],
-                            ),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () {
+                      if (isAnime) {
+                        localHistoryController.clearAnimeHistory();
+                      } else {
+                        localHistoryController.clearMangaHistory();
+                      }
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      minimumSize: const Size(0, 32),
+                    ),
+                    child: Text(
+                      'Clear',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 126,
+              child: ListView.separated(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                scrollDirection: Axis.horizontal,
+                itemCount: histList.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final histItem = histList[index];
+                  final String? imageUrl = histItem.image;
+                  final String title = histItem.title ?? 'Unknown';
+                  final String progress = histItem.progress ?? '';
+                  final int mediaId = histItem.mediaId ?? 0;
+                  final OfflineItem? offlineMatch = allItems.firstWhereOrNull(
+                    (i) => i.mediaData?.id == mediaId.toString(),
+                  );
+                  double prog = 0.0;
+                  final int currentVal =
+                      histItem.currentTimeSeconds ?? histItem.currentPage ?? 0;
+                  final int totalVal = histItem.totalDurationSeconds ?? 0;
+                  if (totalVal > 0) {
+                    prog = (currentVal / totalVal).clamp(0.0, 1.0);
+                  } else if (offlineMatch != null) {
+                    final int cur = int.tryParse(offlineMatch.number) ?? 0;
+                    final int total = offlineMatch.mediaData?.episodes ?? 0;
+                    prog = total > 0 ? (cur / total).clamp(0.0, 1.0) : 0.0;
+                  }
+                  String displayProgress = progress;
+                  if (!isAnime && currentVal > 0) {
+                    displayProgress = totalVal > 0
+                        ? '$progress • Pg $currentVal/$totalVal'
+                        : '$progress • Pg $currentVal';
+                  }
+                  int savedLinksCount = 0;
+                  if (histItem.episodeUrlsJson != null &&
+                      histItem.episodeUrlsJson!.isNotEmpty) {
+                    try {
+                      savedLinksCount =
+                          (jsonDecode(histItem.episodeUrlsJson!) as List)
+                              .length;
+                    } catch (_) {}
+                  }
+                  final int pct = (prog * 100).round();
+                  return Material(
+                    color: cs.surfaceContainerHighest.withValues(alpha: 0.36),
+                    borderRadius: BorderRadius.circular(20),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: () => _handleContinueTap(histItem),
+                      child: Container(
+                        width: 296,
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: cs.outlineVariant.withValues(alpha: 0.22),
+                            width: 0.8,
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                title,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w900,
-                                  color: cs.onSurface,
-                                  height: 1.15,
-                                  letterSpacing: -0.3,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                displayProgress.isNotEmpty
-                                    ? displayProgress
-                                    : 'Progress unknown',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: cs.onSurfaceVariant,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(2),
-                                      child: LinearProgressIndicator(
-                                        value: prog,
-                                        backgroundColor: cs.outlineVariant
-                                            .withOpacity(0.3),
-                                        valueColor: AlwaysStoppedAnimation(
-                                          cs.primary,
+                        ),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: SizedBox(
+                                width: 76,
+                                height: double.infinity,
+                                child:
+                                    (imageUrl != null &&
+                                        imageUrl.trim().isNotEmpty &&
+                                        imageUrl.startsWith('http'))
+                                    ? CachedNetworkImage(
+                                        imageUrl: imageUrl,
+                                        fit: BoxFit.cover,
+                                        placeholder: (_, __) => Container(
+                                          color: cs.surfaceContainerHighest
+                                              .withValues(alpha: 0.35),
                                         ),
-                                        minHeight: 4,
+                                        errorWidget: (_, __, ___) => Container(
+                                          color: cs.surfaceContainerHighest,
+                                        ),
+                                      )
+                                    : Container(
+                                        color: cs.surfaceContainerHighest,
                                       ),
-                                    ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700,
+                                          color: cs.onSurface,
+                                          height: 1.2,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 3,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: cs.primary.withValues(
+                                                alpha: 0.14,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: Text(
+                                              displayProgress.isNotEmpty
+                                                  ? displayProgress
+                                                  : 'Resume',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                color: cs.primary,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                          ),
+                                          if (savedLinksCount > 0) ...[
+                                            const SizedBox(width: 6),
+                                            Icon(
+                                              Icons.link_rounded,
+                                              size: 13,
+                                              color: cs.onSurfaceVariant,
+                                            ),
+                                            const SizedBox(width: 2),
+                                            Text(
+                                              '$savedLinksCount',
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600,
+                                                color: cs.onSurfaceVariant,
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                      if (histItem.sourceName?.isNotEmpty ??
+                                          false) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          histItem.sourceName!,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            color: cs.onSurfaceVariant,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    '${(prog * 100).round()}%',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w800,
-                                      color: cs.primary,
-                                    ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                          child: LinearProgressIndicator(
+                                            value: prog,
+                                            backgroundColor: cs.outlineVariant
+                                                .withValues(alpha: 0.28),
+                                            valueColor: AlwaysStoppedAnimation(
+                                              cs.primary,
+                                            ),
+                                            minHeight: 4.5,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '$pct%',
+                                        style: TextStyle(
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: cs.onSurfaceVariant,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        width: 30,
+                                        height: 30,
+                                        decoration: BoxDecoration(
+                                          color: cs.primary,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          isAnime
+                                              ? Icons.play_arrow_rounded
+                                              : Icons.menu_book_rounded,
+                                          color: cs.onPrimary,
+                                          size: 17,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      right: 16,
-                      bottom: 16,
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: cs.primary,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: cs.primary.withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),
-                        child: Icon(
-                          _contentType == LibraryContentType.anime
-                              ? Icons.play_arrow_rounded
-                              : Icons.menu_book_rounded,
-                          color: cs.onPrimary,
-                          size: 22,
-                        ),
                       ),
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );
@@ -955,10 +1028,10 @@ class _LibraryScreenState extends State<LibraryScreen>
                           ? media.image!
                           : 'https://raw.githubusercontent.com/RyanYuuki/AnymeX/main/assets/images/sticker.png',
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => Shimmer.fromColors(
-                        baseColor: cs.surfaceContainerHighest,
-                        highlightColor: cs.surfaceContainerLow,
-                        child: Container(color: Colors.white),
+                      placeholder: (_, __) => Container(
+                        color: cs.surfaceContainerHighest.withValues(
+                          alpha: 0.35,
+                        ),
                       ),
                       errorWidget: (_, __, ___) => Container(
                         color: cs.surfaceContainerHighest,

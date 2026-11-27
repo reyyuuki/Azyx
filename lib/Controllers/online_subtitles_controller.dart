@@ -1,424 +1,586 @@
-import 'dart:convert';
-import 'dart:developer';
+import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
+    as bridge;
+import 'package:azyx/Controllers/settings_controller.dart';
 import 'package:azyx/Models/anime_all_data.dart';
-import 'package:azyx/Models/subtitle.dart';
+import 'package:azyx/Screens/Settings/Pages/subtitle_settings.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
+import 'package:azyx/Widgets/common/m3_slider.dart';
+import 'package:azyx/Widgets/common/slider_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart';
 import 'package:media_kit/media_kit.dart';
-class EnhancedSubtitleBottomSheet extends StatelessWidget {
+
+enum _SubtitleSheetTab { source, embedded, style }
+
+class EnhancedSubtitleBottomSheet extends StatefulWidget {
   final Rx<AnimeAllData> animeData;
   final Rx<String> selectedSbt;
   final Player player;
+
   const EnhancedSubtitleBottomSheet({
     super.key,
     required this.animeData,
     required this.selectedSbt,
     required this.player,
   });
+
+  @override
+  State<EnhancedSubtitleBottomSheet> createState() =>
+      _EnhancedSubtitleBottomSheetState();
+}
+
+class _EnhancedSubtitleBottomSheetState
+    extends State<EnhancedSubtitleBottomSheet> {
+  _SubtitleSheetTab _tab = _SubtitleSheetTab.source;
+
+  List<bridge.Track> _resolveSourceSubtitles() {
+    final urls = widget.animeData.value.episodeUrls;
+    if (urls.isEmpty) return const [];
+    final current = urls.firstWhereOrNull(
+      (v) => v.url == widget.animeData.value.url,
+    );
+    final subs = current?.subtitles ?? urls.first.subtitles ?? const [];
+    if (subs.isNotEmpty) return subs;
+    final allSubs = <bridge.Track>[];
+    final seen = <String>{};
+    for (final v in urls) {
+      for (final s in (v.subtitles ?? const <bridge.Track>[])) {
+        final key = '${s.file}_${s.label}';
+        if (seen.add(key)) allSubs.add(s);
+      }
+    }
+    return allSubs;
+  }
+
+  List<SubtitleTrack> _resolveEmbeddedTracks() {
+    return widget.player.state.tracks.subtitle
+        .where((t) => t.id != 'no' && t.id != 'auto')
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return DraggableScrollableSheet(
-      initialChildSize: 0.85,
-      minChildSize: 0.3,
-      maxChildSize: 0.95,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: context.theme.colorScheme.surfaceContainer,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            boxShadow: [
-              BoxShadow(
-                color: theme.colorScheme.shadow.withOpacity(0.15),
-                blurRadius: 24,
-                offset: const Offset(0, -8),
-              ),
-            ],
-          ),
-          child: CustomScrollView(
-            controller: scrollController,
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(
-                child: Container(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 50,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.onSurface.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  theme.colorScheme.primary,
-                                  theme.colorScheme.primary.withOpacity(0.8),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: theme.colorScheme.primary.withOpacity(
-                                    0.4,
-                                  ),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.subtitles_outlined,
-                              color: theme.colorScheme.onPrimary,
-                              size: 32,
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                AzyXText(
-                                  text: 'Subtitles',
-                                  fontVariant: FontVariant.bold,
-                                  fontSize: 28,
-                                  color: theme.colorScheme.onSurface,
-                                ),
-                                const SizedBox(height: 4),
-                                AzyXText(
-                                  text: 'Choose your preferred subtitle option',
-                                  fontVariant: FontVariant.regular,
-                                  fontSize: 14,
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.7),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AzyXText(
-                        text: 'Quick Options',
-                        fontVariant: FontVariant.bold,
-                        fontSize: 20,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildQuickOption(
-                              context,
-                              'None',
-                              Icons.subtitles_off_rounded,
-                              () {
-                                selectedSbt.value = '';
-                                player.setSubtitleTrack(SubtitleTrack.no());
-                                Get.back();
-                              },
-                              isSelected: selectedSbt.value.isEmpty,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 32),
-                    ],
-                  ),
-                ),
-              ),
-              if (animeData.value.episodeUrls.first.subtitles != null &&
-                  animeData.value.episodeUrls.first.subtitles!.isNotEmpty)
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: AzyXText(
-                      text: 'Available Subtitles',
-                      fontVariant: FontVariant.bold,
-                      fontSize: 20,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                ),
-              if (animeData.value.episodeUrls.first.subtitles != null &&
-                  animeData.value.episodeUrls.first.subtitles!.isNotEmpty)
-                const SliverToBoxAdapter(child: SizedBox(height: 16)),
-              if (animeData.value.episodeUrls.first.subtitles != null &&
-                  animeData.value.episodeUrls.first.subtitles!.isNotEmpty)
-                Obx(
-                  () => SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final subtitle =
-                            animeData.value.episodeUrls.first.subtitles![index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: _buildSubtitleTile(
-                            subtitle.label!,
-                            subtitle.file!,
-                            theme,
-                            selectedSbt.value == subtitle.label,
-                            () {
-                              selectedSbt.value = subtitle.label!;
-                              player.setSubtitleTrack(
-                                SubtitleTrack.uri(subtitle.file!),
-                              );
-                              Get.back();
-                            },
-                          ),
-                        );
-                      },
-                      childCount:
-                          animeData.value.episodeUrls.first.subtitles!.length,
-                    ),
-                  ),
-                ),
-              if (animeData.value.episodeUrls.first.subtitles == null ||
-                  animeData.value.episodeUrls.first.subtitles!.isEmpty)
-                SliverToBoxAdapter(
-                  child: Container(
-                    margin: const EdgeInsets.all(24),
-                    padding: const EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainer.withOpacity(
-                        0.5,
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: theme.colorScheme.outline.withOpacity(0.1),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.subtitles_off_outlined,
-                          size: 48,
-                          color: theme.colorScheme.onSurface.withOpacity(0.5),
-                        ),
-                        const SizedBox(height: 16),
-                        AzyXText(
-                          text: "No built-in subtitles available",
-                          fontSize: 18,
-                          fontVariant: FontVariant.bold,
-                          textAlign: TextAlign.center,
-                          color: theme.colorScheme.onSurface.withOpacity(0.8),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
-            ],
-          ),
-        );
-      },
-    );
-  }
-  Widget _buildQuickOption(
-    BuildContext context,
-    String title,
-    IconData icon,
-    VoidCallback onTap, {
-    bool isSelected = false,
-  }) {
-    final theme = Theme.of(context);
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        onTap();
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-        decoration: BoxDecoration(
-          gradient: isSelected
-              ? LinearGradient(
-                  colors: [
-                    theme.colorScheme.primary,
-                    theme.colorScheme.primary.withOpacity(0.8),
-                  ],
-                )
-              : null,
-          color: isSelected ? null : theme.colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected
-                ? theme.colorScheme.primary.withOpacity(0.3)
-                : theme.colorScheme.outline.withOpacity(0.1),
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: theme.colorScheme.primary.withOpacity(0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isSelected
-                  ? theme.colorScheme.onPrimary
-                  : theme.colorScheme.onSurface.withOpacity(0.7),
-              size: 24,
-            ),
-            const SizedBox(height: 8),
-            AzyXText(
-              text: title,
-              fontVariant: FontVariant.bold,
-              fontSize: 14,
-              textAlign: TextAlign.center,
-              color: isSelected
-                  ? theme.colorScheme.onPrimary
-                  : theme.colorScheme.onSurface,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-  Widget _buildSubtitleTile(
-    String title,
-    String url,
-    ThemeData theme,
-    bool isSelected,
-    VoidCallback onTap,
-  ) {
+    final cs = theme.colorScheme;
+    final size = MediaQuery.of(context).size;
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        gradient: isSelected
-            ? LinearGradient(
-                colors: [
-                  theme.colorScheme.primary,
-                  theme.colorScheme.primary.withOpacity(0.8),
-                ],
-              )
-            : null,
-        color: isSelected ? null : theme.colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isSelected
-              ? theme.colorScheme.primary.withOpacity(0.3)
-              : theme.colorScheme.outline.withOpacity(0.1),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isSelected
-                ? theme.colorScheme.primary.withOpacity(0.3)
-                : theme.colorScheme.shadow.withOpacity(0.05),
-            blurRadius: isSelected ? 16 : 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
+      height: size.height * 0.82,
+      constraints: const BoxConstraints(maxWidth: 560),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        12,
+        16,
+        16 + MediaQuery.of(context).padding.bottom,
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          splashColor: theme.colorScheme.primary.withOpacity(0.1),
-          highlightColor: theme.colorScheme.primary.withOpacity(0.05),
-          onTap: () {
-            HapticFeedback.selectionClick();
-            onTap();
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border(
+          top: BorderSide(
+            color: cs.outlineVariant.withValues(alpha: 0.2),
+            width: 0.8,
+          ),
+        ),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 34,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 14),
+            decoration: BoxDecoration(
+              color: cs.onSurfaceVariant.withValues(alpha: 0.35),
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.subtitles_rounded,
+                  color: cs.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AzyXText(
+                      text: 'Subtitles',
+                      fontVariant: FontVariant.bold,
+                      fontSize: 17,
+                      color: cs.onSurface,
+                    ),
+                    Text(
+                      'Select track or customize appearance',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton.filledTonal(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.close_rounded, size: 20),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Container(
+            height: 42,
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
+              borderRadius: BorderRadius.circular(21),
+              border: Border.all(
+                color: cs.outlineVariant.withValues(alpha: 0.18),
+                width: 0.6,
+              ),
+            ),
             child: Row(
               children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: isSelected
-                          ? [
-                              theme.colorScheme.onPrimary.withOpacity(0.2),
-                              theme.colorScheme.onPrimary.withOpacity(0.1),
-                            ]
-                          : [
-                              theme.colorScheme.primaryContainer,
-                              theme.colorScheme.primaryContainer.withOpacity(
-                                0.8,
-                              ),
-                            ],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected
-                          ? theme.colorScheme.onPrimary.withOpacity(0.3)
-                          : theme.colorScheme.primary.withOpacity(0.2),
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.subtitles_rounded,
-                    color: isSelected
-                        ? theme.colorScheme.onPrimary
-                        : theme.colorScheme.onPrimaryContainer,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: AzyXText(
-                    text: title,
-                    fontVariant: FontVariant.bold,
-                    fontSize: 16,
-                    color: isSelected
-                        ? theme.colorScheme.onPrimary
-                        : theme.colorScheme.onSurface,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (isSelected)
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.onPrimary.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.check_rounded,
-                      color: theme.colorScheme.onPrimary,
-                      size: 20,
-                    ),
-                  ),
+                _buildTabButton(cs, _SubtitleSheetTab.source, 'Source'),
+                _buildTabButton(cs, _SubtitleSheetTab.embedded, 'Embedded'),
+                _buildTabButton(cs, _SubtitleSheetTab.style, 'Style'),
               ],
             ),
           ),
+          const SizedBox(height: 14),
+          Expanded(
+            child: switch (_tab) {
+              _SubtitleSheetTab.source => _buildSourceTab(cs),
+              _SubtitleSheetTab.embedded => _buildEmbeddedTab(cs),
+              _SubtitleSheetTab.style => _buildStyleTab(cs),
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabButton(
+    ColorScheme cs,
+    _SubtitleSheetTab tab,
+    String label,
+  ) {
+    final isSelected = _tab == tab;
+    return Expanded(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () {
+          HapticFeedback.selectionClick();
+          setState(() => _tab = tab);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isSelected ? cs.primaryContainer : Colors.transparent,
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+              color: isSelected ? cs.onPrimaryContainer : cs.onSurfaceVariant,
+            ),
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSourceTab(ColorScheme cs) {
+    final sourceSubs = _resolveSourceSubtitles();
+    return Obx(() {
+      final currentLabel = widget.selectedSbt.value;
+      return ListView(
+        physics: const BouncingScrollPhysics(),
+        children: [
+          _buildTrackCard(
+            cs,
+            title: 'Off (No Subtitles)',
+            subtitle: 'Hide all subtitle tracks',
+            icon: Icons.subtitles_off_rounded,
+            isSelected: currentLabel.isEmpty,
+            onTap: () {
+              widget.selectedSbt.value = '';
+              widget.player.setSubtitleTrack(SubtitleTrack.no());
+              Navigator.pop(context);
+            },
+          ),
+          const SizedBox(height: 10),
+          if (sourceSubs.isEmpty)
+            _buildEmptyBox(
+              cs,
+              icon: Icons.cloud_off_rounded,
+              title: 'No source subtitles found',
+              subtitle:
+                  'Try switching to Embedded tracks or another server link.',
+            )
+          else
+            ...sourceSubs.map((sub) {
+              final label = (sub.label?.trim().isNotEmpty ?? false)
+                  ? sub.label!.trim()
+                  : 'Subtitle';
+              final file = sub.file ?? '';
+              final isSelected = currentLabel == label;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _buildTrackCard(
+                  cs,
+                  title: label,
+                  subtitle: 'External source track',
+                  icon: Icons.closed_caption_rounded,
+                  isSelected: isSelected,
+                  onTap: () {
+                    if (file.isEmpty) return;
+                    widget.selectedSbt.value = label;
+                    widget.player.setSubtitleTrack(
+                      SubtitleTrack.uri(file, title: label),
+                    );
+                    Navigator.pop(context);
+                  },
+                ),
+              );
+            }),
+        ],
+      );
+    });
+  }
+
+  Widget _buildEmbeddedTab(ColorScheme cs) {
+    final embedded = _resolveEmbeddedTracks();
+    final activeId = widget.player.state.track.subtitle.id;
+    return ListView(
+      physics: const BouncingScrollPhysics(),
+      children: [
+        _buildTrackCard(
+          cs,
+          title: 'Off (No Subtitles)',
+          subtitle: 'Disable embedded subtitle track',
+          icon: Icons.subtitles_off_rounded,
+          isSelected: activeId == 'no',
+          onTap: () {
+            widget.selectedSbt.value = '';
+            widget.player.setSubtitleTrack(SubtitleTrack.no());
+            Navigator.pop(context);
+          },
+        ),
+        const SizedBox(height: 10),
+        if (embedded.isEmpty)
+          _buildEmptyBox(
+            cs,
+            icon: Icons.subtitles_off_outlined,
+            title: 'No embedded tracks',
+            subtitle: 'This video stream has no muxed subtitle tracks.',
+          )
+        else
+          ...embedded.map((track) {
+            final title = (track.title?.trim().isNotEmpty ?? false)
+                ? track.title!.trim()
+                : (track.language?.trim().isNotEmpty ?? false)
+                ? track.language!.toUpperCase()
+                : 'Track ${track.id}';
+            final sub = (track.language?.trim().isNotEmpty ?? false)
+                ? 'Language: ${track.language!.toUpperCase()}'
+                : 'Embedded track #${track.id}';
+            final isSelected = activeId == track.id;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _buildTrackCard(
+                cs,
+                title: title,
+                subtitle: sub,
+                icon: Icons.subtitles_rounded,
+                isSelected: isSelected,
+                onTap: () {
+                  widget.selectedSbt.value = title;
+                  widget.player.setSubtitleTrack(track);
+                  Navigator.pop(context);
+                },
+              ),
+            );
+          }),
+      ],
+    );
+  }
+
+  Widget _buildStyleTab(ColorScheme cs) {
+    return ListView(
+      physics: const BouncingScrollPhysics(),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest.withValues(alpha: 0.35),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: cs.outlineVariant.withValues(alpha: 0.2),
+              width: 0.6,
+            ),
+          ),
+          child: Column(
+            children: [
+              _buildQuickSlider(
+                cs,
+                title: 'Font Size',
+                min: 12,
+                max: 32,
+                divisions: 20,
+                valueGetter: () => settingsController.subtitleFontSize.value,
+                labelBuilder: (v) => '${v.round()} px',
+                onChanged: settingsController.setSubtitleFontSize,
+              ),
+              Divider(
+                height: 16,
+                thickness: 0.5,
+                color: cs.outlineVariant.withValues(alpha: 0.2),
+              ),
+              _buildQuickSlider(
+                cs,
+                title: 'Background Opacity',
+                min: 0.0,
+                max: 1.0,
+                divisions: 10,
+                valueGetter: () => settingsController.subtitleBgOpacity.value,
+                labelBuilder: (v) => '${(v * 100).round()}%',
+                onChanged: settingsController.setSubtitleBgOpacity,
+              ),
+              Divider(
+                height: 16,
+                thickness: 0.5,
+                color: cs.outlineVariant.withValues(alpha: 0.2),
+              ),
+              _buildQuickSlider(
+                cs,
+                title: 'Bottom Margin',
+                min: 8,
+                max: 80,
+                divisions: 18,
+                valueGetter: () =>
+                    settingsController.subtitleBottomMargin.value,
+                labelBuilder: (v) => '${v.round()} px',
+                onChanged: settingsController.setSubtitleBottomMargin,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        FilledButton.tonalIcon(
+          onPressed: () {
+            Navigator.pop(context);
+            Get.to(() => const SubtitleSettingsPage());
+          },
+          icon: const Icon(Icons.tune_rounded, size: 18),
+          label: const Text('Open Full Subtitle Styling'),
+          style: FilledButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickSlider(
+    ColorScheme cs, {
+    required String title,
+    required double min,
+    required double max,
+    required int divisions,
+    required double Function() valueGetter,
+    required String Function(double) labelBuilder,
+    required ValueChanged<double> onChanged,
+  }) {
+    return Obx(() {
+      final val = valueGetter().clamp(min, max);
+      return Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
+                ),
+              ),
+              Text(
+                labelBuilder(val),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: cs.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          CustomSlider(
+            min: min,
+            max: max,
+            divisions: divisions,
+            value: val,
+            theme: const M3SliderTheme(
+              height: 18,
+              trackHeight: 5,
+              outerRadius: 5,
+              innerRadius: 2,
+              thumbGap: 6,
+              edgeInset: 2,
+              thumbWidth: 4,
+              thumbHeight: 18,
+              thumbCornerRadius: 2,
+            ),
+            onChanged: onChanged,
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _buildTrackCard(
+    ColorScheme cs, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: isSelected
+          ? cs.primary.withValues(alpha: 0.14)
+          : cs.surfaceContainerHighest.withValues(alpha: 0.35),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap();
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isSelected
+                  ? cs.primary.withValues(alpha: 0.5)
+                  : cs.outlineVariant.withValues(alpha: 0.18),
+              width: isSelected ? 1.2 : 0.6,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? cs.primary
+                      : cs.surfaceContainerHighest.withValues(alpha: 0.7),
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                child: Icon(
+                  icon,
+                  color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
+                  size: 19,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: isSelected ? cs.primary : cs.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isSelected)
+                Icon(Icons.check_circle_rounded, color: cs.primary, size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyBox(
+    ColorScheme cs, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.28),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: cs.outlineVariant.withValues(alpha: 0.18),
+          width: 0.6,
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 36, color: cs.onSurfaceVariant),
+          const SizedBox(height: 10),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+          ),
+        ],
       ),
     );
   }
 }
+
 void showEnhancedSubtitleSheet(
   Rx<AnimeAllData> animeData,
   Rx<String> selectedSbt,

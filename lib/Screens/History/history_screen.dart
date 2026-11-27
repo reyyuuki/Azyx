@@ -534,13 +534,11 @@ class _HistoryScreenState extends State<HistoryScreen>
                           width: 85,
                           height: 120,
                           fit: BoxFit.cover,
-                          placeholder: (context, url) => Shimmer.fromColors(
-                            baseColor: cs.surfaceContainerHighest,
-                            highlightColor: cs.surfaceContainerLow,
-                            child: Container(
-                              width: 85,
-                              height: 120,
-                              color: Colors.white,
+                          placeholder: (context, url) => Container(
+                            width: 85,
+                            height: 120,
+                            color: cs.surfaceContainerHighest.withValues(
+                              alpha: 0.35,
                             ),
                           ),
                           errorWidget: (context, url, err) => Container(
