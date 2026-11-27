@@ -7,6 +7,7 @@ class User {
   int? episodesWatched;
   int? minutesWatched;
   int? chaptersRead;
+  String? scoreFormat;
   User({
     this.name,
     this.id,
@@ -16,17 +17,19 @@ class User {
     this.episodesWatched,
     this.minutesWatched,
     this.chaptersRead,
+    this.scoreFormat,
   });
   factory User.fromJson(dynamic data) {
     return User(
       name: data['name'],
       id: data['id'],
-      avatar: data['avatar']['large'],
-      animeCount: data['statistics']['anime']['count'],
-      mangaCount: data['statistics']['manga']['count'],
-      episodesWatched: data['statistics']['anime']['episodeWatched'],
-      minutesWatched: data['statistics']['anime']['minutesWatched'],
-      chaptersRead: data['statistics']['manga']['chaptersRead'],
+      avatar: data['avatar']?['large'],
+      animeCount: data['statistics']?['anime']?['count'],
+      mangaCount: data['statistics']?['manga']?['count'],
+      episodesWatched: data['statistics']?['anime']?['episodesWatched'],
+      minutesWatched: data['statistics']?['anime']?['minutesWatched'],
+      chaptersRead: data['statistics']?['manga']?['chaptersRead'],
+      scoreFormat: data['mediaListOptions']?['scoreFormat'],
     );
   }
   factory User.fromMAL(Map<String, dynamic> json) {

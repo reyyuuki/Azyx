@@ -1,6 +1,6 @@
+import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Screens/Anime/Details/controller/anime_details_controller.dart';
-import 'package:azyx/Screens/Anime/Details/tokens/az_tokens.dart';
-import 'package:azyx/Screens/Anime/Details/tokens/az_tones.dart';
+import 'package:azyx/Widgets/list_editor_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -12,138 +12,60 @@ class ListSheet extends StatelessWidget {
     required this.controller,
   });
 
-  static const List<String> statuses = [
-    'Currently watching',
-    'Plan to watch',
-    'Completed',
-    'Paused',
-    'Dropped',
-  ];
+  String _mapDisplayToAniList(String display) {
+    switch (display.toLowerCase()) {
+      case 'currently watching':
+        return 'CURRENT';
+      case 'plan to watch':
+        return 'PLANNING';
+      case 'completed':
+        return 'COMPLETED';
+      case 'rewatching':
+        return 'REPEATING';
+      case 'paused':
+        return 'PAUSED';
+      case 'dropped':
+        return 'DROPPED';
+      default:
+        return display.toUpperCase();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tones = AzTonesProvider.of(context);
+    final media = controller.mediaData.value;
+    final mediaId = media.id ?? controller.currentAnimeId?.toString() ?? '';
+    final existing = serviceHandler.userAnimeList.firstWhereOrNull(
+      (e) => e.id == mediaId,
+    );
+    final entry = media.mediaListEntry;
+    final initialStatus = entry?.status ??
+        existing?.status ??
+        (controller.listStatus.value.isNotEmpty
+            ? _mapDisplayToAniList(controller.listStatus.value)
+            : 'CURRENT');
+    final initialProgress =
+        entry?.progress ?? existing?.progress ?? controller.listProgress.value;
+    final initialScore = entry?.score?.toDouble() ?? existing?.score ?? 0.0;
+    final totalCount = media.episodes ?? existing?.episodes ?? 0;
 
-    return Obx(() {
-      final currentStatus = controller.listStatus.value;
-      final hasCurrentStatus = currentStatus.isNotEmpty;
-
-      return Container(
-        constraints: const BoxConstraints(maxWidth: 480),
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainer,
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(AzTokens.radiusBottomSheet),
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 38,
-                height: 5,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(3),
-                ),
-              ),
-            ),
-            Text(
-              'Add to list',
-              style: AzTokens.body(
-                color: theme.colorScheme.onSurface,
-                weight: FontWeight.w600,
-                size: 17,
-              ),
-            ),
-            const SizedBox(height: 8),
-            ...statuses.map((status) {
-              final isSelected =
-                  currentStatus.toLowerCase() == status.toLowerCase();
-
-              return InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  controller.setMediaListStatus(status);
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(
-                        color: theme.colorScheme.outlineVariant
-                            .withValues(alpha: 0.15),
-                        width: 0.5,
-                      ),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        status,
-                        style: AzTokens.body(
-                          color: isSelected
-                              ? tones.accent
-                              : theme.colorScheme.onSurface,
-                          weight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                          size: 15.5,
-                        ),
-                      ),
-                      if (isSelected)
-                        Icon(
-                          Icons.check_rounded,
-                          size: 20,
-                          color: tones.accent,
-                        ),
-                    ],
-                  ),
-                ),
-              );
-            }),
-            if (hasCurrentStatus)
-              InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  controller.deleteFromList();
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(
-                        color: theme.colorScheme.outlineVariant
-                            .withValues(alpha: 0.15),
-                        width: 0.5,
-                      ),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        'Remove from list',
-                        style: AzTokens.body(
-                          color: theme.colorScheme.error,
-                          weight: FontWeight.w500,
-                          size: 15.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-          ],
-        ),
-      );
-    });
+    return ListEditorSheet(
+      title: media.title ?? 'Unknown',
+      image: media.image ?? '',
+      totalCount: totalCount,
+      isManga: false,
+      initialStatus: initialStatus,
+      initialScore: initialScore,
+      initialProgress: initialProgress,
+      initialStartedAt: existing?.startedAt,
+      initialCompletedAt: existing?.completedAt,
+      initialIsPrivate: existing?.isPrivate ?? false,
+      initialRepeat: existing?.repeat ?? 0,
+      canDelete: controller.listStatus.value.isNotEmpty ||
+          entry != null ||
+          existing != null,
+      onSave: (result) => controller.saveMediaListEntry(result),
+      onDelete: () => controller.deleteFromList(),
+    );
   }
 }

@@ -11,6 +11,11 @@ class UserMedia {
   String? totalEpisodes;
   String? type;
   String? medialistIds;
+  int? entryId;
+  DateTime? startedAt;
+  DateTime? completedAt;
+  bool? isPrivate;
+  int? repeat;
   UserMedia({
     this.id,
     this.image,
@@ -23,10 +28,25 @@ class UserMedia {
     this.score,
     this.episodes,
     this.medialistIds,
+    this.entryId,
+    this.startedAt,
+    this.completedAt,
+    this.isPrivate,
+    this.repeat,
   });
+  static DateTime? _parseFuzzyDate(dynamic json) {
+    if (json is! Map) return null;
+    final y = json['year'] as int?;
+    final m = json['month'] as int?;
+    final d = json['day'] as int?;
+    if (y == null || m == null || d == null) return null;
+    return DateTime(y, m, d);
+  }
+
   factory UserMedia.fromJson(Map<String, dynamic> data) {
     return UserMedia(
       id: data['media']['id'].toString(),
+      entryId: data['id'] as int?,
       title:
           data['media']['title']?['english'] ??
           data['media']['title']?['romaji'] ??
@@ -37,8 +57,12 @@ class UserMedia {
           : '0',
       progress: data['progress'],
       episodes: data['media']['episodes'] ?? data['media']['chapters'],
-      score: data['score'] != null ? data['score'].toDouble() : 0.0,
+      score: data['score'] != null ? (data['score'] as num).toDouble() : 0.0,
       status: data['status'],
+      startedAt: _parseFuzzyDate(data['startedAt']),
+      completedAt: _parseFuzzyDate(data['completedAt']),
+      isPrivate: data['private'] as bool?,
+      repeat: data['repeat'] as int?,
     );
   }
   factory UserMedia.fromSimklMovie(Map<String, dynamic> json) {
@@ -102,5 +126,13 @@ extension UserMediaListFilter on List<UserMedia> {
   List<UserMedia> get currentlyReading => where((e) {
         final s = e.status?.toUpperCase() ?? '';
         return s == 'CURRENT' || s == 'READING';
+      }).toList();
+  List<UserMedia> get planning => where((e) {
+        final s = e.status?.toUpperCase() ?? '';
+        return s == 'PLANNING' || s == 'PLAN_TO_WATCH' || s == 'PLAN_TO_READ';
+      }).toList();
+  List<UserMedia> get completed => where((e) {
+        final s = e.status?.toUpperCase() ?? '';
+        return s == 'COMPLETED';
       }).toList();
 }
