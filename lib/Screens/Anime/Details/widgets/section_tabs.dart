@@ -1,7 +1,5 @@
 import 'package:azyx/Screens/Anime/Details/controller/anime_details_controller.dart';
 import 'package:azyx/Screens/Anime/Details/tokens/az_tokens.dart';
-import 'package:azyx/Screens/Anime/Details/tokens/az_tones.dart';
-import 'package:azyx/Screens/Anime/Details/widgets/glass_surface.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -15,20 +13,13 @@ class SectionTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tones = AzTonesProvider.of(context);
     final theme = Theme.of(context);
 
     return Obx(() {
-      final media = controller.mediaData.value;
-      final hasRelations = (media.relations?.isNotEmpty ?? false) ||
-          (media.recommendations?.isNotEmpty ?? false);
-
-      final tabs = <MapEntry<String, String>>[
-        const MapEntry('ov', 'Overview'),
-        const MapEntry('ep', 'Episodes'),
-        if (hasRelations) const MapEntry('rl', 'Related'),
-        const MapEntry('ch', 'Characters'),
-        const MapEntry('cm', 'Community'),
+      const tabs = <MapEntry<String, String>>[
+        MapEntry('ov', 'Details'),
+        MapEntry('ep', 'Episodes'),
+        MapEntry('cm', 'Comments'),
       ];
 
       final currentTab = controller.activeTab.value;
@@ -38,53 +29,56 @@ class SectionTabs extends StatelessWidget {
           : AzTokens.horizontalPadding;
 
       return Container(
-        height: 46,
+        height: 48,
         margin: EdgeInsets.symmetric(
           horizontal: hPad,
         ),
         constraints: const BoxConstraints(maxWidth: AzTokens.contentMaxWidth),
-        child: GlassSurface(
-          borderRadius: AzTokens.radiusTabContainer,
-          padding: const EdgeInsets.all(4),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: tabs.map((tab) {
-                final isSelected = currentTab == tab.key;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(AzTokens.radiusTabItem),
-                    onTap: () => controller.scrollToSection(tab.key),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      height: 38,
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
-                      decoration: BoxDecoration(
-                        color: isSelected ? tones.soft : Colors.transparent,
-                        borderRadius:
-                            BorderRadius.circular(AzTokens.radiusTabItem),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        tab.value,
-                        style: AzTokens.body(
-                          color: isSelected
-                              ? tones.accent
-                              : theme.colorScheme.onSurfaceVariant,
-                          weight:
-                              isSelected ? FontWeight.w600 : FontWeight.w500,
-                          size: 14,
-                        ),
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color:
+              theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
+            width: 0.8,
+          ),
+        ),
+        child: Row(
+          children: tabs.map((tab) {
+            final isSelected = currentTab == tab.key;
+            return Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => controller.scrollToSection(tab.key),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOutCubic,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? theme.colorScheme.primaryContainer
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      tab.value,
+                      style: AzTokens.body(
+                        color: isSelected
+                            ? theme.colorScheme.onPrimaryContainer
+                            : theme.colorScheme.onSurfaceVariant,
+                        weight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        size: 14,
                       ),
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-          ),
+                ),
+              ),
+            );
+          }).toList(),
         ),
       );
     });

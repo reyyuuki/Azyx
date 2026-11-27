@@ -120,42 +120,64 @@ class _SynopsisBlockState extends State<SynopsisBlock> {
               ],
             ),
           )
-        else ...[
-          ConstrainedBox(
+        else
+          Container(
+            width: double.infinity,
             constraints: const BoxConstraints(maxWidth: 720),
-            child: Text(
-              cleanDesc,
-              maxLines: _isExpanded ? null : 5,
-              overflow:
-                  _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-              style: AzTokens.body(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
-                size: 14.5,
-                height: 1.55,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest
+                  .withValues(alpha: 0.35),
+              borderRadius: BorderRadius.circular(AzTokens.radiusCards),
+              border: Border.all(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
+                width: 0.8,
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          InkWell(
-            borderRadius: BorderRadius.circular(8),
-            onTap: () {
-              setState(() {
-                _isExpanded = !_isExpanded;
-              });
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-              child: Text(
-                _isExpanded ? 'Show less' : 'Read more',
-                style: AzTokens.body(
-                  color: tones.accent,
-                  weight: FontWeight.w600,
-                  size: 14,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  cleanDesc,
+                  maxLines: _isExpanded ? null : 5,
+                  overflow:
+                      _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                  style: AzTokens.body(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
+                    size: 14.5,
+                    height: 1.6,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 12),
+                Material(
+                  color: tones.soft,
+                  borderRadius: BorderRadius.circular(20),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () {
+                      setState(() {
+                        _isExpanded = !_isExpanded;
+                      });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 14,
+                      ),
+                      child: Text(
+                        _isExpanded ? 'Show less' : 'Read more',
+                        style: AzTokens.body(
+                          color: tones.accent,
+                          weight: FontWeight.w600,
+                          size: 13,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
       ],
     );
   }

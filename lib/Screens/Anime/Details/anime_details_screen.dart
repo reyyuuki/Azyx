@@ -4,6 +4,7 @@ import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Screens/Anime/Details/controller/anime_details_controller.dart';
 import 'package:azyx/Screens/Anime/Details/tokens/az_tokens.dart';
 import 'package:azyx/Screens/Anime/Details/tokens/az_tones.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/az_chip.dart';
 import 'package:azyx/Screens/Anime/Details/widgets/az_toast.dart';
 import 'package:azyx/Screens/Anime/Details/widgets/character_grid.dart';
 import 'package:azyx/Screens/Anime/Details/widgets/community_charts.dart';
@@ -16,13 +17,15 @@ import 'package:azyx/Screens/Anime/Details/widgets/hero_section.dart';
 import 'package:azyx/Screens/Anime/Details/widgets/list_sheet.dart';
 import 'package:azyx/Screens/Anime/Details/widgets/mobile_dock.dart';
 import 'package:azyx/Screens/Anime/Details/widgets/poster_row.dart';
-import 'package:azyx/Screens/Anime/Details/widgets/search_overlay.dart';
 import 'package:azyx/Screens/Anime/Details/widgets/section_tabs.dart';
 import 'package:azyx/Screens/Anime/Details/widgets/side_column.dart';
 import 'package:azyx/Screens/Anime/Details/widgets/synopsis_block.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/tags_section.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/up_next_strip.dart';
+import 'package:azyx/Widgets/common/comments_section.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class AnimeDetailsScreen extends StatefulWidget {
   final String? tagg;
@@ -49,17 +52,22 @@ class AnimeDetailsScreen extends StatefulWidget {
   }) {
     return PageRouteBuilder<void>(
       settings: RouteSettings(
-        name: '/anime_details_' + (id != null ? id.toString() : (smallMedia != null ? smallMedia.id : (tagg ?? ''))),
+        name:
+            '/anime_details_' +
+            (id != null
+                ? id.toString()
+                : (smallMedia != null ? smallMedia.id : (tagg ?? ''))),
       ),
       transitionDuration: const Duration(milliseconds: 320),
       reverseTransitionDuration: const Duration(milliseconds: 280),
-      pageBuilder: (context, animation, secondaryAnimation) => AnimeDetailsScreen(
-        tagg: tagg,
-        smallMedia: smallMedia,
-        allData: allData,
-        isOffline: isOffline,
-        id: id,
-      ),
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          AnimeDetailsScreen(
+            tagg: tagg,
+            smallMedia: smallMedia,
+            allData: allData,
+            isOffline: isOffline,
+            id: id,
+          ),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return child;
       },
@@ -73,20 +81,18 @@ class AnimeDetailsScreen extends StatefulWidget {
 class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
   late final String _controllerTag;
   late final AnimeDetailsController _controller;
-  final GlobalKey _tabsKey = GlobalKey();
-  final ValueNotifier<bool> _showStickyTabs = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _showBackButton = ValueNotifier<bool>(true);
+  double _lastScrollOffset = 0.0;
 
   @override
   void initState() {
     super.initState();
     final animeId = _resolveAnimeId();
-    _controllerTag = widget.tagg ??
+    _controllerTag =
+        widget.tagg ??
         'anime_${animeId ?? DateTime.now().millisecondsSinceEpoch}';
 
-    _controller = Get.put(
-      AnimeDetailsController(),
-      tag: _controllerTag,
-    );
+    _controller = Get.put(AnimeDetailsController(), tag: _controllerTag);
 
     if (widget.smallMedia != null) {
       _controller.mediaData.value = AnilistMediaData(
@@ -103,30 +109,26 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
       isOffline: widget.isOffline,
     );
 
-    _controller.scrollController.addListener(_handleScroll);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _handleScroll();
-    });
+    _controller.scrollController.addListener(_handleTopBarScroll);
   }
 
-  void _handleScroll() {
-    final renderBox =
-        _tabsKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null && renderBox.hasSize && mounted) {
-      final position = renderBox.localToGlobal(Offset.zero);
-      final topPadding = MediaQuery.of(context).padding.top;
-      final threshold = topPadding + 56.0;
-      final shouldShow = position.dy <= threshold;
-      if (_showStickyTabs.value != shouldShow) {
-        _showStickyTabs.value = shouldShow;
-      }
+  void _handleTopBarScroll() {
+    if (!_controller.scrollController.hasClients) return;
+    final offset = _controller.scrollController.offset;
+    if (offset <= 24.0) {
+      if (!_showBackButton.value) _showBackButton.value = true;
+    } else if (offset > _lastScrollOffset + 6.0) {
+      if (_showBackButton.value) _showBackButton.value = false;
+    } else if (offset < _lastScrollOffset - 6.0) {
+      if (!_showBackButton.value) _showBackButton.value = true;
     }
+    _lastScrollOffset = offset;
   }
 
   @override
   void dispose() {
-    _controller.scrollController.removeListener(_handleScroll);
-    _showStickyTabs.dispose();
+    _controller.scrollController.removeListener(_handleTopBarScroll);
+    _showBackButton.dispose();
     Get.delete<AnimeDetailsController>(tag: _controllerTag);
     super.dispose();
   }
@@ -152,12 +154,9 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
   }
 
   void _navigateToMedia(int targetId) {
-    Navigator.of(context).push(
-      AnimeDetailsScreen.route(
-        id: targetId,
-        tagg: 'anime_$targetId',
-      ),
-    );
+    Navigator.of(
+      context,
+    ).push(AnimeDetailsScreen.route(id: targetId, tagg: 'anime_$targetId'));
   }
 
   @override
@@ -168,9 +167,7 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
 
     return Obx(() {
       final media = _controller.mediaData.value;
-      final tones = AzTones.fromScheme(
-        theme.colorScheme,
-      );
+      final tones = AzTones.fromScheme(theme.colorScheme);
 
       final isLoading = _controller.isLoading.value;
       final hasError = _controller.error.value.isNotEmpty;
@@ -192,259 +189,79 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
       final isFav = _controller.isFavourite.value;
 
       final relations = PosterRow.fromRelations(media.relations);
-      final recommendations =
-          PosterRow.fromRecommendations(media.recommendations);
+      final recommendations = PosterRow.fromRecommendations(
+        media.recommendations,
+      );
       final hasRelationsOrRecs =
           relations.isNotEmpty || recommendations.isNotEmpty;
 
-      final hasInitialData = (media.title != null && media.title!.isNotEmpty) ||
+      final hasInitialData =
+          (media.title != null && media.title!.isNotEmpty) ||
           widget.smallMedia != null ||
           widget.allData != null;
 
       return AzTonesProvider(
         tones: tones,
-        child: CallbackShortcuts(
-          bindings: {
-            const SingleActivator(LogicalKeyboardKey.slash): () {
-              if (!_controller.isSearchOpen.value) {
-                _controller.openSearch();
-              }
-            },
-          },
-          child: Scaffold(
-            backgroundColor: theme.colorScheme.surface,
-            body: Stack(
-              children: [
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: HeroBackdrop(
-                    bannerUrl: media.bannerImage,
-                    coverUrl: media.coverImage ?? media.image,
-                    height: 540,
-                  ),
+        child: Scaffold(
+          backgroundColor: theme.colorScheme.surface,
+          body: Stack(
+            children: [
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: HeroBackdrop(
+                  bannerUrl: media.bannerImage,
+                  coverUrl: media.coverImage ?? media.image,
+                  height: 540,
                 ),
-                if (isLoading && !hasInitialData)
-                  const DetailsSkeleton()
-                else if (hasError && !hasInitialData)
-                  DetailsError(
-                    errorMessage: _controller.error.value,
-                    onRetry: () => _controller.loadData(),
-                    onSearch: () => _controller.openSearch(),
-                  )
-                else
-                  NotificationListener<ScrollNotification>(
-                    onNotification: (_) {
-                      _handleScroll();
-                      return false;
-                    },
-                    child: CustomScrollView(
-                      controller: _controller.scrollController,
-                      physics: const BouncingScrollPhysics(),
-                      slivers: [
-                        SliverToBoxAdapter(
-                          child: HeroSection(
+              ),
+              if (isLoading && !hasInitialData)
+                const DetailsSkeleton()
+              else if (hasError && !hasInitialData)
+                DetailsError(
+                  errorMessage: _controller.error.value,
+                  onRetry: () => _controller.loadData(),
+                  onSearch: () => Navigator.of(context).maybePop(),
+                )
+              else
+                CustomScrollView(
+                  controller: _controller.scrollController,
+                  physics: const BouncingScrollPhysics(),
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: HeroSection(
+                        media: media,
+                        primaryLabel: primaryLabel,
+                        listButtonLabel: listButtonLabel,
+                        isListOn: isListOn,
+                        isFavourite: isFav,
+                        onWatchTap: () => _controller.onPrimaryAction(context),
+                        onListTap: () => _openListSheet(context),
+                        onFavTap: () => _controller.toggleFavourite(),
+                        heroTag: widget.tagg,
+                        isLoading: isLoading,
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Center(
+                        child: Container(
+                          constraints: const BoxConstraints(
+                            maxWidth: AzTokens.contentMaxWidth,
+                          ),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isDesktop
+                                ? AzTokens.horizontalPadding
+                                : 18.0,
+                          ),
+                          child: UpNextStrip(
+                            controller: _controller,
                             media: media,
-                            primaryLabel: primaryLabel,
-                            listButtonLabel: listButtonLabel,
-                            isListOn: isListOn,
-                            isFavourite: isFav,
-                            onWatchTap: () =>
-                                _controller.onPrimaryAction(context),
-                            onListTap: () => _openListSheet(context),
-                            onFavTap: () => _controller.toggleFavourite(),
-                            heroTag: widget.tagg,
-                            isLoading: isLoading,
-                          ),
-                        ),
-                        SliverToBoxAdapter(
-                          child: Center(
-                            child: Container(
-                              key: _tabsKey,
-                              constraints: const BoxConstraints(
-                                maxWidth: AzTokens.contentMaxWidth,
-                              ),
-                              child: SectionTabs(controller: _controller),
-                            ),
-                          ),
-                        ),
-                      SliverToBoxAdapter(
-                        child: Center(
-                          child: Container(
-                            constraints: const BoxConstraints(
-                              maxWidth: AzTokens.contentMaxWidth,
-                            ),
-                            padding: EdgeInsets.fromLTRB(
-                              isDesktop ? AzTokens.horizontalPadding : 16.0,
-                              isDesktop ? 28.0 : 16.0,
-                              isDesktop ? AzTokens.horizontalPadding : 16.0,
-                              24.0,
-                            ),
-                            child: isDesktop
-                                ? Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Container(
-                                              key: _controller.sectionKeys['ov'],
-                                              child:
-                                                  SynopsisBlock(media: media, isLoading: isLoading),
-                                            ),
-                                            const SizedBox(
-                                                height: AzTokens.sectionGap),
-                                            Container(
-                                              key: _controller.sectionKeys['ep'],
-                                              child: EpisodeGrid(
-                                                controller: _controller,
-                                              ),
-                                            ),
-                                            if (hasRelationsOrRecs) ...[
-                                              const SizedBox(
-                                                  height: AzTokens.sectionGap),
-                                              Container(
-                                                key: _controller
-                                                    .sectionKeys['rl'],
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    if (relations.isNotEmpty)
-                                                      PosterRow(
-                                                        title: 'Related',
-                                                        items: relations,
-                                                        onItemTapped:
-                                                            _navigateToMedia,
-                                                      ),
-                                                    if (recommendations
-                                                        .isNotEmpty)
-                                                      PosterRow(
-                                                        title:
-                                                            'Fans also liked',
-                                                        isSubheading: true,
-                                                        items: recommendations,
-                                                        onItemTapped:
-                                                            _navigateToMedia,
-                                                      ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                            const SizedBox(
-                                                height: AzTokens.sectionGap),
-                                            Container(
-                                              key: _controller.sectionKeys['ch'],
-                                              child: CharacterGrid(
-                                                characters: media.characters,
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                                height: AzTokens.sectionGap),
-                                            Container(
-                                              key: _controller.sectionKeys['cm'],
-                                              child: CommunityCharts(
-                                                media: media,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(width: 56),
-                                      SizedBox(
-                                        width: 320,
-                                        child: SideColumn(media: media),
-                                      ),
-                                    ],
-                                  )
-                                : Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        key: _controller.sectionKeys['ov'],
-                                        child: SynopsisBlock(media: media, isLoading: isLoading),
-                                      ),
-                                      const SizedBox(height: 28.0),
-                                      Container(
-                                        key: _controller.sectionKeys['ep'],
-                                        child: EpisodeGrid(
-                                          controller: _controller,
-                                        ),
-                                      ),
-                                      if (hasRelationsOrRecs) ...[
-                                        const SizedBox(height: 28.0),
-                                        Container(
-                                          key: _controller.sectionKeys['rl'],
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              if (relations.isNotEmpty)
-                                                PosterRow(
-                                                  title: 'Related',
-                                                  items: relations,
-                                                  onItemTapped:
-                                                      _navigateToMedia,
-                                                ),
-                                              if (recommendations.isNotEmpty)
-                                                PosterRow(
-                                                  title: 'Fans also liked',
-                                                  isSubheading: true,
-                                                  items: recommendations,
-                                                  onItemTapped:
-                                                      _navigateToMedia,
-                                                ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                      const SizedBox(height: 28.0),
-                                      Container(
-                                        key: _controller.sectionKeys['ch'],
-                                        child: CharacterGrid(
-                                          characters: media.characters,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 28.0),
-                                      Container(
-                                        key: _controller.sectionKeys['cm'],
-                                        child: CommunityCharts(
-                                          media: media,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 28.0),
-                                      SideColumn(media: media),
-                                      const SizedBox(height: 96),
-                                    ],
-                                  ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: DetailsTopBar(
-                    onSearchTap: () => _controller.openSearch(),
-                    showBackButton: Navigator.of(context).canPop(),
-                  ),
-                ),
-                ValueListenableBuilder<bool>(
-                  valueListenable: _showStickyTabs,
-                  builder: (context, show, _) {
-                    if (!show) return const SizedBox.shrink();
-                    return Positioned(
-                      top: topPadding + 56.0,
-                      left: 0,
-                      right: 0,
+                    ),
+                    SliverToBoxAdapter(
                       child: Center(
                         child: Container(
                           constraints: const BoxConstraints(
@@ -453,31 +270,209 @@ class _AnimeDetailsScreenState extends State<AnimeDetailsScreen> {
                           child: SectionTabs(controller: _controller),
                         ),
                       ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Center(
+                        child: Container(
+                          constraints: const BoxConstraints(
+                            maxWidth: AzTokens.contentMaxWidth,
+                          ),
+                          padding: EdgeInsets.fromLTRB(
+                            isDesktop ? AzTokens.horizontalPadding : 18.0,
+                            isDesktop ? 32.0 : 24.0,
+                            isDesktop ? AzTokens.horizontalPadding : 18.0,
+                            24.0,
+                          ),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 180),
+                            child: switch (_controller.activeTab.value) {
+                              'ep' => KeyedSubtree(
+                                key: const ValueKey('ep'),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    EpisodeGrid(controller: _controller),
+                                    if (!isDesktop) const SizedBox(height: 96),
+                                  ],
+                                ),
+                              ),
+                              'cm' => KeyedSubtree(
+                                key: const ValueKey('cm'),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (media.id != null &&
+                                        media.id!.isNotEmpty)
+                                      CommentsSection(
+                                        mediaId: media.id!,
+                                        mediaTitle:
+                                            media.title ??
+                                            media.titleRomaji ??
+                                            '',
+                                        mediaPoster:
+                                            media.coverImage ??
+                                            media.image ??
+                                            '',
+                                        isManga: false,
+                                      )
+                                    else
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 32,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            'Comments are unavailable for this title.',
+                                            style: AzTokens.caption(
+                                              theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    if (!isDesktop) const SizedBox(height: 96),
+                                  ],
+                                ),
+                              ),
+                              _ => KeyedSubtree(
+                                key: const ValueKey('ov'),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (isDesktop)
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            flex: 6,
+                                            child: SynopsisBlock(
+                                              media: media,
+                                              isLoading: isLoading,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 28),
+                                          Expanded(
+                                            flex: 4,
+                                            child: FactsCard(media: media),
+                                          ),
+                                        ],
+                                      )
+                                    else ...[
+                                      SynopsisBlock(
+                                        media: media,
+                                        isLoading: isLoading,
+                                      ),
+                                      const SizedBox(height: 28.0),
+                                      FactsCard(media: media),
+                                    ],
+                                    const SizedBox(height: AzTokens.sectionGap),
+                                    CommunityCharts(
+                                      media: media,
+                                      showHeading: false,
+                                      showComments: false,
+                                    ),
+                                    if (media.tagsList != null &&
+                                        media.tagsList!.isNotEmpty) ...[
+                                      const SizedBox(
+                                        height: AzTokens.sectionGap,
+                                      ),
+                                      TagsSection(
+                                        tags: media.tagsList!,
+                                        onMuteTag: (tagName) => _controller
+                                            .showToast('Muted "$tagName"'),
+                                      ),
+                                    ],
+                                    const SizedBox(height: AzTokens.sectionGap),
+                                    CharacterGrid(characters: media.characters),
+                                    if (hasRelationsOrRecs) ...[
+                                      const SizedBox(
+                                        height: AzTokens.sectionGap,
+                                      ),
+                                      if (relations.isNotEmpty)
+                                        PosterRow(
+                                          title: 'Related',
+                                          items: relations,
+                                          onItemTapped: _navigateToMedia,
+                                        ),
+                                      if (recommendations.isNotEmpty)
+                                        PosterRow(
+                                          title: 'Fans also liked',
+                                          isSubheading: true,
+                                          items: recommendations,
+                                          onItemTapped: _navigateToMedia,
+                                        ),
+                                    ],
+                                    if (media.siteUrl != null &&
+                                        media.siteUrl!.isNotEmpty) ...[
+                                      const SizedBox(height: 24),
+                                      AzChip(
+                                        label: 'View on AniList',
+                                        icon: Icons.open_in_new_rounded,
+                                        onTap: () {
+                                          launchUrlString(
+                                            media.siteUrl!,
+                                            mode:
+                                                LaunchMode.externalApplication,
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                    if (!isDesktop) const SizedBox(height: 96),
+                                  ],
+                                ),
+                              ),
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: _showBackButton,
+                  builder: (context, visible, child) {
+                    return IgnorePointer(
+                      ignoring: !visible,
+                      child: AnimatedSlide(
+                        offset: visible ? Offset.zero : const Offset(0, -1.2),
+                        duration: const Duration(milliseconds: 240),
+                        curve: Curves.easeOutCubic,
+                        child: AnimatedOpacity(
+                          opacity: visible ? 1.0 : 0.0,
+                          duration: const Duration(milliseconds: 200),
+                          child: child,
+                        ),
+                      ),
                     );
                   },
-                ),
-                if (!isDesktop && !isLoading && !hasError)
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: MobileDock(
-                      primaryLabel: primaryLabel,
-                      onWatchTap: () =>
-                          _controller.onPrimaryAction(context),
-                      onListTap: () => _openListSheet(context),
-                      onFavTap: () => _controller.toggleFavourite(),
-                      isFavourite: isFav,
-                      isListOn: isListOn,
-                    ),
+                  child: DetailsTopBar(
+                    showBackButton: Navigator.of(context).canPop(),
+                    title: media.title ?? media.titleRomaji,
                   ),
-                AzToast(controller: _controller),
-                SearchOverlay(
-                  controller: _controller,
-                  onSelectMedia: _navigateToMedia,
                 ),
-              ],
-            ),
+              ),
+              if (!isDesktop && !isLoading && !hasError)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: MobileDock(
+                    primaryLabel: primaryLabel,
+                    onWatchTap: () => _controller.onPrimaryAction(context),
+                    onListTap: () => _openListSheet(context),
+                    onFavTap: () => _controller.toggleFavourite(),
+                    isFavourite: isFav,
+                    isListOn: isListOn,
+                  ),
+                ),
+              AzToast(controller: _controller),
+            ],
           ),
         ),
       );

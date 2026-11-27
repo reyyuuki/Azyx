@@ -12,7 +12,8 @@ import 'package:ionicons/ionicons.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 class SearchScreen extends StatefulWidget {
   final bool isManga;
-  const SearchScreen({super.key, required this.isManga});
+  final String? initialTag;
+  const SearchScreen({super.key, required this.isManga, this.initialTag});
   @override
   State<SearchScreen> createState() => _SearchScreenState();
 }
@@ -31,6 +32,13 @@ class _SearchScreenState extends State<SearchScreen>
     super.initState();
     title = widget.isManga ? "Manga" : "Anime";
     controller = Get.put(show.SearchController(isManga: widget.isManga));
+    if (widget.initialTag != null && widget.initialTag!.trim().isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          controller.updateFilters({'tags': [widget.initialTag!.trim()]});
+        }
+      });
+    }
     _searchAnimationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,

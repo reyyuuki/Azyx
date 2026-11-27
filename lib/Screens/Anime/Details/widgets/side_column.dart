@@ -75,6 +75,8 @@ class SideColumn extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
+        Text('Details', style: AzTokens.h2(context)),
+        const SizedBox(height: 14),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           decoration: BoxDecoration(
@@ -214,6 +216,145 @@ class SideColumn extends StatelessWidget {
             },
           ),
         ],
+      ],
+    );
+  }
+}
+
+class FactsCard extends StatelessWidget {
+  final AnilistMediaData media;
+
+  const FactsCard({
+    super.key,
+    required this.media,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final airedStr = AzFormatters.dateRange(
+      startYear: media.startYear,
+      startMonth: media.startMonth,
+      startDay: media.startDay,
+      endYear: media.endYear,
+      endMonth: media.endMonth,
+      endDay: media.endDay,
+    );
+
+    final durationMin = media.duration;
+    final eps = media.episodes;
+    String durationText = '–';
+    if (durationMin != null && durationMin > 0) {
+      if (eps != null && eps > 0) {
+        final totalHours = ((durationMin * eps) / 60.0).round();
+        durationText = totalHours > 0
+            ? '$durationMin min · $totalHours h total'
+            : '$durationMin min';
+      } else {
+        durationText = '$durationMin min';
+      }
+    }
+
+    final tiles = <MapEntry<String, String>>[
+      MapEntry(
+        'Format',
+        AzFormatters.formatLabel(media.format ?? media.type),
+      ),
+      MapEntry('Status', AzFormatters.capitalize(media.status)),
+      MapEntry('Duration', durationText),
+      MapEntry(
+        'Studio',
+        media.studios != null && media.studios!.isNotEmpty
+            ? media.studios!.first
+            : '–',
+      ),
+      MapEntry('Aired', airedStr.isNotEmpty ? airedStr : '–'),
+      MapEntry(
+        'Source',
+        media.source != null && media.source!.isNotEmpty
+            ? AzFormatters.capitalize(media.source)
+            : '–',
+      ),
+    ]
+        .where((e) =>
+            e.value.trim().isNotEmpty &&
+            e.value.trim() != '–' &&
+            e.value.trim() != '-')
+        .toList();
+
+    if (tiles.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text('The facts', style: AzTokens.h2(context)),
+        const SizedBox(height: 14),
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest
+                .withValues(alpha: 0.35),
+            borderRadius: BorderRadius.circular(AzTokens.radiusCards),
+            border: Border.all(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
+              width: 0.8,
+            ),
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final tileWidth = (constraints.maxWidth - 10) / 2;
+              return Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: tiles.map((item) {
+                  return Container(
+                    width: tileWidth,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color:
+                          theme.colorScheme.onSurface.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.07),
+                        width: 0.6,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.key,
+                          style: AzTokens.caption(
+                            theme.colorScheme.onSurfaceVariant,
+                            12,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          item.value,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AzTokens.body(
+                            color: theme.colorScheme.onSurface,
+                            weight: FontWeight.w600,
+                            size: 13.5,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ),
       ],
     );
   }

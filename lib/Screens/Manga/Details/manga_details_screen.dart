@@ -7,23 +7,34 @@ import 'package:azyx/Database/isar_models/anime_details_data.dart';
 import 'package:azyx/Database/isar_models/episode_class.dart';
 import 'package:azyx/Database/isar_models/offline_item.dart'
     as azyx_offline_item;
+import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Models/carousale_data.dart';
 import 'package:azyx/Models/user_media.dart';
-import 'package:azyx/Screens/Anime/Details/tabs/details_section.dart';
+import 'package:azyx/Screens/Anime/Details/tokens/az_tokens.dart';
+import 'package:azyx/Screens/Anime/Details/tokens/az_tones.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/az_chip.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/character_grid.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/community_charts.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/details_error.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/details_skeleton.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/details_top_bar.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/hero_backdrop.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/hero_section.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/mobile_dock.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/poster_row.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/side_column.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/synopsis_block.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/tags_section.dart';
 import 'package:azyx/Screens/Manga/Details/tabs/read_section.dart';
-import 'package:azyx/Screens/Manga/Details/tabs/widgets/manga_add_to_list.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
-import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
-import 'package:azyx/Widgets/common/scrollable_app_bar.dart';
 import 'package:azyx/Widgets/common/comments_section.dart';
 import 'package:azyx/utils/mapper.dart';
 import 'package:azyx/utils/source_mapper.dart';
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
-import 'package:expandable_page_view/expandable_page_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import '../../../utils/utils.dart';
-import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
 class MangaDetailsScreen extends StatefulWidget {
   final String tagg;
@@ -41,8 +52,7 @@ class MangaDetailsScreen extends StatefulWidget {
   State<MangaDetailsScreen> createState() => _DetailsScreenState();
 }
 
-class _DetailsScreenState extends State<MangaDetailsScreen>
-    with SingleTickerProviderStateMixin {
+class _DetailsScreenState extends State<MangaDetailsScreen> {
   final RxString title = ''.obs;
   final Rx<String> image = ''.obs;
   final Rx<String> coverImage = ''.obs;
@@ -54,15 +64,20 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
   final Rx<String> mangaTitle = "??".obs;
   final Rx<String> totalChapters = "??".obs;
   final RxList<Chapter> chaptersList = RxList();
-  late TabController _tabBarController;
-  final PageController pageController = PageController();
   final Rx<String> _anilistError = ''.obs;
   final Rx<bool> _extenstionError = false.obs;
   final Rx<bool> isFetchingChapters = true.obs;
   final Rx<String> syncId = ''.obs;
-  final RxInt _currentIndex = 0.obs;
+  final RxString _activeTab = 'ov'.obs;
+  final RxBool _isFavourite = false.obs;
+
+  final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<bool> _showBackButton = ValueNotifier<bool>(true);
+  double _lastScrollOffset = 0.0;
+
   Future<void> loadData() async {
     try {
+      _anilistError.value = '';
       final response = await serviceHandler.fetchAnimeDetails(
         FetchDetailsParams(id: id.value, isManga: true),
       );
@@ -71,6 +86,7 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
       coverImage.value = mediaData.value.coverImage ?? image.value;
     } catch (e) {
       _anilistError.value = e.toString();
+      isLoading.value = false;
       log("Error while getting data for details: $e");
       azyxSnackBar('${serviceHandler.serviceType.toString()} not working');
     }
@@ -118,9 +134,16 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
           episodes: widget.allData?.episodesList!.length,
         ),
       );
-      image.value = widget.smallMedia!.image;
-      title.value = widget.smallMedia!.title;
-      id.value = widget.smallMedia!.id;
+      image.value = widget.smallMedia?.image ?? '';
+      title.value = widget.smallMedia?.title ?? '';
+      id.value = widget.smallMedia?.id ?? '';
+      coverImage.value = image.value;
+      mediaData.value = AnilistMediaData(
+        id: id.value,
+        title: title.value,
+        image: image.value,
+        coverImage: image.value,
+      );
       Utils.log('idd: ${id.value}');
       loadData();
     }
@@ -142,7 +165,7 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
           );
       chaptersList.value = mChapterToChapter(
         episodeResult.episodes ?? [],
-        widget.smallMedia!.title,
+        widget.smallMedia?.title ?? title.value,
       );
       totalChapters.value = chaptersList.length.toString();
     } catch (e) {
@@ -182,24 +205,70 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
     return [media.title ?? '', media.titleRomaji ?? ''];
   }
 
+  void _handleTopBarScroll() {
+    if (!_scrollController.hasClients) return;
+    final offset = _scrollController.offset;
+    if (offset <= 24.0) {
+      if (!_showBackButton.value) _showBackButton.value = true;
+    } else if (offset > _lastScrollOffset + 6.0) {
+      if (_showBackButton.value) _showBackButton.value = false;
+    } else if (offset < _lastScrollOffset - 6.0) {
+      if (!_showBackButton.value) _showBackButton.value = true;
+    }
+    _lastScrollOffset = offset;
+  }
+
+  Future<void> _toggleFavourite() async {
+    final mangaId = int.tryParse(id.value);
+    if (mangaId == null) return;
+
+    if (!serviceHandler.isLoggedIn.value) {
+      azyxSnackBar('Sign in to AniList to favourite this');
+      return;
+    }
+
+    final previous = _isFavourite.value;
+    _isFavourite.value = !previous;
+    azyxSnackBar(
+      _isFavourite.value ? 'Added to favourites' : 'Removed from favourites',
+    );
+
+    final success = await serviceHandler.toggleFavourite(mangaId, isManga: true);
+    if (!success) {
+      _isFavourite.value = previous;
+      azyxSnackBar('Failed to update favourites');
+    }
+  }
+
+  void _openListSheet(BuildContext context) {
+    final total = mediaData.value.episodes ?? chaptersList.length;
+    anilistAddToListController.addToMangaListSheet(
+      context,
+      coverImage.value.isNotEmpty ? coverImage.value : image.value,
+      title.value,
+      total,
+    );
+  }
+
+  void _navigateToManga(PosterRowItem item) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => MangaDetailsScreen(
+          tagg: 'manga_${item.id}',
+          smallMedia: CarousaleData(
+            id: item.id.toString(),
+            title: item.title,
+            image: item.coverImage ?? '',
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
-    final length = sourceController.installedMangaExtensions.isNotEmpty ? 3 : 2;
-    _tabBarController = TabController(length: length, vsync: this);
-    _tabBarController.addListener(() {
-      if (_tabBarController.index != _currentIndex.value) {
-        _currentIndex.value = _tabBarController.index;
-        if (pageController.hasClients &&
-            pageController.page?.round() != _tabBarController.index) {
-          pageController.animateToPage(
-            _tabBarController.index,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        }
-      }
-    });
+    _scrollController.addListener(_handleTopBarScroll);
     _syncMedia();
     convertData();
     getMediaStatus();
@@ -207,8 +276,9 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
 
   @override
   void dispose() {
-    _tabBarController.dispose();
-    pageController.dispose();
+    _scrollController.removeListener(_handleTopBarScroll);
+    _scrollController.dispose();
+    _showBackButton.dispose();
     sourceController.cancelInProgress('manga_search');
     sourceController.cancelInProgress('manga_detail');
     SourceMapper.cancelMapping();
@@ -218,159 +288,476 @@ class _DetailsScreenState extends State<MangaDetailsScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      extendBody: true,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: Obx(
-        () => MangaAddToList(
-          data: azyx_offline_item.OfflineItem(
-            mediaData: mediaData.value,
-            number: '1',
-            animeTitle: title.value,
-            mediaType: 0,
-            chaptersList: chaptersList.toList(),
-          ),
-          mediaData: mediaData.value,
-          isLoading: isLoading,
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            ScrollableAppBar(
-              mediaData: mediaData,
-              image: image.value,
-              tagg: widget.tagg,
-            ),
-            Container(
-              margin: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-              height: 46,
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withOpacity(0.35),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: colorScheme.outline.withOpacity(0.08),
-                  width: 1,
+    final isDesktop = AzTokens.isExpanded(context);
+
+    return Obx(() {
+      final media = mediaData.value;
+      final tones = AzTones.fromScheme(theme.colorScheme);
+      final loading = isLoading.value;
+      final hasError = _anilistError.value.isNotEmpty;
+
+      final isNotYetReleased =
+          media.status?.toUpperCase() == 'NOT_YET_RELEASED';
+      final currentStatus = serviceHandler.currentMedia.value.status ?? '';
+      final isCurrentlyReading = currentStatus.toUpperCase() == 'CURRENT';
+
+      final primaryLabel = isNotYetReleased
+          ? 'Not released yet'
+          : (isCurrentlyReading ? 'Continue reading' : 'Start reading');
+
+      final listButtonLabel = currentStatus.isNotEmpty
+          ? _formatListStatus(currentStatus)
+          : 'Add to list';
+
+      final isListOn = currentStatus.isNotEmpty;
+      final isFav = _isFavourite.value;
+
+      final relations = PosterRow.fromRelations(media.relations);
+      final recommendations = PosterRow.fromRecommendations(
+        media.recommendations,
+      );
+      final hasRelationsOrRecs =
+          relations.isNotEmpty || recommendations.isNotEmpty;
+
+      final hasInitialData =
+          (media.title != null && media.title!.isNotEmpty) ||
+          widget.smallMedia != null ||
+          widget.allData != null;
+
+      final hasChaptersTab =
+          sourceController.installedMangaExtensions.isNotEmpty;
+
+      return AzTonesProvider(
+        tones: tones,
+        child: Scaffold(
+          backgroundColor: theme.colorScheme.surface,
+          body: Stack(
+            children: [
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: HeroBackdrop(
+                  bannerUrl: media.bannerImage,
+                  coverUrl: media.coverImage ?? media.image,
+                  height: 540,
                 ),
               ),
-              child: TabBar(
-                controller: _tabBarController,
-                onTap: (index) {
-                  _currentIndex.value = index;
-                  if (pageController.hasClients) {
-                    pageController.animateToPage(
-                      index,
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
+              if (loading && !hasInitialData)
+                const DetailsSkeleton()
+              else if (hasError && !hasInitialData)
+                DetailsError(
+                  errorMessage: _anilistError.value,
+                  onRetry: () => loadData(),
+                  onSearch: () => Navigator.of(context).maybePop(),
+                )
+              else
+                CustomScrollView(
+                  controller: _scrollController,
+                  physics: const BouncingScrollPhysics(),
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: HeroSection(
+                        media: media,
+                        primaryLabel: primaryLabel,
+                        listButtonLabel: listButtonLabel,
+                        isListOn: isListOn,
+                        isFavourite: isFav,
+                        onWatchTap: () {
+                          if (hasChaptersTab) {
+                            _activeTab.value = 'ch';
+                          } else {
+                            azyxSnackBar('No manga extensions installed');
+                          }
+                        },
+                        onListTap: () => _openListSheet(context),
+                        onFavTap: _toggleFavourite,
+                        heroTag: widget.tagg,
+                        isLoading: loading,
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Center(
+                        child: Container(
+                          constraints: const BoxConstraints(
+                            maxWidth: AzTokens.contentMaxWidth,
+                          ),
+                          child: _MangaSectionTabs(
+                            activeTab: _activeTab,
+                            showChapters: hasChaptersTab,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Center(
+                        child: Container(
+                          constraints: const BoxConstraints(
+                            maxWidth: AzTokens.contentMaxWidth,
+                          ),
+                          padding: EdgeInsets.fromLTRB(
+                            isDesktop ? AzTokens.horizontalPadding : 18.0,
+                            isDesktop ? 32.0 : 24.0,
+                            isDesktop ? AzTokens.horizontalPadding : 18.0,
+                            24.0,
+                          ),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 180),
+                            child: switch (_activeTab.value) {
+                              'ch' when hasChaptersTab => KeyedSubtree(
+                                key: const ValueKey('ch'),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ReadSection(
+                                      syncId: syncId,
+                                      onChanged: (value) {
+                                        int total = 0;
+                                        for (var item in value) {
+                                          final match = RegExp(
+                                            r'\b(?:Chap(?:ter)?|Ch)\s*(\d+)\b',
+                                            caseSensitive: false,
+                                          ).firstMatch(item.name ?? '');
+                                          if (match != null) {
+                                            int episodeNumber = int.parse(
+                                              match.group(1)!,
+                                            );
+                                            total++;
+                                            log(episodeNumber.toString());
+                                          }
+                                        }
+                                        totalChapters.value = total.toString();
+                                      },
+                                      onTitleChanged: (value) {
+                                        mangaTitle.value = value;
+                                      },
+                                      onSourceChanged: () {
+                                        _extenstionError.value = false;
+                                        loadDetails();
+                                      },
+                                      hasError: _extenstionError,
+                                      isFetching: isFetchingChapters,
+                                      id: id.value,
+                                      image: media.coverImage ?? image.value,
+                                      animeTitle: mangaTitle,
+                                      installedExtensions: installedExtensions,
+                                      selectedSource: selectedSource,
+                                      totalEpisodes: totalChapters,
+                                      chaptersList: chaptersList,
+                                    ),
+                                    if (!isDesktop) const SizedBox(height: 96),
+                                  ],
+                                ),
+                              ),
+                              'cm' => KeyedSubtree(
+                                key: const ValueKey('cm'),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (id.value.isNotEmpty)
+                                      CommentsSection(
+                                        mediaId: id.value,
+                                        mediaTitle: title.value,
+                                        mediaPoster: image.value,
+                                        isManga: true,
+                                      )
+                                    else
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 32,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            'Comments are unavailable for this title.',
+                                            style: AzTokens.caption(
+                                              theme
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    if (!isDesktop) const SizedBox(height: 96),
+                                  ],
+                                ),
+                              ),
+                              _ => KeyedSubtree(
+                                key: const ValueKey('ov'),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (isDesktop)
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            flex: 6,
+                                            child: SynopsisBlock(
+                                              media: media,
+                                              isLoading: loading,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 28),
+                                          Expanded(
+                                            flex: 4,
+                                            child: FactsCard(media: media),
+                                          ),
+                                        ],
+                                      )
+                                    else ...[
+                                      SynopsisBlock(
+                                        media: media,
+                                        isLoading: loading,
+                                      ),
+                                      const SizedBox(height: 28.0),
+                                      FactsCard(media: media),
+                                    ],
+                                    const SizedBox(height: AzTokens.sectionGap),
+                                    CommunityCharts(
+                                      media: media,
+                                      showHeading: false,
+                                      showComments: false,
+                                    ),
+                                    if (media.tagsList != null &&
+                                        media.tagsList!.isNotEmpty) ...[
+                                      const SizedBox(
+                                        height: AzTokens.sectionGap,
+                                      ),
+                                      TagsSection(
+                                        tags: media.tagsList!,
+                                        isManga: true,
+                                        onMuteTag: (tagName) =>
+                                            azyxSnackBar('Muted "$tagName"'),
+                                      ),
+                                    ],
+                                    const SizedBox(height: AzTokens.sectionGap),
+                                    CharacterGrid(characters: media.characters),
+                                    if (hasRelationsOrRecs) ...[
+                                      const SizedBox(
+                                        height: AzTokens.sectionGap,
+                                      ),
+                                      if (relations.isNotEmpty)
+                                        _MangaPosterRowWrapper(
+                                          title: 'Related',
+                                          items: relations,
+                                          onItemTapped: _navigateToManga,
+                                        ),
+                                      if (recommendations.isNotEmpty)
+                                        _MangaPosterRowWrapper(
+                                          title: 'Fans also liked',
+                                          isSubheading: true,
+                                          items: recommendations,
+                                          onItemTapped: _navigateToManga,
+                                        ),
+                                    ],
+                                    if (media.siteUrl != null &&
+                                        media.siteUrl!.isNotEmpty) ...[
+                                      const SizedBox(height: 24),
+                                      AzChip(
+                                        label: 'View on AniList',
+                                        icon: Icons.open_in_new_rounded,
+                                        onTap: () {
+                                          launchUrlString(
+                                            media.siteUrl!,
+                                            mode:
+                                                LaunchMode.externalApplication,
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                    if (!isDesktop) const SizedBox(height: 96),
+                                  ],
+                                ),
+                              ),
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: _showBackButton,
+                  builder: (context, visible, child) {
+                    return IgnorePointer(
+                      ignoring: !visible,
+                      child: AnimatedSlide(
+                        offset: visible ? Offset.zero : const Offset(0, -1.2),
+                        duration: const Duration(milliseconds: 240),
+                        curve: Curves.easeOutCubic,
+                        child: AnimatedOpacity(
+                          opacity: visible ? 1.0 : 0.0,
+                          duration: const Duration(milliseconds: 200),
+                          child: child,
+                        ),
+                      ),
                     );
-                  }
-                },
-                splashBorderRadius: BorderRadius.circular(14),
-                indicatorSize: TabBarIndicatorSize.tab,
-                dividerColor: Colors.transparent,
-                indicatorPadding: const EdgeInsets.all(3),
-                indicator: BoxDecoration(
-                  color: colorScheme.primary.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(13),
-                  border: Border.all(
-                    color: colorScheme.primary.withOpacity(0.3),
-                    width: 0.8,
+                  },
+                  child: DetailsTopBar(
+                    showBackButton: Navigator.of(context).canPop(),
+                    title: media.title ?? media.titleRomaji,
+                    categoryLabel: 'Manga',
                   ),
                 ),
-                labelColor: colorScheme.primary,
-                unselectedLabelColor: colorScheme.onSurfaceVariant,
-                labelStyle: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                  fontFamily: theme.textTheme.titleMedium?.fontFamily,
-                ),
-                unselectedLabelStyle: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 13,
-                  fontFamily: theme.textTheme.titleMedium?.fontFamily,
-                ),
-                tabs: [
-                  const Tab(text: "Overview"),
-                  if (sourceController.installedMangaExtensions.isNotEmpty)
-                    const Tab(text: "Chapters"),
-                  const Tab(text: "Comments"),
-                ],
               ),
-            ),
-            const SizedBox(height: 20),
-            ExpandablePageView(
-              controller: pageController,
-              children: [
-                Obx(
-                  () => isLoading.value || _anilistError.value.isNotEmpty
-                      ? Center(
-                          child: _anilistError.value.isNotEmpty
-                              ? AzyXText(
-                                  text: _anilistError.value,
-                                  textAlign: TextAlign.center,
-                                  fontSize: 20,
-                                )
-                              : const LoadingIndicatorM3E(),
-                        )
-                      : DetailsSection(
-                          mediaData: mediaData,
-                          index: _tabBarController.index,
-                          animeTitle: mangaTitle.value,
-                          isManga: true,
-                          chapterList: chaptersList.toList(),
-                        ),
+              if (!isDesktop && !loading && !hasError)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: MobileDock(
+                    primaryLabel: primaryLabel,
+                    onWatchTap: () {
+                      if (hasChaptersTab) {
+                        _activeTab.value = 'ch';
+                      } else {
+                        azyxSnackBar('No manga extensions installed');
+                      }
+                    },
+                    onListTap: () => _openListSheet(context),
+                    onFavTap: _toggleFavourite,
+                    isFavourite: isFav,
+                    isListOn: isListOn,
+                  ),
                 ),
-                if (sourceController.installedMangaExtensions.isNotEmpty)
-                  Obx(
-                    () => ReadSection(
-                      syncId: syncId,
-                      onChanged: (value) {
-                        int total = 0;
-                        for (var item in value) {
-                          final match = RegExp(
-                            r'\b(?:Chap(?:ter)?|Ch)\s*(\d+)\b',
-                            caseSensitive: false,
-                          ).firstMatch(item.name ?? '');
-                          if (match != null) {
-                            int episodeNumber = int.parse(match.group(1)!);
-                            total++;
-                            log(episodeNumber.toString());
-                          }
-                        }
-                        totalChapters.value = total.toString();
-                      },
-                      onTitleChanged: (value) {
-                        mangaTitle.value = value;
-                      },
-                      onSourceChanged: () {
-                        _extenstionError.value = false;
-                        loadDetails();
-                      },
-                      hasError: _extenstionError,
-                      isFetching: isFetchingChapters,
-                      id: id.value,
-                      image: mediaData.value.coverImage ?? image.value,
-                      animeTitle: mangaTitle,
-                      installedExtensions: installedExtensions,
-                      selectedSource: selectedSource,
-                      totalEpisodes: totalChapters,
-                      chaptersList: chaptersList,
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  String _formatListStatus(String raw) {
+    switch (raw.toUpperCase()) {
+      case 'CURRENT':
+        return 'Currently reading';
+      case 'PLANNING':
+        return 'Plan to read';
+      case 'COMPLETED':
+        return 'Completed';
+      case 'PAUSED':
+        return 'Paused';
+      case 'DROPPED':
+        return 'Dropped';
+      case 'REPEATING':
+        return 'Rereading';
+      default:
+        return raw;
+    }
+  }
+}
+
+class _MangaSectionTabs extends StatelessWidget {
+  final RxString activeTab;
+  final bool showChapters;
+
+  const _MangaSectionTabs({
+    required this.activeTab,
+    required this.showChapters,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Obx(() {
+      final tabs = <MapEntry<String, String>>[
+        const MapEntry('ov', 'Details'),
+        if (showChapters) const MapEntry('ch', 'Chapters'),
+        const MapEntry('cm', 'Comments'),
+      ];
+
+      final currentTab = activeTab.value;
+      final hPad = MediaQuery.of(context).size.width < 600
+          ? 16.0
+          : AzTokens.horizontalPadding;
+
+      return Container(
+        height: 48,
+        margin: EdgeInsets.symmetric(horizontal: hPad),
+        constraints: const BoxConstraints(maxWidth: AzTokens.contentMaxWidth),
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color:
+              theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
+            width: 0.8,
+          ),
+        ),
+        child: Row(
+          children: tabs.map((tab) {
+            final isSelected = currentTab == tab.key;
+            return Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => activeTab.value = tab.key,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOutCubic,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? theme.colorScheme.primaryContainer
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      tab.value,
+                      style: AzTokens.body(
+                        color: isSelected
+                            ? theme.colorScheme.onPrimaryContainer
+                            : theme.colorScheme.onSurfaceVariant,
+                        weight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        size: 14,
+                      ),
                     ),
                   ),
-                CommentsSection(
-                  mediaId: id.value,
-                  mediaTitle: title.value,
-                  mediaPoster: image.value,
-                  isManga: true,
                 ),
-              ],
-            ),
-            const SizedBox(height: 120),
-          ],
+              ),
+            );
+          }).toList(),
         ),
-      ),
+      );
+    });
+  }
+}
+
+class _MangaPosterRowWrapper extends StatelessWidget {
+  final String title;
+  final bool isSubheading;
+  final List<PosterRowItem> items;
+  final void Function(PosterRowItem item) onItemTapped;
+
+  const _MangaPosterRowWrapper({
+    required this.title,
+    this.isSubheading = false,
+    required this.items,
+    required this.onItemTapped,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return PosterRow(
+      title: title,
+      isSubheading: isSubheading,
+      items: items,
+      onItemTapped: (id) {
+        final match = items.firstWhere(
+          (e) => e.id == id,
+          orElse: () => items.first,
+        );
+        onItemTapped(match);
+      },
     );
   }
 }

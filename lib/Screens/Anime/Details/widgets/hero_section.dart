@@ -4,7 +4,6 @@ import 'package:azyx/Screens/Anime/Details/tokens/az_tones.dart';
 import 'package:azyx/Screens/Anime/Details/utils/formatters.dart';
 import 'package:azyx/Screens/Anime/Details/widgets/az_button.dart';
 import 'package:azyx/Screens/Anime/Details/widgets/az_chip.dart';
-import 'package:azyx/Screens/Anime/Details/widgets/score_ring.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -85,10 +84,10 @@ class HeroSection extends StatelessWidget {
     final hasEpisodes = media.episodes != null && media.episodes! > 0;
     final hasAnyMeta = hasStatus || hasType || hasSeason || hasEpisodes;
 
-    final hPad = isNarrow ? 16.0 : AzTokens.horizontalPadding;
+    final hPad = isNarrow ? 18.0 : AzTokens.horizontalPadding;
     final topPad = isNarrow
-        ? (MediaQuery.of(context).padding.top + 52.0)
-        : AzTokens.heroTopPadding;
+        ? (MediaQuery.of(context).padding.top + 84.0)
+        : (MediaQuery.of(context).padding.top + 112.0);
 
     final infoColumn = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,32 +183,22 @@ class HeroSection extends StatelessWidget {
           ),
         ],
         const SizedBox(height: 16.0),
-        if ((resolvedScore != null && resolvedScore > 0) ||
-            allTimeRankings.isNotEmpty ||
-            favCount.isNotEmpty)
+        if (allTimeRankings.isNotEmpty || favCount.isNotEmpty)
           Container(
             width: double.infinity,
             padding:
-                const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerLow.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(16.0),
+              color: colorScheme.surfaceContainer.withValues(alpha: 0.72),
+              borderRadius: BorderRadius.circular(18.0),
               border: Border.all(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.12),
+                color: colorScheme.outlineVariant.withValues(alpha: 0.16),
                 width: 0.8,
               ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                if (resolvedScore != null && resolvedScore > 0) ...[
-                  ScoreRing(
-                    score: resolvedScore,
-                    size: 44.0,
-                    strokeWidth: 3.0,
-                  ),
-                  _buildDivider(colorScheme),
-                ],
                 ...allTimeRankings.map((r) => Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -290,7 +279,7 @@ class HeroSection extends StatelessWidget {
         hPad,
         topPad,
         hPad,
-        isNarrow ? 12.0 : 18.0,
+        isNarrow ? 22.0 : 28.0,
       ),
       child: Center(
         child: ConstrainedBox(
@@ -431,35 +420,24 @@ class HeroSection extends StatelessWidget {
                         ),
                       ],
                       const SizedBox(height: 14.0),
-                      if ((resolvedScore != null && resolvedScore > 0) ||
-                          allTimeRankings.isNotEmpty ||
-                          favCount.isNotEmpty)
+                      if (allTimeRankings.isNotEmpty || favCount.isNotEmpty)
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12.0, vertical: 10.0),
+                              horizontal: 14.0, vertical: 12.0),
                           decoration: BoxDecoration(
-                            color: colorScheme.surfaceContainerLow
-                                .withValues(alpha: 0.5),
-                            borderRadius: BorderRadius.circular(16.0),
+                            color: colorScheme.surfaceContainer
+                                .withValues(alpha: 0.72),
+                            borderRadius: BorderRadius.circular(18.0),
                             border: Border.all(
                               color: colorScheme.outlineVariant
-                                  .withValues(alpha: 0.12),
+                                  .withValues(alpha: 0.16),
                               width: 0.8,
                             ),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              if (resolvedScore != null &&
-                                  resolvedScore > 0) ...[
-                                ScoreRing(
-                                  score: resolvedScore,
-                                  size: 40.0,
-                                  strokeWidth: 2.8,
-                                ),
-                                _buildDivider(colorScheme, height: 22.0),
-                              ],
                               ...allTimeRankings.map((r) => Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
