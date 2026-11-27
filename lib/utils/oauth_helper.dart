@@ -11,6 +11,18 @@ class OauthHelper {
     required String callbackUrlScheme,
     bool forceWebAuth = false,
   }) async {
+    try {
+      final result = await FlutterWebAuth2.authenticate(
+        url: url,
+        callbackUrlScheme: callbackUrlScheme,
+      );
+      if (result.isNotEmpty) {
+        return result;
+      }
+    } catch (e) {
+      debugPrint('FlutterWebAuth2 error: $e');
+    }
+
     final supportsWebView =
         !forceWebAuth && (Platform.isAndroid || Platform.isIOS);
 
@@ -32,18 +44,6 @@ class OauthHelper {
       } catch (e) {
         debugPrint('WebView login error: $e');
       }
-    }
-
-    try {
-      final result = await FlutterWebAuth2.authenticate(
-        url: url,
-        callbackUrlScheme: callbackUrlScheme,
-      );
-      if (result.isNotEmpty) {
-        return result;
-      }
-    } catch (e) {
-      debugPrint('FlutterWebAuth2 error: $e');
     }
 
     try {
@@ -89,7 +89,9 @@ class _OauthWebViewPageState extends State<OauthWebViewPage> {
     final isWindows = Platform.isWindows;
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(kToolbarHeight + (isWindows ? 40.0 : 0.0)),
+        preferredSize: Size.fromHeight(
+          kToolbarHeight + (isWindows ? 40.0 : 0.0),
+        ),
         child: Padding(
           padding: EdgeInsets.only(top: isWindows ? 40.0 : 0.0),
           child: AppBar(
@@ -110,8 +112,9 @@ class _OauthWebViewPageState extends State<OauthWebViewPage> {
           useShouldOverrideUrlLoading: true,
           transparentBackground: false,
           supportZoom: false,
-          userAgent:
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          userAgent: Platform.isWindows || Platform.isLinux || Platform.isMacOS
+              ? "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+              : null,
         ),
         onLoadStart: (controller, url) => _checkUrl(url),
         onLoadStop: (controller, url) => _checkUrl(url),
@@ -121,8 +124,12 @@ class _OauthWebViewPageState extends State<OauthWebViewPage> {
           _checkUrl(url);
           controller.getUrl().then((u) => _checkUrl(u));
           final text = '${url.toString()} ${error.description}';
-          if (text.contains('code=') || text.contains('${widget.callbackUrlScheme}://')) {
-            final pattern = r'(' + widget.callbackUrlScheme + r'://[^\s"\x27<>]+|https?://[^\s"\x27<>]+[?&]code=[^\s"\x27<>]+)';
+          if (text.contains('code=') ||
+              text.contains('${widget.callbackUrlScheme}://')) {
+            final pattern =
+                r'(' +
+                widget.callbackUrlScheme +
+                r'://[^\s"\x27<>]+|https?://[^\s"\x27<>]+[?&]code=[^\s"\x27<>]+)';
             final match = RegExp(pattern).firstMatch(text);
             if (match != null && !_finished) {
               _finished = true;
