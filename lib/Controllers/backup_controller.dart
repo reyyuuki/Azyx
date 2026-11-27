@@ -16,6 +16,7 @@ import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Providers/theme_provider.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:isar_community/isar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -135,10 +136,10 @@ class BackupController extends GetxController {
 
       final file = File(outputPath);
       await file.writeAsString(jsonString);
-      Get.snackbar('Backup', 'Backup exported successfully!');
+      azyxSnackBar('Backup exported successfully!');
       return outputPath;
     } catch (e) {
-      Get.snackbar('Backup Failed', e.toString());
+      azyxSnackBar('Backup Failed', subtitle: e.toString());
       return null;
     } finally {
       isBackingUp.value = false;
@@ -296,14 +297,15 @@ class BackupController extends GetxController {
         } catch (_) {}
       }
 
-      Get.snackbar(
+      azyxSnackBar(
         'Restore Complete',
-        'Restored: $historyRestored history, $categoriesRestored categories, $offlineRestored downloads, $settingsRestored settings',
+        subtitle:
+            'Restored: $historyRestored history, $categoriesRestored categories, $offlineRestored downloads, $settingsRestored settings',
       );
       return true;
     } catch (e, stackTrace) {
       log('Restore failed error: $e\n$stackTrace');
-      Get.snackbar('Restore Failed', e.toString());
+      azyxSnackBar('Restore Failed', subtitle: e.toString());
       return false;
     } finally {
       isRestoring.value = false;

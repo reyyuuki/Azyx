@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 import 'package:azyx/Widgets/Animation/drop_animation.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 class Utils {
@@ -7,7 +8,7 @@ class Utils {
     developer.log('[AzyX]: $message');
   }
   static void showSnackBar(String title, String message) {
-    Get.snackbar(title, message);
+    azyxSnackBar(title, subtitle: message);
   }
 }
 extension NavigatorExts on Widget {
