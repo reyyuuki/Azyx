@@ -4,6 +4,7 @@ import 'dart:math' hide log;
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
 import 'package:azyx/Controllers/local_history_controller.dart';
+import 'package:azyx/Controllers/services/episode_metadata_service.dart';
 import 'package:azyx/Controllers/services/models/base_service.dart';
 import 'package:azyx/Controllers/services/service_handler.dart';
 import 'package:azyx/Controllers/source/source_controller.dart';
@@ -15,6 +16,8 @@ import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
 import 'package:azyx/Models/user_media.dart';
 import 'package:azyx/Widgets/anime/episodes_list.dart';
+import 'package:azyx/Widgets/custom_drop_down.dart';
+import 'package:azyx/Widgets/list_editor_sheet.dart';
 import 'package:azyx/utils/source_mapper.dart';
 import 'package:azyx/Screens/Anime/Details/widgets/wrong_title_sheet.dart';
 import 'package:flutter/material.dart';
@@ -68,10 +71,21 @@ class AnimeDetailsController extends GetxController {
   int? currentAnimeId;
   bool isOfflineMode = false;
   OfflineItem? offlineItemData;
+  int _sourceRequestVersion = 0;
+
+  int _beginSourceRequest() {
+    SourceMapper.interruptMapping();
+    sourceController.cancelInProgress('search');
+    sourceController.cancelInProgress('detail');
+    return ++_sourceRequestVersion;
+  }
+
+  bool _isStaleSourceRequest(int reqId) => reqId != _sourceRequestVersion;
 
   @override
   void onInit() {
     super.onInit();
+    activeSource.value = sourceController.activeSource.value;
     scrollController.addListener(_onScroll);
   }
 
@@ -81,8 +95,9 @@ class AnimeDetailsController extends GetxController {
     scrollController.dispose();
     _toastTimer?.cancel();
     _searchDebounce?.cancel();
+    SourceMapper.interruptMapping();
+    sourceController.cancelInProgress('search');
     sourceController.cancelInProgress('detail');
-    SourceMapper.cancelMapping();
     super.onClose();
   }
 
@@ -305,6 +320,8 @@ class AnimeDetailsController extends GetxController {
         return 'Plan to watch';
       case 'COMPLETED':
         return 'Completed';
+      case 'REPEATING':
+        return 'Rewatching';
       case 'PAUSED':
         return 'Paused';
       case 'DROPPED':
@@ -322,6 +339,8 @@ class AnimeDetailsController extends GetxController {
         return 'PLANNING';
       case 'Completed':
         return 'COMPLETED';
+      case 'Rewatching':
+        return 'REPEATING';
       case 'Paused':
         return 'PAUSED';
       case 'Dropped':
@@ -354,6 +373,40 @@ class AnimeDetailsController extends GetxController {
 
   Future<void> setMediaListStatus(String status) => setListStatus(status);
   Future<void> deleteFromList() => setListStatus(null);
+
+  Future<void> saveMediaListEntry(ListEditorResult result) async {
+    final animeId = currentAnimeId;
+    if (animeId == null) return;
+    final token = AuthKeys.anilistToken.get<String>('');
+    if (token.isEmpty) {
+      showToast('Sign in to AniList to save this');
+      return;
+    }
+    final previousStatus = listStatus.value;
+    final previousProgress = listProgress.value;
+    listStatus.value = _mapAniListStatusToDisplay(result.status);
+    listProgress.value = result.progress;
+    try {
+      await serviceHandler.updateListEntry(
+        UserMedia(
+          id: animeId.toString(),
+          status: result.status,
+          score: result.score > 0 ? result.score : null,
+          progress: result.progress,
+          startedAt: result.startedAt,
+          completedAt: result.completedAt,
+          isPrivate: result.isPrivate,
+          repeat: result.repeat,
+        ),
+        isAnime: true,
+      );
+      showToast('Saved to ${listStatus.value.toLowerCase()}');
+    } catch (_) {
+      listStatus.value = previousStatus;
+      listProgress.value = previousProgress;
+      showToast('Failed to update list');
+    }
+  }
 
   Future<void> setListStatus(String? newDisplayStatus) async {
     final animeId = currentAnimeId;
@@ -408,8 +461,16 @@ class AnimeDetailsController extends GetxController {
       return;
     }
 
+    if (sourceController.activeSource.value == null) {
+      sourceController.setActiveSource(sourceController.installedExtensions.first);
+    }
+    activeSource.value = sourceController.activeSource.value;
+
+    final reqId = _beginSourceRequest();
     isFetchingEpisodes.value = true;
     extensionError.value = false;
+    episodesList.clear();
+    filteredEpisodes.clear();
 
     try {
       final titles = [
@@ -426,29 +487,34 @@ class AnimeDetailsController extends GetxController {
         synonyms: mediaData.value.synonyms ?? [],
       );
 
+      if (isClosed || _isStaleSourceRequest(reqId)) return;
+
       if (result != null && result.url != null) {
         mappedExtensionTitle.value = result.title ?? '';
-        await fetchEpisodesForLink(result.url!);
+        await fetchEpisodesForLink(result.url!, reqId: reqId);
       } else {
         extensionError.value = true;
       }
     } catch (e) {
+      if (isClosed || _isStaleSourceRequest(reqId)) return;
       log('fetchEpisodes error: $e');
       extensionError.value = true;
     } finally {
-      isFetchingEpisodes.value = false;
+      if (!isClosed && !_isStaleSourceRequest(reqId)) {
+        isFetchingEpisodes.value = false;
+      }
     }
   }
 
-  Future<void> fetchEpisodesForLink(String link) async {
-    final token = 'detail_${currentAnimeId ?? ''}';
+  Future<void> fetchEpisodesForLink(String link, {int? reqId}) async {
+    final activeReqId = reqId ?? _beginSourceRequest();
+    final token = 'detail_${currentAnimeId ?? ''}_$activeReqId';
     sourceController.updateToken('detail', token);
     try {
       final episodeResult = await sourceController.activeSource.value!.methods
-          .getDetail(
-            DMedia.withUrl(link),
-            parameters: SourceParams(cancelToken: token),
-          );
+          .getDetail(DMedia.withUrl(link));
+
+      if (isClosed || _isStaleSourceRequest(activeReqId)) return;
 
       final rawList = List<DEpisode>.from(episodeResult.episodes ?? []);
       rawList.sort((a, b) {
@@ -493,38 +559,14 @@ class AnimeDetailsController extends GetxController {
   }
 
   Future<void> _enrichWithAnifyData() async {
+    if (!EpisodeMetadataService.isEnabled || currentAnimeId == null) return;
     try {
-      final resp = await http.get(
-        Uri.parse('https://api.ani.zip/mappings?anilist_id=$currentAnimeId'),
+      final enriched = await EpisodeMetadataService.enrichEpisodes(
+        episodes: episodesList.toList(),
+        anilistId: currentAnimeId!,
+        title: mediaData.value.title ?? mediaData.value.titleRomaji,
       );
-      if (resp.statusCode == 200) {
-        final parsed = jsonDecode(resp.body);
-        final anifyEps = parsed['episodes'] as Map<String, dynamic>?;
-        if (anifyEps != null) {
-          final enriched = episodesList.map((entry) {
-            dynamic data;
-            for (final e in anifyEps.values) {
-              if (e is Map && e['absoluteEpisodeNumber']?.toString() == entry.number) {
-                data = e;
-                break;
-              }
-            }
-            return Episode(
-              url: entry.url ?? '',
-              number: entry.number,
-              desc: data != null ? (data['overview'] ?? '') : entry.desc,
-              thumbnail: data != null ? (data['image'] ?? '') : entry.thumbnail,
-              title: data != null ? ((data['title']?['en']) ?? '') : entry.title,
-              sortKeys: entry.sortKeys,
-              sortVals: entry.sortVals,
-              season: entry.season,
-              type: entry.type,
-              filler: entry.filler,
-            );
-          }).toList();
-          episodesList.assignAll(enriched);
-        }
-      }
+      episodesList.assignAll(enriched);
     } catch (e) {
       log('_enrichWithAnifyData error: $e');
     }
@@ -651,6 +693,12 @@ class AnimeDetailsController extends GetxController {
   }
 
   void onEpisodeTapped(BuildContext context, Episode episode) {
+    final source = sourceController.activeSource.value;
+    if (source == null) {
+      showToast('Select an extension first');
+      return;
+    }
+
     final scrapeToken =
         'scrape_${DateTime.now().millisecondsSinceEpoch}_${episode.number}_${Random().nextInt(10000)}';
     final sourceEpisode = DEpisode(
@@ -659,19 +707,25 @@ class AnimeDetailsController extends GetxController {
       sortMap: episode.effectiveSortMap,
     );
 
-    final stream = () async* {
-      try {
-        final list = await sourceController.activeSource.value!.methods.getVideoList(
-          sourceEpisode,
-          parameters: SourceParams(cancelToken: scrapeToken),
-        );
-        for (final video in list) {
-          yield video;
-        }
-      } catch (e) {
-        log('getVideoList error: $e');
-      }
-    }();
+    final methods = source.methods;
+    final nativeStream = methods.getVideoListStream(
+      sourceEpisode,
+      parameters: SourceParams(cancelToken: scrapeToken),
+    );
+    final stream = nativeStream ??
+        () async* {
+          try {
+            final list = await methods.getVideoList(
+              sourceEpisode,
+              parameters: SourceParams(cancelToken: scrapeToken),
+            );
+            for (final video in list) {
+              yield video;
+            }
+          } catch (e) {
+            log('getVideoList error: $e');
+          }
+        }();
 
     final hasErrorRx = false.obs;
     final epTitleRx = (episode.title ?? '').obs;
@@ -698,7 +752,7 @@ class AnimeDetailsController extends GetxController {
         );
       },
     ).whenComplete(() {
-      sourceController.activeSource.value?.cancelRequest(scrapeToken);
+      source.cancelRequest(scrapeToken);
     });
   }
 
@@ -749,74 +803,10 @@ class AnimeDetailsController extends GetxController {
   }
 
   void scrollToSection(String sectionId) {
-    final key = sectionKeys[sectionId];
-    if (key == null || key.currentContext == null) return;
-
-    _isManualScrolling = true;
     activeTab.value = sectionId;
-
-    try {
-      final renderBox = key.currentContext!.findRenderObject() as RenderBox?;
-      if (renderBox != null) {
-        final position = renderBox.localToGlobal(Offset.zero);
-        final currentScroll = scrollController.offset;
-        final targetOffset = (currentScroll + position.dy - 132.0).clamp(
-          0.0,
-          scrollController.position.maxScrollExtent,
-        );
-        scrollController
-            .animateTo(
-          targetOffset,
-          duration: const Duration(milliseconds: 320),
-          curve: Curves.easeInOutCubic,
-        )
-            .then((_) {
-          _isManualScrolling = false;
-        });
-        return;
-      }
-    } catch (_) {}
-
-    Scrollable.ensureVisible(
-      key.currentContext!,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOutCubic,
-    ).then((_) {
-      _isManualScrolling = false;
-    });
   }
 
-  void _onScroll() {
-    if (_isManualScrolling) return;
-
-    final scrollOffset = scrollController.offset;
-    final viewportHeight = scrollController.position.viewportDimension;
-    final targetY = scrollOffset + viewportHeight * 0.3;
-
-    String? currentSection;
-
-    for (final entry in sectionKeys.entries) {
-      final key = entry.value;
-      final ctx = key.currentContext;
-      if (ctx != null) {
-        final box = ctx.findRenderObject() as RenderBox?;
-        if (box != null && box.hasSize) {
-          final pos = box.localToGlobal(Offset.zero, ancestor: null);
-          final sectionTop = scrollOffset + pos.dy - 132;
-          final sectionBottom = sectionTop + box.size.height;
-
-          if (targetY >= sectionTop && targetY <= sectionBottom) {
-            currentSection = entry.key;
-            break;
-          }
-        }
-      }
-    }
-
-    if (currentSection != null && activeTab.value != currentSection) {
-      activeTab.value = currentSection;
-    }
-  }
+  void _onScroll() {}
 
   Future<void> loadData() async {
     if (currentAnimeId != null) {
@@ -828,6 +818,18 @@ class AnimeDetailsController extends GetxController {
     await fetchEpisodes();
   }
 
+  void switchExtension(Source source) {
+    _beginSourceRequest();
+    sourceController.setActiveSource(source);
+    activeSource.value = source;
+    selectedSeason.value = '';
+    selectedType.value = '';
+    episodeFilter.value = '';
+    episodesList.clear();
+    filteredEpisodes.clear();
+    fetchEpisodes();
+  }
+
   void openSourceSelector(BuildContext context) {
     final installed = sourceController.installedExtensions;
     if (installed.isEmpty) {
@@ -835,51 +837,22 @@ class AnimeDetailsController extends GetxController {
       return;
     }
 
-    showModalBottomSheet(
+    CustomSourceDropdown.showSourceSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (ctx) {
-        final theme = Theme.of(ctx);
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Select Extension Source',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: installed.length,
-                  itemBuilder: (context, index) {
-                    final source = installed[index];
-                    final isCurrent = source.id == activeSource.value?.id;
-
-                    return ListTile(
-                      title: Text(source.name ?? ''),
-                      trailing:
-                          isCurrent ? const Icon(Icons.check_rounded) : null,
-                      onTap: () {
-                        sourceController.setActiveSource(source);
-                        activeSource.value = source;
-                        Navigator.pop(ctx);
-                        fetchEpisodes();
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
+      items: installed.toList(),
+      currentSource: activeSource.value ?? sourceController.activeSource.value,
+      labelText: 'Source',
+      onChanged: (value) {
+        if (value != null) {
+          final matched = installed.firstWhere(
+            (i) =>
+                i.id.toString() == value ||
+                '${i.name}_${i.id}' == value ||
+                i.name == value,
+            orElse: () => installed.first,
+          );
+          switchExtension(matched);
+        }
       },
     );
   }

@@ -49,4 +49,25 @@ enum SyncKeys {
   gistSyncSettings,
 }
 enum WatchiumKeys { serverUrl }
+enum SubtitleKeys {
+  fontSize,
+  textColor,
+  backgroundColor,
+  backgroundOpacity,
+  outlineWidth,
+  outlineColor,
+  bottomMargin,
+  opacity,
+}
+enum PlayerKeys {
+  visualProfile,
+  customColorSettings,
+}
+enum CacheKeys {
+  anilistHomeData,
+}
+enum MetadataKeys {
+  episodeMetadataEnabled,
+  episodeMetadataProvider,
+}
 
