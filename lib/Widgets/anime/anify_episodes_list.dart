@@ -130,20 +130,25 @@ class AnifyEpisodesWidget extends StatelessWidget {
             log(
               '[AnifyEpisodesList] Tapped EP ${entry.number} url=${entry.url} sortMap=${sourceEpisode.sortMap}',
             );
-            final stream = () async* {
-              try {
-                final list = await sourceController.activeSource.value!.methods
-                    .getVideoList(
+            final methods = sourceController.activeSource.value!.methods;
+            final nativeStream = methods.getVideoListStream(
+              sourceEpisode,
+              parameters: SourceParams(cancelToken: scrapeToken),
+            );
+            final stream = nativeStream ??
+                () async* {
+                  try {
+                    final list = await methods.getVideoList(
                       sourceEpisode,
                       parameters: SourceParams(cancelToken: scrapeToken),
                     );
-                for (final video in list) {
-                  yield video;
-                }
-              } catch (e) {
-                log('[AnifyEpisodesList] getVideoList error: $e');
-              }
-            }();
+                    for (final video in list) {
+                      yield video;
+                    }
+                  } catch (e) {
+                    log('[AnifyEpisodesList] getVideoList error: $e');
+                  }
+                }();
             showModalBottomSheet(
               context: context,
               shape: const RoundedRectangleBorder(

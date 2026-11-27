@@ -108,7 +108,6 @@ class SourceMapper {
         query,
         1,
         [],
-        parameters: SourceParams(cancelToken: token),
       )).list;
       if (results.isEmpty || isInterrupted()) return;
       final allTargetTitles = {

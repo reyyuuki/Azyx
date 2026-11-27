@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.dart'
     hide isar;
 import 'package:azyx/Database/keys/data_keys.dart';
 import 'package:azyx/Database/kv_helper.dart';
+import 'package:azyx/Extensions/plugin_manager.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:get/get.dart';
 
@@ -25,6 +28,7 @@ class SourceController extends GetxController {
   var lastUpdatedSource = "".obs;
   final RxBool shouldShowExtensions = false.obs;
   final RxBool isExtensionManagerInitialized = false.obs;
+  final RxInt extensionUpdatesCount = 0.obs;
   bool _isBridgeLoaded = false;
   ExtensionManager? _extensionManager;
   ExtensionManager get extensionManager {
@@ -95,7 +99,8 @@ class SourceController extends GetxController {
     final manager = extensionManager;
     await manager.onRuntimeBridgeInitialization();
     _isBridgeLoaded = true;
-    fetchRepos();
+    await fetchRepos();
+    unawaited(checkBridgeUpdate());
   }
 
   void _bindExtensionLists() {
@@ -174,6 +179,7 @@ class SourceController extends GetxController {
     novelRepos.value = extensionManager.getAllRepos(ItemType.novel);
     await extensionManager.refreshExtensions(refreshAvailableSource: true);
     await initExtensions();
+    await checkForUpdates();
   }
 
   void setActiveSource(Source source) {
@@ -238,6 +244,97 @@ class SourceController extends GetxController {
         return availableMangaExtensions;
       case ItemType.novel:
         return availableNovelExtensions;
+    }
+  }
+
+  bool isExtensionNewerVersion(String? installed, String? latest) {
+    if (installed == null || latest == null) return false;
+    if (installed.isEmpty || latest.isEmpty) return false;
+
+    String clean(String v) =>
+        v.toLowerCase().replaceAll(RegExp(r'[^0-9.]'), '');
+    final installedClean = clean(installed);
+    final latestClean = clean(latest);
+
+    if (installedClean.isEmpty || latestClean.isEmpty) return false;
+
+    final installedParts = installedClean
+        .split('.')
+        .where((e) => e.isNotEmpty)
+        .map((e) => int.tryParse(e) ?? 0)
+        .toList();
+    final latestParts = latestClean
+        .split('.')
+        .where((e) => e.isNotEmpty)
+        .map((e) => int.tryParse(e) ?? 0)
+        .toList();
+
+    final maxLength = installedParts.length > latestParts.length
+        ? installedParts.length
+        : latestParts.length;
+
+    for (var index = 0; index < maxLength; index++) {
+      final installedPart = index < installedParts.length
+          ? installedParts[index]
+          : 0;
+      final latestPart = index < latestParts.length ? latestParts[index] : 0;
+
+      if (latestPart > installedPart) return true;
+      if (latestPart < installedPart) return false;
+    }
+    return false;
+  }
+
+  bool extensionHasUpdate(Source source) {
+    if (source.hasUpdate == true) return true;
+    final type = source.itemType;
+    if (type == null) return false;
+    final availableList = getAvailableExtensions(type);
+    final available = availableList.firstWhereOrNull((s) {
+      if (s.runtimeType != source.runtimeType) return false;
+      if (s.id?.toString() == source.id?.toString() &&
+          s.id != null &&
+          s.id!.isNotEmpty) {
+        return true;
+      }
+      return s.name != null && s.name!.isNotEmpty && s.name == source.name;
+    });
+    if (available == null) return false;
+    return isExtensionNewerVersion(source.version, available.version);
+  }
+
+  Future<void> checkBridgeUpdate() async {
+    try {
+      if (Platform.isAndroid &&
+          await AnymeXRuntimeBridge.isLoadedFromStorage()) {
+        return;
+      }
+      final manager = PluginManager();
+      final latestRelease = await manager.fetchLatestRelease();
+      if (latestRelease != null) {
+        final installed = manager.installedVersion;
+        if (installed.isNotEmpty &&
+            manager.isNewerVersion(installed, latestRelease.tagName)) {
+          azyxSnackBar(
+            'Extension Bridge update available (${latestRelease.tagName}). Open Extension Manager to update.',
+          );
+        }
+      }
+    } catch (e) {
+      log('Error checking for bridge updates: $e');
+    }
+  }
+
+  Future<void> checkForUpdates() async {
+    try {
+      final updatesCount = [
+        ...installedExtensions,
+        ...installedMangaExtensions,
+        ...installedNovelExtensions,
+      ].where((s) => extensionHasUpdate(s)).length;
+      extensionUpdatesCount.value = updatesCount;
+    } catch (e) {
+      log('Error checking for updates: $e');
     }
   }
 }

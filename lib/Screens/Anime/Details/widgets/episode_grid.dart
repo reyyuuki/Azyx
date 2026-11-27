@@ -7,6 +7,7 @@ import 'package:azyx/Screens/Anime/Details/tokens/az_tokens.dart';
 import 'package:azyx/Screens/Anime/Details/tokens/az_tones.dart';
 import 'package:azyx/Screens/Anime/Details/widgets/az_button.dart';
 import 'package:azyx/Screens/Anime/Details/widgets/az_chip.dart';
+import 'package:azyx/Widgets/custom_drop_down.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -38,31 +39,40 @@ class EpisodeGrid extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 8.0,
-            runSpacing: 8.0,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Episodes', style: AzTokens.h2(context)),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AzChip(
-                    label: activeSourceName,
-                    icon: Icons.extension_rounded,
-                    onTap: () => _openSourcePicker(context),
-                  ),
-                  const SizedBox(width: 8),
-                  AzChip(
-                    label: 'Wrong title?',
-                    icon: Icons.sync_problem_rounded,
-                    onTap: () => controller.openWrongTitleDialog(context),
-                  ),
-                ],
+              AzChip(
+                label: 'Wrong title?',
+                icon: Icons.sync_problem_rounded,
+                onTap: () => controller.openWrongTitleDialog(context),
               ),
             ],
           ),
+          if (sourceController.installedExtensions.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            CustomSourceDropdown(
+              items: sourceController.installedExtensions,
+              sourceController: sourceController,
+              selectedSource: controller.activeSource.value ??
+                  sourceController.activeSource.value ??
+                  sourceController.installedExtensions.first,
+              labelText: 'Source',
+              onChanged: (value) {
+                if (value != null) {
+                  final matched = sourceController.installedExtensions.firstWhere(
+                    (i) =>
+                        i.id.toString() == value ||
+                        "${i.name}_${i.id}" == value ||
+                        i.name == value,
+                    orElse: () => sourceController.installedExtensions.first,
+                  );
+                  controller.switchExtension(matched);
+                }
+              },
+            ),
+          ],
           const SizedBox(height: 14),
           if (seasons.length > 1 || types.length > 1 || totalEpisodes > 12) ...[
             SingleChildScrollView(
@@ -214,18 +224,41 @@ class EpisodeGrid extends StatelessWidget {
           else
             LayoutBuilder(
               builder: (context, constraints) {
+                final isWide = constraints.maxWidth >= 650;
+                if (!isWide) {
+                  return ListView.separated(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: episodes.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final ep = episodes[index];
+                      final isNextToWatch = ep.number == nextEpNum;
+                      return _buildEpisodeCard(
+                        context,
+                        ep,
+                        theme,
+                        tones,
+                        isNextToWatch: isNextToWatch,
+                      );
+                    },
+                  );
+                }
+
                 final crossAxisCount =
-                    max(1, (constraints.maxWidth / 240).floor());
+                    constraints.maxWidth >= 1000 ? 3 : 2;
 
                 return GridView.builder(
                   shrinkWrap: true,
+                  padding: EdgeInsets.zero,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: episodes.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: crossAxisCount,
-                    crossAxisSpacing: 14,
-                    mainAxisSpacing: 14,
-                    childAspectRatio: 16 / 13,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    mainAxisExtent: 86,
                   ),
                   itemBuilder: (context, index) {
                     final ep = episodes[index];
@@ -254,125 +287,203 @@ class EpisodeGrid extends StatelessWidget {
     AzTones tones, {
     required bool isNextToWatch,
   }) {
-    final titleText = ep.title != null && ep.title!.trim().isNotEmpty
-        ? 'Ep ${ep.number} - ${ep.title}'
-        : 'Episode ${ep.number}';
+    final hasTitle = ep.title != null && ep.title!.trim().isNotEmpty;
+    final hasThumb = ep.thumbnail != null && ep.thumbnail!.isNotEmpty;
+    final primaryText = hasTitle ? ep.title!.trim() : 'Episode ${ep.number}';
+    final metaParts = <String>[
+      if (hasTitle) 'Ep ${ep.number}',
+      if (ep.type != null && ep.type!.isNotEmpty) ep.type!,
+      if (ep.season != null && ep.season!.isNotEmpty) 'Season ${ep.season}',
+    ];
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: () => controller.onEpisodeTapped(context, ep),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => controller.onEpisodeTapped(context, ep),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          height: 86,
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
             color: isNextToWatch
-                ? tones.accent
-                : theme.colorScheme.outlineVariant.withValues(alpha: 0.15),
-            width: isNextToWatch ? 2.0 : 0.5,
+                ? tones.soft.withValues(alpha: 0.45)
+                : theme.colorScheme.surfaceContainer.withValues(alpha: 0.72),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isNextToWatch
+                  ? tones.accent
+                  : theme.colorScheme.outlineVariant.withValues(alpha: 0.16),
+              width: isNextToWatch ? 1.5 : 0.8,
+            ),
+            boxShadow: isNextToWatch
+                ? [
+                    BoxShadow(
+                      color: tones.glow.withValues(alpha: 0.18),
+                      blurRadius: 14,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : null,
           ),
-          boxShadow: isNextToWatch
-              ? [
-                  BoxShadow(
-                    color: tones.glow.withValues(alpha: 0.25),
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (ep.thumbnail != null && ep.thumbnail!.isNotEmpty)
-                    CachedNetworkImage(
-                      imageUrl: ep.thumbnail!,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(
-                        color: theme.colorScheme.surfaceContainerHighest,
-                      ),
-                      errorWidget: (_, __, ___) => Container(
-                        color: theme.colorScheme.surfaceContainerHighest,
-                        child: Center(
-                          child: Icon(
-                            Icons.play_circle_outline_rounded,
-                            size: 36,
-                            color: theme.colorScheme.onSurfaceVariant,
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(11),
+                child: SizedBox(
+                  width: hasThumb ? 116 : 64,
+                  height: double.infinity,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (hasThumb)
+                        CachedNetworkImage(
+                          imageUrl: ep.thumbnail!,
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => Container(
+                            color: theme.colorScheme.surfaceContainerHighest,
+                          ),
+                          errorWidget: (_, __, ___) => Container(
+                            color: theme.colorScheme.surfaceContainerHighest,
+                            child: Center(
+                              child: Text(
+                                ep.number,
+                                style: AzTokens.body(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  weight: FontWeight.w700,
+                                  size: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        Container(
+                          color: isNextToWatch
+                              ? tones.accent.withValues(alpha: 0.16)
+                              : theme.colorScheme.surfaceContainerHighest
+                                  .withValues(alpha: 0.65),
+                          child: Center(
+                            child: Text(
+                              ep.number.padLeft(2, '0'),
+                              style: AzTokens.body(
+                                color: isNextToWatch
+                                    ? tones.accent
+                                    : theme.colorScheme.onSurface,
+                                weight: FontWeight.w700,
+                                size: 17,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    )
-                  else
-                    Container(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      child: Center(
-                        child: Icon(
-                          Icons.play_circle_outline_rounded,
-                          size: 36,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  if (isNextToWatch)
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: tones.accent,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          'NEXT',
-                          style: AzTokens.caption(
-                            tones.onAccent,
-                            10,
-                            FontWeight.w700,
+                      if (hasThumb)
+                        Positioned(
+                          left: 6,
+                          bottom: 6,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.72),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'EP ${ep.number}',
+                              style: AzTokens.caption(
+                                Colors.white,
+                                10,
+                                FontWeight.w700,
+                              ),
+                            ),
                           ),
                         ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (isNextToWatch || metaParts.isNotEmpty)
+                      Row(
+                        children: [
+                          if (isNextToWatch)
+                            Container(
+                              margin: const EdgeInsets.only(right: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: tones.accent,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'NEXT',
+                                style: AzTokens.caption(
+                                  tones.onAccent,
+                                  9.5,
+                                  FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          if (metaParts.isNotEmpty)
+                            Expanded(
+                              child: Text(
+                                metaParts.join(' · '),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AzTokens.caption(
+                                  theme.colorScheme.onSurfaceVariant,
+                                  11.5,
+                                  FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    if (isNextToWatch || metaParts.isNotEmpty)
+                      const SizedBox(height: 3),
+                    Text(
+                      primaryText,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AzTokens.body(
+                        color: theme.colorScheme.onSurface,
+                        weight: FontWeight.w600,
+                        size: 13.5,
+                        height: 1.25,
                       ),
                     ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    titleText,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AzTokens.body(
-                      color: theme.colorScheme.onSurface,
-                      weight: FontWeight.w600,
-                      size: 13.5,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    [
-                      if (ep.type != null && ep.type!.isNotEmpty) ep.type!,
-                      if (ep.season != null && ep.season!.isNotEmpty)
-                        'Season ${ep.season}',
-                    ].join(' · '),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AzTokens.caption(theme.colorScheme.onSurfaceVariant),
-                  ),
-                ],
+              const SizedBox(width: 8),
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isNextToWatch
+                      ? tones.accent
+                      : theme.colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.7),
+                ),
+                child: Icon(
+                  Icons.play_arrow_rounded,
+                  size: 18,
+                  color: isNextToWatch
+                      ? tones.onAccent
+                      : theme.colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

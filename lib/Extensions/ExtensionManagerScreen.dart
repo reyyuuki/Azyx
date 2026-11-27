@@ -4,11 +4,13 @@ import 'package:anymex_extension_runtime_bridge/anymex_extension_runtime_bridge.
 import 'package:azyx/Controllers/source/source_controller.dart';
 import 'package:azyx/Controllers/source/download_run_time_apk.dart';
 import 'package:azyx/Extensions/plugin_manager.dart';
+import 'package:azyx/Widgets/AzyXWidgets/azyx_snack_bar.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/core/icons/icons_broken.dart';
 import 'package:azyx/Widgets/AzyXWidgets/azyx_gradient_container.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 
@@ -377,7 +379,13 @@ class _RepoSectionState extends State<_RepoSection> {
           }
           return Column(
             children: repos
-                .map((repo) => _RepoTile(repo: repo, itemType: widget.itemType))
+                .map(
+                  (repo) => _RepoTile(
+                    repo: repo,
+                    itemType: widget.itemType,
+                    managerId: widget.manager.id,
+                  ),
+                )
                 .toList(),
           );
         }),
@@ -462,17 +470,87 @@ class _RepoSectionState extends State<_RepoSection> {
 class _RepoTile extends StatefulWidget {
   final Repo repo;
   final ItemType itemType;
-  const _RepoTile({required this.repo, required this.itemType});
+  final String managerId;
+  const _RepoTile({
+    required this.repo,
+    required this.itemType,
+    required this.managerId,
+  });
   @override
   State<_RepoTile> createState() => _RepoTileState();
 }
 
 class _RepoTileState extends State<_RepoTile> {
   bool _removing = false;
+  bool _editing = false;
+
   Future<void> _remove() async {
     setState(() => _removing = true);
     await sourceController.removeRepo(widget.repo, widget.itemType);
     if (mounted) setState(() => _removing = false);
+  }
+
+  Future<void> _copyUrl() async {
+    await Clipboard.setData(ClipboardData(text: widget.repo.url));
+    azyxSnackBar('Repository URL copied');
+  }
+
+  Future<void> _editUrl() async {
+    final controller = TextEditingController(text: widget.repo.url);
+    final theme = Theme.of(context).colorScheme;
+    final updated = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: theme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'Edit Repository URL',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: theme.onSurface,
+          ),
+        ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 13,
+            color: theme.onSurface,
+          ),
+          decoration: InputDecoration(
+            hintText: 'Repository URL...',
+            filled: true,
+            fillColor: theme.surfaceContainerHighest.withOpacity(0.45),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide.none,
+            ),
+          ),
+          onSubmitted: (val) => Navigator.of(ctx).pop(val.trim()),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (updated == null || updated.isEmpty || updated == widget.repo.url) {
+      return;
+    }
+    if (mounted) setState(() => _editing = true);
+    await sourceController.removeRepo(widget.repo, widget.itemType);
+    await sourceController.addRepo(updated, widget.itemType, widget.managerId);
+    if (mounted) setState(() => _editing = false);
   }
 
   @override
@@ -559,6 +637,37 @@ class _RepoTileState extends State<_RepoTile> {
               ),
             ),
             const SizedBox(width: 6),
+            IconButton(
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              tooltip: 'Copy link',
+              icon: Icon(
+                Icons.copy_rounded,
+                color: theme.onSurface.withOpacity(0.65),
+                size: 18,
+              ),
+              onPressed: _copyUrl,
+            ),
+            _editing
+                ? SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: LoadingIndicatorM3E(color: theme.primary),
+                  )
+                : IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 32,
+                      minHeight: 32,
+                    ),
+                    tooltip: 'Edit link',
+                    icon: Icon(
+                      Icons.edit_rounded,
+                      color: theme.primary.withOpacity(0.85),
+                      size: 18,
+                    ),
+                    onPressed: _editUrl,
+                  ),
             _removing
                 ? SizedBox(
                     width: 18,
@@ -571,6 +680,7 @@ class _RepoTileState extends State<_RepoTile> {
                       minWidth: 32,
                       minHeight: 32,
                     ),
+                    tooltip: 'Remove',
                     icon: Icon(
                       Icons.remove_circle_outline_rounded,
                       color: theme.error.withOpacity(0.7),

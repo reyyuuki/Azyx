@@ -101,8 +101,27 @@ class _ExtensionScreenState extends State<Extension> {
                     physics: const BouncingScrollPhysics(),
                     slivers: [
                       const SliverToBoxAdapter(child: SizedBox(height: 8)),
-                      if (widget.installed)
-                        _buildInstalledList(_installedExtensions),
+                      if (widget.installed) ...[
+                        () {
+                          final updateEntries = _installedExtensions
+                              .where(
+                                (s) => sourceController.extensionHasUpdate(s),
+                              )
+                              .toList();
+                          final upToDateEntries = _installedExtensions
+                              .where(
+                                (s) => !sourceController.extensionHasUpdate(s),
+                              )
+                              .toList();
+                          return SliverMainAxisGroup(
+                            slivers: [
+                              if (updateEntries.isNotEmpty)
+                                _buildUpdatePendingList(updateEntries),
+                              _buildInstalledList(upToDateEntries),
+                            ],
+                          );
+                        }(),
+                      ],
                       if (!widget.installed)
                         _buildNotInstalledList(_allAvailableExtensions),
                       const SliverToBoxAdapter(child: SizedBox(height: 80)),
@@ -318,9 +337,19 @@ class _ExtensionScreenState extends State<Extension> {
     );
   }
   Future<void> _updateAllSources(List<Source> sources) async {
-    for (var source in sources) {
-      await source.update();
+    if (_isUpdatingAll || sources.isEmpty) return;
+    setState(() => _isUpdatingAll = true);
+    try {
+      for (final source in sources) {
+        try {
+          await source.update();
+        } catch (e) {
+          Utils.log('Failed to update ${source.name}: $e');
+        }
+      }
+      await sourceController.fetchRepos();
+    } finally {
+      if (mounted) setState(() => _isUpdatingAll = false);
     }
-    setState(() {});
   }
 }

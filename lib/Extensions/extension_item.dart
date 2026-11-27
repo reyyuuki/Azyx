@@ -86,7 +86,7 @@ class _ExtensionListTileWidgetState extends State<ExtensionListTileWidget>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).colorScheme;
-    final updateAvailable = widget.source.hasUpdate ?? false;
+    final updateAvailable = sourceController.extensionHasUpdate(widget.source);
     final isInstalled = _installedExtensions.any((e) => e.id == widget.source.id);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),

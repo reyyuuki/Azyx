@@ -12,6 +12,7 @@ import 'package:azyx/Widgets/AzyXWidgets/azyx_text.dart';
 import 'package:azyx/Widgets/common/shimmer_effect.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:loading_indicator_m3e/loading_indicator_m3e.dart';
 class EpisodesList extends StatelessWidget {
@@ -126,20 +127,25 @@ class EpisodesList extends StatelessWidget {
             log(
               '[EpisodesList] Tapped EP ${episode.number} url=${episode.url} sortMap=${sourceEpisode.sortMap}',
             );
-            final stream = () async* {
-              try {
-                final list = await sourceController.activeSource.value!.methods
-                    .getVideoList(
+            final methods = sourceController.activeSource.value!.methods;
+            final nativeStream = methods.getVideoListStream(
+              sourceEpisode,
+              parameters: SourceParams(cancelToken: scrapeToken),
+            );
+            final stream = nativeStream ??
+                () async* {
+                  try {
+                    final list = await methods.getVideoList(
                       sourceEpisode,
                       parameters: SourceParams(cancelToken: scrapeToken),
                     );
-                for (final video in list) {
-                  yield video;
-                }
-              } catch (e) {
-                log('[EpisodesList] getVideoList error: $e');
-              }
-            }();
+                    for (final video in list) {
+                      yield video;
+                    }
+                  } catch (e) {
+                    log('[EpisodesList] getVideoList error: $e');
+                  }
+                }();
             showModalBottomSheet(
               context: context,
               shape: const RoundedRectangleBorder(
@@ -312,7 +318,8 @@ class _StreamEpisodeSheetState extends State<StreamEpisodeSheet> {
     super.initState();
     _sub = widget.stream?.listen(
       (video) {
-        if (seenUrls.add(video.url)) {
+        final key = '${video.url}_${video.quality}';
+        if (seenUrls.add(key)) {
           videos.add(video);
         }
       },
@@ -342,167 +349,306 @@ class _StreamEpisodeSheetState extends State<StreamEpisodeSheet> {
     if (q.isNotEmpty && q != 'null') return q;
     return 'Stream';
   }
+  String _streamFormatLabel(Video video) {
+    final lower = video.url.toLowerCase();
+    if (lower.contains('.m3u8')) return 'HLS';
+    if (lower.contains('.mpd')) return 'DASH';
+    if (lower.contains('.mp4')) return 'MP4';
+    return 'STREAM';
+  }
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      padding: EdgeInsets.fromLTRB(
+        18,
+        12,
+        18,
+        16 + MediaQuery.of(context).padding.bottom,
+      ),
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border(
+          top: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.18),
+            width: 0.8,
+          ),
+        ),
       ),
       height: MediaQuery.of(context).size.height * 0.72,
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-        child: Obx(() {
-          final fetching = isFetching.value;
-          final hasErr = widget.hasError.value;
-          final videoList = videos.toList();
-          return ListView(
-            physics: const BouncingScrollPhysics(),
+      child: Column(
+        children: [
+          Container(
+            width: 32,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          Row(
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 5,
-                  margin: const EdgeInsets.only(top: 4, bottom: 16),
-                  decoration: BoxDecoration(
-                    color: colorScheme.onSurfaceVariant.withOpacity(0.4),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.play_circle_outline_rounded,
+                  color: colorScheme.onPrimaryContainer,
+                  size: 22,
                 ),
               ),
-              AzyXText(
-                text: "Choose Stream",
-                fontSize: 25,
-                fontVariant: FontVariant.bold,
-                color: colorScheme.primary,
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 6),
-              Obx(
-                () => AzyXText(
-                  text: widget.episodeTitle.value.isEmpty
-                      ? 'Episode ${widget.number}'
-                      : 'Episode ${widget.number} • ${widget.episodeTitle.value}',
-                  fontSize: 13,
-                  maxLines: 2,
-                  color: colorScheme.onSurfaceVariant.withOpacity(0.75),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 18),
-              if (hasErr && videoList.isEmpty)
-                _StreamSheetMessage(
-                  icon: Icons.error_outline_rounded,
-                  title: 'Unable to load stream links',
-                  subtitle:
-                      'This source did not return any playable links for this episode.',
-                  color: colorScheme.error,
-                )
-              else if (videoList.isEmpty && fetching)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 40),
-                    child: SizedBox(
-                      width: 32,
-                      height: 32,
-                      child: LoadingIndicatorM3E(),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Choose Stream',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: colorScheme.onSurface,
+                      ),
                     ),
+                    Obx(
+                      () => Text(
+                        widget.episodeTitle.value.isEmpty
+                            ? 'Episode ${widget.number}'
+                            : 'Episode ${widget.number} • ${widget.episodeTitle.value}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton.filledTonal(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.close_rounded, size: 20),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Obx(() {
+            final fetching = isFetching.value;
+            final videoList = videos.toList();
+            return Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.45),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (fetching)
+                      const SizedBox(
+                        width: 12,
+                        height: 12,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    else
+                      Icon(
+                        Icons.check_circle_outline_rounded,
+                        size: 14,
+                        color: colorScheme.primary,
+                      ),
+                    const SizedBox(width: 8),
+                    Text(
+                      fetching
+                          ? (videoList.isEmpty
+                                ? 'Searching for servers...'
+                                : '${videoList.length} ${videoList.length == 1 ? 'server' : 'servers'} found • Searching...')
+                          : '${videoList.length} ${videoList.length == 1 ? 'server' : 'servers'} available',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+          const SizedBox(height: 14),
+          Expanded(
+            child: Obx(() {
+              final fetching = isFetching.value;
+              final hasErr = widget.hasError.value;
+              final videoList = videos.toList();
+              if (hasErr && videoList.isEmpty) {
+                return Center(
+                  child: _StreamSheetMessage(
+                    icon: Icons.error_outline_rounded,
+                    title: 'Unable to load stream links',
+                    subtitle:
+                        'This source did not return any playable links for this episode.',
+                    color: colorScheme.error,
                   ),
-                )
-              else ...[
-                ...videoList.map((video) {
-                  return GestureDetector(
-                    onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => WatchScreen(
-                            playerData: AnimeAllData(
-                              url: video.url,
-                              episodeTitle: widget.episodeTitle.value,
-                              title: widget.title,
-                              number: widget.number,
-                              image: widget.image,
-                              id: widget.id,
-                              episodeUrls: videos,
-                              episodeList: widget.episodeList,
-                            ),
+                );
+              }
+              if (videoList.isEmpty && fetching) {
+                return const Center(
+                  child: SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: LoadingIndicatorM3E(),
+                  ),
+                );
+              }
+              return ListView.separated(
+                physics: const BouncingScrollPhysics(),
+                itemCount: videoList.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                itemBuilder: (context, index) {
+                  final video = videoList[index];
+                  final format = _streamFormatLabel(video);
+                  final subtitleCount = video.subtitles?.length ?? 0;
+                  return Material(
+                    color: colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.32),
+                    borderRadius: BorderRadius.circular(18),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(18),
+                      onTap: () async {
+                        final navigator = Navigator.of(
+                          context,
+                          rootNavigator: true,
+                        );
+                        final data = AnimeAllData(
+                          url: video.url,
+                          episodeTitle: widget.episodeTitle.value,
+                          title: widget.title,
+                          number: widget.number,
+                          image: widget.image,
+                          id: widget.id,
+                          source: sourceController.activeSource.value?.name,
+                          episodeUrls: List<Video>.from(videos),
+                          episodeList: widget.episodeList,
+                        );
+                        Navigator.pop(context);
+                        await navigator.push(
+                          MaterialPageRoute(
+                            builder: (_) => WatchScreen(playerData: data),
                           ),
+                        );
+                        serviceHandler.currentMedia.value.status =
+                            serviceHandler.currentMedia.value.status;
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 14,
                         ),
-                      );
-                      serviceHandler.currentMedia.value.status =
-                          serviceHandler.currentMedia.value.status;
-                    },
-                    child: AzyXContainer(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainer.withOpacity(0.65),
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: colorScheme.outlineVariant.withOpacity(0.14),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(13),
+                              ),
+                              child: Icon(
+                                Icons.play_arrow_rounded,
+                                color: colorScheme.onPrimaryContainer,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _videoLabel(video),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: colorScheme.onSurface,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 7,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: colorScheme
+                                              .surfaceContainerHighest,
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          format,
+                                          style: theme.textTheme.labelSmall
+                                              ?.copyWith(
+                                            color: colorScheme.primary,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                      if (subtitleCount > 0) ...[
+                                        const SizedBox(width: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 7,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: colorScheme
+                                                .surfaceContainerHighest,
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            '$subtitleCount SUB',
+                                            style: theme.textTheme.labelSmall
+                                                ?.copyWith(
+                                              color:
+                                                  colorScheme.onSurfaceVariant,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(
+                              Icons.chevron_right_rounded,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ],
                         ),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color: colorScheme.primary.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Icon(
-                              Icons.play_arrow_rounded,
-                              color: colorScheme.primary,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                AzyXText(
-                                  text: _videoLabel(video),
-                                  fontSize: 16,
-                                  fontVariant: FontVariant.bold,
-                                  color: colorScheme.onSurface,
-                                ),
-                                const SizedBox(height: 2),
-                                AzyXText(
-                                  text: 'Tap to start watching instantly',
-                                  fontSize: 12,
-                                  color: colorScheme.onSurfaceVariant
-                                      .withOpacity(0.72),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
                       ),
                     ),
                   );
-                }),
-                if (fetching)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      child: SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: LoadingIndicatorM3E(),
-                      ),
-                    ),
-                  ),
-              ],
-            ],
-          );
-        }),
+                },
+              );
+            }),
+          ),
+        ],
       ),
     );
   }
