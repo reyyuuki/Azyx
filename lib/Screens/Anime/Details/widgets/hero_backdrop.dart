@@ -1,6 +1,5 @@
-import 'dart:ui';
 import 'package:azyx/Screens/Anime/Details/tokens/az_tones.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:azyx/Screens/Anime/Details/widgets/baked_blur_image.dart';
 import 'package:flutter/material.dart';
 
 class HeroBackdrop extends StatelessWidget {
@@ -30,33 +29,17 @@ class HeroBackdrop extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             if (imageUrl.isNotEmpty)
-              hasBanner
-                  ? Opacity(
-                      opacity: 0.55,
-                      child: CachedNetworkImage(
-                        imageUrl: imageUrl,
-                        fit: BoxFit.cover,
-                        memCacheWidth: 1400,
-                        errorWidget: (_, __, ___) => const SizedBox.shrink(),
-                      ),
-                    )
-                  : ClipRect(
-                      child: Transform.scale(
-                        scale: 1.25,
-                        child: ImageFiltered(
-                          imageFilter: ImageFilter.blur(sigmaX: 38.0, sigmaY: 38.0),
-                          child: Opacity(
-                            opacity: 0.50,
-                            child: CachedNetworkImage(
-                              imageUrl: imageUrl,
-                              fit: BoxFit.cover,
-                              memCacheWidth: 800,
-                              errorWidget: (_, __, ___) => const SizedBox.shrink(),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+              ClipRect(
+                child: Transform.scale(
+                  scale: 1.12,
+                  child: BakedBlurImage(
+                    url: imageUrl,
+                    fallbackUrl: coverUrl,
+                    blurSigma: 12.0,
+                    opacity: 0.58,
+                  ),
+                ),
+              ),
             Container(
               decoration: BoxDecoration(
                 gradient: RadialGradient(
