@@ -59,8 +59,8 @@ class ServiceHandler extends GetxController {
     required bool isAnime,
     String? syncId,
   }) async => await onlineService.updateEntry(params, isAnime: isAnime);
-  Future<bool> toggleFavourite(int animeId) =>
-      anilistService.toggleFavourite(animeId);
+  Future<bool> toggleFavourite(int mediaId, {bool isManga = false}) =>
+      anilistService.toggleFavourite(mediaId, isManga: isManga);
   Future<bool> deleteMediaListEntry(int entryId) =>
       anilistService.deleteMediaListEntry(entryId);
   Rx<Widget> animeWidgets(BuildContext context) =>
@@ -71,15 +71,23 @@ class ServiceHandler extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _initServices();
+    Future.microtask(_initServices);
   }
   Future<void> _initServices() async {
-    serviceType.value = ServicesType.values[AuthKeys.serviceType.get<int>(0)];
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Get.find<CommunityService>().fetchAll();
-    });
-    await fetchHomePage();
-    await autoLogin();
+    try {
+      final rawIdx = AuthKeys.serviceType.get<int>(0);
+      final safeIdx = rawIdx.clamp(0, ServicesType.values.length - 1);
+      serviceType.value = ServicesType.values[safeIdx];
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (Get.isRegistered<CommunityService>()) {
+          Get.find<CommunityService>().fetchAll();
+        }
+      });
+      await fetchHomePage();
+      await autoLogin();
+    } catch (e, st) {
+      debugPrint('ServiceHandler _initServices error: $e\n$st');
+    }
   }
   Future<void> fetchHomePage() => service.fetchhomeData();
   Future<AnilistMediaData> fetchAnimeDetails(FetchDetailsParams params) async {

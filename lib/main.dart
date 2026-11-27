@@ -1,3 +1,4 @@
+import 'package:azyx/Screens/Home/Desktop/desktop_sidebar.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:app_links/app_links.dart';
@@ -102,6 +103,7 @@ void main(List<String> args) async {
       );
     },
     (error, stack) {
+      debugPrint("Unhandled error: $error\n$stack");
       Utils.log("Unhandled error: $error $stack");
     },
   );
@@ -185,6 +187,29 @@ class _HomePageState extends State<HomePage> {
       Platform.isWindows || Platform.isLinux || Platform.isMacOS;
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final isDesktopLayout = isDesktop && width >= 950;
+
+    if (isDesktopLayout) {
+      return Scaffold(
+        body: Row(
+          children: [
+            Obx(
+              () => DesktopSidebar(
+                selectedIndex: index.value,
+                onDestinationSelected: (newIndex) {
+                  index.value = newIndex;
+                },
+              ),
+            ),
+            Expanded(
+              child: Obx(() => _screens[index.value]),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       extendBody: true,
       body: Obx(() => _screens[index.value]),

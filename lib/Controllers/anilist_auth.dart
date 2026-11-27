@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:azyx/Controllers/anilist_data_controller.dart';
@@ -364,6 +365,9 @@ class AnilistService extends GetxController
       avatar {
         large
       }
+      mediaListOptions {
+        scoreFormat
+      }
       statistics {
         anime {
           count
@@ -410,6 +414,7 @@ class AnilistService extends GetxController
         lists {
           name
           entries {
+            id
             media {
               id
               title {
@@ -429,6 +434,18 @@ class AnilistService extends GetxController
             progress
             status
             score
+            repeat
+            private
+            startedAt {
+              year
+              month
+              day
+            }
+            completedAt {
+              year
+              month
+              day
+            }
           }
         }
       }
@@ -491,6 +508,7 @@ class AnilistService extends GetxController
         lists {
           name
           entries {
+            id
             media {
               id
               title {
@@ -510,6 +528,19 @@ class AnilistService extends GetxController
             }
             progress
             status
+            score
+            repeat
+            private
+            startedAt {
+              year
+              month
+              day
+            }
+            completedAt {
+              year
+              month
+              day
+            }
           }
         }
       }
@@ -572,15 +603,9 @@ class AnilistService extends GetxController
     userMangaList.value.clear();
   }
 
-  Future<void> fetchAnilistAnimes() async {
-    String url = 'https://graphql.anilist.co/';
-    Map<String, String> headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
-    String query = r'''
+  static const String _combinedHomeQuery = r'''
   query {
-    trending: Page {
+    animeTrending: Page {
       media(type: ANIME, sort: TRENDING_DESC) {
         id
         title {
@@ -597,7 +622,7 @@ class AnilistService extends GetxController
         status
       }
     }
-    popular: Page {
+    animePopular: Page {
       media(type: ANIME, sort: POPULARITY_DESC) {
         id
         title {
@@ -614,7 +639,7 @@ class AnilistService extends GetxController
         episodes
       }
     }
-    latestReleasing: Page {
+    animeUpcoming: Page {
       media(type: ANIME, status: NOT_YET_RELEASED, sort: [POPULARITY_DESC, TRENDING_DESC], isAdult: false) {
         id
         title {
@@ -629,7 +654,7 @@ class AnilistService extends GetxController
         status
       }
     }
-    recentlyCompleted: Page {
+    animeCompleted: Page {
       media(type: ANIME, status: FINISHED, sort: END_DATE_DESC, isAdult: false) {
         id
         title {
@@ -644,43 +669,7 @@ class AnilistService extends GetxController
         status
       }
     }
-  }
-  ''';
-    final response = await http.post(
-      Uri.parse(url),
-      headers: headers,
-      body: jsonEncode({'query': query}),
-    );
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      spotlight.value = (data['data']['trending']['media'] as List<dynamic>)
-          .map((item) => Media.fromJson(item))
-          .toList();
-      popular.value = (data['data']['popular']['media'] as List<dynamic>)
-          .map((item) => Media.fromJson(item))
-          .toList();
-      topUpcoming.value =
-          (data['data']['latestReleasing']['media'] as List<dynamic>)
-              .map((item) => Media.fromJson(item))
-              .toList();
-      trending.value =
-          (data['data']['recentlyCompleted']['media'] as List<dynamic>)
-              .map((item) => Media.fromJson(item))
-              .toList();
-    } else {
-      throw Exception('Failed to load data');
-    }
-  }
-
-  Future<void> fetchAnilistManga() async {
-    String url = 'https://graphql.anilist.co/';
-    Map<String, String> headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
-    String query = r'''
-  query {
-    trending: Page {
+    mangaTrending: Page {
       media(type: MANGA, sort: TRENDING_DESC) {
         id
         title {
@@ -698,7 +687,7 @@ class AnilistService extends GetxController
         chapters
       }
     }
-    popular: Page {
+    mangaPopular: Page {
       media(type: MANGA, sort: POPULARITY_DESC) {
         id
         title {
@@ -713,7 +702,7 @@ class AnilistService extends GetxController
         status
       }
     }
-    latestReleasing: Page {
+    mangaUpcoming: Page {
       media(type: MANGA, status: NOT_YET_RELEASED, sort: [POPULARITY_DESC, TRENDING_DESC]) {
         id
         title {
@@ -728,49 +717,138 @@ class AnilistService extends GetxController
         status
       }
     }
-    recentlyCompleted: Page {
-    media(type: MANGA, status: FINISHED, sort: END_DATE_DESC, isAdult: false) {
-      id
-      title {
-        english
-        romaji
-        native
+    mangaCompleted: Page {
+      media(type: MANGA, status: FINISHED, sort: END_DATE_DESC, isAdult: false) {
+        id
+        title {
+          english
+          romaji
+          native
+        }
+        chapters
+        coverImage {
+          large
+        }
+        averageScore
+        status
       }
-      chapters
-      coverImage {
-        large
-      }
-      averageScore
-      status
     }
   }
-}
-''';
-    final response = await http.post(
-      Uri.parse(url),
-      headers: headers,
-      body: jsonEncode({'query': query}),
-    );
+  ''';
+
+  List<Media> _parseMediaList(dynamic rawList) {
+    if (rawList is! List) return <Media>[];
+    final items = <Media>[];
+    for (final item in rawList) {
+      if (item is Map) {
+        try {
+          items.add(Media.fromJson(Map<String, dynamic>.from(item)));
+        } catch (e) {
+          log('Media.fromJson skip error: $e');
+        }
+      }
+    }
+    return items;
+  }
+
+  bool _applyHomeDataMap(Map<String, dynamic> dataMap) {
+    try {
+      final animeTrending = dataMap['animeTrending']?['media'];
+      final animePopular = dataMap['animePopular']?['media'];
+      final animeUpcoming = dataMap['animeUpcoming']?['media'];
+      final animeCompleted = dataMap['animeCompleted']?['media'];
+      final mangaTrending = dataMap['mangaTrending']?['media'];
+      final mangaPopular = dataMap['mangaPopular']?['media'];
+      final mangaUpcoming = dataMap['mangaUpcoming']?['media'];
+      final mangaCompleted = dataMap['mangaCompleted']?['media'];
+
+      if (animeTrending is! List || mangaTrending is! List) {
+        return false;
+      }
+
+      spotlight.value = _parseMediaList(animeTrending);
+      if (animePopular is List) {
+        popular.value = _parseMediaList(animePopular);
+      }
+      if (animeUpcoming is List) {
+        topUpcoming.value = _parseMediaList(animeUpcoming);
+      }
+      if (animeCompleted is List) {
+        trending.value = _parseMediaList(animeCompleted);
+      }
+
+      spotlightM.value = _parseMediaList(mangaTrending);
+      if (mangaPopular is List) {
+        popularM.value = _parseMediaList(mangaPopular);
+      }
+      if (mangaUpcoming is List) {
+        topUpcomingM.value = _parseMediaList(mangaUpcoming);
+      }
+      if (mangaCompleted is List) {
+        trendingM.value = _parseMediaList(mangaCompleted);
+      }
+
+      return spotlight.isNotEmpty || spotlightM.isNotEmpty;
+    } catch (e) {
+      log('_applyHomeDataMap error: $e');
+      return false;
+    }
+  }
+
+  bool _loadCachedHomeData() {
+    try {
+      final raw = CacheKeys.anilistHomeData.get<String>('');
+      if (raw.isEmpty) return false;
+      final decoded = jsonDecode(raw);
+      if (decoded is Map<String, dynamic>) {
+        return _applyHomeDataMap(decoded);
+      }
+      if (decoded is Map) {
+        return _applyHomeDataMap(Map<String, dynamic>.from(decoded));
+      }
+    } catch (e) {
+      log('_loadCachedHomeData error: $e');
+    }
+    return false;
+  }
+
+  Future<void> _fetchCombinedHomeData() async {
+    final response = await http
+        .post(
+          Uri.parse('https://graphql.anilist.co/'),
+          headers: const {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: jsonEncode({'query': _combinedHomeQuery}),
+        )
+        .timeout(const Duration(seconds: 20));
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      spotlightM.value = (data['data']['trending']['media'] as List<dynamic>)
-          .map((item) => Media.fromJson(item))
-          .toList();
-      popularM.value = (data['data']['popular']['media'] as List<dynamic>)
-          .map((item) => Media.fromJson(item))
-          .toList();
-      topUpcomingM.value =
-          (data['data']['latestReleasing']['media'] as List<dynamic>)
-              .map((item) => Media.fromJson(item))
-              .toList();
-      trendingM.value =
-          (data['data']['recentlyCompleted']['media'] as List<dynamic>)
-              .map((item) => Media.fromJson(item))
-              .toList();
+      final decoded = jsonDecode(response.body);
+      final dataMap = decoded is Map ? decoded['data'] : null;
+      if (dataMap is Map) {
+        final typedMap = Map<String, dynamic>.from(dataMap);
+        final applied = _applyHomeDataMap(typedMap);
+        if (applied) {
+          CacheKeys.anilistHomeData.set(jsonEncode(typedMap));
+        }
+      }
     } else {
-      throw Exception('Failed to load data');
+      throw Exception('Failed to load AniList home data (${response.statusCode})');
     }
   }
+
+  Future<void> _refreshCombinedHomeDataSafe() async {
+    try {
+      await _fetchCombinedHomeData();
+    } catch (e) {
+      log('Background AniList home refresh error: $e');
+    }
+  }
+
+  Future<void> fetchAnilistAnimes() => _fetchCombinedHomeData();
+
+  Future<void> fetchAnilistManga() => _fetchCombinedHomeData();
 
   @override
   Future<void> updateEntry(
@@ -785,12 +863,24 @@ class AnilistService extends GetxController
       'Content-Type': 'application/json',
     };
     const String mutation = '''
-    mutation SaveMediaListEntry(\$mediaId: Int!, \$status: MediaListStatus!, \$score: Float, \$progress: Int) {
-      SaveMediaListEntry(mediaId: \$mediaId, status: \$status, score: \$score, progress: \$progress) {
+    mutation SaveMediaListEntry(\$mediaId: Int!, \$status: MediaListStatus!, \$score: Float, \$progress: Int, \$startedAt: FuzzyDateInput, \$completedAt: FuzzyDateInput, \$private: Boolean, \$repeat: Int) {
+      SaveMediaListEntry(mediaId: \$mediaId, status: \$status, score: \$score, progress: \$progress, startedAt: \$startedAt, completedAt: \$completedAt, private: \$private, repeat: \$repeat) {
         id
         status
         score
         progress
+        repeat
+        private
+        startedAt {
+          year
+          month
+          day
+        }
+        completedAt {
+          year
+          month
+          day
+        }
         media {
           id
           title {
@@ -807,6 +897,20 @@ class AnilistService extends GetxController
       'status': anime.status ?? "CURRENT",
       if (anime.score != null) 'score': anime.score,
       if (anime.progress != null) 'progress': anime.progress,
+      if (anime.startedAt != null)
+        'startedAt': {
+          'year': anime.startedAt!.year,
+          'month': anime.startedAt!.month,
+          'day': anime.startedAt!.day,
+        },
+      if (anime.completedAt != null)
+        'completedAt': {
+          'year': anime.completedAt!.year,
+          'month': anime.completedAt!.month,
+          'day': anime.completedAt!.day,
+        },
+      if (anime.isPrivate != null) 'private': anime.isPrivate,
+      if (anime.repeat != null) 'repeat': anime.repeat,
     };
     final response = await http.post(
       Uri.parse(url),
@@ -815,11 +919,17 @@ class AnilistService extends GetxController
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      log('Successfully added to list: ${data['data']['SaveMediaListEntry']}');
+      final saved = data['data']?['SaveMediaListEntry'];
+      log('Successfully added to list: $saved');
       currentMedia.update((val) {
+        val?.entryId = saved?['id'] as int? ?? val.entryId;
         val?.progress = anime.progress;
         val?.status = anime.status;
         val?.score = anime.score;
+        val?.startedAt = anime.startedAt;
+        val?.completedAt = anime.completedAt;
+        val?.isPrivate = anime.isPrivate;
+        val?.repeat = anime.repeat;
       });
     } else {
       final error = jsonDecode(response.body);
@@ -829,16 +939,31 @@ class AnilistService extends GetxController
     await fetchUserMangaList();
   }
 
-  Future<bool> toggleFavourite(int animeId) async {
+  Future<bool> toggleFavourite(int mediaId, {bool isManga = false}) async {
     const String url = 'https://graphql.anilist.co';
     final accessToken = AuthKeys.anilistToken.get<String>('');
-    if (accessToken.isEmpty) return false;
+    if (accessToken.isEmpty) {
+      log('toggleFavourite error: missing AniList access token');
+      return false;
+    }
     final Map<String, String> headers = {
       'Authorization': 'Bearer $accessToken',
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     };
-    const String mutation = '''
+    final String mutation = isManga
+        ? '''
+    mutation (\$mangaId: Int) {
+      ToggleFavourite(mangaId: \$mangaId) {
+        manga {
+          pageInfo {
+            total
+          }
+        }
+      }
+    }
+    '''
+        : '''
     mutation (\$animeId: Int) {
       ToggleFavourite(animeId: \$animeId) {
         anime {
@@ -849,16 +974,26 @@ class AnilistService extends GetxController
       }
     }
     ''';
+    final variables = isManga ? {'mangaId': mediaId} : {'animeId': mediaId};
     try {
       final response = await http.post(
         Uri.parse(url),
         headers: headers,
         body: jsonEncode({
           'query': mutation,
-          'variables': {'animeId': animeId},
+          'variables': variables,
         }),
       );
-      return response.statusCode == 200;
+      if (response.statusCode != 200) {
+        log('toggleFavourite HTTP ${response.statusCode}: ${response.body}');
+        return false;
+      }
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map && decoded['errors'] != null) {
+        log('toggleFavourite GraphQL error: ${decoded['errors']}');
+        return false;
+      }
+      return true;
     } catch (e) {
       log('toggleFavourite error: $e');
       return false;
@@ -988,8 +1123,12 @@ class AnilistService extends GetxController
 
   @override
   Future<void> fetchhomeData() async {
-    await fetchAnilistAnimes();
-    await fetchAnilistManga();
+    final hasCache = _loadCachedHomeData();
+    if (hasCache) {
+      unawaited(_refreshCombinedHomeDataSafe());
+      return;
+    }
+    await _fetchCombinedHomeData();
   }
 
   @override
