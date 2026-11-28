@@ -55,6 +55,8 @@ class AnimeDetailsController extends GetxController {
   final RxString selectedSeason = ''.obs;
   final RxString selectedType = ''.obs;
   final RxString episodeFilter = ''.obs;
+  final RxInt selectedRangeIndex = 0.obs;
+  final RxInt totalUnrangedEpisodes = 0.obs;
   final RxList<Episode> filteredEpisodes = RxList<Episode>();
 
   final Map<String, GlobalKey> sectionKeys = {
@@ -610,17 +612,38 @@ class AnimeDetailsController extends GetxController {
 
   void setSeasonFilter(String s) {
     selectedSeason.value = s;
+    selectedRangeIndex.value = 0;
     _applyFilters();
   }
 
   void setTypeFilter(String t) {
     selectedType.value = t;
+    selectedRangeIndex.value = 0;
+    _applyFilters();
+  }
+
+  void setEpisodeRange(int index) {
+    selectedRangeIndex.value = index;
     _applyFilters();
   }
 
   void setEpisodeSearch(String query) {
     episodeFilter.value = query;
     _applyFilters();
+  }
+
+  int _rangeChunkSize(int total) => total > 100 ? 50 : 25;
+
+  List<({int index, String label})> getEpisodeRanges() {
+    final total = totalUnrangedEpisodes.value;
+    final chunk = _rangeChunkSize(total);
+    if (total <= chunk) return const [];
+    final count = (total / chunk).ceil();
+    return List.generate(count, (i) {
+      final start = i * chunk + 1;
+      final end = (i + 1) * chunk > total ? total : (i + 1) * chunk;
+      return (index: i, label: '$start - $end');
+    });
   }
 
   void _applyFilters() {
@@ -651,7 +674,27 @@ class AnimeDetailsController extends GetxController {
       return (a.title ?? '').compareTo(b.title ?? '');
     });
 
-    filteredEpisodes.assignAll(list);
+    if (q.isNotEmpty) {
+      totalUnrangedEpisodes.value = list.length;
+      filteredEpisodes.assignAll(list);
+      return;
+    }
+
+    totalUnrangedEpisodes.value = list.length;
+    final chunk = _rangeChunkSize(list.length);
+    if (list.length <= chunk || selectedRangeIndex.value == -1) {
+      filteredEpisodes.assignAll(list);
+      return;
+    }
+
+    final maxRange = (list.length / chunk).ceil() - 1;
+    final safeIdx = selectedRangeIndex.value.clamp(0, maxRange);
+    if (safeIdx != selectedRangeIndex.value) {
+      selectedRangeIndex.value = safeIdx;
+    }
+    final start = safeIdx * chunk;
+    final end = (start + chunk) > list.length ? list.length : (start + chunk);
+    filteredEpisodes.assignAll(list.sublist(start, end));
   }
 
   LocalHistoryItem? getLocalHistory() {

@@ -31,6 +31,9 @@ class EpisodeGrid extends StatelessWidget {
       final totalEpisodes = controller.episodesList.length;
       final seasons = controller.getAvailableSeasons();
       final types = controller.getAvailableTypes();
+      final ranges = controller.getEpisodeRanges();
+      final showRanges =
+          ranges.length > 1 && controller.episodeFilter.value.trim().isEmpty;
       final activeSourceName =
           sourceController.activeSource.value?.name ?? 'No Extension';
       final nextEpNum = controller.getNextEpisodeNumber().toString();
@@ -40,9 +43,12 @@ class EpisodeGrid extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Episodes', style: AzTokens.h2(context)),
+              Expanded(child: Text('Episodes', style: AzTokens.h2(context))),
+              if (types.isNotEmpty) ...[
+                _buildTypeDropdown(context, theme, tones, types),
+                const SizedBox(width: 8),
+              ],
               AzChip(
                 label: 'Wrong title?',
                 icon: Icons.sync_problem_rounded,
@@ -74,58 +80,37 @@ class EpisodeGrid extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 14),
-          if (seasons.length > 1 || types.length > 1 || totalEpisodes > 12) ...[
+          if (seasons.length > 1) ...[
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
               child: Row(
                 children: [
-                  if (seasons.length > 1) ...[
-                    AzChip(
-                      label: 'All Seasons',
-                      isActive: controller.selectedSeason.value.isEmpty,
-                      onTap: () => controller.setSeasonFilter(''),
-                    ),
-                    const SizedBox(width: 8),
-                    ...seasons.map((s) {
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: AzChip(
-                          label: 'Season $s',
-                          isActive: controller.selectedSeason.value == s,
-                          onTap: () => controller.setSeasonFilter(s),
-                        ),
-                      );
-                    }),
-                  ],
-                  if (types.length > 1) ...[
-                    AzChip(
-                      label: 'All Types',
-                      isActive: controller.selectedType.value.isEmpty,
-                      onTap: () => controller.setTypeFilter(''),
-                    ),
-                    const SizedBox(width: 8),
-                    ...types.map((t) {
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: AzChip(
-                          label: t,
-                          isActive: controller.selectedType.value.toLowerCase() ==
-                              t.toLowerCase(),
-                          onTap: () => controller.setTypeFilter(t),
-                        ),
-                      );
-                    }),
-                  ],
+                  AzChip(
+                    label: 'All Seasons',
+                    isActive: controller.selectedSeason.value.isEmpty,
+                    onTap: () => controller.setSeasonFilter(''),
+                  ),
+                  const SizedBox(width: 8),
+                  ...seasons.map((s) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: AzChip(
+                        label: 'Season $s',
+                        isActive: controller.selectedSeason.value == s,
+                        onTap: () => controller.setSeasonFilter(s),
+                      ),
+                    );
+                  }),
                 ],
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
           ],
           if (totalEpisodes > 12)
             Container(
               height: 44,
-              margin: const EdgeInsets.only(bottom: 16),
+              margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(12),
@@ -155,6 +140,33 @@ class EpisodeGrid extends StatelessWidget {
                 onChanged: controller.setEpisodeSearch,
               ),
             ),
+          if (showRanges) ...[
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: [
+                  AzChip(
+                    label: 'All',
+                    isActive: controller.selectedRangeIndex.value == -1,
+                    onTap: () => controller.setEpisodeRange(-1),
+                  ),
+                  const SizedBox(width: 8),
+                  ...ranges.map((r) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: AzChip(
+                        label: r.label,
+                        isActive: controller.selectedRangeIndex.value == r.index,
+                        onTap: () => controller.setEpisodeRange(r.index),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
           if (isLoading)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 36),
@@ -556,6 +568,67 @@ class EpisodeGrid extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTypeDropdown(
+    BuildContext context,
+    ThemeData theme,
+    AzTones tones,
+    List<String> types,
+  ) {
+    final current = controller.selectedType.value;
+    final matched = types.firstWhereOrNull(
+      (t) => t.toLowerCase() == current.toLowerCase(),
+    );
+    final value = matched ?? '';
+
+    return Container(
+      height: 34,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+          width: 0.8,
+        ),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isDense: true,
+          borderRadius: BorderRadius.circular(12),
+          dropdownColor: theme.colorScheme.surfaceContainerHigh,
+          icon: Icon(
+            Icons.keyboard_arrow_down_rounded,
+            size: 16,
+            color: tones.accent,
+          ),
+          style: AzTokens.body(
+            color: theme.colorScheme.onSurface,
+            weight: FontWeight.w600,
+            size: 12.5,
+          ),
+          items: [
+            const DropdownMenuItem<String>(
+              value: '',
+              child: Text('All'),
+            ),
+            ...types.map(
+              (t) => DropdownMenuItem<String>(
+                value: t,
+                child: Text(t),
+              ),
+            ),
+          ],
+          onChanged: (val) {
+            if (val != null) {
+              controller.setTypeFilter(val);
+            }
+          },
+        ),
       ),
     );
   }
