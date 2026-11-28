@@ -45,7 +45,9 @@ class DesktopSidebar extends StatelessWidget {
                 title: historyItem.title ?? 'Unknown',
                 url: historyItem.link ?? '',
                 number:
-                    historyItem.progress?.replaceAll(RegExp(r'[^0-9]'), '') ??
+                    RegExp(r'(\d+(?:\.\d+)?)')
+                        .firstMatch(historyItem.progress ?? '')
+                        ?.group(1) ??
                     '1',
                 episodeTitle: historyItem.title,
                 source: historyItem.sourceName,
@@ -339,84 +341,98 @@ class DesktopSidebar extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 14),
-              _buildNavItem(
-                context: context,
-                index: 0,
-                icon: Broken.home_1,
-                label: 'Home',
-                isExpanded: isExpanded,
-              ),
-              const SizedBox(height: 4),
-              _buildNavItem(
-                context: context,
-                index: 1,
-                icon: Broken.element_4,
-                label: 'Library',
-                isExpanded: isExpanded,
-              ),
-              const SizedBox(height: 4),
-              _buildNavItem(
-                context: context,
-                index: 2,
-                icon: Icons.movie_filter_rounded,
-                label: 'Anime',
-                isExpanded: isExpanded,
-              ),
-              const SizedBox(height: 4),
-              _buildNavItem(
-                context: context,
-                index: 3,
-                icon: Broken.book,
-                label: 'Manga',
-                isExpanded: isExpanded,
-              ),
-              if (isExpanded) ...[
-                const SizedBox(height: 18),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Text(
-                    'Your lists',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.6,
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: isExpanded
+                        ? CrossAxisAlignment.start
+                        : CrossAxisAlignment.center,
+                    children: [
+                      _buildNavItem(
+                        context: context,
+                        index: 0,
+                        icon: Broken.home_1,
+                        label: 'Home',
+                        isExpanded: isExpanded,
                       ),
-                      letterSpacing: 0.3,
-                    ),
+                      const SizedBox(height: 4),
+                      _buildNavItem(
+                        context: context,
+                        index: 1,
+                        icon: Broken.element_4,
+                        label: 'Library',
+                        isExpanded: isExpanded,
+                      ),
+                      const SizedBox(height: 4),
+                      _buildNavItem(
+                        context: context,
+                        index: 2,
+                        icon: Icons.movie_filter_rounded,
+                        label: 'Anime',
+                        isExpanded: isExpanded,
+                      ),
+                      const SizedBox(height: 4),
+                      _buildNavItem(
+                        context: context,
+                        index: 3,
+                        icon: Broken.book,
+                        label: 'Manga',
+                        isExpanded: isExpanded,
+                      ),
+                      if (isExpanded) ...[
+                        const SizedBox(height: 18),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Text(
+                            'Your lists',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurfaceVariant
+                                  .withValues(
+                                alpha: 0.6,
+                              ),
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Obx(
+                          () => _buildListShortcut(
+                            context: context,
+                            icon: Icons.play_circle_outline_rounded,
+                            label: 'Watching',
+                            count: serviceHandler
+                                .userAnimeList
+                                .currentlyWatching
+                                .length,
+                          ),
+                        ),
+                        Obx(
+                          () => _buildListShortcut(
+                            context: context,
+                            icon: Broken.bookmark,
+                            label: 'Planning',
+                            count: serviceHandler.userAnimeList.planning.length,
+                          ),
+                        ),
+                        Obx(
+                          () => _buildListShortcut(
+                            context: context,
+                            icon: Broken.heart,
+                            label: 'Favourites',
+                            count:
+                                serviceHandler.userAnimeList.completed.length,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-                const SizedBox(height: 6),
-                Obx(
-                  () => _buildListShortcut(
-                    context: context,
-                    icon: Icons.play_circle_outline_rounded,
-                    label: 'Watching',
-                    count: serviceHandler
-                        .userAnimeList
-                        .currentlyWatching
-                        .length,
-                  ),
-                ),
-                Obx(
-                  () => _buildListShortcut(
-                    context: context,
-                    icon: Broken.bookmark,
-                    label: 'Planning',
-                    count: serviceHandler.userAnimeList.planning.length,
-                  ),
-                ),
-                Obx(
-                  () => _buildListShortcut(
-                    context: context,
-                    icon: Broken.heart,
-                    label: 'Favourites',
-                    count: serviceHandler.userAnimeList.completed.length,
-                  ),
-                ),
-              ],
-              const Spacer(),
+              ),
+              const SizedBox(height: 8),
               Obx(() {
                 final history = localHistoryController.animeWatchingHistory;
                 final userWatching =

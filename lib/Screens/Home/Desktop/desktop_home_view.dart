@@ -66,7 +66,9 @@ class _DesktopHomeViewState extends State<DesktopHomeView> {
                 title: historyItem.title ?? 'Unknown',
                 url: historyItem.link ?? '',
                 number:
-                    historyItem.progress?.replaceAll(RegExp(r'[^0-9]'), '') ??
+                    RegExp(r'(\d+(?:\.\d+)?)')
+                        .firstMatch(historyItem.progress ?? '')
+                        ?.group(1) ??
                     '1',
                 episodeTitle: historyItem.title,
                 source: historyItem.sourceName,
@@ -390,9 +392,12 @@ class _DesktopHomeViewState extends State<DesktopHomeView> {
       if (historyItem != null) {
         title = historyItem.title ?? 'Unknown';
         image = historyItem.image ?? '';
-        final parsedEp = int.tryParse(
-          historyItem.progress?.replaceAll(RegExp(r'[^0-9]'), '') ?? '1',
-        );
+        final parsedEp = double.tryParse(
+          RegExp(r'(\d+(?:\.\d+)?)')
+                  .firstMatch(historyItem.progress ?? '')
+                  ?.group(1) ??
+              '1',
+        )?.toInt();
         nextEp = (parsedEp ?? 1) + 1;
         totalEp = historyItem.episodeList?.length ?? 0;
       } else if (onlineItem != null) {
@@ -420,9 +425,13 @@ class _DesktopHomeViewState extends State<DesktopHomeView> {
       if (hasHistory && history.length > 1) {
         for (var i = 1; i < history.length && i < 5; i++) {
           final it = history[i];
-          final curEp = int.tryParse(
-            it.progress?.replaceAll(RegExp(r'[^0-9]'), '') ?? '1',
-          ) ?? 1;
+          final curEp = double.tryParse(
+                RegExp(r'(\d+(?:\.\d+)?)')
+                        .firstMatch(it.progress ?? '')
+                        ?.group(1) ??
+                    '1',
+              )?.toInt() ??
+              1;
           sideItems.add(
             _buildSideQueueItem(
               context: context,

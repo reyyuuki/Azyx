@@ -46,7 +46,11 @@ class _HistoryScreenState extends State<HistoryScreen>
               image: item.image ?? '',
               title: item.title ?? 'Unknown',
               url: item.link ?? '',
-              number: item.progress?.replaceAll(RegExp(r'[^0-9]'), '') ?? '1',
+              number:
+                  RegExp(r'(\d+(?:\.\d+)?)')
+                      .firstMatch(item.progress ?? '')
+                      ?.group(1) ??
+                  '1',
               episodeTitle: item.title,
               source: item.sourceName,
               episodeList: item.episodeList,

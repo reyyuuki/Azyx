@@ -107,7 +107,9 @@ class _LibraryScreenState extends State<LibraryScreen>
               .toList();
         } catch (_) {}
       }
-      final epNumber = item.progress?.replaceAll(RegExp(r'[^0-9]'), '') ?? '1';
+      final epNumber =
+          RegExp(r'(\d+(?:\.\d+)?)').firstMatch(item.progress ?? '')?.group(1) ??
+              '1';
       final resolvedUrl = (item.link != null && item.link!.isNotEmpty)
           ? item.link!
           : (episodeUrls.isNotEmpty ? episodeUrls.first.url : '');
