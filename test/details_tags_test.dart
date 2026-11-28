@@ -6,6 +6,8 @@ import 'package:azyx/Screens/Anime/Details/widgets/community_charts.dart';
 import 'package:azyx/Screens/Anime/Details/widgets/tags_section.dart';
 import 'package:azyx/Screens/Manga/Details/manga_details_screen.dart';
 import 'package:azyx/Screens/Settings/Pages/episode_metadata_settings.dart';
+import 'package:azyx/utils/color_profiler.dart';
+import 'package:azyx/utils/shaders.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -132,5 +134,17 @@ void main() {
     expect(settingsPage, isNotNull);
     final service = AnilistService();
     expect(service.spotlight, isEmpty);
+  });
+
+  test('PlayerShaders profiles and ColorProfileBottomSheet resolve', () {
+    expect(PlayerShaders.getShaderByName('Anime4K: Mode A (Fast)').length, 3);
+    expect(PlayerShaders.getShaderByName('Anime4K: Mode A (HQ)').length, 6);
+    final sheet = ColorProfileBottomSheet(
+      currentProfile: 'natural',
+      onProfileSelected: (_) {},
+      onCustomSettingsChanged: (_) {},
+      player: null,
+    );
+    expect(sheet.currentProfile, 'natural');
   });
 }

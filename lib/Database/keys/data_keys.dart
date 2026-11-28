@@ -62,6 +62,9 @@ enum SubtitleKeys {
 enum PlayerKeys {
   visualProfile,
   customColorSettings,
+  shadersEnabled,
+  shaderTier,
+  selectedShader,
 }
 enum CacheKeys {
   anilistHomeData,

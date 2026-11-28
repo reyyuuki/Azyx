@@ -19,6 +19,7 @@ dependencies:
   http: ^1.2.2
   permission_handler: any
   # flutter_local_notifications: any
+  archive: ^4.0.9
   dio: ^5.7.0
   media_kit:
     git:
