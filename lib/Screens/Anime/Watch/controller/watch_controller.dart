@@ -160,7 +160,12 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Future.microtask(() {
         if (isClosed) return;
-        player = Player();
+        player = Player(
+          configuration: const PlayerConfiguration(
+            bufferSize: 64 * 1024 * 1024,
+          ),
+        );
+        _configurePlayerStreaming();
         controller = VideoController(
           player,
           configuration: const VideoControllerConfiguration(
@@ -320,13 +325,8 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     player.stream.log.listen((msg) {
       log('[MediaKit Player Log] $msg');
     });
-    bool appliedOnPlay = false;
     player.stream.playing.listen((p) {
       isPlaying.value = p;
-      if (p && !appliedOnPlay) {
-        appliedOnPlay = true;
-        applySavedProfile();
-      }
       if (watchiumService.inRoom) {
         if (watchiumService.isHost.value) {
           final pos = position.value.inSeconds.toDouble();
@@ -687,6 +687,26 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _configurePlayerStreaming() async {
+    final platform = player.platform;
+    if (platform == null) return;
+    const props = <String, String>{
+      'cache': 'yes',
+      'cache-on-disk': 'no',
+      'demuxer-max-bytes': '134217728',
+      'demuxer-max-back-bytes': '33554432',
+      'cache-secs': '120',
+      'demuxer-readahead-secs': '30',
+      'network-timeout': '15',
+      'hls-bitrate': 'max',
+    };
+    for (final entry in props.entries) {
+      try {
+        await (platform as dynamic).setProperty(entry.key, entry.value);
+      } catch (_) {}
+    }
+  }
+
   void applySavedProfile() => ColorProfileManager().applySavedProfile(player);
   void showColorProfileSheet(BuildContext context) {
     showModalBottomSheet(
@@ -696,6 +716,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
       builder: (context) => ColorProfileBottomSheet(
         currentProfile: currentVisualProfile.value,
         player: player,
+        videoController: controller,
         onProfileSelected: (profile) {
           Utils.log('Selected profile: $profile');
           currentVisualProfile.value = profile;
@@ -803,7 +824,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     if (anilistAuthController.userData.value.name != null) {
       anilistAddToListController.updateAnimeProgress(
         animeData.value,
-        (episodeNumber.value.toInt()),
+        double.tryParse(episodeNumber.value)?.toInt() ?? 1,
       );
       azyxSnackBar("Tracking Episode $episodeNumber");
     }
@@ -836,7 +857,7 @@ class WatchController extends GetxController with WidgetsBindingObserver {
     if (anilistAuthController.userData.value.name != null) {
       anilistAddToListController.updateAnimeProgress(
         animeData.value,
-        (episodeNumber.value.toInt()),
+        double.tryParse(episodeNumber.value)?.toInt() ?? 1,
       );
       azyxSnackBar("Tracking Episode $episodeNumber");
     }
